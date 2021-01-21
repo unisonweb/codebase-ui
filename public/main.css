@@ -1,0 +1,181 @@
+/* Reset */
+* {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+h5,
+ul,
+p,
+ol,
+li {
+  margin: 0;
+  padding: 0;
+}
+
+/* Variables */
+
+:root {
+  --main-nav-width: 20rem;
+
+  --color-gray-20: #222;
+  --color-gray-30: #333;
+  --color-gray-50: #555;
+  --color-gray-40: #444;
+  --color-gray-55: #545454;
+  --color-gray-100: #aaa;
+  --color-gray-120: #ccc;
+  --color-gray-130: #ddd;
+  --color-gray-140: #eee;
+
+  --color-main-bg: white;
+  --color-main-fg: var(--color-gray-30);
+}
+
+/* global */
+html {
+  font-size: 16px;
+  font-family: "IBM Plex Sans", sans-serif;
+}
+
+body {
+  font-size: 1rem;
+  line-height: 1.4em;
+  background: var(--color-main-bg);
+  color: var(--color-main-fg);
+}
+
+a,
+a:visited {
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-main-fg);
+}
+
+a:hover {
+  color: red;
+}
+
+a:active {
+}
+
+main {
+}
+
+code {
+  font-family: "JetBrains Mono", monospace;
+}
+
+#main-header {
+  background: var(--color-gray-20);
+  color: var(--color-main-bg);
+  padding: 0.5rem;
+  height: 3rem;
+}
+
+/* -- Panes ---------------------------------------------------------------- */
+
+#panes {
+  display: flex;
+  flex-direction: row;
+  min-height: calc(100vh - 3rem);
+}
+
+.pane {
+  padding: 1rem;
+  height: 3rem;
+}
+
+.pane-header {
+  height: 3rem;
+  padding: 1rem;
+  background: var(--color-gray-30);
+  color: white;
+}
+
+/* -- Main Nav Pane -------------------------------------------------------- */
+
+#main-nav-pane {
+  width: var(--main-nav-width);
+  background: var(--color-main-bg);
+  display: flex;
+  border-right: 1px solid var(--color-gray-130);
+}
+
+#definition-search {
+  position: relative;
+  background: var(--color-gray-55);
+  flex: 1;
+  padding: 0;
+}
+
+#definition-search i {
+  position: absolute;
+  top: 1rem;
+  left: 1rem;
+}
+
+#definition-search input {
+  background: none;
+  border: none;
+  padding: 1rem;
+  padding-left: 3rem;
+  font-size: 1rem;
+  width: var(--main-nav-width);
+  color: white;
+}
+
+#definition-search input:focus {
+  outline: none;
+  border: 0;
+}
+
+/* -- Main Nav Pane -------------------------------------------------------- */
+
+#main-pane {
+  background: var(--color-gray-140);
+  flex-grow: 1;
+}
+
+.definition {
+  background: white;
+  border-bottom: 1px solid var(--color-gray-130);
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+
+.definition .action {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  justify-items: center;
+  text-align: center;
+  padding: 1.5rem;
+  font-size: 0.875rem;
+  color: var(--color-gray-100);
+}
+.definition .action:hover {
+  color: var(--color-main-fg);
+}
+
+.definition-summary {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  padding: 1rem 0;
+}
+
+.definition-namespace-path {
+  font-size: 0.7em;
+}
+
+.definition-namespace-path .slash {
+  color: var(--color-gray-120);
+  padding: 0 0.5rem;
+}
