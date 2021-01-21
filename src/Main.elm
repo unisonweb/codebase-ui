@@ -2,8 +2,8 @@ module Main exposing (..)
 
 import Browser
 import Html exposing (Html, a, article, aside, button, div, header, i, input, label, nav, section, span, text)
-import Html.Attributes exposing (class, id, placeholder, type_)
-import Html.Events exposing (onClick)
+import Html.Attributes exposing (class, id, placeholder, type_, value)
+import Html.Events exposing (onInput)
 
 
 
@@ -20,12 +20,13 @@ main =
 
 
 type alias Model =
-    {}
+    { query : String
+    }
 
 
 init : Model
 init =
-    {}
+    { query = "" }
 
 
 
@@ -33,12 +34,14 @@ init =
 
 
 type Msg
-    = NoOp
+    = UpdateQuery String
 
 
 update : Msg -> Model -> Model
 update msg model =
-    model
+    case msg of
+        UpdateQuery query ->
+            { model | query = query }
 
 
 
@@ -79,7 +82,13 @@ view model =
             [ section [ id "main-nav-pane" ]
                 [ header [ id "definition-search", class "pane-header" ]
                     [ icon "search"
-                    , input [ type_ "text", placeholder "Namespace, name, or signature" ] []
+                    , input
+                        [ type_ "text"
+                        , placeholder "Namespace, name, or signature"
+                        , value model.query
+                        , onInput UpdateQuery
+                        ]
+                        []
                     ]
                 ]
             , section [ id "main-pane" ]
