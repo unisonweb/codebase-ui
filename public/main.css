@@ -146,7 +146,7 @@ code {
   background: white;
   border-bottom: 1px solid var(--color-gray-130);
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
   flex: 1;
 }
 
@@ -156,7 +156,7 @@ code {
   justify-content: center;
   justify-items: center;
   text-align: center;
-  padding: 1.5rem;
+  width: 3rem;
   font-size: 0.875rem;
   color: var(--color-gray-100);
 }
@@ -165,6 +165,12 @@ code {
 }
 
 .definition-summary {
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+}
+
+.definition-info {
   flex-grow: 1;
   display: flex;
   flex-direction: column;
@@ -178,4 +184,9 @@ code {
 .definition-namespace-path .slash {
   color: var(--color-gray-120);
   padding: 0 0.5rem;
+}
+
+.definition-details {
+  padding: 1rem;
+  border-top: 1px solid var(--color-gray-140);
 }
