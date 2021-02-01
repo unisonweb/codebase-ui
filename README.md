@@ -1,7 +1,7 @@
-codebase Browser
-================
+Unison Codebase Browser
+=======================
 
 Running
 -------
 
-With Elm (0.19.1) installed, run `make` in the root. Open `public/index.html` in a browser. 
+With a `ucm` running, run `npm start` in the `codebase-browser` directory to start the development server
