@@ -185,7 +185,7 @@ viewDefinition ( definition, viewSettings ) =
 view : Model -> Html Msg
 view model =
     div []
-        [ header [ id "main-header" ] [ text "Unison" ]
+        [ header [ id "main-header" ] [ text "Unison Codebase browser" ]
         , article [ id "panes" ]
             [ section [ id "main-nav-pane" ]
                 [ header [ id "definition-search", class "pane-header" ]
