@@ -7,8 +7,8 @@
     "url": "git+https://github.com/unisonweb/codebase-browser.git"
   },
   "scripts": {
-    "build": 	"elm make src/Main.elm --output public/bundle.js",
-    "start": 	"elm-live src/Main.elm --path-to-elm=node_modules/.bin/elm --dir=public --pushstate --verbose -- --output public/bundle.js"
+    "build": "elm make src/Main.elm --output public/bundle.js",
+    "start": "elm-live src/Main.elm --path-to-elm=node_modules/.bin/elm --dir=public --pushstate --verbose --proxy-prefix=/api --proxy-host=http://localhost:8081 -- --output public/bundle.js"
   },
   "bugs": {
     "url": "https://github.com/unisonweb/codebase-browser/issues"

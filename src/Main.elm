@@ -6,8 +6,9 @@ import Browser
 
 main : Program () App.Model App.Msg
 main =
-    Browser.sandbox
+    Browser.element
         { init = App.init
         , update = App.update
         , view = App.view
+        , subscriptions = App.subscriptions
         }

@@ -1,79 +1,42 @@
 module App exposing (..)
 
-import Browser
+import Api
+import Definition exposing (Definition)
 import Html exposing (Html, a, article, aside, button, div, header, i, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
+import Http
+import List.Nonempty
+import Namespace
+import RemoteData
+import UnisonHash exposing (UnisonHash)
 
 
 
 -- MODEL
 
 
-type alias DefinitionHash =
-    String
-
-
-type alias NamespacePath =
-    List String
-
-
-type alias TypeSignature =
-    String
-
-
-type alias FunctionBody =
-    String
-
-
-type alias Definition =
-    { hash : DefinitionHash
-    , path :
-        NamespacePath
-    , name : String
-    , type_ : TypeSignature
-    , body : FunctionBody
-    }
-
-
-type alias DefinitionView =
-    { showCode : Bool
-    , showDocs : Bool
-    }
-
-
 type alias OpenDefinition =
-    ( Definition, DefinitionView )
+    ( Definition, Bool )
 
 
 type alias Model =
     { query : String
     , openDefinitions : List OpenDefinition
+    , namespaces : RemoteData.WebData Namespace.Namespace
     }
 
 
-init : Model
-init =
-    { query = ""
-    , openDefinitions =
-        [ ( { hash = "#123"
-            , path = [ "base", "v1", "List" ]
-            , name = "flatMap"
-            , type_ = "(a ->{e} [b]) -> [a] ->{e} [b]"
-            , body = "flatMap body"
+init : () -> ( Model, Cmd Msg )
+init _ =
+    let
+        model =
+            { query = ""
+            , openDefinitions = []
+            , namespaces = RemoteData.Loading
             }
-          , { showCode = False, showDocs = False }
-          )
-        , ( { hash = "#abc"
-            , path = [ "base", "v1", "List" ]
-            , name = "map"
-            , type_ = "(a ->{𝕖} b) -> [a] ->{𝕖} [b]"
-            , body = "map body"
-            }
-          , { showCode = False, showDocs = False }
-          )
-        ]
-    }
+    in
+    ( model, fetchNamespaces )
 
 
 
@@ -82,36 +45,65 @@ init =
 
 type Msg
     = UpdateQuery String
-    | CloseDefinition DefinitionHash
-    | ToggleShowCode DefinitionHash
+    | CloseDefinition UnisonHash
+    | ToggleShowCode UnisonHash
+    | FetchNamespace
+    | FetchNamespaceFinished (Result Http.Error Namespace.Namespace)
 
 
-update : Msg -> Model -> Model
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         UpdateQuery query ->
-            { model | query = query }
+            ( { model | query = query }, Cmd.none )
 
         CloseDefinition hash ->
             let
                 nextOpenDefinitions =
-                    List.filter (\( d, _ ) -> d.hash /= hash) model.openDefinitions
+                    model.openDefinitions
             in
-            { model | openDefinitions = nextOpenDefinitions }
+            ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
         ToggleShowCode hash ->
             let
-                toggleShowCode ( def, viewSettings ) =
-                    if def.hash == hash then
-                        ( def, { viewSettings | showCode = not viewSettings.showCode } )
-
-                    else
-                        ( def, viewSettings )
-
                 nextOpenDefinitions =
-                    List.map toggleShowCode model.openDefinitions
+                    model.openDefinitions
             in
-            { model | openDefinitions = nextOpenDefinitions }
+            ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
+
+        FetchNamespace ->
+            ( model, Cmd.none )
+
+        FetchNamespaceFinished result ->
+            case result of
+                Ok namespace ->
+                    ( { model | namespaces = RemoteData.Success namespace }
+                    , Cmd.none
+                    )
+
+                Err err ->
+                    ( { model | namespaces = RemoteData.Failure err }, Cmd.none )
+
+
+
+-- Http
+
+
+fetchNamespaces : Cmd Msg
+fetchNamespaces =
+    Http.get
+        { url = Api.listUrl
+        , expect = Http.expectJson FetchNamespaceFinished Namespace.decode
+        }
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Sub.none
 
 
 
@@ -123,16 +115,62 @@ icon name =
     i [ class ("fas fa-" ++ name) ] []
 
 
-viewNamespaceTree : Model -> Html Msg
-viewNamespaceTree model =
-    div [] []
+errorToString : Http.Error -> String
+errorToString err =
+    case err of
+        Http.Timeout ->
+            "Timeout exceeded"
+
+        Http.NetworkError ->
+            "Network error"
+
+        Http.BadStatus status ->
+            "Bad status: " ++ String.fromInt status
+
+        Http.BadBody text ->
+            "Unexpected response from api: " ++ text
+
+        Http.BadUrl url ->
+            "Malformed url: " ++ url
 
 
-viewNamespacePath : NamespacePath -> Html msg
+viewNamespaceChild : Namespace.NamespaceChild -> Html Msg
+viewNamespaceChild namespaceChild =
+    case namespaceChild of
+        Namespace.SubNamespace name size ->
+            div [] [ text name ]
+
+        Namespace.Type name hash ->
+            div [] [ text name ]
+
+
+viewNamespaceTree : RemoteData.WebData Namespace.Namespace -> Html Msg
+viewNamespaceTree namespace =
+    let
+        content =
+            case namespace of
+                RemoteData.Success ns ->
+                    List.map viewNamespaceChild ns.children
+
+                RemoteData.Failure err ->
+                    [ text (errorToString err) ]
+
+                RemoteData.NotAsked ->
+                    [ text "Loading" ]
+
+                RemoteData.Loading ->
+                    [ text "Loading" ]
+    in
+    div [ class "namespace-tree" ] content
+
+
+viewNamespacePath : Namespace.Path -> Html msg
 viewNamespacePath path =
     let
         namespaceLinks =
-            List.map (\p -> a [ class "namespace" ] [ text p ]) path
+            path
+                |> List.Nonempty.map (\p -> a [ class "namespace" ] [ text p ])
+                |> List.Nonempty.toList
 
         slash =
             span [ class "slash" ] [ text "/" ]
@@ -147,39 +185,9 @@ viewNothing =
     text ""
 
 
-viewDefinitionDetails : OpenDefinition -> Html msg
-viewDefinitionDetails ( definition, viewSettings ) =
-    if viewSettings.showCode then
-        div [ class "definition-details" ] [ text definition.body ]
-
-    else
-        viewNothing
-
-
-viewDefinition : OpenDefinition -> Html Msg
-viewDefinition ( definition, viewSettings ) =
-    let
-        showCodeCaret =
-            if viewSettings.showCode then
-                "caret-down"
-
-            else
-                "caret-right"
-    in
-    div [ class "definition" ]
-        [ div
-            [ class "definition-summary" ]
-            [ a [ class "action", onClick (ToggleShowCode definition.hash) ]
-                [ icon showCodeCaret ]
-            , div [ class "definition-info" ]
-                [ viewNamespacePath definition.path
-                , label [] [ text definition.name ]
-                ]
-            , a [ class "action", onClick (CloseDefinition definition.hash) ]
-                [ icon "times" ]
-            ]
-        , viewDefinitionDetails ( definition, viewSettings )
-        ]
+viewDefinition : OpenDefinition -> Html msg
+viewDefinition _ =
+    div [] []
 
 
 view : Model -> Html Msg
@@ -198,8 +206,8 @@ view model =
                         ]
                         []
                     ]
+                , viewNamespaceTree model.namespaces
                 ]
-            , viewNamespaceTree model
             , section [ id "main-pane" ]
                 [ header [ class "pane-header" ] []
                 , div [] (List.map viewDefinition model.openDefinitions)

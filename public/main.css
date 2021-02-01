@@ -105,12 +105,12 @@ code {
   background: var(--color-main-bg);
   display: flex;
   border-right: 1px solid var(--color-gray-130);
+  flex-direction: column;
 }
 
 #definition-search {
   position: relative;
   background: var(--color-gray-55);
-  flex: 1;
   padding: 0;
 }
 
@@ -135,7 +135,11 @@ code {
   border: 0;
 }
 
-/* -- Main Nav Pane -------------------------------------------------------- */
+.namespace-tree {
+  padding: 1rem;
+}
+
+/* -- Main Pane ------------------------------------------------------------ */
 
 #main-pane {
   background: var(--color-gray-140);
