@@ -165,7 +165,7 @@ viewNamespaceTree namespace =
 
 
 viewNamespacePath : Namespace.Path -> Html msg
-viewNamespacePath path =
+viewNamespacePath (Namespace.Path path) =
     let
         namespaceLinks =
             path

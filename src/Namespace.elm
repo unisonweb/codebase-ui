@@ -6,8 +6,8 @@ import List.Nonempty
 import UnisonHash exposing (UnisonHash(..))
 
 
-type alias Path =
-    List.Nonempty.Nonempty String
+type Path
+    = Path (List.Nonempty.Nonempty String)
 
 
 type NamespaceChild
@@ -23,18 +23,22 @@ pathFromString : String -> Path
 pathFromString rawPath =
     let
         parts =
-            String.split "." rawPath |> List.Nonempty.fromList
+            rawPath
+                |> String.split "."
+                |> List.map String.trim
+                |> List.filter (\s -> String.length s > 0)
+                |> List.Nonempty.fromList
     in
     case parts of
         Nothing ->
-            List.Nonempty.fromElement "."
+            Path (List.Nonempty.fromElement ".")
 
         Just path ->
-            path
+            Path path
 
 
 name : Path -> String
-name path =
+name (Path path) =
     List.Nonempty.last path
 
 
