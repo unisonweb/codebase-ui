@@ -1,5 +1,5 @@
-Unison Codebase Browser
-=======================
+Unison Codebase UI
+==================
 
 Running
 -------
