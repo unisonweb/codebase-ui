@@ -2,14 +2,15 @@ module App exposing (..)
 
 import Api
 import Definition exposing (Definition)
-import Html exposing (Html, a, article, aside, button, div, header, i, input, label, nav, section, span, text)
+import Hash exposing (Hash)
+import Html exposing (Html, a, article, aside, button, div, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import List.Nonempty
-import Namespace
-import RemoteData
-import UnisonHash exposing (UnisonHash)
+import NamespaceTree exposing (NamespaceTree(..))
+import RemoteData exposing (RemoteData(..), WebData)
+import UI
 
 
 
@@ -23,7 +24,7 @@ type alias OpenDefinition =
 type alias Model =
     { query : String
     , openDefinitions : List OpenDefinition
-    , namespaces : RemoteData.WebData Namespace.Namespace
+    , namespaceTree : WebData NamespaceTree
     }
 
 
@@ -33,10 +34,10 @@ init _ =
         model =
             { query = ""
             , openDefinitions = []
-            , namespaces = RemoteData.Loading
+            , namespaceTree = Loading
             }
     in
-    ( model, fetchNamespaces )
+    ( model, fetchNamespaceTree )
 
 
 
@@ -45,10 +46,10 @@ init _ =
 
 type Msg
     = UpdateQuery String
-    | CloseDefinition UnisonHash
-    | ToggleShowCode UnisonHash
-    | FetchNamespace
-    | FetchNamespaceFinished (Result Http.Error Namespace.Namespace)
+    | CloseDefinition Hash
+    | ToggleShowCode Hash
+    | FetchNamespaceTree
+    | FetchNamespaceTreeFinished (Result Http.Error NamespaceTree)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -71,133 +72,97 @@ update msg model =
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
-        FetchNamespace ->
-            ( model, Cmd.none )
+        FetchNamespaceTree ->
+            ( model, fetchNamespaceTree )
 
-        FetchNamespaceFinished result ->
+        FetchNamespaceTreeFinished result ->
             case result of
-                Ok namespace ->
-                    ( { model | namespaces = RemoteData.Success namespace }
+                Ok tree ->
+                    ( { model | namespaceTree = Success tree }
                     , Cmd.none
                     )
 
                 Err err ->
-                    ( { model | namespaces = RemoteData.Failure err }, Cmd.none )
+                    ( { model | namespaceTree = Failure err }, Cmd.none )
 
 
 
 -- Http
 
 
-fetchNamespaces : Cmd Msg
-fetchNamespaces =
+fetchNamespaceTree : Cmd Msg
+fetchNamespaceTree =
     Http.get
         { url = Api.listUrl
-        , expect = Http.expectJson FetchNamespaceFinished Namespace.decode
+        , expect = Http.expectJson FetchNamespaceTreeFinished NamespaceTree.decode
         }
-
-
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
 
 
 
 -- VIEW
 
 
-icon : String -> Html msg
-icon name =
-    i [ class ("fas fa-" ++ name) ] []
-
-
-errorToString : Http.Error -> String
-errorToString err =
-    case err of
-        Http.Timeout ->
-            "Timeout exceeded"
-
-        Http.NetworkError ->
-            "Network error"
-
-        Http.BadStatus status ->
-            "Bad status: " ++ String.fromInt status
-
-        Http.BadBody text ->
-            "Unexpected response from api: " ++ text
-
-        Http.BadUrl url ->
-            "Malformed url: " ++ url
-
-
-viewNamespaceChild : Namespace.NamespaceChild -> Html Msg
-viewNamespaceChild namespaceChild =
-    case namespaceChild of
-        Namespace.SubNamespace name size ->
+viewNamespaceTree : NamespaceTree -> Html Msg
+viewNamespaceTree tree =
+    case tree of
+        NamespaceTree.Namespace name subTree ->
             div [] [ text name ]
 
-        Namespace.Type name hash ->
+        NamespaceTree.Type name ->
+            div [] [ text name ]
+
+        NamespaceTree.Term name ->
             div [] [ text name ]
 
 
-viewNamespaceTree : RemoteData.WebData Namespace.Namespace -> Html Msg
-viewNamespaceTree namespace =
+viewNamespaceTrees : WebData (List NamespaceTree) -> Html Msg
+viewNamespaceTrees treeRequest =
+    case treeRequest of
+        Success trees ->
+            div [] (List.map viewNamespaceTree trees)
+
+        Failure err ->
+            div [] [ text (Api.errorToString err) ]
+
+        NotAsked ->
+            UI.spinner
+
+        Loading ->
+            UI.spinner
+
+
+viewAllNamespaces : WebData NamespaceTree -> Html Msg
+viewAllNamespaces namespaceRoot =
     let
         content =
-            case namespace of
-                RemoteData.Success ns ->
-                    List.map viewNamespaceChild ns.children
+            case namespaceRoot of
+                Success root ->
+                    case root of
+                        NamespaceTree.Namespace name subTrees ->
+                            viewNamespaceTrees subTrees
 
-                RemoteData.Failure err ->
-                    [ text (errorToString err) ]
+                        _ ->
+                            div [] [ text "TODO, Fix types such that this branch cant be constructed" ]
 
-                RemoteData.NotAsked ->
-                    [ text "Loading" ]
+                Failure err ->
+                    div [] [ text (Api.errorToString err) ]
 
-                RemoteData.Loading ->
-                    [ text "Loading" ]
+                NotAsked ->
+                    UI.spinner
+
+                Loading ->
+                    UI.spinner
     in
-    div [ class "namespace-tree" ] content
-
-
-viewNamespacePath : Namespace.Path -> Html msg
-viewNamespacePath (Namespace.Path path) =
-    let
-        namespaceLinks =
-            path
-                |> List.Nonempty.map (\p -> a [ class "namespace" ] [ text p ])
-                |> List.Nonempty.toList
-
-        slash =
-            span [ class "slash" ] [ text "/" ]
-    in
-    label
-        [ class "definition-namespace-path" ]
-        (List.intersperse slash namespaceLinks)
-
-
-viewNothing : Html msg
-viewNothing =
-    text ""
-
-
-viewDefinition : OpenDefinition -> Html msg
-viewDefinition _ =
-    div [] []
+    div [ id "all-namespaces", class "namespace-tree" ] [ content ]
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ header [ id "main-header" ] [ text "Unison Codebase browser" ]
-        , article [ id "panes" ]
+        [ article [ id "panes" ]
             [ section [ id "main-nav-pane" ]
                 [ header [ id "definition-search", class "pane-header" ]
-                    [ icon "search"
+                    [ UI.icon "search"
                     , input
                         [ type_ "text"
                         , placeholder "Namespace, name, or signature"
@@ -206,11 +171,11 @@ view model =
                         ]
                         []
                     ]
-                , viewNamespaceTree model.namespaces
+                , viewAllNamespaces model.namespaceTree
                 ]
             , section [ id "main-pane" ]
                 [ header [ class "pane-header" ] []
-                , div [] (List.map viewDefinition model.openDefinitions)
+                , div [] []
                 ]
             ]
         ]

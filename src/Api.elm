@@ -1,5 +1,7 @@
 module Api exposing (..)
 
+import Http
+import RemoteData exposing (WebData)
 import Url.Builder exposing (QueryParameter, absolute)
 
 
@@ -20,3 +22,26 @@ listUrl =
 definitionUrl : String
 definitionUrl =
     serverUrl [ "getDefinition" ] []
+
+
+
+-- ERROR
+
+
+errorToString : Http.Error -> String
+errorToString err =
+    case err of
+        Http.Timeout ->
+            "Timeout exceeded"
+
+        Http.NetworkError ->
+            "Network error"
+
+        Http.BadStatus status ->
+            "Bad status: " ++ String.fromInt status
+
+        Http.BadBody text ->
+            "Unexpected response from api: " ++ text
+
+        Http.BadUrl url ->
+            "Malformed url: " ++ url

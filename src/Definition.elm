@@ -12,5 +12,3 @@ type alias Signature =
 type Definition
     = Term String Signature
     | Type String Signature
-    | Patch
-    | Doc
