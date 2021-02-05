@@ -139,6 +139,10 @@ code {
   padding: 1rem;
 }
 
+.namespace-tree .node {
+  display: block;
+}
+
 /* -- Main Pane ------------------------------------------------------------ */
 
 #main-pane {

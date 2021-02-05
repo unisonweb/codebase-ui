@@ -1,14 +1,15 @@
 module NamespaceTree exposing (..)
 
+import FullyQualifiedName exposing (FQN, fqn)
 import Json.Decode as Json exposing (andThen, field)
 import List.Nonempty
 import RemoteData exposing (RemoteData(..), WebData)
 
 
 type NamespaceTree
-    = Namespace String (WebData (List NamespaceTree))
-    | Type String
-    | Term String
+    = Namespace FQN (WebData (List NamespaceTree))
+    | Type FQN
+    | Term FQN
 
 
 
@@ -18,13 +19,13 @@ type NamespaceTree
 decodeSubNamespace : Json.Decoder NamespaceTree
 decodeSubNamespace =
     Json.map2 Namespace
-        (field "namespaceName" Json.string)
+        (field "namespaceName" Json.string |> andThen (fqn >> Json.succeed))
         (Json.succeed NotAsked)
 
 
 decodeType : Json.Decoder NamespaceTree
 decodeType =
-    Json.map Type (field "typeName" Json.string)
+    Json.map Type (field "typeName" Json.string |> andThen (fqn >> Json.succeed))
 
 
 decodeNamespaceChild : Json.Decoder NamespaceTree
@@ -42,5 +43,5 @@ decode : Json.Decoder NamespaceTree
 decode =
     Json.map2
         Namespace
-        (field "namespaceListingName" Json.string)
+        (field "namespaceListingName" Json.string |> andThen (fqn >> Json.succeed))
         (field "namespaceListingChildren" decodeChildren |> andThen (Success >> Json.succeed))

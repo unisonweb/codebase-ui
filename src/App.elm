@@ -2,6 +2,7 @@ module App exposing (..)
 
 import Api
 import Definition exposing (Definition)
+import FullyQualifiedName exposing (FQN, unqualifiedName)
 import Hash exposing (Hash)
 import Html exposing (Html, a, article, aside, button, div, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
@@ -10,6 +11,7 @@ import Http
 import List.Nonempty
 import NamespaceTree exposing (NamespaceTree(..))
 import RemoteData exposing (RemoteData(..), WebData)
+import Set exposing (Set)
 import UI
 
 
@@ -25,6 +27,7 @@ type alias Model =
     { query : String
     , openDefinitions : List OpenDefinition
     , namespaceTree : WebData NamespaceTree
+    , expandedNamespaces : Set FQN
     }
 
 
@@ -35,6 +38,7 @@ init _ =
             { query = ""
             , openDefinitions = []
             , namespaceTree = Loading
+            , expandedNamespaces = Set.empty
             }
     in
     ( model, fetchNamespaceTree )
@@ -48,7 +52,7 @@ type Msg
     = UpdateQuery String
     | CloseDefinition Hash
     | ToggleShowCode Hash
-    | FetchNamespaceTree
+    | ToggleExpandedNamespaceTree FQN
     | FetchNamespaceTreeFinished (Result Http.Error NamespaceTree)
 
 
@@ -72,7 +76,7 @@ update msg model =
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
-        FetchNamespaceTree ->
+        ToggleExpandedNamespaceTree fqn ->
             ( model, fetchNamespaceTree )
 
         FetchNamespaceTreeFinished result ->
@@ -102,24 +106,28 @@ fetchNamespaceTree =
 -- VIEW
 
 
-viewNamespaceTree : NamespaceTree -> Html Msg
-viewNamespaceTree tree =
+viewNamespaceTree : Set FQN -> NamespaceTree -> Html Msg
+viewNamespaceTree expandedNamespaces tree =
     case tree of
-        NamespaceTree.Namespace name subTree ->
-            div [] [ text name ]
+        NamespaceTree.Namespace fqn subTree ->
+            a
+                [ class "node namespace"
+                , onClick (ToggleExpandedNamespaceTree fqn)
+                ]
+                [ text (unqualifiedName fqn) ]
 
-        NamespaceTree.Type name ->
-            div [] [ text name ]
+        NamespaceTree.Type fqn ->
+            a [ class "node type" ] [ text (unqualifiedName fqn) ]
 
-        NamespaceTree.Term name ->
-            div [] [ text name ]
+        NamespaceTree.Term fqn ->
+            a [ class "node term" ] [ text (unqualifiedName fqn) ]
 
 
-viewNamespaceTrees : WebData (List NamespaceTree) -> Html Msg
-viewNamespaceTrees treeRequest =
+viewNamespaceTrees : Set FQN -> WebData (List NamespaceTree) -> Html Msg
+viewNamespaceTrees expandedNamespaces treeRequest =
     case treeRequest of
         Success trees ->
-            div [] (List.map viewNamespaceTree trees)
+            div [] (List.map (viewNamespaceTree expandedNamespaces) trees)
 
         Failure err ->
             div [] [ text (Api.errorToString err) ]
@@ -131,15 +139,15 @@ viewNamespaceTrees treeRequest =
             UI.spinner
 
 
-viewAllNamespaces : WebData NamespaceTree -> Html Msg
-viewAllNamespaces namespaceRoot =
+viewAllNamespaces : Set FQN -> WebData NamespaceTree -> Html Msg
+viewAllNamespaces expandedNamespaces namespaceRoot =
     let
         content =
             case namespaceRoot of
                 Success root ->
                     case root of
                         NamespaceTree.Namespace name subTrees ->
-                            viewNamespaceTrees subTrees
+                            viewNamespaceTrees expandedNamespaces subTrees
 
                         _ ->
                             div [] [ text "TODO, Fix types such that this branch cant be constructed" ]
@@ -171,7 +179,7 @@ view model =
                         ]
                         []
                     ]
-                , viewAllNamespaces model.namespaceTree
+                , viewAllNamespaces model.expandedNamespaces model.namespaceTree
                 ]
             , section [ id "main-pane" ]
                 [ header [ class "pane-header" ] []
