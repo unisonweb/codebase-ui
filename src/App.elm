@@ -2,8 +2,9 @@ module App exposing (..)
 
 import Api
 import Definition exposing (Definition)
-import FullyQualifiedName exposing (FQN, unqualifiedName)
-import Hash exposing (Hash)
+import FullyQualifiedName exposing (unqualifiedName)
+import Hash exposing (Hash(..))
+import HashSet exposing (HashSet)
 import Html exposing (Html, a, article, aside, button, div, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -27,7 +28,7 @@ type alias Model =
     { query : String
     , openDefinitions : List OpenDefinition
     , namespaceTree : WebData NamespaceTree
-    , expandedNamespaces : Set FQN
+    , expandedNamespaces : HashSet
     }
 
 
@@ -38,7 +39,7 @@ init _ =
             { query = ""
             , openDefinitions = []
             , namespaceTree = Loading
-            , expandedNamespaces = Set.empty
+            , expandedNamespaces = HashSet.empty
             }
     in
     ( model, fetchNamespaceTree )
@@ -52,7 +53,7 @@ type Msg
     = UpdateQuery String
     | CloseDefinition Hash
     | ToggleShowCode Hash
-    | ToggleExpandedNamespaceTree FQN
+    | ToggleExpandedNamespaceTree Hash
     | FetchNamespaceTreeFinished (Result Http.Error NamespaceTree)
 
 
@@ -76,8 +77,14 @@ update msg model =
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
-        ToggleExpandedNamespaceTree fqn ->
-            ( model, fetchNamespaceTree )
+        ToggleExpandedNamespaceTree hash ->
+            ( { model
+                | expandedNamespaces =
+                    HashSet.toggle hash
+                        model.expandedNamespaces
+              }
+            , Cmd.none
+            )
 
         FetchNamespaceTreeFinished result ->
             case result of
@@ -106,24 +113,27 @@ fetchNamespaceTree =
 -- VIEW
 
 
-viewNamespaceTree : Set FQN -> NamespaceTree -> Html Msg
+viewNamespaceTree : HashSet -> NamespaceTree -> Html Msg
 viewNamespaceTree expandedNamespaces tree =
     case tree of
-        NamespaceTree.Namespace fqn subTree ->
+        NamespaceTree.Namespace hash fqn subTree ->
             a
                 [ class "node namespace"
-                , onClick (ToggleExpandedNamespaceTree fqn)
+                , onClick (ToggleExpandedNamespaceTree hash)
                 ]
                 [ text (unqualifiedName fqn) ]
 
-        NamespaceTree.Type fqn ->
+        NamespaceTree.Type hash fqn ->
             a [ class "node type" ] [ text (unqualifiedName fqn) ]
 
-        NamespaceTree.Term fqn ->
+        NamespaceTree.Term hash fqn ->
             a [ class "node term" ] [ text (unqualifiedName fqn) ]
 
+        NamespaceTree.Patch _ ->
+            a [ class "node patch" ] [ text "Patch" ]
 
-viewNamespaceTrees : Set FQN -> WebData (List NamespaceTree) -> Html Msg
+
+viewNamespaceTrees : HashSet -> WebData (List NamespaceTree) -> Html Msg
 viewNamespaceTrees expandedNamespaces treeRequest =
     case treeRequest of
         Success trees ->
@@ -139,14 +149,14 @@ viewNamespaceTrees expandedNamespaces treeRequest =
             UI.spinner
 
 
-viewAllNamespaces : Set FQN -> WebData NamespaceTree -> Html Msg
+viewAllNamespaces : HashSet -> WebData NamespaceTree -> Html Msg
 viewAllNamespaces expandedNamespaces namespaceRoot =
     let
         content =
             case namespaceRoot of
                 Success root ->
                     case root of
-                        NamespaceTree.Namespace name subTrees ->
+                        NamespaceTree.Namespace _ _ subTrees ->
                             viewNamespaceTrees expandedNamespaces subTrees
 
                         _ ->
