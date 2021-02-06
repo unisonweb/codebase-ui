@@ -9,8 +9,8 @@ icon name =
     i [ class ("fas fa-" ++ name) ] []
 
 
-empty : Html msg
-empty =
+nothing : Html msg
+nothing =
     text ""
 
 

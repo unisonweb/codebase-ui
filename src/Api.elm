@@ -2,7 +2,7 @@ module Api exposing (..)
 
 import Http
 import RemoteData exposing (WebData)
-import Url.Builder exposing (QueryParameter, absolute)
+import Url.Builder exposing (QueryParameter, absolute, string)
 
 
 
@@ -14,9 +14,12 @@ serverUrl path queryParams =
     absolute ("api" :: path) queryParams
 
 
-listUrl : String
-listUrl =
-    serverUrl [ "list" ] []
+listUrl : Maybe String -> String
+listUrl namespaceHashOrFQN =
+    namespaceHashOrFQN
+        |> Maybe.map (\n -> [ string "namespace" n ])
+        |> Maybe.withDefault []
+        |> serverUrl [ "list" ]
 
 
 definitionUrl : String

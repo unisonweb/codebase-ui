@@ -10,7 +10,7 @@ import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import List.Nonempty
-import NamespaceTree exposing (NamespaceTree(..))
+import NamespaceListing exposing (DefinitionListing(..), NamespaceListing(..), NamespaceListingContent)
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import UI
@@ -27,8 +27,8 @@ type alias OpenDefinition =
 type alias Model =
     { query : String
     , openDefinitions : List OpenDefinition
-    , namespaceTree : WebData NamespaceTree
-    , expandedNamespaces : HashSet
+    , rootNamespaceListing : WebData NamespaceListing
+    , expandedNamespaceListings : HashSet
     }
 
 
@@ -38,11 +38,11 @@ init _ =
         model =
             { query = ""
             , openDefinitions = []
-            , namespaceTree = Loading
-            , expandedNamespaces = HashSet.empty
+            , rootNamespaceListing = Loading
+            , expandedNamespaceListings = HashSet.empty
             }
     in
-    ( model, fetchNamespaceTree )
+    ( model, fetchRootNamespaceListing )
 
 
 
@@ -53,8 +53,9 @@ type Msg
     = UpdateQuery String
     | CloseDefinition Hash
     | ToggleShowCode Hash
-    | ToggleExpandedNamespaceTree Hash
-    | FetchNamespaceTreeFinished (Result Http.Error NamespaceTree)
+    | ToggleExpandedNamespaceListing Hash
+    | FetchSubNamespaceListingFinished Hash (Result Http.Error NamespaceListing)
+    | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -77,35 +78,74 @@ update msg model =
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
-        ToggleExpandedNamespaceTree hash ->
-            ( { model
-                | expandedNamespaces =
-                    HashSet.toggle hash
-                        model.expandedNamespaces
-              }
-            , Cmd.none
-            )
+        ToggleExpandedNamespaceListing hash ->
+            let
+                shouldExpand =
+                    not (HashSet.member hash model.expandedNamespaceListings)
 
-        FetchNamespaceTreeFinished result ->
+                newModel =
+                    { model
+                        | expandedNamespaceListings =
+                            HashSet.toggle hash
+                                model.expandedNamespaceListings
+                    }
+
+                cmd =
+                    if shouldExpand then
+                        fetchSubNamespaceListing hash
+
+                    else
+                        Cmd.none
+            in
+            ( newModel, cmd )
+
+        FetchSubNamespaceListingFinished fetchedHash result ->
+            let
+                replaceNamespaceListing ((NamespaceListing hash fqn _) as namespaceListing) =
+                    if Hash.equals fetchedHash hash then
+                        case result of
+                            Ok (NamespaceListing _ _ content) ->
+                                NamespaceListing hash fqn content
+
+                            Err err ->
+                                NamespaceListing hash fqn (Failure err)
+
+                    else
+                        namespaceListing
+
+                nextNamespaceListing =
+                    RemoteData.map (NamespaceListing.map replaceNamespaceListing) model.rootNamespaceListing
+            in
+            ( { model | rootNamespaceListing = nextNamespaceListing }, Cmd.none )
+
+        FetchRootNamespaceListingFinished result ->
             case result of
-                Ok tree ->
-                    ( { model | namespaceTree = Success tree }
+                Ok (NamespaceListing hash fqn content) ->
+                    ( { model | rootNamespaceListing = Success (NamespaceListing hash fqn content) }
                     , Cmd.none
                     )
 
                 Err err ->
-                    ( { model | namespaceTree = Failure err }, Cmd.none )
+                    ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
 
 
 -- Http
 
 
-fetchNamespaceTree : Cmd Msg
-fetchNamespaceTree =
+fetchRootNamespaceListing : Cmd Msg
+fetchRootNamespaceListing =
     Http.get
-        { url = Api.listUrl
-        , expect = Http.expectJson FetchNamespaceTreeFinished NamespaceTree.decode
+        { url = Api.listUrl Nothing
+        , expect = Http.expectJson FetchRootNamespaceListingFinished NamespaceListing.decode
+        }
+
+
+fetchSubNamespaceListing : Hash -> Cmd Msg
+fetchSubNamespaceListing hash =
+    Http.get
+        { url = Api.listUrl (Just (Hash.toString hash))
+        , expect = Http.expectJson (FetchSubNamespaceListingFinished hash) NamespaceListing.decode
         }
 
 
@@ -113,54 +153,78 @@ fetchNamespaceTree =
 -- VIEW
 
 
-viewNamespaceTree : HashSet -> NamespaceTree -> Html Msg
-viewNamespaceTree expandedNamespaces tree =
-    case tree of
-        NamespaceTree.Namespace hash fqn subTree ->
-            a
-                [ class "node namespace"
-                , onClick (ToggleExpandedNamespaceTree hash)
-                ]
-                [ text (unqualifiedName fqn) ]
-
-        NamespaceTree.Type hash fqn ->
+viewDefinitionListing : DefinitionListing -> Html Msg
+viewDefinitionListing definition =
+    case definition of
+        Type hash fqn ->
             a [ class "node type" ] [ text (unqualifiedName fqn) ]
 
-        NamespaceTree.Term hash fqn ->
+        Term hash fqn ->
             a [ class "node term" ] [ text (unqualifiedName fqn) ]
 
-        NamespaceTree.Patch _ ->
+        Patch _ ->
             a [ class "node patch" ] [ text "Patch" ]
 
 
-viewNamespaceTrees : HashSet -> WebData (List NamespaceTree) -> Html Msg
-viewNamespaceTrees expandedNamespaces treeRequest =
-    case treeRequest of
-        Success trees ->
-            div [] (List.map (viewNamespaceTree expandedNamespaces) trees)
+viewLoadedNamespaceListingContent : HashSet -> NamespaceListingContent -> Html Msg
+viewLoadedNamespaceListingContent expandedNamespaceListings content =
+    let
+        namespaces =
+            List.map (viewNamespaceListing expandedNamespaceListings) content.namespaces
+
+        definitions =
+            List.map viewDefinitionListing content.definitions
+    in
+    div [] (namespaces ++ definitions)
+
+
+viewNamespaceListingContent : HashSet -> WebData NamespaceListingContent -> Html Msg
+viewNamespaceListingContent expandedNamespaceListings content =
+    case content of
+        Success loadedContent ->
+            viewLoadedNamespaceListingContent expandedNamespaceListings loadedContent
 
         Failure err ->
-            div [] [ text (Api.errorToString err) ]
+            text (Api.errorToString err)
 
         NotAsked ->
-            UI.spinner
+            UI.nothing
 
         Loading ->
             UI.spinner
 
 
-viewAllNamespaces : HashSet -> WebData NamespaceTree -> Html Msg
-viewAllNamespaces expandedNamespaces namespaceRoot =
+viewNamespaceListing : HashSet -> NamespaceListing -> Html Msg
+viewNamespaceListing expandedNamespaceListings (NamespaceListing hash fqn content) =
     let
-        content =
-            case namespaceRoot of
-                Success root ->
-                    case root of
-                        NamespaceTree.Namespace _ _ subTrees ->
-                            viewNamespaceTrees expandedNamespaces subTrees
+        namespaceContent =
+            if HashSet.member hash expandedNamespaceListings then
+                div [ class "namespace-content" ]
+                    [ viewNamespaceListingContent
+                        expandedNamespaceListings
+                        content
+                    ]
 
-                        _ ->
-                            div [] [ text "TODO, Fix types such that this branch cant be constructed" ]
+            else
+                UI.nothing
+    in
+    div []
+        [ a
+            [ class "node namespace"
+            , onClick (ToggleExpandedNamespaceListing hash)
+            ]
+            [ text (unqualifiedName fqn) ]
+        , namespaceContent
+        ]
+
+
+viewAllNamespaces : HashSet -> WebData NamespaceListing -> Html Msg
+viewAllNamespaces expandedNamespaceListings namespaceRoot =
+    let
+        listings =
+            case namespaceRoot of
+                Success (NamespaceListing _ fqn content) ->
+                    viewNamespaceListingContent expandedNamespaceListings content
 
                 Failure err ->
                     div [] [ text (Api.errorToString err) ]
@@ -171,7 +235,10 @@ viewAllNamespaces expandedNamespaces namespaceRoot =
                 Loading ->
                     UI.spinner
     in
-    div [ id "all-namespaces", class "namespace-tree" ] [ content ]
+    div [ id "all-namespaces", class "namespace-tree" ]
+        [ div [] [ text "All Namespaces" ]
+        , listings
+        ]
 
 
 view : Model -> Html Msg
@@ -189,7 +256,7 @@ view model =
                         ]
                         []
                     ]
-                , viewAllNamespaces model.expandedNamespaces model.namespaceTree
+                , viewAllNamespaces model.expandedNamespaceListings model.rootNamespaceListing
                 ]
             , section [ id "main-pane" ]
                 [ header [ class "pane-header" ] []

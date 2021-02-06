@@ -141,6 +141,11 @@ code {
 
 .namespace-tree .node {
   display: block;
+  user-select: none;
+}
+
+.namespace-tree .namespace-content {
+  margin-left: 1rem;
 }
 
 /* -- Main Pane ------------------------------------------------------------ */
