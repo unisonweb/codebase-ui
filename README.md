@@ -1,6 +1,8 @@
 Unison Codebase UI
 ==================
 
+![CI](https://github.com/unisonweb/codebase-ui/workflows/CI/badge.svg)
+
 Running
 -------
 
