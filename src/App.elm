@@ -2,14 +2,16 @@ module App exposing (..)
 
 import Api
 import Definition exposing (Definition)
-import Html exposing (Html, a, article, aside, button, div, header, i, input, label, nav, section, span, text)
+import FullyQualifiedName exposing (unqualifiedName)
+import Hash exposing (Hash(..))
+import HashSet exposing (HashSet)
+import Html exposing (Html, a, article, aside, button, div, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import List.Nonempty
-import Namespace
-import RemoteData
-import UnisonHash exposing (UnisonHash)
+import NamespaceListing exposing (DefinitionListing(..), NamespaceListing(..), NamespaceListingContent)
+import RemoteData exposing (RemoteData(..), WebData)
+import UI
 
 
 
@@ -23,7 +25,8 @@ type alias OpenDefinition =
 type alias Model =
     { query : String
     , openDefinitions : List OpenDefinition
-    , namespaces : RemoteData.WebData Namespace.Namespace
+    , rootNamespaceListing : WebData NamespaceListing
+    , expandedNamespaceListings : HashSet
     }
 
 
@@ -33,10 +36,11 @@ init _ =
         model =
             { query = ""
             , openDefinitions = []
-            , namespaces = RemoteData.Loading
+            , rootNamespaceListing = Loading
+            , expandedNamespaceListings = HashSet.empty
             }
     in
-    ( model, fetchNamespaces )
+    ( model, fetchRootNamespaceListing )
 
 
 
@@ -45,10 +49,11 @@ init _ =
 
 type Msg
     = UpdateQuery String
-    | CloseDefinition UnisonHash
-    | ToggleShowCode UnisonHash
-    | FetchNamespace
-    | FetchNamespaceFinished (Result Http.Error Namespace.Namespace)
+    | CloseDefinition Hash
+    | ToggleShowCode Hash
+    | ToggleExpandedNamespaceListing Hash
+    | FetchSubNamespaceListingFinished Hash (Result Http.Error NamespaceListing)
+    | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -71,133 +76,176 @@ update msg model =
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
-        FetchNamespace ->
-            ( model, Cmd.none )
+        ToggleExpandedNamespaceListing hash ->
+            let
+                shouldExpand =
+                    not (HashSet.member hash model.expandedNamespaceListings)
 
-        FetchNamespaceFinished result ->
+                newModel =
+                    { model
+                        | expandedNamespaceListings =
+                            HashSet.toggle hash
+                                model.expandedNamespaceListings
+                    }
+
+                cmd =
+                    if shouldExpand then
+                        fetchSubNamespaceListing hash
+
+                    else
+                        Cmd.none
+            in
+            ( newModel, cmd )
+
+        FetchSubNamespaceListingFinished fetchedHash result ->
+            let
+                replaceNamespaceListing ((NamespaceListing hash fqn _) as namespaceListing) =
+                    if Hash.equals fetchedHash hash then
+                        case result of
+                            Ok (NamespaceListing _ _ content) ->
+                                NamespaceListing hash fqn content
+
+                            Err err ->
+                                NamespaceListing hash fqn (Failure err)
+
+                    else
+                        namespaceListing
+
+                nextNamespaceListing =
+                    RemoteData.map (NamespaceListing.map replaceNamespaceListing) model.rootNamespaceListing
+            in
+            ( { model | rootNamespaceListing = nextNamespaceListing }, Cmd.none )
+
+        FetchRootNamespaceListingFinished result ->
             case result of
-                Ok namespace ->
-                    ( { model | namespaces = RemoteData.Success namespace }
+                Ok (NamespaceListing hash fqn content) ->
+                    ( { model | rootNamespaceListing = Success (NamespaceListing hash fqn content) }
                     , Cmd.none
                     )
 
                 Err err ->
-                    ( { model | namespaces = RemoteData.Failure err }, Cmd.none )
+                    ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
 
 
 -- Http
 
 
-fetchNamespaces : Cmd Msg
-fetchNamespaces =
+fetchRootNamespaceListing : Cmd Msg
+fetchRootNamespaceListing =
     Http.get
-        { url = Api.listUrl
-        , expect = Http.expectJson FetchNamespaceFinished Namespace.decode
+        { url = Api.listUrl Nothing
+        , expect = Http.expectJson FetchRootNamespaceListingFinished NamespaceListing.decode
         }
 
 
-
--- SUBSCRIPTIONS
-
-
-subscriptions : Model -> Sub Msg
-subscriptions model =
-    Sub.none
+fetchSubNamespaceListing : Hash -> Cmd Msg
+fetchSubNamespaceListing hash =
+    Http.get
+        { url = Api.listUrl (Just (Hash.toString hash))
+        , expect = Http.expectJson (FetchSubNamespaceListingFinished hash) NamespaceListing.decode
+        }
 
 
 
 -- VIEW
 
 
-icon : String -> Html msg
-icon name =
-    i [ class ("fas fa-" ++ name) ] []
+viewDefinitionListing : DefinitionListing -> Html Msg
+viewDefinitionListing definition =
+    case definition of
+        Type hash fqn ->
+            a [ class "node type" ] [ text (unqualifiedName fqn) ]
+
+        Term hash fqn ->
+            a [ class "node term" ] [ text (unqualifiedName fqn) ]
+
+        Patch _ ->
+            a [ class "node patch" ] [ text "Patch" ]
 
 
-errorToString : Http.Error -> String
-errorToString err =
-    case err of
-        Http.Timeout ->
-            "Timeout exceeded"
-
-        Http.NetworkError ->
-            "Network error"
-
-        Http.BadStatus status ->
-            "Bad status: " ++ String.fromInt status
-
-        Http.BadBody text ->
-            "Unexpected response from api: " ++ text
-
-        Http.BadUrl url ->
-            "Malformed url: " ++ url
-
-
-viewNamespaceChild : Namespace.NamespaceChild -> Html Msg
-viewNamespaceChild namespaceChild =
-    case namespaceChild of
-        Namespace.SubNamespace name size ->
-            div [] [ text name ]
-
-        Namespace.Type name hash ->
-            div [] [ text name ]
-
-
-viewNamespaceTree : RemoteData.WebData Namespace.Namespace -> Html Msg
-viewNamespaceTree namespace =
+viewLoadedNamespaceListingContent : HashSet -> NamespaceListingContent -> Html Msg
+viewLoadedNamespaceListingContent expandedNamespaceListings content =
     let
-        content =
-            case namespace of
-                RemoteData.Success ns ->
-                    List.map viewNamespaceChild ns.children
+        namespaces =
+            List.map (viewNamespaceListing expandedNamespaceListings) content.namespaces
 
-                RemoteData.Failure err ->
-                    [ text (errorToString err) ]
-
-                RemoteData.NotAsked ->
-                    [ text "Loading" ]
-
-                RemoteData.Loading ->
-                    [ text "Loading" ]
+        definitions =
+            List.map viewDefinitionListing content.definitions
     in
-    div [ class "namespace-tree" ] content
+    div [] (namespaces ++ definitions)
 
 
-viewNamespacePath : Namespace.Path -> Html msg
-viewNamespacePath (Namespace.Path path) =
+viewNamespaceListingContent : HashSet -> WebData NamespaceListingContent -> Html Msg
+viewNamespaceListingContent expandedNamespaceListings content =
+    case content of
+        Success loadedContent ->
+            viewLoadedNamespaceListingContent expandedNamespaceListings loadedContent
+
+        Failure err ->
+            text (Api.errorToString err)
+
+        NotAsked ->
+            UI.nothing
+
+        Loading ->
+            UI.spinner
+
+
+viewNamespaceListing : HashSet -> NamespaceListing -> Html Msg
+viewNamespaceListing expandedNamespaceListings (NamespaceListing hash fqn content) =
     let
-        namespaceLinks =
-            path
-                |> List.Nonempty.map (\p -> a [ class "namespace" ] [ text p ])
-                |> List.Nonempty.toList
+        namespaceContent =
+            if HashSet.member hash expandedNamespaceListings then
+                div [ class "namespace-content" ]
+                    [ viewNamespaceListingContent
+                        expandedNamespaceListings
+                        content
+                    ]
 
-        slash =
-            span [ class "slash" ] [ text "/" ]
+            else
+                UI.nothing
     in
-    label
-        [ class "definition-namespace-path" ]
-        (List.intersperse slash namespaceLinks)
+    div []
+        [ a
+            [ class "node namespace"
+            , onClick (ToggleExpandedNamespaceListing hash)
+            ]
+            [ text (unqualifiedName fqn) ]
+        , namespaceContent
+        ]
 
 
-viewNothing : Html msg
-viewNothing =
-    text ""
+viewAllNamespaces : HashSet -> WebData NamespaceListing -> Html Msg
+viewAllNamespaces expandedNamespaceListings namespaceRoot =
+    let
+        listings =
+            case namespaceRoot of
+                Success (NamespaceListing _ fqn content) ->
+                    viewNamespaceListingContent expandedNamespaceListings content
 
+                Failure err ->
+                    div [] [ text (Api.errorToString err) ]
 
-viewDefinition : OpenDefinition -> Html msg
-viewDefinition _ =
-    div [] []
+                NotAsked ->
+                    UI.spinner
+
+                Loading ->
+                    UI.spinner
+    in
+    div [ id "all-namespaces", class "namespace-tree" ]
+        [ div [] [ text "All Namespaces" ]
+        , listings
+        ]
 
 
 view : Model -> Html Msg
 view model =
     div []
-        [ header [ id "main-header" ] [ text "Unison Codebase browser" ]
-        , article [ id "panes" ]
+        [ article [ id "panes" ]
             [ section [ id "main-nav-pane" ]
                 [ header [ id "definition-search", class "pane-header" ]
-                    [ icon "search"
+                    [ UI.icon "search"
                     , input
                         [ type_ "text"
                         , placeholder "Namespace, name, or signature"
@@ -206,11 +254,11 @@ view model =
                         ]
                         []
                     ]
-                , viewNamespaceTree model.namespaces
+                , viewAllNamespaces model.expandedNamespaceListings model.rootNamespaceListing
                 ]
             , section [ id "main-pane" ]
                 [ header [ class "pane-header" ] []
-                , div [] (List.map viewDefinition model.openDefinitions)
+                , div [] []
                 ]
             ]
         ]

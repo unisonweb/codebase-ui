@@ -1,6 +1,8 @@
 module Api exposing (..)
 
-import Url.Builder exposing (QueryParameter, absolute)
+import Http
+import RemoteData exposing (WebData)
+import Url.Builder exposing (QueryParameter, absolute, string)
 
 
 
@@ -12,11 +14,37 @@ serverUrl path queryParams =
     absolute ("api" :: path) queryParams
 
 
-listUrl : String
-listUrl =
-    serverUrl [ "list" ] []
+listUrl : Maybe String -> String
+listUrl namespaceHashOrFQN =
+    namespaceHashOrFQN
+        |> Maybe.map (\n -> [ string "namespace" n ])
+        |> Maybe.withDefault []
+        |> serverUrl [ "list" ]
 
 
 definitionUrl : String
 definitionUrl =
     serverUrl [ "getDefinition" ] []
+
+
+
+-- ERROR
+
+
+errorToString : Http.Error -> String
+errorToString err =
+    case err of
+        Http.Timeout ->
+            "Timeout exceeded"
+
+        Http.NetworkError ->
+            "Network error"
+
+        Http.BadStatus status ->
+            "Bad status: " ++ String.fromInt status
+
+        Http.BadBody text ->
+            "Unexpected response from api: " ++ text
+
+        Http.BadUrl url ->
+            "Malformed url: " ++ url
