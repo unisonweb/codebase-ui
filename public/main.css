@@ -17,29 +17,71 @@ li {
   padding: 0;
 }
 
-/* Variables */
-
 :root {
-  --main-nav-width: 20rem;
+  --main-sidebar-width: 14rem;
 
-  --color-gray-20: #222;
-  --color-gray-30: #333;
-  --color-gray-50: #555;
-  --color-gray-40: #444;
-  --color-gray-55: #545454;
-  --color-gray-100: #aaa;
-  --color-gray-120: #ccc;
-  --color-gray-130: #ddd;
-  --color-gray-140: #eee;
+  /* -- All colors --------------------------------------------------------- */
 
-  --color-main-bg: white;
-  --color-main-fg: var(--color-gray-30);
+  /* Brand colors */
+  --color-brand-bright-red: #ff4756;
+  --color-brand-orange: #ff8800;
+  --color-brand-yellow: #ffc41f;
+  --color-brand-purple: #8f228f;
+  --color-brand-dark-purple: #520066;
+
+  /* Base colors */
+  --color-blue-base: #5695f4;
+  --color-gray-base: #515258;
+
+  /* Darker (than base) grays */
+  --color-gray-darken-5: #464649;
+  --color-gray-darken-20: #2d2e35;
+  --color-gray-darken-25: #22232a;
+  --color-gray-darken-30: #18181c;
+
+  /* Lighter (than base) grays */
+  --color-gray-lighten-20: #818286;
+  --color-gray-lighten-30: #bdbfc6;
+  --color-gray-lighten-40: #d1d5dc;
+  --color-gray-lighten-50: #e4e7ec;
+  --color-gray-lighten-60: #fafafb;
+  --color-gray-lighten-100: #fff;
+
+  /* -- Default Theme -------------------------------------------------------*/
+  --color-main-fg: var(--color-gray-darken-30);
+  --color-main-bg: var(--color-gray-lighten-100);
+  --color-main-subtle-fg: var(--color-gray-lighten-30);
+  --color-main-subtle-bg: var(--color-gray-lighten-60);
+  --color-main-border: var(--color-gray-lighten-40);
+  --color-main-subtle-border: var(--color-gray-lighten-50);
+  --color-main-highlight-fg: var(--color-blue-base);
+  --color-main-highlight-bg: var(--color-blue-base);
+  --color-main-highlight-border: var(--color-blue-base);
+
+  --color-sidebar-fg: var(--color-gray-lighten-60);
+  --color-sidebar-bg: var(--color-gray-darken-20);
+  --color-sidebar-context-fg: var(--color-brand-orange);
+  --color-sidebar-border: transparent;
+  --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
+  --color-sidebar-subtle-bg: transparent;
+  --color-sidebar-highlight-fg: var(--color-blue-base);
+  --color-sidebar-highlight-bg: var(--color-blue-base);
+  --color-sidebar-highlight-border: var(--color-blue-base);
+
+  --color-workspace-fg: var(--color-main-fg);
+  --color-workspace-bg: var(--color-gray-lighten-50);
+  --color-workspace-border: var(--color-main-border);
+  --color-workspace-subtle-fg: var(--color-main-subtle-fg);
+  --color-workspace-subtle-bg: var(--color-main-subtle-bg);
+  --color-workspace-highlight-fg: var(--color-blue-base);
+  --color-workspace-highlight-bg: var(--color-blue-base);
+  --color-workspace-highlight-border: var(--color-blue-base);
 }
 
-/* global */
+/* -- Global --------------------------------------------------------------- */
 html {
   font-size: 16px;
-  font-family: "IBM Plex Sans", sans-serif;
+  font-family: "Inter", sans-serif;
 }
 
 body {
@@ -58,85 +100,62 @@ a:visited {
 }
 
 a:hover {
-  color: red;
-}
-
-a:active {
-}
-
-main {
+  color: var(--color-main-highlight-fg);
 }
 
 code {
-  font-family: "JetBrains Mono", monospace;
+  font-family: "Roboto Mono", monospace;
 }
 
-#main-header {
-  background: var(--color-gray-20);
-  color: var(--color-main-bg);
-  padding: 0.5rem;
-  height: 3rem;
-}
+/* -- Application ---------------------------------------------------------- */
 
-/* -- Panes ---------------------------------------------------------------- */
-
-#panes {
+#app {
   display: flex;
+  flex-grow: 1;
   flex-direction: row;
-  min-height: calc(100vh - 3rem);
 }
 
-.pane {
-  padding: 1rem;
-  height: 3rem;
-}
+/* -- Main Sidebar --------------------------------------------------------- */
 
-.pane-header {
-  height: 3rem;
-  padding: 1rem;
-  background: var(--color-gray-30);
-  color: white;
-}
-
-/* -- Main Nav Pane -------------------------------------------------------- */
-
-#main-nav-pane {
-  width: var(--main-nav-width);
-  background: var(--color-main-bg);
+#main-sidebar {
+  width: var(--main-sidebar-width);
+  background: var(--color-sidebar-bg);
+  color: var(--color-sidebar-fg);
+  border-right: 1px solid var(--color-sidebar-border);
   display: flex;
-  border-right: 1px solid var(--color-gray-130);
   flex-direction: column;
+  font-size: 0.875rem;
+  overflow: auto;
+  height: 100vh;
+  padding: 1rem 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-sidebar-subtle-fg) var(--color-sidebar-bg);
 }
 
-#definition-search {
-  position: relative;
-  background: var(--color-gray-55);
-  padding: 0;
+#main-sidebar::-webkit-scrollbar {
+  width: 0.4rem;
+}
+#main-sidebar::-webkit-scrollbar-track {
+  background: var(--color-sidebar-bg);
+}
+#main-sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--color-sidebar-subtle-fg);
+  border-radius: 0.2rem;
 }
 
-#definition-search i {
-  position: absolute;
-  top: 1rem;
-  left: 1rem;
+#main-sidebar header {
+  margin-bottom: 2.5rem;
 }
 
-#definition-search input {
-  background: none;
-  border: none;
-  padding: 1rem;
-  padding-left: 3rem;
+#main-sidebar h1 {
   font-size: 1rem;
-  width: var(--main-nav-width);
-  color: white;
+  color: var(--color-sidebar-context-fg);
 }
 
-#definition-search input:focus {
-  outline: none;
-  border: 0;
-}
-
-.namespace-tree {
-  padding: 1rem;
+#main-sidebar h2 {
+  font-size: 0.875rem;
+  font-weight: normal;
+  color: var(--color-sidebar-subtle-fg);
 }
 
 .namespace-tree .node {
@@ -144,62 +163,45 @@ code {
   user-select: none;
 }
 
+.namespace-tree .node .icon {
+  color: var(--color-sidebar-subtle-fg);
+  width: 1rem;
+  transition: all 0.2s;
+}
+
+.namespace-tree .node:hover .icon {
+  color: var(--color-sidebar-highlight);
+}
+
+.namespace-tree .node label {
+  color: var(--color-sidebar-fg);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.namespace-tree .node:hover label {
+  color: var(--color-sidebar-highlight-fg);
+}
+
 .namespace-tree .namespace-content {
   margin-left: 1rem;
 }
 
-/* -- Main Pane ------------------------------------------------------------ */
+/* -- Workspace ---------------------------------------------------------------- */
 
-#main-pane {
-  background: var(--color-gray-140);
+#workspace {
+  background: var(--color-workspace-bg);
+  color: var(--color-workspace-fg);
   flex-grow: 1;
 }
 
-.definition {
-  background: white;
-  border-bottom: 1px solid var(--color-gray-130);
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-}
-
-.definition .action {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  justify-items: center;
-  text-align: center;
-  width: 3rem;
+#workspace-toolbar {
+  height: 3.5rem;
+  padding: 0.75rem 1rem;
   font-size: 0.875rem;
-  color: var(--color-gray-100);
-}
-.definition .action:hover {
-  color: var(--color-main-fg);
 }
 
-.definition-summary {
-  display: flex;
-  flex-direction: row;
-  flex: 1;
-}
-
-.definition-info {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-  padding: 1rem 0;
-}
-
-.definition-namespace-path {
-  font-size: 0.7em;
-}
-
-.definition-namespace-path .slash {
-  color: var(--color-gray-120);
-  padding: 0 0.5rem;
-}
-
-.definition-details {
-  padding: 1rem;
-  border-top: 1px solid var(--color-gray-140);
+#workspace-content {
+  overflow: auto;
+  height: calc(100vh - 3.5rem);
 }

@@ -5,13 +5,14 @@ import Definition exposing (Definition)
 import FullyQualifiedName exposing (unqualifiedName)
 import Hash exposing (Hash(..))
 import HashSet exposing (HashSet)
-import Html exposing (Html, a, article, aside, button, div, header, input, label, nav, section, span, text)
+import Html exposing (Html, a, article, aside, button, div, h1, h2, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import NamespaceListing exposing (DefinitionListing(..), NamespaceListing(..), NamespaceListingContent)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
+import UI.Icon
 
 
 
@@ -23,8 +24,7 @@ type alias OpenDefinition =
 
 
 type alias Model =
-    { query : String
-    , openDefinitions : List OpenDefinition
+    { openDefinitions : List OpenDefinition
     , rootNamespaceListing : WebData NamespaceListing
     , expandedNamespaceListings : HashSet
     }
@@ -34,8 +34,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     let
         model =
-            { query = ""
-            , openDefinitions = []
+            { openDefinitions = []
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = HashSet.empty
             }
@@ -48,10 +47,7 @@ init _ =
 
 
 type Msg
-    = UpdateQuery String
-    | CloseDefinition Hash
-    | ToggleShowCode Hash
-    | ToggleExpandedNamespaceListing Hash
+    = ToggleExpandedNamespaceListing Hash
     | FetchSubNamespaceListingFinished Hash (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
 
@@ -59,23 +55,6 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        UpdateQuery query ->
-            ( { model | query = query }, Cmd.none )
-
-        CloseDefinition hash ->
-            let
-                nextOpenDefinitions =
-                    model.openDefinitions
-            in
-            ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
-
-        ToggleShowCode hash ->
-            let
-                nextOpenDefinitions =
-                    model.openDefinitions
-            in
-            ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
-
         ToggleExpandedNamespaceListing hash ->
             let
                 shouldExpand =
@@ -155,13 +134,15 @@ viewDefinitionListing : DefinitionListing -> Html Msg
 viewDefinitionListing definition =
     case definition of
         Type hash fqn ->
-            a [ class "node type" ] [ text (unqualifiedName fqn) ]
+            a [ class "node type" ]
+                [ label [] [ text (unqualifiedName fqn) ]
+                ]
 
         Term hash fqn ->
-            a [ class "node term" ] [ text (unqualifiedName fqn) ]
+            a [ class "node term" ] [ label [] [ text (unqualifiedName fqn) ] ]
 
         Patch _ ->
-            a [ class "node patch" ] [ text "Patch" ]
+            a [ class "node patch" ] [ label [] [ text "Patch" ] ]
 
 
 viewLoadedNamespaceListingContent : HashSet -> NamespaceListingContent -> Html Msg
@@ -195,23 +176,25 @@ viewNamespaceListingContent expandedNamespaceListings content =
 viewNamespaceListing : HashSet -> NamespaceListing -> Html Msg
 viewNamespaceListing expandedNamespaceListings (NamespaceListing hash fqn content) =
     let
-        namespaceContent =
+        ( caretIcon, namespaceContent ) =
             if HashSet.member hash expandedNamespaceListings then
-                div [ class "namespace-content" ]
+                ( UI.Icon.caretDown
+                , div [ class "namespace-content" ]
                     [ viewNamespaceListingContent
                         expandedNamespaceListings
                         content
                     ]
+                )
 
             else
-                UI.nothing
+                ( UI.Icon.caretRight, UI.nothing )
     in
     div []
         [ a
             [ class "node namespace"
             , onClick (ToggleExpandedNamespaceListing hash)
             ]
-            [ text (unqualifiedName fqn) ]
+            [ caretIcon, label [] [ text (unqualifiedName fqn) ] ]
         , namespaceContent
         ]
 
@@ -234,31 +217,33 @@ viewAllNamespaces expandedNamespaceListings namespaceRoot =
                     UI.spinner
     in
     div [ id "all-namespaces", class "namespace-tree" ]
-        [ div [] [ text "All Namespaces" ]
+        [ h2 [] [ text "All Namespaces" ]
         , listings
+        ]
+
+
+viewMainSidebar : Model -> Html Msg
+viewMainSidebar model =
+    aside
+        [ id "main-sidebar" ]
+        [ header [] [ h1 [] [ text "~/.unison" ] ]
+        , viewAllNamespaces
+            model.expandedNamespaceListings
+            model.rootNamespaceListing
+        ]
+
+
+viewWorkspace : Model -> Html Msg
+viewWorkspace model =
+    article [ id "workspace" ]
+        [ header [ id "workspace-toolbar" ] [ text "Open" ]
+        , section [ id "workspace-pans" ] [ section [ class "definitions-pane" ] [] ]
         ]
 
 
 view : Model -> Html Msg
 view model =
-    div []
-        [ article [ id "panes" ]
-            [ section [ id "main-nav-pane" ]
-                [ header [ id "definition-search", class "pane-header" ]
-                    [ UI.icon "search"
-                    , input
-                        [ type_ "text"
-                        , placeholder "Namespace, name, or signature"
-                        , value model.query
-                        , onInput UpdateQuery
-                        ]
-                        []
-                    ]
-                , viewAllNamespaces model.expandedNamespaceListings model.rootNamespaceListing
-                ]
-            , section [ id "main-pane" ]
-                [ header [ class "pane-header" ] []
-                , div [] []
-                ]
-            ]
+    div [ id "app" ]
+        [ viewMainSidebar model
+        , viewWorkspace model
         ]
