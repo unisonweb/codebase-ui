@@ -9,10 +9,8 @@ import Html exposing (Html, a, article, aside, button, div, header, input, label
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import List.Nonempty
 import NamespaceListing exposing (DefinitionListing(..), NamespaceListing(..), NamespaceListingContent)
 import RemoteData exposing (RemoteData(..), WebData)
-import Set exposing (Set)
 import UI
 
 
