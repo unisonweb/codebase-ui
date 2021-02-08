@@ -166,6 +166,9 @@ code {
 .namespace-tree .node .icon {
   color: var(--color-sidebar-subtle-fg);
   width: 1rem;
+  text-align: center;
+  margin-left: -0.275rem;
+  margin-right: 0.25rem;
   transition: all 0.2s;
 }
 
