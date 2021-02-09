@@ -17,6 +17,8 @@
   "homepage": "https://github.com/unisonweb/codebase-browser#readme",
   "devDependencies": {
     "elm": "^0.19.1-5",
+    "elm-analyse": "^0.16.5",
+    "elm-format": "^0.8.5",
     "elm-live": "^4.0.0-rc.1",
     "elm-test": "^0.19.1-revision6"
   }
