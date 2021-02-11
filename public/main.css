@@ -107,6 +107,13 @@ code {
   font-family: "Roboto Mono", monospace;
 }
 
+/* -- UI ------------------------------------------------------------------- */
+
+.error-message {
+  color: var(--color-brand-bright-red);
+  font-weight: bold;
+}
+
 /* -- Application ---------------------------------------------------------- */
 
 #app {
@@ -190,7 +197,7 @@ code {
   margin-left: 1rem;
 }
 
-/* -- Workspace ---------------------------------------------------------------- */
+/* -- Workspace ------------------------------------------------------------ */
 
 #workspace {
   background: var(--color-workspace-bg);
@@ -207,4 +214,13 @@ code {
 #workspace-content {
   overflow: auto;
   height: calc(100vh - 3.5rem);
+}
+
+/* -- Definitions ---------------------------------------------------------- */
+
+.definition-row {
+  background: var(--color-main-bg);
+  color: var(--color-main-fg);
+  padding: 1rem;
+  margin-bottom: 1px;
 }

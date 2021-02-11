@@ -12,3 +12,8 @@ nothing =
 spinner : Html msg
 spinner =
     div [ class "spinner" ] [ text "Loading..." ]
+
+
+errorMessage : String -> Html msg
+errorMessage message =
+    div [ class "error-message" ] [ text message ]

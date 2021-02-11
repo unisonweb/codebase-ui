@@ -1,4 +1,6 @@
-module Hash exposing (Hash(..), equals, toString)
+module Hash exposing (Hash, decode, equals, fromString, toString)
+
+import Json.Decode as Decode
 
 
 type Hash
@@ -13,3 +15,17 @@ equals (Hash a) (Hash b) =
 toString : Hash -> String
 toString (Hash raw) =
     raw
+
+
+fromString : String -> Hash
+fromString raw =
+    Hash raw
+
+
+
+-- JSON Decode
+
+
+decode : String -> Decode.Decoder Hash
+decode =
+    fromString >> Decode.succeed

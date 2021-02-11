@@ -6,9 +6,9 @@ module NamespaceListing exposing
     , map
     )
 
-import FullyQualifiedName exposing (FQN, fqn)
-import Hash exposing (Hash(..))
-import Json.Decode as Json exposing (andThen, field)
+import FullyQualifiedName exposing (FQN)
+import Hash exposing (Hash)
+import Json.Decode as Decode exposing (andThen, field)
 import List.Nonempty
 import RemoteData exposing (RemoteData(..), WebData)
 
@@ -40,16 +40,16 @@ map f ((NamespaceListing hash fqn content) as namespace) =
 -- JSON Decode
 
 
-decode : Json.Decoder NamespaceListing
+decode : Decode.Decoder NamespaceListing
 decode =
-    Json.map3
+    Decode.map3
         NamespaceListing
-        (field "namespaceListingHash" Json.string |> andThen (Hash >> Json.succeed))
-        (field "namespaceListingName" Json.string |> andThen (fqn >> Json.succeed))
+        (field "namespaceListingHash" Decode.string |> andThen Hash.decode)
+        (field "namespaceListingName" Decode.string |> andThen FullyQualifiedName.decode)
         -- The main namespace being decoded has children, so we use Success for
         -- the RemoteData. There children of the children however are not yet
         -- fetched
-        (field "namespaceListingChildren" decodeContent |> andThen (Success >> Json.succeed))
+        (field "namespaceListingChildren" decodeContent |> andThen (Success >> Decode.succeed))
 
 
 
@@ -63,31 +63,31 @@ type DecodedNamespaceChild
     | SubDefinition DefinitionListing
 
 
-decodeSubNamespace : Json.Decoder DecodedNamespaceChild
+decodeSubNamespace : Decode.Decoder DecodedNamespaceChild
 decodeSubNamespace =
-    Json.map3 NamespaceListing
+    Decode.map3 NamespaceListing
         -- TODO namespaceName should be namespaceHash
-        (field "namespaceName" Json.string |> andThen (Hash >> Json.succeed))
-        (field "namespaceName" Json.string |> andThen (fqn >> Json.succeed))
-        (Json.succeed NotAsked)
-        |> andThen (SubNamespace >> Json.succeed)
+        (field "namespaceName" Decode.string |> andThen Hash.decode)
+        (field "namespaceName" Decode.string |> andThen FullyQualifiedName.decode)
+        (Decode.succeed NotAsked)
+        |> andThen (SubNamespace >> Decode.succeed)
 
 
-decodeSubDefinition : Json.Decoder DecodedNamespaceChild
+decodeSubDefinition : Decode.Decoder DecodedNamespaceChild
 decodeSubDefinition =
-    Json.oneOf
-        [ Json.map2 Type
-            (field "typeHash" Json.string |> andThen (Hash >> Json.succeed))
-            (field "typeName" Json.string |> andThen (fqn >> Json.succeed))
-        , Json.map2 Term
-            (field "termHash" Json.string |> andThen (Hash >> Json.succeed))
-            (field "termName" Json.string |> andThen (fqn >> Json.succeed))
-        , Json.map Patch (field "patchName" Json.string)
+    Decode.oneOf
+        [ Decode.map2 Type
+            (field "typeHash" Decode.string |> andThen Hash.decode)
+            (field "typeName" Decode.string |> andThen FullyQualifiedName.decode)
+        , Decode.map2 Term
+            (field "termHash" Decode.string |> andThen Hash.decode)
+            (field "termName" Decode.string |> andThen FullyQualifiedName.decode)
+        , Decode.map Patch (field "patchName" Decode.string)
         ]
-        |> andThen (SubDefinition >> Json.succeed)
+        |> andThen (SubDefinition >> Decode.succeed)
 
 
-decodeContent : Json.Decoder NamespaceListingContent
+decodeContent : Decode.Decoder NamespaceListingContent
 decodeContent =
     let
         emptyNamespaceContent =
@@ -95,7 +95,7 @@ decodeContent =
 
         decodeNamespaceChild =
             field "contents"
-                (Json.oneOf [ decodeSubNamespace, decodeSubDefinition ])
+                (Decode.oneOf [ decodeSubNamespace, decodeSubDefinition ])
 
         groupContent namespaceChild acc =
             case namespaceChild of
@@ -108,4 +108,4 @@ decodeContent =
         childrenToContent children =
             List.foldl groupContent emptyNamespaceContent children
     in
-    Json.list decodeNamespaceChild |> andThen (childrenToContent >> Json.succeed)
+    Decode.list decodeNamespaceChild |> andThen (childrenToContent >> Decode.succeed)
