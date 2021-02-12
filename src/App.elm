@@ -5,7 +5,7 @@ import Definition exposing (Definition)
 import FullyQualifiedName exposing (unqualifiedName)
 import Hash exposing (Hash)
 import HashSet exposing (HashSet)
-import Html exposing (Html, a, article, aside, button, div, h1, h2, header, input, label, nav, section, span, text)
+import Html exposing (Html, a, article, aside, button, code, div, h1, h2, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -48,6 +48,7 @@ type Msg
     | FetchSubNamespaceListingFinished Hash (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
     | OpenDefinition Hash
+    | CloseDefinition Hash
     | FetchOpenDefinitionsFinished (List Hash) (Result Http.Error (List Definition))
 
 
@@ -111,7 +112,16 @@ update msg model =
                         Loading
                         model.openDefinitions
               }
-            , fetchOpenDefinitions [ hash ]
+            , fetchDefinitions [ hash ]
+            )
+
+        CloseDefinition hash ->
+            ( { model
+                | openDefinitions =
+                    OpenDefinitions.remove hash
+                        model.openDefinitions
+              }
+            , Cmd.none
             )
 
         FetchOpenDefinitionsFinished hashes result ->
@@ -150,8 +160,8 @@ fetchSubNamespaceListing hash =
         }
 
 
-fetchOpenDefinitions : List Hash -> Cmd Msg
-fetchOpenDefinitions hashes =
+fetchDefinitions : List Hash -> Cmd Msg
+fetchDefinitions hashes =
     Http.get
         { url = Api.definitionUrl (List.map Hash.toString hashes)
         , expect = Http.expectJson (FetchOpenDefinitionsFinished hashes) Definition.decodeList
@@ -272,38 +282,52 @@ viewMainSidebar model =
         ]
 
 
-viewDefinition : WebData Definition -> Html Msg
-viewDefinition definition =
+viewDefinition : Hash -> WebData Definition -> Html Msg
+viewDefinition hash definition =
     let
-        row content =
-            div [ class "definition-row" ] [ content ]
+        row headerItems content =
+            div [ class "definition-row" ]
+                [ header [] headerItems, section [ class "content" ] [ content ] ]
+
+        loadedRow title content =
+            row
+                [ div [] [ title ]
+                , a [ class "close", onClick (CloseDefinition hash) ] [ UI.Icon.x ]
+                ]
+                content
     in
     case definition of
         Success def ->
-            row (text (Definition.unqualifiedName def))
+            loadedRow (text "base.List") (text (Hash.toString hash))
 
         Failure err ->
-            row (UI.errorMessage (Api.errorToString err))
+            loadedRow (text "Error") (UI.errorMessage (Api.errorToString err))
 
         NotAsked ->
             UI.nothing
 
         Loading ->
-            row UI.spinner
+            row [ UI.loadingPlaceholder ]
+                (div
+                    []
+                    [ div [ class "docs" ] [ UI.loadingPlaceholder ]
+                    , code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ]
+                    ]
+                )
 
 
 viewOpenDefinitions : OpenDefinitions -> List (Html Msg)
 viewOpenDefinitions openDefinitions =
     openDefinitions
-        |> OpenDefinitions.definitions
-        |> List.map viewDefinition
+        |> OpenDefinitions.toList
+        |> List.map (\( h, d ) -> viewDefinition h d)
 
 
 viewWorkspace : Model -> Html Msg
 viewWorkspace model =
     article [ id "workspace" ]
         [ header [ id "workspace-toolbar" ] []
-        , section [ id "workspace-pans" ]
+        , section [ id "workspace-content" ]
             [ section
                 [ class "definitions-pane" ]
                 (viewOpenDefinitions model.openDefinitions)

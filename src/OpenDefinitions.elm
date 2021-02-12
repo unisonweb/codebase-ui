@@ -1,4 +1,4 @@
-module OpenDefinitions exposing (OpenDefinitions, definitions, empty, fromList, hashes, insert, insertList, loading, update)
+module OpenDefinitions exposing (OpenDefinitions, definitions, empty, fromList, hashes, insert, insertList, loading, remove, toList, update)
 
 import Definition exposing (Definition)
 import Hash exposing (Hash)
@@ -97,3 +97,10 @@ hashes (OpenDefinitions dict) =
 definitions : OpenDefinitions -> List (WebData Definition)
 definitions (OpenDefinitions dict) =
     OrderedDict.values dict
+
+
+toList : OpenDefinitions -> List ( Hash, WebData Definition )
+toList (OpenDefinitions dict) =
+    dict
+        |> OrderedDict.toList
+        |> List.map (\( h, d ) -> ( Hash.fromString h, d ))

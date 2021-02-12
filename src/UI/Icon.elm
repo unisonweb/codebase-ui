@@ -19,6 +19,11 @@ caretDown =
     icon "caret-down"
 
 
+x : Html msg
+x =
+    icon "times"
+
+
 namespace : Html msg
 namespace =
     icon "box"

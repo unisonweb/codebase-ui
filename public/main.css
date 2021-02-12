@@ -18,7 +18,14 @@ li {
 }
 
 :root {
+  --size-base: 16px;
+
   --main-sidebar-width: 14rem;
+
+  /* -- Font sizes --------------------------------------------------------- */
+
+  --font-size-base: 1rem;
+  --font-size-medium: 0.875rem;
 
   /* -- All colors --------------------------------------------------------- */
 
@@ -69,6 +76,7 @@ li {
   --color-sidebar-highlight-border: var(--color-blue-base);
 
   --color-workspace-fg: var(--color-main-fg);
+  --color-workspace-mg: var(--color-gray-lighten-100);
   --color-workspace-bg: var(--color-gray-lighten-50);
   --color-workspace-border: var(--color-main-border);
   --color-workspace-subtle-fg: var(--color-main-subtle-fg);
@@ -80,7 +88,7 @@ li {
 
 /* -- Global --------------------------------------------------------------- */
 html {
-  font-size: 16px;
+  font-size: var(--base-size);
   font-family: "Inter", sans-serif;
 }
 
@@ -104,6 +112,7 @@ a:hover {
 }
 
 code {
+  display: inline-block;
   font-family: "Roboto Mono", monospace;
 }
 
@@ -111,7 +120,16 @@ code {
 
 .error-message {
   color: var(--color-brand-bright-red);
-  font-weight: bold;
+}
+
+/* Loading placeholders */
+
+.loading-placeholder {
+  display: inline-block;
+  height: calc(var(--font-size-base) * 0.65);
+  border-radius: calc(var(--font-size-base) / 2);
+  background: var(--main-subtle-fg);
+  min-width: calc(var(--font-size-base) * 3);
 }
 
 /* -- Application ---------------------------------------------------------- */
@@ -131,7 +149,7 @@ code {
   border-right: 1px solid var(--color-sidebar-border);
   display: flex;
   flex-direction: column;
-  font-size: 0.875rem;
+  font-size: var(--font-size-medium);
   overflow: auto;
   height: 100vh;
   padding: 1rem 1.5rem;
@@ -150,17 +168,21 @@ code {
   border-radius: 0.2rem;
 }
 
+#main-sidebar .loading-placeholder {
+  background: var(--color-workspace-subtle-fg);
+}
+
 #main-sidebar header {
   margin-bottom: 2.5rem;
 }
 
 #main-sidebar h1 {
-  font-size: 1rem;
+  font-size: var(--font-size-base);
   color: var(--color-sidebar-context-fg);
 }
 
 #main-sidebar h2 {
-  font-size: 0.875rem;
+  font-size: var(--font-size-medium);
   font-weight: normal;
   color: var(--color-sidebar-subtle-fg);
 }
@@ -208,7 +230,9 @@ code {
 #workspace-toolbar {
   height: 3.5rem;
   padding: 0.75rem 1rem;
-  font-size: 0.875rem;
+  font-size: var(--font-size-medium);
+  background: var(--color-workspace-mg);
+  border-bottom: 1px solid var(--color-workspace-border);
 }
 
 #workspace-content {
@@ -219,8 +243,53 @@ code {
 /* -- Definitions ---------------------------------------------------------- */
 
 .definition-row {
-  background: var(--color-main-bg);
-  color: var(--color-main-fg);
+  background: var(--color-workspace-mg);
+  color: var(--color-workspace-fg);
   padding: 1rem;
   margin-bottom: 1px;
+}
+
+.definition-row .loading-placeholder {
+  background: var(--color-workspace-bg);
+}
+
+.definition-row header {
+  color: var(--color-workspace-subtle-fg);
+  font-size: var(--font-size-medium);
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  justify-content: space-between;
+}
+
+.definition-row .content {
+  margin: 2rem 1rem 1rem;
+}
+
+.definition-row .content .docs {
+  margin-bottom: 1rem;
+}
+
+.definition-row .content code {
+  display: block;
+  padding: 1rem 1.25rem;
+  border-radius: 0.25rem;
+  background: var(--color-workspace-subtle-bg);
+}
+
+/* Definition row loading indicator */
+
+.definition-row header .loading-placeholder {
+  width: 10%;
+}
+
+.definition-row .content .loading-placeholder {
+  display: block;
+  width: 40%;
+  margin-bottom: 0.3rem;
+}
+
+.definition-row .content code .loading-placeholder {
+  display: block;
+  width: 40%;
 }

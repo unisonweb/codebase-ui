@@ -14,6 +14,16 @@ spinner =
     div [ class "spinner" ] [ text "Loading..." ]
 
 
+type Sizing
+    = Base
+    | Medium
+
+
+loadingPlaceholder : Html msg
+loadingPlaceholder =
+    div [ class "loading-placeholder" ] []
+
+
 errorMessage : String -> Html msg
 errorMessage message =
     div [ class "error-message" ] [ text message ]
