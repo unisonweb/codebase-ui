@@ -27,9 +27,9 @@ unqualifiedName (FQN nameParts) =
 
 
 
--- JSON Decode
+-- JSON DECODE
 
 
-decode : String -> Decode.Decoder FQN
+decode : Decode.Decoder FQN
 decode =
-    fromString >> Decode.succeed
+    Decode.map fromString Decode.string

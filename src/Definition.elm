@@ -1,95 +1,166 @@
 module Definition exposing (..)
 
+import Api
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
+import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, section, span, text)
+import Html.Attributes exposing (class, id, placeholder, type_, value)
+import Html.Events exposing (onClick, onInput)
+import Http
 import Json.Decode as Decode exposing (andThen, field)
+import List.Nonempty as NEL
+import UI
+import UI.Icon
+import Util
 
 
-type alias TermSignature =
+
+-- TYPES
+
+
+type alias Syntax =
     List String
 
 
-type alias TermBody =
-    List String
+type alias SignatureSyntax =
+    Syntax
 
 
-type alias TypeBody =
-    List String
+type alias DefinitionSyntax =
+    Syntax
+
+
+type alias TypeDefinitionInfo =
+    { fqns : NEL.Nonempty FQN
+    , name : String
+    , definition : Syntax
+    }
+
+
+type alias TermDefinitionInfo =
+    { fqns : NEL.Nonempty FQN
+    , name : String
+    , definition : Syntax
+    , signature : SignatureSyntax
+    }
 
 
 type Definition
-    = Term Hash FQN TermSignature TermBody
-    | Type Hash FQN TypeBody
+    = Term Hash TermDefinitionInfo
+    | Type Hash TypeDefinitionInfo
 
 
 
--- Helpers
+-- HELPERS
 
 
 hash : Definition -> Hash
 hash definition =
     case definition of
-        Term hash_ _ _ _ ->
-            hash_
+        Type h _ ->
+            h
 
-        Type hash_ _ _ ->
-            hash_
+        Term h _ ->
+            h
 
 
-fqn : Definition -> FQN
-fqn definition =
+
+-- VIEW
+
+
+viewDefinitionRow : List (Html msg) -> Html msg -> Html msg
+viewDefinitionRow headerItems content =
+    div [ class "definition-row" ]
+        [ header [] headerItems, section [ class "content" ] [ content ] ]
+
+
+viewClosableRow : msg -> Html msg -> Html msg -> Html msg
+viewClosableRow closeMsg title content =
+    viewDefinitionRow
+        [ h3 [] [ title ]
+        , a [ class "close", onClick closeMsg ] [ UI.Icon.x ]
+        ]
+        content
+
+
+viewError : msg -> Http.Error -> Html msg
+viewError closeMsg err =
+    viewClosableRow closeMsg (text "Error") (UI.errorMessage (Api.errorToString err))
+
+
+viewLoading : Html msg
+viewLoading =
+    viewDefinitionRow [ UI.loadingPlaceholder ]
+        (div
+            []
+            [ div [ class "docs" ] [ UI.loadingPlaceholder ]
+            , code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ]
+            ]
+        )
+
+
+view : msg -> Definition -> Html msg
+view closeMsg definition =
+    let
+        viewDefinitionInfo info =
+            viewClosableRow
+                closeMsg
+                (div [] [ text info.name ])
+                (div []
+                    [ div [ class "docs" ] [ text "todo docs" ]
+                    , code [] [ text "todo code" ]
+                    ]
+                )
+    in
     case definition of
-        Term _ fqn_ _ _ ->
-            fqn_
+        Term _ info ->
+            viewDefinitionInfo info
 
-        Type _ fqn_ _ ->
-            fqn_
-
-
-unqualifiedName : Definition -> String
-unqualifiedName definition =
-    definition
-        |> fqn
-        |> FullyQualifiedName.unqualifiedName
+        Type _ info ->
+            viewDefinitionInfo info
 
 
 
--- JSON Decode
+-- JSON DECODERS
 
 
-decodeType : Decode.Decoder Definition
-decodeType =
+decodeTypeDefInfo : Decode.Decoder TypeDefinitionInfo
+decodeTypeDefInfo =
+    Decode.map3 TypeDefinitionInfo
+        (field "typeNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
+        (field "bestTypeName" Decode.string)
+        (Decode.succeed [])
+
+
+decodeTypes : Decode.Decoder (List Definition)
+decodeTypes =
     let
-        decodeHash =
-            Decode.map Hash.fromString (field "prefix" Decode.string)
-
-        decodeFqn =
-            Decode.map FullyQualifiedName.fromString (field "prefix" Decode.string)
+        buildTypes =
+            List.map (\( h, d ) -> Type (Hash.fromString h) d)
     in
-    Decode.map3 Type
-        (Decode.index 0 decodeHash)
-        (Decode.index 0 decodeFqn)
+    Decode.keyValuePairs decodeTypeDefInfo |> Decode.map buildTypes
+
+
+decodeTermDefInfo : Decode.Decoder TermDefinitionInfo
+decodeTermDefInfo =
+    Decode.map4 TermDefinitionInfo
+        (field "termNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
+        (field "bestTermName" Decode.string)
+        (Decode.succeed [])
         (Decode.succeed [])
 
 
-decodeTerm : Decode.Decoder Definition
-decodeTerm =
+decodeTerms : Decode.Decoder (List Definition)
+decodeTerms =
     let
-        decodeHash =
-            Decode.map Hash.fromString (field "prefix" Decode.string)
-
-        decodeFqn =
-            Decode.map FullyQualifiedName.fromString (field "prefix" Decode.string)
+        buildTerms =
+            List.map (\( h, d ) -> Term (Hash.fromString h) d)
     in
-    Decode.map4 Term
-        (Decode.index 0 decodeHash)
-        (Decode.index 0 decodeFqn)
-        (Decode.succeed [])
-        (Decode.succeed [])
+    Decode.keyValuePairs decodeTermDefInfo |> Decode.map buildTerms
 
 
 decodeList : Decode.Decoder (List Definition)
 decodeList =
     Decode.map2 List.append
-        (field "termDefinitions" (Decode.list decodeTerm))
-        (field "typeDefinitions" (Decode.list decodeType))
+        (field "termDefinitions" decodeTerms)
+        (field "typeDefinitions" decodeTypes)

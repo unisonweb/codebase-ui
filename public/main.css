@@ -254,12 +254,16 @@ code {
 }
 
 .definition-row header {
-  color: var(--color-workspace-subtle-fg);
-  font-size: var(--font-size-medium);
   display: flex;
   flex-direction: row;
   flex: 1;
   justify-content: space-between;
+}
+
+.definition-row header h3 {
+  color: var(--color-workspace-fg);
+  font-size: var(--font-size-base);
+  font-weight: bold;
 }
 
 .definition-row .content {

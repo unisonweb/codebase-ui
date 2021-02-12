@@ -14,9 +14,9 @@ import RemoteData exposing (RemoteData(..), WebData)
 
 
 type DefinitionListing
-    = Type Hash FQN
-    | Term Hash FQN
-    | Patch String
+    = TypeListing Hash FQN
+    | TermListing Hash FQN
+    | PatchListing String
 
 
 type alias NamespaceListingContent =
@@ -45,7 +45,7 @@ decode =
     Decode.map3
         NamespaceListing
         (field "namespaceListingHash" Decode.string |> andThen Hash.decode)
-        (field "namespaceListingName" Decode.string |> andThen FullyQualifiedName.decode)
+        (field "namespaceListingName" FullyQualifiedName.decode)
         -- The main namespace being decoded has children, so we use Success for
         -- the RemoteData. There children of the children however are not yet
         -- fetched
@@ -68,7 +68,7 @@ decodeSubNamespace =
     Decode.map3 NamespaceListing
         -- TODO namespaceName should be namespaceHash
         (field "namespaceName" Decode.string |> andThen Hash.decode)
-        (field "namespaceName" Decode.string |> andThen FullyQualifiedName.decode)
+        (field "namespaceName" FullyQualifiedName.decode)
         (Decode.succeed NotAsked)
         |> andThen (SubNamespace >> Decode.succeed)
 
@@ -76,13 +76,13 @@ decodeSubNamespace =
 decodeSubDefinition : Decode.Decoder DecodedNamespaceChild
 decodeSubDefinition =
     Decode.oneOf
-        [ Decode.map2 Type
+        [ Decode.map2 TypeListing
             (field "typeHash" Decode.string |> andThen Hash.decode)
-            (field "typeName" Decode.string |> andThen FullyQualifiedName.decode)
-        , Decode.map2 Term
+            (field "typeName" FullyQualifiedName.decode)
+        , Decode.map2 TermListing
             (field "termHash" Decode.string |> andThen Hash.decode)
-            (field "termName" Decode.string |> andThen FullyQualifiedName.decode)
-        , Decode.map Patch (field "patchName" Decode.string)
+            (field "termName" FullyQualifiedName.decode)
+        , Decode.map PatchListing (field "patchName" Decode.string)
         ]
         |> andThen (SubDefinition >> Decode.succeed)
 

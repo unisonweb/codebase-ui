@@ -1,11 +1,11 @@
 module App exposing (..)
 
 import Api
-import Definition exposing (Definition)
+import Definition exposing (Definition(..))
 import FullyQualifiedName exposing (unqualifiedName)
 import Hash exposing (Hash)
 import HashSet exposing (HashSet)
-import Html exposing (Html, a, article, aside, button, code, div, h1, h2, header, input, label, nav, section, span, text)
+import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
@@ -173,21 +173,21 @@ fetchDefinitions hashes =
 
 
 viewDefinitionListing : DefinitionListing -> Html Msg
-viewDefinitionListing definition =
-    case definition of
-        Type hash fqn ->
+viewDefinitionListing listing =
+    case listing of
+        TypeListing hash fqn ->
             a [ class "node type", onClick (OpenDefinition hash) ]
                 [ UI.Icon.type_
                 , label [] [ text (unqualifiedName fqn) ]
                 ]
 
-        Term hash fqn ->
+        TermListing hash fqn ->
             a [ class "node term", onClick (OpenDefinition hash) ]
                 [ UI.Icon.term
                 , label [] [ text (unqualifiedName fqn) ]
                 ]
 
-        Patch _ ->
+        PatchListing _ ->
             a [ class "node patch" ]
                 [ UI.Icon.patch
                 , label [] [ text "Patch" ]
@@ -284,36 +284,18 @@ viewMainSidebar model =
 
 viewDefinition : Hash -> WebData Definition -> Html Msg
 viewDefinition hash definition =
-    let
-        row headerItems content =
-            div [ class "definition-row" ]
-                [ header [] headerItems, section [ class "content" ] [ content ] ]
-
-        loadedRow title content =
-            row
-                [ div [] [ title ]
-                , a [ class "close", onClick (CloseDefinition hash) ] [ UI.Icon.x ]
-                ]
-                content
-    in
     case definition of
         Success def ->
-            loadedRow (text "base.List") (text (Hash.toString hash))
+            Definition.view (CloseDefinition hash) def
 
         Failure err ->
-            loadedRow (text "Error") (UI.errorMessage (Api.errorToString err))
+            Definition.viewError (CloseDefinition hash) err
 
         NotAsked ->
             UI.nothing
 
         Loading ->
-            row [ UI.loadingPlaceholder ]
-                (div
-                    []
-                    [ div [ class "docs" ] [ UI.loadingPlaceholder ]
-                    , code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ]
-                    ]
-                )
+            Definition.viewLoading
 
 
 viewOpenDefinitions : OpenDefinitions -> List (Html Msg)
