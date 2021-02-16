@@ -1,15 +1,16 @@
 module App exposing (..)
 
 import Api
-import Definition exposing (Definition)
+import Definition exposing (Definition(..))
 import FullyQualifiedName exposing (unqualifiedName)
-import Hash exposing (Hash(..))
+import Hash exposing (Hash)
 import HashSet exposing (HashSet)
-import Html exposing (Html, a, article, aside, button, div, h1, h2, header, input, label, nav, section, span, text)
+import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import NamespaceListing exposing (DefinitionListing(..), NamespaceListing(..), NamespaceListingContent)
+import OpenDefinitions exposing (OpenDefinitions)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Icon
@@ -19,12 +20,8 @@ import UI.Icon
 -- MODEL
 
 
-type alias OpenDefinition =
-    ( Definition, Bool )
-
-
 type alias Model =
-    { openDefinitions : List OpenDefinition
+    { openDefinitions : OpenDefinitions
     , rootNamespaceListing : WebData NamespaceListing
     , expandedNamespaceListings : HashSet
     }
@@ -34,7 +31,7 @@ init : () -> ( Model, Cmd Msg )
 init _ =
     let
         model =
-            { openDefinitions = []
+            { openDefinitions = OpenDefinitions.empty
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = HashSet.empty
             }
@@ -50,6 +47,9 @@ type Msg
     = ToggleExpandedNamespaceListing Hash
     | FetchSubNamespaceListingFinished Hash (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
+    | OpenDefinition Hash
+    | CloseDefinition Hash
+    | FetchOpenDefinitionsFinished (List Hash) (Result Http.Error (List Definition))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -105,6 +105,40 @@ update msg model =
                 Err err ->
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
+        OpenDefinition hash ->
+            ( { model
+                | openDefinitions =
+                    OpenDefinitions.insert hash
+                        Loading
+                        model.openDefinitions
+              }
+            , fetchDefinitions [ hash ]
+            )
+
+        CloseDefinition hash ->
+            ( { model
+                | openDefinitions =
+                    OpenDefinitions.remove hash
+                        model.openDefinitions
+              }
+            , Cmd.none
+            )
+
+        FetchOpenDefinitionsFinished hashes result ->
+            let
+                list =
+                    case result of
+                        Err err ->
+                            List.map (\h -> ( h, Failure err )) hashes
+
+                        Ok definitions ->
+                            List.map (\d -> ( Definition.hash d, Success d )) definitions
+
+                nextOpenDefinitions =
+                    OpenDefinitions.insertList list model.openDefinitions
+            in
+            ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
+
 
 
 -- Http
@@ -126,23 +160,38 @@ fetchSubNamespaceListing hash =
         }
 
 
+fetchDefinitions : List Hash -> Cmd Msg
+fetchDefinitions hashes =
+    Http.get
+        { url = Api.definitionUrl (List.map Hash.toString hashes)
+        , expect = Http.expectJson (FetchOpenDefinitionsFinished hashes) Definition.decodeList
+        }
+
+
 
 -- VIEW
 
 
 viewDefinitionListing : DefinitionListing -> Html Msg
-viewDefinitionListing definition =
-    case definition of
-        Type hash fqn ->
-            a [ class "node type" ]
-                [ label [] [ text (unqualifiedName fqn) ]
+viewDefinitionListing listing =
+    case listing of
+        TypeListing hash fqn ->
+            a [ class "node type", onClick (OpenDefinition hash) ]
+                [ UI.Icon.type_
+                , label [] [ text (unqualifiedName fqn) ]
                 ]
 
-        Term hash fqn ->
-            a [ class "node term" ] [ label [] [ text (unqualifiedName fqn) ] ]
+        TermListing hash fqn ->
+            a [ class "node term", onClick (OpenDefinition hash) ]
+                [ UI.Icon.term
+                , label [] [ text (unqualifiedName fqn) ]
+                ]
 
-        Patch _ ->
-            a [ class "node patch" ] [ label [] [ text "Patch" ] ]
+        PatchListing _ ->
+            a [ class "node patch" ]
+                [ UI.Icon.patch
+                , label [] [ text "Patch" ]
+                ]
 
 
 viewLoadedNamespaceListingContent : HashSet -> NamespaceListingContent -> Html Msg
@@ -164,7 +213,7 @@ viewNamespaceListingContent expandedNamespaceListings content =
             viewLoadedNamespaceListingContent expandedNamespaceListings loadedContent
 
         Failure err ->
-            text (Api.errorToString err)
+            UI.errorMessage (Api.errorToString err)
 
         NotAsked ->
             UI.nothing
@@ -208,7 +257,7 @@ viewAllNamespaces expandedNamespaceListings namespaceRoot =
                     viewNamespaceListingContent expandedNamespaceListings content
 
                 Failure err ->
-                    div [] [ text (Api.errorToString err) ]
+                    UI.errorMessage (Api.errorToString err)
 
                 NotAsked ->
                     UI.spinner
@@ -233,11 +282,38 @@ viewMainSidebar model =
         ]
 
 
+viewDefinition : Hash -> WebData Definition -> Html Msg
+viewDefinition hash definition =
+    case definition of
+        Success def ->
+            Definition.view (CloseDefinition hash) def
+
+        Failure err ->
+            Definition.viewError (CloseDefinition hash) err
+
+        NotAsked ->
+            UI.nothing
+
+        Loading ->
+            Definition.viewLoading
+
+
+viewOpenDefinitions : OpenDefinitions -> List (Html Msg)
+viewOpenDefinitions openDefinitions =
+    openDefinitions
+        |> OpenDefinitions.toList
+        |> List.map (\( h, d ) -> viewDefinition h d)
+
+
 viewWorkspace : Model -> Html Msg
 viewWorkspace model =
     article [ id "workspace" ]
-        [ header [ id "workspace-toolbar" ] [ text "Open" ]
-        , section [ id "workspace-pans" ] [ section [ class "definitions-pane" ] [] ]
+        [ header [ id "workspace-toolbar" ] []
+        , section [ id "workspace-content" ]
+            [ section
+                [ class "definitions-pane" ]
+                (viewOpenDefinitions model.openDefinitions)
+            ]
         ]
 
 

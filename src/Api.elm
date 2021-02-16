@@ -22,9 +22,11 @@ listUrl namespaceHashOrFQN =
         |> serverUrl [ "list" ]
 
 
-definitionUrl : String
-definitionUrl =
-    serverUrl [ "getDefinition" ] []
+definitionUrl : List String -> String
+definitionUrl hashes =
+    hashes
+        |> List.map (string "names")
+        |> serverUrl [ "getDefinition" ]
 
 
 

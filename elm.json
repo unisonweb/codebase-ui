@@ -14,7 +14,8 @@
             "elm/url": "1.0.0",
             "krisajenkins/remotedata": "6.0.1",
             "mgold/elm-nonempty-list": "4.1.0",
-            "stoeffel/set-extra": "1.2.3"
+            "stoeffel/set-extra": "1.2.3",
+            "y0hy0h/ordered-containers": "2.0.1"
         },
         "indirect": {
             "elm/bytes": "1.0.8",

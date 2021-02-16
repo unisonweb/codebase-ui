@@ -1,6 +1,6 @@
 module HashSet exposing (HashSet, empty, insert, member, remove, toList, toggle)
 
-import Hash exposing (Hash(..))
+import Hash exposing (Hash)
 import Set exposing (Set)
 import Set.Extra
 
@@ -24,27 +24,27 @@ empty =
 
 
 insert : Hash -> HashSet -> HashSet
-insert (Hash raw) (HashSet set) =
-    HashSet (Set.insert raw set)
+insert h (HashSet set) =
+    HashSet (Set.insert (Hash.toString h) set)
 
 
 remove : Hash -> HashSet -> HashSet
-remove (Hash raw) (HashSet set) =
-    HashSet (Set.remove raw set)
+remove h (HashSet set) =
+    HashSet (Set.remove (Hash.toString h) set)
 
 
 member : Hash -> HashSet -> Bool
-member (Hash raw) (HashSet set) =
-    Set.member raw set
+member h (HashSet set) =
+    Set.member (Hash.toString h) set
 
 
 toList : HashSet -> List Hash
 toList (HashSet set) =
     set
         |> Set.toList
-        |> List.map Hash
+        |> List.map Hash.fromString
 
 
 toggle : Hash -> HashSet -> HashSet
-toggle (Hash raw) (HashSet set) =
-    HashSet (Set.Extra.toggle raw set)
+toggle h (HashSet set) =
+    HashSet (Set.Extra.toggle (Hash.toString h) set)
