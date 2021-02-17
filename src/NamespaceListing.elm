@@ -6,7 +6,7 @@ module NamespaceListing exposing
     , map
     )
 
-import FullyQualifiedName exposing (FQN)
+import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode exposing (andThen, field)
 import List.Nonempty
@@ -37,19 +37,22 @@ map f ((NamespaceListing hash fqn content) as namespace) =
 
 
 
--- JSON Decode
+-- JSON DECODE
 
 
-decode : Decode.Decoder NamespaceListing
-decode =
+decode : FQN -> Decode.Decoder NamespaceListing
+decode listingFqn =
     Decode.map3
         NamespaceListing
-        (field "namespaceListingHash" Decode.string |> andThen Hash.decode)
-        (field "namespaceListingName" FullyQualifiedName.decode)
+        (field "namespaceListingHash" Hash.decode)
+        (field "namespaceListingName" FQN.decode)
         -- The main namespace being decoded has children, so we use Success for
         -- the RemoteData. There children of the children however are not yet
         -- fetched
-        (field "namespaceListingChildren" decodeContent |> andThen (Success >> Decode.succeed))
+        (field "namespaceListingChildren" (decodeContent listingFqn)
+            |> andThen
+                (Success >> Decode.succeed)
+        )
 
 
 
@@ -63,39 +66,38 @@ type DecodedNamespaceChild
     | SubDefinition DefinitionListing
 
 
-decodeSubNamespace : Decode.Decoder DecodedNamespaceChild
-decodeSubNamespace =
+decodeSubNamespace : FQN -> Decode.Decoder DecodedNamespaceChild
+decodeSubNamespace parentFqn =
     Decode.map3 NamespaceListing
-        -- TODO namespaceName should be namespaceHash
-        (field "namespaceName" Decode.string |> andThen Hash.decode)
-        (field "namespaceName" FullyQualifiedName.decode)
+        (field "namespaceHash" Hash.decode)
+        (field "namespaceName" (FQN.decodeFromParent parentFqn))
         (Decode.succeed NotAsked)
         |> andThen (SubNamespace >> Decode.succeed)
 
 
-decodeSubDefinition : Decode.Decoder DecodedNamespaceChild
-decodeSubDefinition =
+decodeSubDefinition : FQN -> Decode.Decoder DecodedNamespaceChild
+decodeSubDefinition parentFqn =
     Decode.oneOf
         [ Decode.map2 TypeListing
-            (field "typeHash" Decode.string |> andThen Hash.decode)
-            (field "typeName" FullyQualifiedName.decode)
+            (field "typeHash" Hash.decode)
+            (field "typeName" (FQN.decodeFromParent parentFqn))
         , Decode.map2 TermListing
-            (field "termHash" Decode.string |> andThen Hash.decode)
-            (field "termName" FullyQualifiedName.decode)
+            (field "termHash" Hash.decode)
+            (field "termName" (FQN.decodeFromParent parentFqn))
         , Decode.map PatchListing (field "patchName" Decode.string)
         ]
         |> andThen (SubDefinition >> Decode.succeed)
 
 
-decodeContent : Decode.Decoder NamespaceListingContent
-decodeContent =
+decodeContent : FQN -> Decode.Decoder NamespaceListingContent
+decodeContent parentFqn =
     let
         emptyNamespaceContent =
             { definitions = [], namespaces = [] }
 
         decodeNamespaceChild =
             field "contents"
-                (Decode.oneOf [ decodeSubNamespace, decodeSubDefinition ])
+                (Decode.oneOf [ decodeSubNamespace parentFqn, decodeSubDefinition parentFqn ])
 
         groupContent namespaceChild acc =
             case namespaceChild of

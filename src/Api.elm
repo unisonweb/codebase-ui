@@ -14,9 +14,11 @@ serverUrl path queryParams =
     absolute ("api" :: path) queryParams
 
 
+{-| TODO: Be more explicit about Root |
+-}
 listUrl : Maybe String -> String
-listUrl namespaceHashOrFQN =
-    namespaceHashOrFQN
+listUrl rawFQN =
+    rawFQN
         |> Maybe.map (\n -> [ string "namespace" n ])
         |> Maybe.withDefault []
         |> serverUrl [ "list" ]
