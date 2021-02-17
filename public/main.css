@@ -84,6 +84,17 @@ li {
   --color-workspace-highlight-fg: var(--color-blue-base);
   --color-workspace-highlight-bg: var(--color-blue-base);
   --color-workspace-highlight-border: var(--color-blue-base);
+
+  /* -- Default Syntax Theme ------------------------------------------------*/
+
+  --color-syntax-plain: var(--color-main-fg);
+  --color-syntax-subtle: var(--color-main-subtle-fg);
+  --color-syntax-keyword: #225ebe;
+  --color-syntax-operator: #c7474e;
+  --color-syntax-name: #6848ba;
+  --color-syntax-type: #225ebe;
+  --color-syntax-variant: #438443;
+  --color-syntax-text: #438443;
 }
 
 /* -- Global --------------------------------------------------------------- */
@@ -111,9 +122,156 @@ a:hover {
   color: var(--color-main-highlight-fg);
 }
 
+pre {
+  margin: 0;
+}
+
 code {
   display: inline-block;
   font-family: "Roboto Mono", monospace;
+}
+
+/* -- Syntax --------------------------------------------------------------- */
+
+.builtin {
+  color: var(--color-syntax-keyword);
+}
+
+.comment {
+  color: var(--color-syntax-subtle);
+}
+
+.numberic-literal {
+  color: var(--color-syntax-name);
+}
+
+.text-literal {
+  color: var(--color-syntax-text);
+}
+
+.bytes-literal {
+  color: var(--color-syntax-text);
+}
+
+.char-literal {
+  color: var(--color-syntax-text);
+}
+
+.boolean-literal {
+  color: var(--color-syntax-variant);
+}
+
+.blank {
+  color: var(--color-syntax-base);
+}
+
+.var {
+  color: var(--color-syntax-base);
+}
+
+.reference {
+  color: var(--color-syntax-name);
+}
+
+.referent {
+  color: var(--color-syntax-name);
+}
+
+.op.cons {
+  color: var(--color-syntax-operator);
+}
+
+.op.snoc {
+  color: var(--color-syntax-operator);
+}
+
+.op.concat {
+  color: var(--color-syntax-operator);
+}
+
+.constructor {
+  color: var(--color-syntax-variant);
+}
+
+.request {
+  color: var(--color-syntax-name);
+}
+
+.ability-braces {
+  color: var(--color-syntax-subtle);
+}
+
+.control-keyword {
+  color: var(--color-syntax-keyword);
+}
+
+.type-operator {
+  color: var(--color-syntax-operator);
+}
+
+.binding-equals {
+  color: var(--color-syntax-subtle);
+}
+
+.type-ascription-colon {
+  color: var(--color-syntax-operator);
+}
+
+.data-type-keyword {
+  color: var(--color-syntax-keyword);
+}
+
+.data-type-params {
+  color: var(--color-syntax-plain);
+}
+
+.unit {
+  color: var(--color-syntax-subtle);
+}
+
+.data-type-modifier {
+  color: var(--color-syntax-operator);
+}
+
+.use-keyword {
+  color: var(--color-syntax-keyword);
+}
+
+.use-prefix {
+  color: var(--color-syntax-name);
+}
+
+.use-suffix {
+  color: var(--color-syntax-variant);
+}
+
+.hash-qualifier {
+  color: var(--color-syntax-name);
+}
+
+.delay-force-char {
+  color: var(--color-syntax-operator);
+  font-weight: bold;
+}
+
+.delimeter-char {
+  color: var(--color-syntax-subtle);
+}
+
+.parenthesis {
+  color: var(--color-syntax-subtle);
+}
+
+.link-keyword {
+  color: var(--color-syntax-keyword);
+}
+
+.doc-delimeter {
+  color: var(--color-syntax-subtle);
+}
+
+.doc-keyword {
+  color: var(--color-syntax-keyword);
 }
 
 /* -- UI ------------------------------------------------------------------- */
