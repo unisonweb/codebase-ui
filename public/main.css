@@ -134,7 +134,8 @@ code {
 /* -- Syntax --------------------------------------------------------------- */
 
 .builtin {
-  color: var(--color-syntax-keyword);
+  color: var(--color-syntax-base);
+  font-style: italic;
 }
 
 .comment {
@@ -230,7 +231,7 @@ code {
 }
 
 .data-type-modifier {
-  color: var(--color-syntax-operator);
+  color: var(--color-syntax-name);
 }
 
 .use-keyword {

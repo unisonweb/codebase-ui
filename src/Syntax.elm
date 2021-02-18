@@ -1,4 +1,4 @@
-module Code exposing (Code, SyntaxSegment(..), SyntaxType(..), decode, decodeSyntax, view)
+module Syntax exposing (Syntax, SyntaxSegment(..), SyntaxType(..), decode, view)
 
 import Hash exposing (Hash)
 import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, pre, section, span, text)
@@ -10,9 +10,8 @@ import List.Nonempty as NEL
 import Util
 
 
-type Code
-    = Builtin
-    | Syntax (NEL.Nonempty SyntaxSegment)
+type Syntax
+    = Syntax (NEL.Nonempty SyntaxSegment)
 
 
 type SyntaxSegment
@@ -192,25 +191,15 @@ viewSegment (SyntaxSegment sType sText) =
     span [ class (syntaxTypeToClassName sType) ] [ text sText ]
 
 
-viewSyntaxSegments : NEL.Nonempty SyntaxSegment -> List (Html msg)
-viewSyntaxSegments segments =
-    segments
-        |> NEL.map viewSegment
-        |> NEL.toList
-
-
-view : Code -> Html msg
-view code_ =
+view : Syntax -> Html msg
+view (Syntax segments) =
     let
-        content =
-            case code_ of
-                Syntax segments ->
-                    viewSyntaxSegments segments
-
-                Builtin ->
-                    [ span [ class "builtin" ] [ text "Builtin" ] ]
+        renderedSegments =
+            segments
+                |> NEL.map viewSegment
+                |> NEL.toList
     in
-    pre [] [ code [] content ]
+    span [ class "syntax" ] renderedSegments
 
 
 
@@ -378,14 +367,6 @@ decodeSyntaxSegment =
         (field "segment" Decode.string)
 
 
-decodeSyntax : Decode.Decoder Code
-decodeSyntax =
-    Decode.map Syntax (Util.decodeNonEmptyList decodeSyntaxSegment)
-
-
-decode : Decode.Decoder Code
+decode : Decode.Decoder Syntax
 decode =
-    Decode.oneOf
-        [ field "contents" decodeSyntax
-        , Decode.succeed Builtin
-        ]
+    Util.decodeNonEmptyList decodeSyntaxSegment |> andThen (Syntax >> Decode.succeed)

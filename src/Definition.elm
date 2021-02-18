@@ -1,7 +1,6 @@
 module Definition exposing (..)
 
 import Api
-import Code exposing (Code)
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
 import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, section, span, text)
@@ -10,6 +9,8 @@ import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode exposing (andThen, at, field)
 import List.Nonempty as NEL
+import Source exposing (TermSource(..), TypeSignature(..), TypeSource(..), viewTermSource, viewTypeSource)
+import Syntax
 import UI
 import UI.Icon
 import Util
@@ -22,15 +23,14 @@ import Util
 type alias TypeDefinitionInfo =
     { fqns : NEL.Nonempty FQN
     , name : String
-    , definition : Code
+    , source : TypeSource
     }
 
 
 type alias TermDefinitionInfo =
     { fqns : NEL.Nonempty FQN
     , name : String
-    , definition : Code
-    , signature : Code
+    , source : TermSource
     }
 
 
@@ -91,22 +91,18 @@ viewLoading =
 view : msg -> Definition -> Html msg
 view closeMsg definition =
     let
-        viewDefinitionInfo info =
+        viewDefinitionInfo info source =
             viewClosableRow
                 closeMsg
                 (div [] [ text info.name ])
-                (div []
-                    [ -- div [ class "docs" ] [ text "todo docs" ]
-                      Code.view info.definition
-                    ]
-                )
+                (div [] [ source ])
     in
     case definition of
         Term _ info ->
-            viewDefinitionInfo info
+            viewDefinitionInfo info (viewTermSource info.name info.source)
 
         Type _ info ->
-            viewDefinitionInfo info
+            viewDefinitionInfo info (viewTypeSource info.source)
 
 
 
@@ -118,7 +114,11 @@ decodeTypeDefInfo =
     Decode.map3 TypeDefinitionInfo
         (field "typeNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
         (field "bestTypeName" Decode.string)
-        (field "typeDefinition" Code.decode)
+        (Decode.oneOf
+            [ field "typeDefinition" Syntax.decode |> andThen (TypeSource >> Decode.succeed)
+            , Decode.succeed BuiltinType
+            ]
+        )
 
 
 decodeTypes : Decode.Decoder (List Definition)
@@ -132,11 +132,14 @@ decodeTypes =
 
 decodeTermDefInfo : Decode.Decoder TermDefinitionInfo
 decodeTermDefInfo =
-    Decode.map4 TermDefinitionInfo
+    Decode.map3 TermDefinitionInfo
         (field "termNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
         (field "bestTermName" Decode.string)
-        (field "termDefinition" Code.decode)
-        (field "signature" Code.decodeSyntax)
+        (Decode.oneOf
+            [ Decode.map TermSource (at [ "termDefinition", "contents" ] Syntax.decode)
+            , Decode.map (TypeSignature >> BuiltinTerm) (field "signature" Syntax.decode)
+            ]
+        )
 
 
 decodeTerms : Decode.Decoder (List Definition)
