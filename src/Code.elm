@@ -331,13 +331,13 @@ decodeHashQualifier =
             Decode.map NameOnly (at [ "annotation", "contents", "contents", "toText" ] Decode.string)
 
         decodeHashOnly =
-            Decode.map HashOnly (at [ "annotation", "contents", "contents" ] Decode.string |> andThen Hash.decode)
+            Decode.map HashOnly (at [ "annotation", "contents", "contents" ] Hash.decode)
 
         decodeHashQualified =
             Decode.map2
                 HashQualified
                 (at [ "annotation", "contents", "contents", "toText" ] (Decode.index 0 Decode.string))
-                (at [ "annotation", "contents", "contents" ] (Decode.index 1 Decode.string |> andThen Hash.decode))
+                (at [ "annotation", "contents", "contents" ] (Decode.index 1 Hash.decode))
     in
     Decode.map
         HashQualifier
@@ -361,10 +361,10 @@ decodeSyntaxSegment : Decode.Decoder SyntaxSegment
 decodeSyntaxSegment =
     let
         decodeReferent =
-            Decode.map Referent (at [ "annotation", "contents" ] Decode.string |> andThen Hash.decode)
+            Decode.map Referent (at [ "annotation", "contents" ] Hash.decode)
 
         decodeReference =
-            Decode.map Reference (at [ "annotation", "contents" ] Decode.string |> andThen Hash.decode)
+            Decode.map Reference (at [ "annotation", "contents" ] Hash.decode)
     in
     Decode.map2 SyntaxSegment
         (Decode.oneOf
