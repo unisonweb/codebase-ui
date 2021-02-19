@@ -12,13 +12,13 @@ equals =
         [ test "Returns True when equal" <|
             \_ ->
                 Expect.true
-                    "Expected Hash \"foo\" and Hash \"foo\" to be equal"
-                    (Hash.equals (Hash "foo") (Hash "foo"))
+                    "Expected Hash \"#foo\" and Hash \"#foo\" to be equal"
+                    (Hash.equals (Hash.fromString "#foo") (Hash.fromString "#foo"))
         , test "Returns False when not equal" <|
             \_ ->
                 Expect.false
-                    "Expected Hash \"foo\" and Hash \"bar\" to *not* be equal"
-                    (Hash.equals (Hash "foo") (Hash "bar"))
+                    "Expected Hash \"#foo\" and Hash \"#bar\" to *not* be equal"
+                    (Hash.equals (Hash.fromString "#foo") (Hash.fromString "#bar"))
         ]
 
 
@@ -29,7 +29,7 @@ toString =
             \_ ->
                 let
                     hash =
-                        Hash "foo"
+                        Hash.fromString "#foo"
                 in
-                Expect.equal "foo" (Hash.toString hash)
+                Expect.equal "#foo" (Hash.toString hash)
         ]

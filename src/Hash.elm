@@ -26,6 +26,6 @@ fromString raw =
 -- JSON Decode
 
 
-decode : String -> Decode.Decoder Hash
+decode : Decode.Decoder Hash
 decode =
-    fromString >> Decode.succeed
+    Decode.map fromString Decode.string

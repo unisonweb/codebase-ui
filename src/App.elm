@@ -2,9 +2,9 @@ module App exposing (..)
 
 import Api
 import Definition exposing (Definition(..))
-import FullyQualifiedName exposing (unqualifiedName)
+import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
+import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import Hash exposing (Hash)
-import HashSet exposing (HashSet)
 import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -23,7 +23,7 @@ import UI.Icon
 type alias Model =
     { openDefinitions : OpenDefinitions
     , rootNamespaceListing : WebData NamespaceListing
-    , expandedNamespaceListings : HashSet
+    , expandedNamespaceListings : FQNSet
     }
 
 
@@ -33,7 +33,7 @@ init _ =
         model =
             { openDefinitions = OpenDefinitions.empty
             , rootNamespaceListing = Loading
-            , expandedNamespaceListings = HashSet.empty
+            , expandedNamespaceListings = FQNSet.empty
             }
     in
     ( model, fetchRootNamespaceListing )
@@ -44,8 +44,8 @@ init _ =
 
 
 type Msg
-    = ToggleExpandedNamespaceListing Hash
-    | FetchSubNamespaceListingFinished Hash (Result Http.Error NamespaceListing)
+    = ToggleExpandedNamespaceListing FQN
+    | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
     | OpenDefinition Hash
     | CloseDefinition Hash
@@ -55,31 +55,32 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        ToggleExpandedNamespaceListing hash ->
+        ToggleExpandedNamespaceListing fqn ->
             let
                 shouldExpand =
-                    not (HashSet.member hash model.expandedNamespaceListings)
+                    not (FQNSet.member fqn model.expandedNamespaceListings)
 
                 newModel =
+                    -- TODO: Update to Loading
                     { model
                         | expandedNamespaceListings =
-                            HashSet.toggle hash
+                            FQNSet.toggle fqn
                                 model.expandedNamespaceListings
                     }
 
                 cmd =
                     if shouldExpand then
-                        fetchSubNamespaceListing hash
+                        fetchSubNamespaceListing fqn
 
                     else
                         Cmd.none
             in
             ( newModel, cmd )
 
-        FetchSubNamespaceListingFinished fetchedHash result ->
+        FetchSubNamespaceListingFinished fetchedFqn result ->
             let
                 replaceNamespaceListing ((NamespaceListing hash fqn _) as namespaceListing) =
-                    if Hash.equals fetchedHash hash then
+                    if FQN.equals fetchedFqn fqn then
                         case result of
                             Ok (NamespaceListing _ _ content) ->
                                 NamespaceListing hash fqn content
@@ -141,22 +142,26 @@ update msg model =
 
 
 
--- Http
+-- HTTP
 
 
 fetchRootNamespaceListing : Cmd Msg
 fetchRootNamespaceListing =
+    let
+        rootFqn =
+            FQN.fromString "."
+    in
     Http.get
         { url = Api.listUrl Nothing
-        , expect = Http.expectJson FetchRootNamespaceListingFinished NamespaceListing.decode
+        , expect = Http.expectJson FetchRootNamespaceListingFinished (NamespaceListing.decode rootFqn)
         }
 
 
-fetchSubNamespaceListing : Hash -> Cmd Msg
-fetchSubNamespaceListing hash =
+fetchSubNamespaceListing : FQN -> Cmd Msg
+fetchSubNamespaceListing fqn =
     Http.get
-        { url = Api.listUrl (Just (Hash.toString hash))
-        , expect = Http.expectJson (FetchSubNamespaceListingFinished hash) NamespaceListing.decode
+        { url = Api.listUrl (Just (FQN.toString fqn))
+        , expect = Http.expectJson (FetchSubNamespaceListingFinished fqn) (NamespaceListing.decode fqn)
         }
 
 
@@ -194,7 +199,7 @@ viewDefinitionListing listing =
                 ]
 
 
-viewLoadedNamespaceListingContent : HashSet -> NamespaceListingContent -> Html Msg
+viewLoadedNamespaceListingContent : FQNSet -> NamespaceListingContent -> Html Msg
 viewLoadedNamespaceListingContent expandedNamespaceListings content =
     let
         namespaces =
@@ -206,7 +211,7 @@ viewLoadedNamespaceListingContent expandedNamespaceListings content =
     div [] (namespaces ++ definitions)
 
 
-viewNamespaceListingContent : HashSet -> WebData NamespaceListingContent -> Html Msg
+viewNamespaceListingContent : FQNSet -> WebData NamespaceListingContent -> Html Msg
 viewNamespaceListingContent expandedNamespaceListings content =
     case content of
         Success loadedContent ->
@@ -219,14 +224,14 @@ viewNamespaceListingContent expandedNamespaceListings content =
             UI.nothing
 
         Loading ->
-            UI.spinner
+            UI.loadingPlaceholder
 
 
-viewNamespaceListing : HashSet -> NamespaceListing -> Html Msg
+viewNamespaceListing : FQNSet -> NamespaceListing -> Html Msg
 viewNamespaceListing expandedNamespaceListings (NamespaceListing hash fqn content) =
     let
         ( caretIcon, namespaceContent ) =
-            if HashSet.member hash expandedNamespaceListings then
+            if FQNSet.member fqn expandedNamespaceListings then
                 ( UI.Icon.caretDown
                 , div [ class "namespace-content" ]
                     [ viewNamespaceListingContent
@@ -241,14 +246,14 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing hash fqn conten
     div []
         [ a
             [ class "node namespace"
-            , onClick (ToggleExpandedNamespaceListing hash)
+            , onClick (ToggleExpandedNamespaceListing fqn)
             ]
             [ caretIcon, label [] [ text (unqualifiedName fqn) ] ]
         , namespaceContent
         ]
 
 
-viewAllNamespaces : HashSet -> WebData NamespaceListing -> Html Msg
+viewAllNamespaces : FQNSet -> WebData NamespaceListing -> Html Msg
 viewAllNamespaces expandedNamespaceListings namespaceRoot =
     let
         listings =
