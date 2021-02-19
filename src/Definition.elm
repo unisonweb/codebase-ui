@@ -1,13 +1,14 @@
 module Definition exposing (..)
 
 import Api
+import Code exposing (Code)
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
 import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, section, span, text)
 import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
-import Json.Decode as Decode exposing (andThen, field)
+import Json.Decode as Decode exposing (andThen, at, field)
 import List.Nonempty as NEL
 import UI
 import UI.Icon
@@ -18,30 +19,18 @@ import Util
 -- TYPES
 
 
-type alias Syntax =
-    List String
-
-
-type alias SignatureSyntax =
-    Syntax
-
-
-type alias DefinitionSyntax =
-    Syntax
-
-
 type alias TypeDefinitionInfo =
     { fqns : NEL.Nonempty FQN
     , name : String
-    , definition : Syntax
+    , definition : Code
     }
 
 
 type alias TermDefinitionInfo =
     { fqns : NEL.Nonempty FQN
     , name : String
-    , definition : Syntax
-    , signature : SignatureSyntax
+    , definition : Code
+    , signature : Code
     }
 
 
@@ -107,8 +96,8 @@ view closeMsg definition =
                 closeMsg
                 (div [] [ text info.name ])
                 (div []
-                    [ div [ class "docs" ] [ text "todo docs" ]
-                    , code [] [ text "todo code" ]
+                    [ -- div [ class "docs" ] [ text "todo docs" ]
+                      Code.view info.definition
                     ]
                 )
     in
@@ -129,7 +118,7 @@ decodeTypeDefInfo =
     Decode.map3 TypeDefinitionInfo
         (field "typeNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
         (field "bestTypeName" Decode.string)
-        (Decode.succeed [])
+        (field "typeDefinition" Code.decode)
 
 
 decodeTypes : Decode.Decoder (List Definition)
@@ -146,8 +135,8 @@ decodeTermDefInfo =
     Decode.map4 TermDefinitionInfo
         (field "termNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
         (field "bestTermName" Decode.string)
-        (Decode.succeed [])
-        (Decode.succeed [])
+        (field "termDefinition" Code.decode)
+        (field "signature" Code.decodeSyntax)
 
 
 decodeTerms : Decode.Decoder (List Definition)
