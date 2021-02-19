@@ -1,7 +1,24 @@
-module OpenDefinitions exposing (OpenDefinitions, definitions, empty, fromList, hashes, insert, insertList, loading, remove, toList, update)
+module OpenDefinitions exposing
+    ( OpenDefinitions
+    , definitions
+    , empty
+    , fromList
+    , get
+    , hashes
+    , insert
+    , insertAfter
+    , loading
+    , member
+    , remove
+    , replace
+    , replaceItems
+    , toList
+    , update
+    )
 
 import Definition exposing (Definition)
 import Hash exposing (Hash)
+import List.Extra as ListE
 import OrderedDict exposing (OrderedDict)
 import RemoteData exposing (WebData)
 
@@ -21,7 +38,7 @@ type OpenDefinitions
 
 
 
--- Build
+-- BUILD
 
 
 empty : OpenDefinitions
@@ -39,34 +56,39 @@ loading list =
 fromList : List ( Hash, WebData Definition ) -> OpenDefinitions
 fromList list =
     list
-        |> List.map (\( h, d ) -> ( Hash.toString h, d ))
+        |> List.map (Tuple.mapFirst Hash.toString)
         |> OrderedDict.fromList
         |> OpenDefinitions
 
 
-update : Hash -> (Maybe (WebData Definition) -> Maybe (WebData Definition)) -> OpenDefinitions -> OpenDefinitions
+update :
+    Hash
+    -> (Maybe (WebData Definition) -> Maybe (WebData Definition))
+    -> OpenDefinitions
+    -> OpenDefinitions
 update h f (OpenDefinitions dict) =
     OpenDefinitions (OrderedDict.update (Hash.toString h) f dict)
 
 
-insert : Hash -> WebData Definition -> OpenDefinitions -> OpenDefinitions
-insert h definition (OpenDefinitions dict) =
-    OpenDefinitions (OrderedDict.insert (Hash.toString h) definition dict)
+{-| Replace existing item |
+-}
+replace : Hash -> WebData Definition -> OpenDefinitions -> OpenDefinitions
+replace h def openDefinition =
+    update h (Maybe.map (always def)) openDefinition
 
 
-insertBefore : Hash -> Hash -> WebData Definition -> OpenDefinitions -> OpenDefinitions
-insertBefore beforeHash insertHash definition (OpenDefinitions dict) =
-    -- TODO
-    OpenDefinitions dict
-
-
-insertList : List ( Hash, WebData Definition ) -> OpenDefinitions -> OpenDefinitions
-insertList list openDefinitions =
+{-| Replace existing items in OpenDefinitions |
+-}
+replaceItems :
+    List ( Hash, WebData Definition )
+    -> OpenDefinitions
+    -> OpenDefinitions
+replaceItems items openDefinitions =
     let
-        inserter ( h, d ) acc =
-            insert h d acc
+        replacer ( h, d ) acc =
+            replace h d acc
     in
-    List.foldl inserter openDefinitions list
+    List.foldl replacer openDefinitions items
 
 
 remove : Hash -> OpenDefinitions -> OpenDefinitions
@@ -74,8 +96,46 @@ remove h (OpenDefinitions dict) =
     OpenDefinitions (OrderedDict.remove (Hash.toString h) dict)
 
 
+insert : ( Hash, WebData Definition ) -> OpenDefinitions -> OpenDefinitions
+insert ( h, definition ) (OpenDefinitions dict) =
+    OpenDefinitions (OrderedDict.insert (Hash.toString h) definition dict)
 
--- Query
+
+{-| Insert after a Hash. If the Hash is not in OpenDefinitions, insert at the
+end. If the element to insert already exists in OpenDefinitions, move it to
+after the provided Hash |
+-}
+insertAfter : Hash -> ( Hash, WebData Definition ) -> OpenDefinitions -> OpenDefinitions
+insertAfter afterHash (( hashToInsert, def ) as definitionRow) openDefinitions =
+    let
+        after (( h, d ) as elem) =
+            if Hash.equals afterHash h then
+                [ elem, definitionRow ]
+
+            else
+                [ elem ]
+
+        insertAfter_ defs =
+            defs
+                |> toList
+                |> List.filter (\( h, _ ) -> not (Hash.equals h hashToInsert))
+                |> List.concatMap after
+                |> fromList
+    in
+    if member afterHash openDefinitions then
+        insertAfter_ openDefinitions
+
+    else
+        insert definitionRow openDefinitions
+
+
+
+-- QUERY
+
+
+member : Hash -> OpenDefinitions -> Bool
+member hash (OpenDefinitions dict) =
+    OrderedDict.member (Hash.toString hash) dict
 
 
 get : Hash -> OpenDefinitions -> Maybe (WebData Definition)
@@ -84,7 +144,7 @@ get h (OpenDefinitions dict) =
 
 
 
--- Conversions
+-- CONVERSIONS
 
 
 hashes : OpenDefinitions -> List Hash
@@ -103,4 +163,4 @@ toList : OpenDefinitions -> List ( Hash, WebData Definition )
 toList (OpenDefinitions dict) =
     dict
         |> OrderedDict.toList
-        |> List.map (\( h, d ) -> ( Hash.fromString h, d ))
+        |> List.map (Tuple.mapFirst Hash.fromString)

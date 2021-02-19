@@ -141,6 +141,10 @@ code {
   font-family: var(--font-monospace);
 }
 
+code a:hover {
+  text-decoration: underline;
+}
+
 /* -- Syntax --------------------------------------------------------------- */
 
 .builtin {

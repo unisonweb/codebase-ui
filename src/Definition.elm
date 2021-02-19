@@ -88,8 +88,8 @@ viewLoading =
         )
 
 
-view : msg -> Definition -> Html msg
-view closeMsg definition =
+view : msg -> (Hash -> msg) -> Definition -> Html msg
+view closeMsg toOpenReferenceMsg definition =
     let
         viewDefinitionInfo info source =
             viewClosableRow
@@ -99,10 +99,10 @@ view closeMsg definition =
     in
     case definition of
         Term _ info ->
-            viewDefinitionInfo info (viewTermSource info.name info.source)
+            viewDefinitionInfo info (viewTermSource toOpenReferenceMsg info.name info.source)
 
         Type _ info ->
-            viewDefinitionInfo info (viewTypeSource info.source)
+            viewDefinitionInfo info (viewTypeSource toOpenReferenceMsg info.source)
 
 
 
