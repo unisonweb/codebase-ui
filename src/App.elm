@@ -13,7 +13,7 @@ import NamespaceListing exposing (DefinitionListing(..), NamespaceListing(..), N
 import OpenDefinitions exposing (OpenDefinitions)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
-import UI.Icon
+import UI.Icon as Icon
 
 
 
@@ -182,19 +182,19 @@ viewDefinitionListing listing =
     case listing of
         TypeListing hash fqn ->
             a [ class "node type", onClick (OpenDefinition hash) ]
-                [ UI.Icon.type_
+                [ Icon.view Icon.Type
                 , label [] [ text (unqualifiedName fqn) ]
                 ]
 
         TermListing hash fqn ->
             a [ class "node term", onClick (OpenDefinition hash) ]
-                [ UI.Icon.term
+                [ Icon.view Icon.Term
                 , label [] [ text (unqualifiedName fqn) ]
                 ]
 
         PatchListing _ ->
             a [ class "node patch" ]
-                [ UI.Icon.patch
+                [ Icon.view Icon.Patch
                 , label [] [ text "Patch" ]
                 ]
 
@@ -232,7 +232,7 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing hash fqn conten
     let
         ( caretIcon, namespaceContent ) =
             if FQNSet.member fqn expandedNamespaceListings then
-                ( UI.Icon.caretDown
+                ( Icon.CaretDown
                 , div [ class "namespace-content" ]
                     [ viewNamespaceListingContent
                         expandedNamespaceListings
@@ -241,14 +241,14 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing hash fqn conten
                 )
 
             else
-                ( UI.Icon.caretRight, UI.nothing )
+                ( Icon.CaretRight, UI.nothing )
     in
-    div []
+    div [ class "subtree" ]
         [ a
             [ class "node namespace"
             , onClick (ToggleExpandedNamespaceListing fqn)
             ]
-            [ caretIcon, label [] [ text (unqualifiedName fqn) ] ]
+            [ Icon.view caretIcon, label [] [ text (unqualifiedName fqn) ] ]
         , namespaceContent
         ]
 
@@ -270,9 +270,9 @@ viewAllNamespaces expandedNamespaceListings namespaceRoot =
                 Loading ->
                     UI.spinner
     in
-    div [ id "all-namespaces", class "namespace-tree" ]
+    div [ id "all-namespaces" ]
         [ h2 [] [ text "All Namespaces" ]
-        , listings
+        , div [ class "namespace-tree" ] [ listings ]
         ]
 
 
