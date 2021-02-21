@@ -1,6 +1,6 @@
 module UI exposing (..)
 
-import Html exposing (Html, div, i, text)
+import Html exposing (Html, code, div, i, pre, text)
 import Html.Attributes exposing (class)
 
 
@@ -27,3 +27,13 @@ loadingPlaceholder =
 errorMessage : String -> Html msg
 errorMessage message =
     div [ class "error-message" ] [ text message ]
+
+
+codeInline : Html msg -> Html msg
+codeInline content =
+    code [] [ content ]
+
+
+codeBlock : Html msg -> Html msg
+codeBlock content =
+    pre [] [ code [] [ content ] ]
