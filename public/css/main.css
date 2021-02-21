@@ -22,7 +22,10 @@ li {
 
   --main-sidebar-width: 14rem;
 
-  /* -- Font sizes --------------------------------------------------------- */
+  /* -- Font --------------------------------------------------------------- */
+
+  --font-sans-serif: "Inter", sans-serif;
+  --font-monospace: "Roboto Mono", monospace;
 
   --font-size-base: 1rem;
   --font-size-medium: 0.875rem;
@@ -97,10 +100,17 @@ li {
   --color-syntax-text: #438443;
 }
 
+@supports (font-variation-settings: normal) {
+  :root {
+    --font-sans-serif: "Inter var", sans-serif;
+    --font-monospace: "Roboto Mono var", monospace;
+  }
+}
+
 /* -- Global --------------------------------------------------------------- */
 html {
   font-size: var(--base-size);
-  font-family: "Inter", sans-serif;
+  font-family: var(--font-sans-serif);
 }
 
 body {
@@ -128,7 +138,7 @@ pre {
 
 code {
   display: inline-block;
-  font-family: "Roboto Mono", monospace;
+  font-family: var(--font-monospace);
 }
 
 /* -- Syntax --------------------------------------------------------------- */
