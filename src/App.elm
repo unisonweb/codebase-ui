@@ -48,6 +48,7 @@ type Msg
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
     | OpenDefinition Hash
+    | OpenDefinitionAfter Hash Hash
     | CloseDefinition Hash
     | FetchOpenDefinitionsFinished (List Hash) (Result Http.Error (List Definition))
 
@@ -107,14 +108,35 @@ update msg model =
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
         OpenDefinition hash ->
-            ( { model
-                | openDefinitions =
-                    OpenDefinitions.insert hash
-                        Loading
-                        model.openDefinitions
-              }
-            , fetchDefinitions [ hash ]
-            )
+            -- We don't want to refetch or replace any already open definitions
+            if OpenDefinitions.member hash model.openDefinitions then
+                ( model, Cmd.none )
+
+            else
+                ( { model
+                    | openDefinitions =
+                        OpenDefinitions.insert
+                            ( hash, Loading )
+                            model.openDefinitions
+                  }
+                , fetchDefinitions [ hash ]
+                )
+
+        OpenDefinitionAfter afterHash hash ->
+            -- We don't want to refetch or replace any already open definitions
+            if OpenDefinitions.member hash model.openDefinitions then
+                ( model, Cmd.none )
+
+            else
+                ( { model
+                    | openDefinitions =
+                        OpenDefinitions.insertAfter
+                            afterHash
+                            ( hash, Loading )
+                            model.openDefinitions
+                  }
+                , fetchDefinitions [ hash ]
+                )
 
         CloseDefinition hash ->
             ( { model
@@ -136,7 +158,7 @@ update msg model =
                             List.map (\d -> ( Definition.hash d, Success d )) definitions
 
                 nextOpenDefinitions =
-                    OpenDefinitions.insertList list model.openDefinitions
+                    OpenDefinitions.replaceItems list model.openDefinitions
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
@@ -291,7 +313,7 @@ viewDefinition : Hash -> WebData Definition -> Html Msg
 viewDefinition hash definition =
     case definition of
         Success def ->
-            Definition.view (CloseDefinition hash) def
+            Definition.view (CloseDefinition hash) (OpenDefinitionAfter hash) def
 
         Failure err ->
             Definition.viewError (CloseDefinition hash) err

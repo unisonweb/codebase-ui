@@ -186,17 +186,37 @@ syntaxTypeToClassName sType =
             "doc-keyword"
 
 
-viewSegment : SyntaxSegment -> Html msg
-viewSegment (SyntaxSegment sType sText) =
-    span [ class (syntaxTypeToClassName sType) ] [ text sText ]
+viewSegment : (Hash -> msg) -> SyntaxSegment -> Html msg
+viewSegment toReferenceClickMsg (SyntaxSegment sType sText) =
+    let
+        hash =
+            case sType of
+                Reference h ->
+                    Just h
+
+                Referent h ->
+                    Just h
+
+                _ ->
+                    Nothing
+
+        className =
+            syntaxTypeToClassName sType
+    in
+    case hash of
+        Just h ->
+            a [ class className, onClick (toReferenceClickMsg h) ] [ text sText ]
+
+        Nothing ->
+            span [ class className ] [ text sText ]
 
 
-view : Syntax -> Html msg
-view (Syntax segments) =
+view : (Hash -> msg) -> Syntax -> Html msg
+view toReferenceClickMsg (Syntax segments) =
     let
         renderedSegments =
             segments
-                |> NEL.map viewSegment
+                |> NEL.map (viewSegment toReferenceClickMsg)
                 |> NEL.toList
     in
     span [ class "syntax" ] renderedSegments

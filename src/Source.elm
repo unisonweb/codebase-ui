@@ -1,5 +1,6 @@
 module Source exposing (TermSource(..), TypeSignature(..), TypeSource(..), viewTermSource, viewTypeSource)
 
+import Hash exposing (Hash)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
 import Syntax exposing (Syntax)
@@ -20,13 +21,13 @@ type TermSource
     | BuiltinTerm TypeSignature
 
 
-viewTypeSource : TypeSource -> Html msg
-viewTypeSource source =
+viewTypeSource : (Hash -> msg) -> TypeSource -> Html msg
+viewTypeSource toReferenceClickMsg source =
     let
         content =
             case source of
                 TypeSource syntax ->
-                    Syntax.view syntax
+                    Syntax.view toReferenceClickMsg syntax
 
                 BuiltinType ->
                     span
@@ -38,20 +39,20 @@ viewTypeSource source =
     UI.codeBlock content
 
 
-viewTermSource : String -> TermSource -> Html msg
-viewTermSource termName source =
+viewTermSource : (Hash -> msg) -> String -> TermSource -> Html msg
+viewTermSource toReferenceClickMsg termName source =
     let
         content =
             case source of
                 TermSource syntax ->
-                    Syntax.view syntax
+                    Syntax.view toReferenceClickMsg syntax
 
                 BuiltinTerm (TypeSignature syntax) ->
                     span
                         []
                         [ span [ class "hash-qualifier" ] [ text termName ]
                         , span [ class "type-ascription-colon" ] [ text " : " ]
-                        , Syntax.view syntax
+                        , Syntax.view toReferenceClickMsg syntax
                         , span [ class "blank" ] [ text "\n" ]
                         , span [ class "hash-qualifier" ] [ text termName ]
                         , span [ class "binding-equals" ] [ text " = " ]
