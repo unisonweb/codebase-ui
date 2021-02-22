@@ -44,7 +44,7 @@ li {
   --color-gray-base: #515258;
 
   /* Darker (than base) grays */
-  --color-gray-darken-5: #464649;
+  --color-gray-darken-5: #3d3e43;
   --color-gray-darken-20: #2d2e35;
   --color-gray-darken-25: #22232a;
   --color-gray-darken-30: #18181c;
@@ -68,14 +68,14 @@ li {
   --color-main-highlight-bg: var(--color-blue-base);
   --color-main-highlight-border: var(--color-blue-base);
 
-  --color-sidebar-fg: var(--color-gray-lighten-60);
+  --color-sidebar-fg: var(--color-gray-lighten-50);
   --color-sidebar-bg: var(--color-gray-darken-20);
   --color-sidebar-context-fg: var(--color-brand-orange);
   --color-sidebar-border: transparent;
   --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
   --color-sidebar-subtle-bg: transparent;
-  --color-sidebar-highlight-fg: var(--color-blue-base);
-  --color-sidebar-highlight-bg: var(--color-blue-base);
+  --color-sidebar-highlight-fg: var(--color-gray-lighten-60);
+  --color-sidebar-highlight-bg: var(--color-gray-darken-5);
   --color-sidebar-highlight-border: var(--color-blue-base);
 
   --color-workspace-fg: var(--color-main-fg);
@@ -301,6 +301,14 @@ code {
   min-width: calc(var(--font-size-base) * 3);
 }
 
+.icon {
+  display: inline-block;
+  width: 0.875rem;
+  height: 0.875rem;
+  color: var(--color-main-fg);
+  transition: all 0.2s;
+}
+
 /* -- Application ---------------------------------------------------------- */
 
 #app {
@@ -321,7 +329,7 @@ code {
   font-size: var(--font-size-medium);
   overflow: auto;
   height: 100vh;
-  padding: 1rem 1.5rem;
+  padding: 1rem 1rem 1rem 1.5rem;
   scrollbar-width: thin;
   scrollbar-color: var(--color-sidebar-subtle-fg) var(--color-sidebar-bg);
 }
@@ -356,9 +364,20 @@ code {
   color: var(--color-sidebar-subtle-fg);
 }
 
+.namespace-tree {
+  margin-left: -0.5rem;
+}
+
 .namespace-tree .node {
-  display: block;
+  display: flex;
   user-select: none;
+  align-items: center;
+  border-radius: 4px;
+  padding-left: 0.5rem;
+}
+
+.namespace-tree .node:hover {
+  background: var(--color-sidebar-highlight-bg);
 }
 
 .namespace-tree .node .icon {
@@ -367,11 +386,10 @@ code {
   text-align: center;
   margin-left: -0.275rem;
   margin-right: 0.25rem;
-  transition: all 0.2s;
 }
 
 .namespace-tree .node:hover .icon {
-  color: var(--color-sidebar-highlight);
+  color: var(--color-sidebar-highlight-fg);
 }
 
 .namespace-tree .node label {
@@ -427,6 +445,13 @@ code {
   flex-direction: row;
   flex: 1;
   justify-content: space-between;
+}
+
+.definition-row .close .icon {
+  color: var(--color-workspace-subtle-fg);
+}
+.definition-row .close:hover .icon {
+  color: var(--color-workspace-fg);
 }
 
 .definition-row header h3 {

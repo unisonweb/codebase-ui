@@ -1,49 +1,108 @@
 module UI.Icon exposing (..)
 
-import Html exposing (Html, i)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
+import Svg exposing (svg, use)
+import Svg.Attributes exposing (height, width, xlinkHref)
 
 
-icon : String -> Html msg
-icon name =
-    i [ class ("icon fas fa-" ++ name) ] []
+type Icon
+    = ChevronDown
+    | ChevronUp
+    | CaretLeft
+    | CaretRight
+    | CaretUp
+    | CaretDown
+    | Patch
+    | Term
+    | Ability
+    | Type
+    | Document
+    | Folder
+    | Plus
+    | Hash
+    | Warn
+    | Checkmark
+    | X
+    | Search
 
 
-caretRight : Html msg
-caretRight =
-    icon "caret-right"
+{-| Example: UI.Icon.view UI.Icon.Checkmark |
+-}
+view : Icon -> Html msg
+view icon =
+    let
+        ref =
+            spritePath ++ "#icon-" ++ toIdString icon
+    in
+    -- Random, its not possible to dynamically set classNames on svg elements
+    div [ class "icon" ]
+        [ svg [ width "100%", height "100%" ] [ use [ xlinkHref ref ] [] ]
+        ]
 
 
-caretDown : Html msg
-caretDown =
-    icon "caret-down"
+
+-- HELPERS
 
 
-x : Html msg
-x =
-    icon "times"
+spritePath : String
+spritePath =
+    "/img/icons.svg"
 
 
-namespace : Html msg
-namespace =
-    icon "box"
+toIdString : Icon -> String
+toIdString icon =
+    case icon of
+        ChevronDown ->
+            "chevron-down"
 
+        ChevronUp ->
+            "chevron-up"
 
-term : Html msg
-term =
-    icon "code"
+        CaretLeft ->
+            "caret-left"
 
+        CaretRight ->
+            "caret-right"
 
-patch : Html msg
-patch =
-    icon "directions"
+        CaretUp ->
+            "caret-up"
 
+        CaretDown ->
+            "caret-down"
 
-type_ : Html msg
-type_ =
-    icon "border-none"
+        Patch ->
+            "patch"
 
+        Term ->
+            "term"
 
-ability : Html msg
-ability =
-    icon "brackets-curly"
+        Ability ->
+            "ability"
+
+        Type ->
+            "type"
+
+        Document ->
+            "document"
+
+        Folder ->
+            "folder"
+
+        Plus ->
+            "plus"
+
+        Hash ->
+            "hash"
+
+        Warn ->
+            "warn"
+
+        Checkmark ->
+            "checkmark"
+
+        X ->
+            "x"
+
+        Search ->
+            "search"

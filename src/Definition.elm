@@ -12,7 +12,7 @@ import List.Nonempty as NEL
 import Source exposing (TermSource(..), TypeSignature(..), TypeSource(..), viewTermSource, viewTypeSource)
 import Syntax
 import UI
-import UI.Icon
+import UI.Icon as Icon
 import Util
 
 
@@ -67,7 +67,7 @@ viewClosableRow : msg -> Html msg -> Html msg -> Html msg
 viewClosableRow closeMsg title content =
     viewDefinitionRow
         [ h3 [] [ title ]
-        , a [ class "close", onClick closeMsg ] [ UI.Icon.x ]
+        , a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
         ]
         content
 
