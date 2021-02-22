@@ -8,6 +8,7 @@ import Html.Attributes exposing (class, id, placeholder, type_, value)
 import Html.Events exposing (onClick, onInput)
 import Http
 import Json.Decode as Decode exposing (andThen, at, field)
+import Json.Decode.Extra exposing (when)
 import List.Nonempty as NEL
 import Source exposing (TermSource(..), TypeSignature(..), TypeSource(..), viewTermSource, viewTypeSource)
 import Syntax
@@ -111,12 +112,19 @@ view closeMsg toOpenReferenceMsg definition =
 
 decodeTypeDefInfo : Decode.Decoder TypeDefinitionInfo
 decodeTypeDefInfo =
+    let
+        decodeTypeDefTag =
+            at [ "typeDefinition", "tag" ] Decode.string
+
+        decodeUserObject =
+            Decode.map TypeSource (at [ "typeDefinition", "contents" ] Syntax.decode)
+    in
     Decode.map3 TypeDefinitionInfo
         (field "typeNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
         (field "bestTypeName" Decode.string)
         (Decode.oneOf
-            [ field "typeDefinition" Syntax.decode |> andThen (TypeSource >> Decode.succeed)
-            , Decode.succeed BuiltinType
+            [ when decodeTypeDefTag ((==) "UserObject") decodeUserObject
+            , when decodeTypeDefTag ((==) "BuiltinObject") (Decode.succeed BuiltinType)
             ]
         )
 
