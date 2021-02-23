@@ -1,6 +1,7 @@
 module App exposing (..)
 
 import Api
+import Browser.Dom as Dom
 import Definition exposing (Definition(..))
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
@@ -31,8 +32,10 @@ import NamespaceListing
         )
 import OpenDefinitions exposing (OpenDefinitions)
 import RemoteData exposing (RemoteData(..), WebData)
+import Task
 import UI
 import UI.Icon as Icon
+import Util
 
 
 
@@ -63,7 +66,8 @@ init _ =
 
 
 type Msg
-    = ToggleExpandedNamespaceListing FQN
+    = NoOp
+    | ToggleExpandedNamespaceListing FQN
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
     | OpenDefinition Hash
@@ -75,6 +79,9 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
+        NoOp ->
+            ( model, Cmd.none )
+
         ToggleExpandedNamespaceListing fqn ->
             let
                 shouldExpand =
@@ -127,35 +134,10 @@ update msg model =
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
         OpenDefinition hash ->
-            -- We don't want to refetch or replace any already open definitions
-            if OpenDefinitions.member hash model.openDefinitions then
-                ( model, Cmd.none )
-
-            else
-                ( { model
-                    | openDefinitions =
-                        OpenDefinitions.insert
-                            ( hash, Loading )
-                            model.openDefinitions
-                  }
-                , fetchDefinitions [ hash ]
-                )
+            openDefinition model Nothing hash
 
         OpenDefinitionAfter afterHash hash ->
-            -- We don't want to refetch or replace any already open definitions
-            if OpenDefinitions.member hash model.openDefinitions then
-                ( model, Cmd.none )
-
-            else
-                ( { model
-                    | openDefinitions =
-                        OpenDefinitions.insertAfter
-                            afterHash
-                            ( hash, Loading )
-                            model.openDefinitions
-                  }
-                , fetchDefinitions [ hash ]
-                )
+            openDefinition model (Just afterHash) hash
 
         CloseDefinition hash ->
             ( { model
@@ -193,7 +175,37 @@ update msg model =
 
 
 
--- HTTP
+-- UPDATE HELPERS
+
+
+openDefinition :
+    { m | openDefinitions : OpenDefinitions }
+    -> Maybe Hash
+    -> Hash
+    -> ( { m | openDefinitions : OpenDefinitions }, Cmd Msg )
+openDefinition model afterHash hash =
+    -- We don't want to refetch or replace any already open definitions, but we
+    -- do want to scroll to it
+    if OpenDefinitions.member hash model.openDefinitions then
+        ( model, scrollToDefinition hash )
+
+    else
+        let
+            nextOpenDefinitions =
+                case afterHash of
+                    Nothing ->
+                        OpenDefinitions.insert ( hash, Loading ) model.openDefinitions
+
+                    Just h ->
+                        OpenDefinitions.insertAfter h ( hash, Loading ) model.openDefinitions
+        in
+        ( { model | openDefinitions = nextOpenDefinitions }
+        , Cmd.batch [ fetchDefinitions [ hash ], scrollToDefinition hash ]
+        )
+
+
+
+-- EFFECTS
 
 
 fetchRootNamespaceListing : Cmd Msg
@@ -222,6 +234,30 @@ fetchDefinitions hashes =
         { url = Api.definitionUrl (List.map Hash.toString hashes)
         , expect = Http.expectJson (FetchOpenDefinitionsFinished hashes) Definition.decodeList
         }
+
+
+scrollToDefinition : Hash -> Cmd Msg
+scrollToDefinition hash =
+    let
+        id =
+            "definition-" ++ Hash.toString hash
+    in
+    Task.sequence
+        [ Dom.getElement id |> Task.map (.element >> .y)
+        , Dom.getElement "workspace-content" |> Task.map (.element >> .y)
+        , Dom.getViewportOf "workspace-content" |> Task.map (.viewport >> .y)
+        ]
+        |> Task.andThen
+            (\outcome ->
+                case outcome of
+                    elY :: viewportY :: viewportScrollTop :: [] ->
+                        Dom.setViewportOf "workspace-content" 0 (viewportScrollTop + (elY - viewportY))
+                            |> Task.onError (\_ -> Task.succeed ())
+
+                    _ ->
+                        Task.succeed ()
+            )
+        |> Task.attempt (always NoOp)
 
 
 
@@ -345,13 +381,13 @@ viewDefinition hash definition =
             Definition.view (CloseDefinition hash) (OpenDefinitionAfter hash) def
 
         Failure err ->
-            Definition.viewError (CloseDefinition hash) err
+            Definition.viewError (CloseDefinition hash) hash err
 
         NotAsked ->
             UI.nothing
 
         Loading ->
-            Definition.viewLoading
+            Definition.viewLoading hash
 
 
 viewOpenDefinitions : OpenDefinitions -> List (Html Msg)

@@ -4,7 +4,7 @@ import Api
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
 import Html exposing (Html, a, code, div, h3, header, section, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (at, field)
@@ -65,33 +65,34 @@ hash definition =
 -- VIEW
 
 
-viewDefinitionRow : List (Html msg) -> Html msg -> Html msg
-viewDefinitionRow headerItems content =
-    div [ class "definition-row" ]
+viewDefinitionRow : Hash -> List (Html msg) -> Html msg -> Html msg
+viewDefinitionRow hash_ headerItems content =
+    div [ class "definition-row", id ("definition-" ++ Hash.toString hash_) ]
         [ header [] headerItems, section [ class "content" ] [ content ] ]
 
 
-viewClosableRow : msg -> Html msg -> Html msg -> Html msg
-viewClosableRow closeMsg title content =
+viewClosableRow : msg -> Hash -> Html msg -> Html msg -> Html msg
+viewClosableRow closeMsg hash_ title content =
     viewDefinitionRow
+        hash_
         [ h3 [] [ title ]
         , a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
         ]
         content
 
 
-viewError : msg -> Http.Error -> Html msg
-viewError closeMsg err =
-    viewClosableRow closeMsg (text "Error") (UI.errorMessage (Api.errorToString err))
+viewError : msg -> Hash -> Http.Error -> Html msg
+viewError closeMsg hash_ err =
+    viewClosableRow closeMsg hash_ (text "Error") (UI.errorMessage (Api.errorToString err))
 
 
-viewLoading : Html msg
-viewLoading =
-    viewDefinitionRow [ UI.loadingPlaceholder ]
+viewLoading : Hash -> Html msg
+viewLoading hash_ =
+    viewDefinitionRow hash_
+        [ UI.loadingPlaceholder ]
         (div
             []
-            [ div [ class "docs" ] [ UI.loadingPlaceholder ]
-            , code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ]
+            [ code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ]
             ]
         )
 
@@ -99,18 +100,19 @@ viewLoading =
 view : msg -> (Hash -> msg) -> Definition -> Html msg
 view closeMsg toOpenReferenceMsg definition =
     let
-        viewDefinitionInfo info source =
+        viewDefinitionInfo hash_ info source =
             viewClosableRow
                 closeMsg
+                hash_
                 (div [] [ text info.name ])
                 (div [] [ source ])
     in
     case definition of
-        Term _ info ->
-            viewDefinitionInfo info (viewTermSource toOpenReferenceMsg info.name info.source)
+        Term h info ->
+            viewDefinitionInfo h info (viewTermSource toOpenReferenceMsg info.name info.source)
 
-        Type _ info ->
-            viewDefinitionInfo info (viewTypeSource toOpenReferenceMsg info.source)
+        Type h info ->
+            viewDefinitionInfo h info (viewTypeSource toOpenReferenceMsg info.source)
 
 
 
