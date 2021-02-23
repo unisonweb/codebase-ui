@@ -3,7 +3,7 @@ module Definition exposing (..)
 import Api
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
-import Html exposing (Html, a, div, h3, header, section, text)
+import Html exposing (Html, a, code, div, h3, header, section, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import Http
