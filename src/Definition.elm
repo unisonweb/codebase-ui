@@ -3,14 +3,21 @@ module Definition exposing (..)
 import Api
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
-import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, section, span, text)
-import Html.Attributes exposing (class, id, placeholder, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, a, div, h3, header, section, text)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Http
-import Json.Decode as Decode exposing (andThen, at, field)
+import Json.Decode as Decode exposing (at, field)
 import Json.Decode.Extra exposing (when)
 import List.Nonempty as NEL
-import Source exposing (TermSource(..), TypeSignature(..), TypeSource(..), viewTermSource, viewTypeSource)
+import Source
+    exposing
+        ( TermSource(..)
+        , TypeSignature(..)
+        , TypeSource(..)
+        , viewTermSource
+        , viewTypeSource
+        )
 import Syntax
 import UI
 import UI.Icon as Icon

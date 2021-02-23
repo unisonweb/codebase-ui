@@ -1,4 +1,4 @@
-module UI.Icon exposing (..)
+module UI.Icon exposing (Icon(..), view)
 
 import Html exposing (Html, div)
 import Html.Attributes exposing (class)

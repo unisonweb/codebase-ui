@@ -1,8 +1,6 @@
 module OpenDefinitionsTests exposing (..)
 
-import Debug
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
+import Expect
 import Hash
 import OpenDefinitions exposing (..)
 import RemoteData exposing (RemoteData(..))

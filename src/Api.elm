@@ -1,7 +1,6 @@
 module Api exposing (..)
 
 import Http
-import RemoteData exposing (WebData)
 import Url.Builder exposing (QueryParameter, absolute, string)
 
 

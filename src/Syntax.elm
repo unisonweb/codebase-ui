@@ -1,9 +1,9 @@
 module Syntax exposing (Syntax, SyntaxSegment(..), SyntaxType(..), decode, view)
 
 import Hash exposing (Hash)
-import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, pre, section, span, text)
-import Html.Attributes exposing (class, id, placeholder, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html exposing (Html, a, span, text)
+import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (andThen, at, field)
 import Json.Decode.Extra exposing (when)
 import List.Nonempty as NEL
