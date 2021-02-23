@@ -5,11 +5,29 @@ import Definition exposing (Definition(..))
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import Hash exposing (Hash)
-import Html exposing (Html, a, article, aside, button, code, div, h1, h2, h3, header, input, label, nav, section, span, text)
-import Html.Attributes exposing (class, id, placeholder, type_, value)
-import Html.Events exposing (onClick, onInput)
+import Html
+    exposing
+        ( Html
+        , a
+        , article
+        , aside
+        , div
+        , h1
+        , h2
+        , header
+        , label
+        , section
+        , text
+        )
+import Html.Attributes exposing (class, id)
+import Html.Events exposing (onClick)
 import Http
-import NamespaceListing exposing (DefinitionListing(..), NamespaceListing(..), NamespaceListingContent)
+import NamespaceListing
+    exposing
+        ( DefinitionListing(..)
+        , NamespaceListing(..)
+        , NamespaceListingContent
+        )
 import OpenDefinitions exposing (OpenDefinitions)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI

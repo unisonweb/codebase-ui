@@ -1,6 +1,6 @@
 module FullyQualifiedNameTests exposing (..)
 
-import Expect exposing (Expectation)
+import Expect
 import FullyQualifiedName as FQN exposing (..)
 import Test exposing (..)
 

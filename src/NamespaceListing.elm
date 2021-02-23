@@ -9,7 +9,6 @@ module NamespaceListing exposing
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode exposing (andThen, field)
-import List.Nonempty
 import RemoteData exposing (RemoteData(..), WebData)
 
 
@@ -27,8 +26,11 @@ type NamespaceListing
     = NamespaceListing Hash FQN (WebData NamespaceListingContent)
 
 
-map : (NamespaceListing -> NamespaceListing) -> NamespaceListing -> NamespaceListing
-map f ((NamespaceListing hash fqn content) as namespace) =
+map :
+    (NamespaceListing -> NamespaceListing)
+    -> NamespaceListing
+    -> NamespaceListing
+map f (NamespaceListing hash fqn content) =
     let
         mapContent c =
             { c | namespaces = List.map (map f) c.namespaces }

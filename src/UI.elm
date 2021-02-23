@@ -1,6 +1,6 @@
 module UI exposing (..)
 
-import Html exposing (Html, code, div, i, pre, text)
+import Html exposing (Html, code, div, pre, text)
 import Html.Attributes exposing (class)
 
 
@@ -12,11 +12,6 @@ nothing =
 spinner : Html msg
 spinner =
     div [ class "spinner" ] [ text "Loading..." ]
-
-
-type Sizing
-    = Base
-    | Medium
 
 
 loadingPlaceholder : Html msg

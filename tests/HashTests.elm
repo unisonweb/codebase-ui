@@ -1,7 +1,6 @@
 module HashTests exposing (..)
 
-import Expect exposing (Expectation)
-import Fuzz exposing (Fuzzer, int, list, string)
+import Expect
 import Hash exposing (..)
 import Test exposing (..)
 

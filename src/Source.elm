@@ -1,4 +1,10 @@
-module Source exposing (TermSource(..), TypeSignature(..), TypeSource(..), viewTermSource, viewTypeSource)
+module Source exposing
+    ( TermSource(..)
+    , TypeSignature(..)
+    , TypeSource(..)
+    , viewTermSource
+    , viewTypeSource
+    )
 
 import Hash exposing (Hash)
 import Html exposing (Html, span, text)

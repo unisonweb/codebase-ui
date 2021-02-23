@@ -1,4 +1,13 @@
-module FullyQualifiedNameSet exposing (FQNSet, empty, insert, member, remove, toList, toggle)
+module FullyQualifiedNameSet exposing
+    ( FQNSet
+    , empty
+    , insert
+    , member
+    , remove
+    , size
+    , toList
+    , toggle
+    )
 
 import FullyQualifiedName as FQN exposing (FQN)
 import Set exposing (Set)

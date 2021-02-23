@@ -18,7 +18,6 @@ module OpenDefinitions exposing
 
 import Definition exposing (Definition)
 import Hash exposing (Hash)
-import List.Extra as ListE
 import OrderedDict exposing (OrderedDict)
 import RemoteData exposing (WebData)
 
@@ -106,9 +105,9 @@ end. If the element to insert already exists in OpenDefinitions, move it to
 after the provided Hash |
 -}
 insertAfter : Hash -> ( Hash, WebData Definition ) -> OpenDefinitions -> OpenDefinitions
-insertAfter afterHash (( hashToInsert, def ) as definitionRow) openDefinitions =
+insertAfter afterHash (( hashToInsert, _ ) as definitionRow) openDefinitions =
     let
-        after (( h, d ) as elem) =
+        after (( h, _ ) as elem) =
             if Hash.equals afterHash h then
                 [ elem, definitionRow ]
 
