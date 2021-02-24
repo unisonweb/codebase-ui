@@ -429,6 +429,7 @@ code a:hover {
 #workspace-content {
   overflow: auto;
   height: calc(100vh - 3.5rem);
+  scroll-behavior: smooth;
   scrollbar-width: auto;
   scrollbar-color: var(--color-workspace-subtle-fg) var(--color-workspace-mg);
 }
