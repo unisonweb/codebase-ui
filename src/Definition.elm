@@ -147,12 +147,22 @@ decodeTypes =
 
 decodeTermDefInfo : Decode.Decoder TermDefinitionInfo
 decodeTermDefInfo =
+    let
+        decodeTermDefTag =
+            at [ "termDefinition", "tag" ] Decode.string
+
+        decodeUserObject =
+            Decode.map TermSource (at [ "termDefinition", "contents" ] Syntax.decode)
+
+        decodeBuiltin =
+            Decode.map (TypeSignature >> BuiltinTerm) (field "signature" Syntax.decode)
+    in
     Decode.map3 TermDefinitionInfo
         (field "termNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
         (field "bestTermName" Decode.string)
         (Decode.oneOf
-            [ Decode.map TermSource (at [ "termDefinition", "contents" ] Syntax.decode)
-            , Decode.map (TypeSignature >> BuiltinTerm) (field "signature" Syntax.decode)
+            [ when decodeTermDefTag ((==) "UserObject") decodeUserObject
+            , when decodeTermDefTag ((==) "BuiltinObject") decodeBuiltin
             ]
         )
 

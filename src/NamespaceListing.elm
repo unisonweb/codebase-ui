@@ -9,6 +9,7 @@ module NamespaceListing exposing
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode exposing (andThen, field)
+import Json.Decode.Extra exposing (when)
 import RemoteData exposing (RemoteData(..), WebData)
 
 
@@ -70,36 +71,47 @@ type DecodedNamespaceChild
 
 decodeSubNamespace : FQN -> Decode.Decoder DecodedNamespaceChild
 decodeSubNamespace parentFqn =
-    Decode.map3 NamespaceListing
-        (field "namespaceHash" Hash.decode)
-        (field "namespaceName" (FQN.decodeFromParent parentFqn))
-        (Decode.succeed NotAsked)
-        |> andThen (SubNamespace >> Decode.succeed)
-
-
-decodeSubDefinition : FQN -> Decode.Decoder DecodedNamespaceChild
-decodeSubDefinition parentFqn =
-    Decode.oneOf
-        [ Decode.map2 TypeListing
-            (field "typeHash" Hash.decode)
-            (field "typeName" (FQN.decodeFromParent parentFqn))
-        , Decode.map2 TermListing
-            (field "termHash" Hash.decode)
-            (field "termName" (FQN.decodeFromParent parentFqn))
-        , Decode.map PatchListing (field "patchName" Decode.string)
-        ]
-        |> andThen (SubDefinition >> Decode.succeed)
+    Decode.map SubNamespace
+        (Decode.map3 NamespaceListing
+            (field "namespaceHash" Hash.decode)
+            (field "namespaceName" (FQN.decodeFromParent parentFqn))
+            (Decode.succeed NotAsked)
+        )
 
 
 decodeContent : FQN -> Decode.Decoder NamespaceListingContent
 decodeContent parentFqn =
     let
+        decodeTag =
+            field "tag" Decode.string
+
         emptyNamespaceContent =
             { definitions = [], namespaces = [] }
 
-        decodeNamespaceChild =
-            field "contents"
-                (Decode.oneOf [ decodeSubNamespace parentFqn, decodeSubDefinition parentFqn ])
+        decodeTypeListing =
+            Decode.map SubDefinition
+                (Decode.map2 TypeListing
+                    (field "typeHash" Hash.decode)
+                    (field "typeName" (FQN.decodeFromParent parentFqn))
+                )
+
+        decodeTermListing =
+            Decode.map SubDefinition
+                (Decode.map2 TermListing
+                    (field "termHash" Hash.decode)
+                    (field "termName" (FQN.decodeFromParent parentFqn))
+                )
+
+        decodePatchListing =
+            Decode.map SubDefinition (Decode.map PatchListing (field "patchName" Decode.string))
+
+        decodeChild =
+            Decode.oneOf
+                [ when decodeTag ((==) "Subnamespace") (field "contents" (decodeSubNamespace parentFqn))
+                , when decodeTag ((==) "TypeObject") (field "contents" decodeTypeListing)
+                , when decodeTag ((==) "TermObject") (field "contents" decodeTermListing)
+                , when decodeTag ((==) "PatchObject") (field "contents" decodePatchListing)
+                ]
 
         groupContent namespaceChild acc =
             case namespaceChild of
@@ -112,4 +124,4 @@ decodeContent parentFqn =
         childrenToContent children =
             List.foldl groupContent emptyNamespaceContent children
     in
-    Decode.list decodeNamespaceChild |> andThen (childrenToContent >> Decode.succeed)
+    Decode.list decodeChild |> andThen (childrenToContent >> Decode.succeed)
