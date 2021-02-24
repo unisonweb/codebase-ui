@@ -22,6 +22,7 @@ import Html
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Http
+import List.Extra as ListE
 import NamespaceListing
     exposing
         ( DefinitionListing(..)
@@ -167,16 +168,26 @@ update msg model =
 
         FetchOpenDefinitionsFinished hashes result ->
             let
-                list =
+                resultOrFailure definitions h =
+                    let
+                        definitionRequest =
+                            definitions
+                                |> ListE.find (\d -> Hash.equals h (Definition.hash d))
+                                |> Maybe.map Success
+                                |> Maybe.withDefault (Failure (Http.BadStatus 404))
+                    in
+                    ( h, definitionRequest )
+
+                resultList =
                     case result of
                         Err err ->
                             List.map (\h -> ( h, Failure err )) hashes
 
                         Ok definitions ->
-                            List.map (\d -> ( Definition.hash d, Success d )) definitions
+                            List.map (resultOrFailure definitions) hashes
 
                 nextOpenDefinitions =
-                    OpenDefinitions.replaceItems list model.openDefinitions
+                    OpenDefinitions.replaceItems resultList model.openDefinitions
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
@@ -268,7 +279,7 @@ viewNamespaceListingContent expandedNamespaceListings content =
 
 
 viewNamespaceListing : FQNSet -> NamespaceListing -> Html Msg
-viewNamespaceListing expandedNamespaceListings (NamespaceListing hash fqn content) =
+viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) =
     let
         ( caretIcon, namespaceContent ) =
             if FQNSet.member fqn expandedNamespaceListings then
@@ -298,7 +309,7 @@ viewAllNamespaces expandedNamespaceListings namespaceRoot =
     let
         listings =
             case namespaceRoot of
-                Success (NamespaceListing _ fqn content) ->
+                Success (NamespaceListing _ _ content) ->
                     viewNamespaceListingContent expandedNamespaceListings content
 
                 Failure err ->
