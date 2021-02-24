@@ -429,6 +429,18 @@ code a:hover {
 #workspace-content {
   overflow: auto;
   height: calc(100vh - 3.5rem);
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-workspace-subtle-fg) var(--color-workspace-mg);
+}
+#workspace-content::-webkit-scrollbar {
+  width: 0.5rem;
+}
+#workspace-content::-webkit-scrollbar-track {
+  background: var(--color-workspace-mg);
+}
+#workspace-content::-webkit-scrollbar-thumb {
+  background-color: var(--color-workspace-subtle-fg);
+  border-radius: 0.25rem;
 }
 
 /* -- Definitions ---------------------------------------------------------- */
