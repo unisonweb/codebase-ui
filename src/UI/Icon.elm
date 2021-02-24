@@ -32,11 +32,17 @@ type Icon
 view : Icon -> Html msg
 view icon =
     let
+        iconName =
+            toIdString icon
+
         ref =
-            spritePath ++ "#icon-" ++ toIdString icon
+            spritePath ++ "#icon-" ++ iconName
+
+        className =
+            "icon " ++ iconName
     in
     -- Random, its not possible to dynamically set classNames on svg elements
-    div [ class "icon" ]
+    div [ class className ]
         [ svg [ width "100%", height "100%" ] [ use [ xlinkHref ref ] [] ]
         ]
 
