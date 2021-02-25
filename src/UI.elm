@@ -2,6 +2,12 @@ module UI exposing (..)
 
 import Html exposing (Html, code, div, pre, text)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
+
+
+button : String -> msg -> Html msg
+button label clickMsg =
+    Html.button [ onClick clickMsg ] [ text label ]
 
 
 nothing : Html msg

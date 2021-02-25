@@ -18,6 +18,7 @@ import Html
         , header
         , label
         , section
+        , span
         , text
         )
 import Html.Attributes exposing (class, id)
@@ -35,7 +36,6 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Task
 import UI
 import UI.Icon as Icon
-import Util
 
 
 
@@ -271,18 +271,21 @@ viewDefinitionListing listing =
             a [ class "node type", onClick (OpenDefinition hash) ]
                 [ Icon.view Icon.Type
                 , label [] [ text (unqualifiedName fqn) ]
+                , span [ class "definition-type" ] [ text "type" ]
                 ]
 
         TermListing hash fqn ->
             a [ class "node term", onClick (OpenDefinition hash) ]
                 [ Icon.view Icon.Term
                 , label [] [ text (unqualifiedName fqn) ]
+                , span [ class "definition-type" ] [ text "term" ]
                 ]
 
         PatchListing _ ->
             a [ class "node patch" ]
                 [ Icon.view Icon.Patch
                 , label [] [ text "Patch" ]
+                , span [ class "definition-type" ] [ text "patch" ]
                 ]
 
 
@@ -400,7 +403,7 @@ viewOpenDefinitions openDefinitions =
 viewWorkspace : Model -> Html Msg
 viewWorkspace model =
     article [ id "workspace" ]
-        [ header [ id "workspace-toolbar" ] []
+        [ header [ id "workspace-toolbar" ] [ UI.button "Open" NoOp ]
         , section [ id "workspace-content" ]
             [ section
                 [ class "definitions-pane" ]

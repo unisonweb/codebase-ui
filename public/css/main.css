@@ -41,6 +41,8 @@ li {
 
   /* Base colors */
   --color-blue-base: #5695f4;
+  --color-green-base: #27ae60;
+  --color-purple-base: #9a76c8;
   --color-gray-base: #515258;
 
   /* Darker (than base) grays */
@@ -55,7 +57,7 @@ li {
   --color-gray-lighten-40: #d1d5dc;
   --color-gray-lighten-50: #e4e7ec;
   --color-gray-lighten-60: #fafafb;
-  --color-gray-lighten-100: #fff;
+  --color-gray-lighten-100: #ffffff;
 
   /* -- Default Theme -------------------------------------------------------*/
   --color-main-fg: var(--color-gray-darken-30);
@@ -87,6 +89,13 @@ li {
   --color-workspace-highlight-fg: var(--color-blue-base);
   --color-workspace-highlight-bg: var(--color-blue-base);
   --color-workspace-highlight-border: var(--color-blue-base);
+
+  --color-icon-type: var(--color-brand-orange);
+  --color-icon-test: var(--color-green-base);
+  --color-icon-term: var(--color-purple-base);
+  --color-icon-ability: var(--color-brand-bright-red);
+  --color-icon-doc: var(--color-brand-yellow);
+  --color-icon-patch: var(--color-blue-base);
 
   /* -- Default Syntax Theme ------------------------------------------------*/
 
@@ -340,6 +349,30 @@ button {
   transition: all 0.2s;
 }
 
+.icon.type {
+  color: var(--color-icon-type);
+}
+
+.icon.test {
+  color: var(--color-icon-test);
+}
+
+.icon.term {
+  color: var(--color-icon-term);
+}
+
+.icon.ability {
+  color: var(--color-icon-ability);
+}
+
+.icon.doc {
+  color: var(--color-icon-doc);
+}
+
+.icon.patch {
+  color: var(--color-icon-patch);
+}
+
 /* -- Application ---------------------------------------------------------- */
 
 #app {
@@ -393,6 +426,7 @@ button {
   font-size: var(--font-size-medium);
   font-weight: normal;
   color: var(--color-sidebar-subtle-fg);
+  margin-bottom: 0.125rem;
 }
 
 .namespace-tree {
@@ -405,6 +439,8 @@ button {
   align-items: center;
   border-radius: 4px;
   padding-left: 0.5rem;
+  margin-bottom: 0.125rem;
+  height: 1.75rem;
 }
 
 .namespace-tree .node:hover {
@@ -413,14 +449,16 @@ button {
 }
 
 .namespace-tree .node .icon {
-  color: var(--color-sidebar-subtle-fg);
-  width: 1rem;
+  width: 0.875rem;
+  height: 0.875rem;
   text-align: center;
-  margin-left: -0.275rem;
-  margin-right: 0.25rem;
+  margin-right: 0.5rem;
+}
+.namespace-tree .node .icon:is(.caret-right, .caret-down) {
+  color: var(--color-sidebar-subtle-fg);
 }
 
-.namespace-tree .node:hover .icon {
+.namespace-tree .node:hover .icon:is(.caret-right, .caret-down) {
   color: var(--color-sidebar-highlight-fg);
 }
 
@@ -428,6 +466,13 @@ button {
   color: var(--color-sidebar-fg);
   transition: all 0.2s;
   cursor: pointer;
+}
+
+.namespace-tree .node .definition-type {
+  font-family: var(--font-monospace);
+  color: var(--color-sidebar-subtle-fg);
+  margin-left: 0.375rem;
+  font-size: 0.75rem;
 }
 
 .namespace-tree .node:hover label {
