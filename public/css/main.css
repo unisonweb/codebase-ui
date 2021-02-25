@@ -207,11 +207,11 @@ code a:active {
   color: var(--color-syntax-base);
 }
 
-.reference {
+.type-reference {
   color: var(--color-syntax-name);
 }
 
-.referent {
+.term-reference {
   color: var(--color-syntax-name);
 }
 

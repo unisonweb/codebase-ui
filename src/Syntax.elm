@@ -24,12 +24,6 @@ type SeqOp
     | Concat
 
 
-type HashQualified
-    = NameOnly String
-    | HashOnly Hash
-    | HashQualified String Hash
-
-
 type SyntaxType
     = NumericLiteral
     | TextLiteral
@@ -38,8 +32,8 @@ type SyntaxType
     | BooleanLiteral
     | Blank
     | Var
-    | Reference Hash
-    | Referent Hash
+    | TypeReference Hash
+    | TermReference Hash
       -- +:|:+|++
     | Op SeqOp
     | Constructor
@@ -62,7 +56,8 @@ type SyntaxType
     | UseKeyword
     | UsePrefix
     | UseSuffix
-    | HashQualifier HashQualified
+      -- TODO: Should this be NameOnly Name | HashOnly Hash | HashQualified Name Hash
+    | HashQualifier String
       -- ! '
     | DelayForceChar
       -- ? , ` [ ] @ |
@@ -105,11 +100,11 @@ syntaxTypeToClassName sType =
         Var ->
             "var"
 
-        Reference _ ->
-            "reference"
+        TypeReference _ ->
+            "type-reference"
 
-        Referent _ ->
-            "referent"
+        TermReference _ ->
+            "term-reference"
 
         Op seqOp ->
             case seqOp of
@@ -191,10 +186,10 @@ viewSegment toReferenceClickMsg (SyntaxSegment sType sText) =
     let
         hash =
             case sType of
-                Reference h ->
+                TypeReference h ->
                     Just h
 
-                Referent h ->
+                TermReference h ->
                     Just h
 
                 _ ->
@@ -330,34 +325,6 @@ decodeOp =
         )
 
 
-decodeHashQualifier : Decode.Decoder SyntaxType
-decodeHashQualifier =
-    let
-        decodeHashQualifierTag =
-            at [ "annotation", "contents", "tag" ] Decode.string
-
-        decodeNameOnly =
-            Decode.map NameOnly (at [ "annotation", "contents", "contents", "toText" ] Decode.string)
-
-        decodeHashOnly =
-            Decode.map HashOnly (at [ "annotation", "contents", "contents" ] Hash.decode)
-
-        decodeHashQualified =
-            Decode.map2
-                HashQualified
-                (at [ "annotation", "contents", "contents", "toText" ] (Decode.index 0 Decode.string))
-                (at [ "annotation", "contents", "contents" ] (Decode.index 1 Hash.decode))
-    in
-    Decode.map
-        HashQualifier
-        (Decode.oneOf
-            [ when decodeHashQualifierTag ((==) "NameOnly") decodeNameOnly
-            , when decodeHashQualifierTag ((==) "HashOnly") decodeHashOnly
-            , when decodeHashQualifierTag ((==) "HashQualified") decodeHashQualified
-            ]
-        )
-
-
 decodeTag : Decode.Decoder String
 decodeTag =
     Decode.oneOf
@@ -369,16 +336,19 @@ decodeTag =
 decodeSyntaxSegment : Decode.Decoder SyntaxSegment
 decodeSyntaxSegment =
     let
-        decodeReferent =
-            Decode.map Referent (at [ "annotation", "contents" ] Hash.decode)
+        decodeTermReference =
+            Decode.map TermReference (at [ "annotation", "contents" ] Hash.decode)
 
-        decodeReference =
-            Decode.map Reference (at [ "annotation", "contents" ] Hash.decode)
+        decodeTypeReference =
+            Decode.map TypeReference (at [ "annotation", "contents" ] Hash.decode)
+
+        decodeHashQualifier =
+            Decode.map HashQualifier (at [ "annotation", "contents" ] Decode.string)
     in
     Decode.map2 SyntaxSegment
         (Decode.oneOf
-            [ when decodeTag ((==) "Referent") decodeReferent
-            , when decodeTag ((==) "Reference") decodeReference
+            [ when decodeTag ((==) "TermReference") decodeTermReference
+            , when decodeTag ((==) "TypeReference") decodeTypeReference
             , when decodeTag ((==) "Op") decodeOp
             , when decodeTag ((==) "HashQualifier") decodeHashQualifier
             , decodeTag |> andThen (simpleSyntaxTypeFromString >> Decode.succeed)

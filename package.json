@@ -1,20 +1,21 @@
 {
-  "name": "codebase-browser",
+  "name": "codebase-ui",
   "version": "1.0.0",
-  "description": "Unison Codebase Browser",
+  "description": "Unison Codebase UI",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/unisonweb/codebase-browser.git"
+    "url": "git+https://github.com/unisonweb/codebase-ui.git"
   },
   "scripts": {
     "build": "elm make src/Main.elm --output public/bundle.js",
-    "start": "elm-live src/Main.elm --path-to-elm=node_modules/.bin/elm --dir=public --pushstate --verbose --proxy-prefix=/api --proxy-host=http://localhost:8081 -- --output public/bundle.js",
-    "test": "elm-test"
+    "start": "npm run makeElmEnv; elm-live src/Main.elm --path-to-elm=node_modules/.bin/elm --dir=public --pushstate --verbose --proxy-prefix=/api --proxy-host=${API_URL} -- --output public/bundle.js",
+    "test": "elm-test",
+    "makeElmEnv": "node ./scripts/makeElmEnv.mjs"
   },
   "bugs": {
-    "url": "https://github.com/unisonweb/codebase-browser/issues"
+    "url": "https://github.com/unisonweb/codebase-ui/issues"
   },
-  "homepage": "https://github.com/unisonweb/codebase-browser#readme",
+  "homepage": "https://github.com/unisonweb/codebase-ui#readme",
   "devDependencies": {
     "elm": "^0.19.1-5",
     "elm-format": "^0.8.5",
