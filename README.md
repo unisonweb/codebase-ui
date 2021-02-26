@@ -6,8 +6,17 @@ Unison Codebase UI
 Running
 -------
 
-With a `ucm` running, run `npm start` in the `codebase-browser` directory to start the development server
+Start `ucm` and copy the API URL and API Token (this URL is uniquely generated
+by `ucm` at start-up) from the `ucm` start-up output (It's formatted as
+a single URL with a query string. Get the token by from the query string).
 
+Then start the development server, run:
+
+```sh
+API_URL="<API URL FROM UCM>" API_TOKEN="<API TOKEN FROM UCM>" npm start
+```
+
+Then visit `http://localhost:8000` to use the UI.
 
 Generating Icon Sprite
 ----------------------

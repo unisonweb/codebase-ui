@@ -1,30 +1,22 @@
-module Api exposing (..)
+module Api exposing (definitions, errorToString, list)
 
+import Env
 import Http
 import Url.Builder exposing (QueryParameter, absolute, string)
 
 
-
--- URL HELPERS
-
-
-serverUrl : List String -> List QueryParameter -> String
-serverUrl path queryParams =
-    absolute ("api" :: path) queryParams
-
-
 {-| TODO: Be more explicit about Root |
 -}
-listUrl : Maybe String -> String
-listUrl rawFQN =
+list : Maybe String -> String
+list rawFQN =
     rawFQN
         |> Maybe.map (\n -> [ string "namespace" n ])
         |> Maybe.withDefault []
         |> serverUrl [ "list" ]
 
 
-definitionUrl : List String -> String
-definitionUrl hashes =
+definitions : List String -> String
+definitions hashes =
     hashes
         |> List.map (string "names")
         |> serverUrl [ "getDefinition" ]
@@ -51,3 +43,20 @@ errorToString err =
 
         Http.BadUrl url ->
             "Malformed url: " ++ url
+
+
+
+-- PRIVATE URL HELPERS
+
+
+serverUrl : List String -> List QueryParameter -> String
+serverUrl path queryParams =
+    let
+        url =
+            absolute ("api" :: path) queryParams
+    in
+    if String.contains "?" url then
+        url ++ "&" ++ Env.apiToken
+
+    else
+        url ++ "?" ++ Env.apiToken

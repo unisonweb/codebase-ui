@@ -215,7 +215,7 @@ fetchRootNamespaceListing =
             FQN.fromString "."
     in
     Http.get
-        { url = Api.listUrl Nothing
+        { url = Api.list Nothing
         , expect = Http.expectJson FetchRootNamespaceListingFinished (NamespaceListing.decode rootFqn)
         }
 
@@ -223,7 +223,7 @@ fetchRootNamespaceListing =
 fetchSubNamespaceListing : FQN -> Cmd Msg
 fetchSubNamespaceListing fqn =
     Http.get
-        { url = Api.listUrl (Just (FQN.toString fqn))
+        { url = Api.list (Just (FQN.toString fqn))
         , expect = Http.expectJson (FetchSubNamespaceListingFinished fqn) (NamespaceListing.decode fqn)
         }
 
@@ -231,7 +231,7 @@ fetchSubNamespaceListing fqn =
 fetchDefinitions : List Hash -> Cmd Msg
 fetchDefinitions hashes =
     Http.get
-        { url = Api.definitionUrl (List.map Hash.toString hashes)
+        { url = Api.definitions (List.map Hash.toString hashes)
         , expect = Http.expectJson (FetchOpenDefinitionsFinished hashes) Definition.decodeList
         }
 
