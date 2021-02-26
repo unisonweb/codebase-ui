@@ -1,7 +1,9 @@
 module App exposing (..)
 
 import Api
+import Browser
 import Browser.Dom as Dom
+import Browser.Navigation as Nav
 import Definition exposing (Definition(..))
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
@@ -36,6 +38,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Task
 import UI
 import UI.Icon as Icon
+import Url exposing (Url)
 
 
 
@@ -43,17 +46,21 @@ import UI.Icon as Icon
 
 
 type alias Model =
-    { openDefinitions : OpenDefinitions
+    { navKey : Nav.Key
+    , currentUrl : Url
+    , openDefinitions : OpenDefinitions
     , rootNamespaceListing : WebData NamespaceListing
     , expandedNamespaceListings : FQNSet
     }
 
 
-init : () -> ( Model, Cmd Msg )
-init _ =
+init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init _ initialUrl navKey =
     let
         model =
-            { openDefinitions = OpenDefinitions.empty
+            { navKey = navKey
+            , currentUrl = initialUrl
+            , openDefinitions = OpenDefinitions.empty
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = FQNSet.empty
             }
@@ -67,6 +74,8 @@ init _ =
 
 type Msg
     = NoOp
+    | LinkClicked Browser.UrlRequest
+    | UrlChanged Url
     | ToggleExpandedNamespaceListing FQN
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
@@ -80,6 +89,12 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         NoOp ->
+            ( model, Cmd.none )
+
+        LinkClicked _ ->
+            ( model, Cmd.none )
+
+        UrlChanged _ ->
             ( model, Cmd.none )
 
         ToggleExpandedNamespaceListing fqn ->
@@ -412,9 +427,13 @@ viewWorkspace model =
         ]
 
 
-view : Model -> Html Msg
+view : Model -> Browser.Document Msg
 view model =
-    div [ id "app" ]
-        [ viewMainSidebar model
-        , viewWorkspace model
+    { title = "Unison Codebase"
+    , body =
+        [ div [ id "app" ]
+            [ viewMainSidebar model
+            , viewWorkspace model
+            ]
         ]
+    }
