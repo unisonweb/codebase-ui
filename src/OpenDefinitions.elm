@@ -3,8 +3,8 @@
    the Workspace area. It supports holding Loading definitions and inserting
    definitions after another.
 
-   It features a `focus` indicator and a before and after just like a Zipper,
-   but is based on OrderedDicts. `focus` can be changed with `next` and `prev`.
+   It features a `focus` indicator and a before and after just like a Zipper.
+   `focus` can be changed with `next` and `prev`.
 
    Invariants:
      It structurally can't hold the invariant that it should not contain
@@ -40,18 +40,7 @@ import Definition exposing (Definition)
 import Hash exposing (Hash)
 import List
 import List.Extra as ListE
-import OrderedDict exposing (OrderedDict)
 import RemoteData exposing (WebData)
-
-
-type alias DefinitionDict =
-    OrderedDict String (WebData Definition)
-
-
-type alias HashIndexedDefinition =
-    { hash : Hash
-    , definition : WebData Definition
-    }
 
 
 {-| This technically allows multiple of the same definition across the 3 fields.
@@ -60,10 +49,16 @@ This is conceptionally not allowed and is enforced by the helper functions.
 type OpenDefinitions
     = Empty
     | OpenDefinitions
-        { before : DefinitionDict
+        { before : List HashIndexedDefinition
         , focus : HashIndexedDefinition
-        , after : DefinitionDict
+        , after : List HashIndexedDefinition
         }
+
+
+type alias HashIndexedDefinition =
+    { hash : Hash
+    , definition : WebData Definition
+    }
 
 
 init : Maybe Hash -> OpenDefinitions
@@ -82,11 +77,7 @@ fromDefinitions :
     -> List HashIndexedDefinition
     -> OpenDefinitions
 fromDefinitions before focus_ after =
-    OpenDefinitions
-        { before = defDictFromList before
-        , focus = focus_
-        , after = defDictFromList after
-        }
+    OpenDefinitions { before = before, focus = focus_, after = after }
 
 
 empty : OpenDefinitions
@@ -106,11 +97,7 @@ isEmpty openDefinitions =
 
 singleton : HashIndexedDefinition -> OpenDefinitions
 singleton hashIndexedDefinition =
-    OpenDefinitions
-        { before = OrderedDict.empty
-        , focus = hashIndexedDefinition
-        , after = OrderedDict.empty
-        }
+    OpenDefinitions { before = [], focus = hashIndexedDefinition, after = [] }
 
 
 
@@ -118,24 +105,8 @@ singleton hashIndexedDefinition =
 
 
 insertWithFocus : HashIndexedDefinition -> OpenDefinitions -> OpenDefinitions
-insertWithFocus hashIndexedDefinition od =
-    case od of
-        Empty ->
-            singleton hashIndexedDefinition
-
-        OpenDefinitions _ ->
-            let
-                newBefore =
-                    od
-                        |> toList
-                        |> List.map hashIndexedDefinitionToRawPair
-                        |> OrderedDict.fromList
-            in
-            OpenDefinitions
-                { before = newBefore
-                , focus = hashIndexedDefinition
-                , after = OrderedDict.empty
-                }
+insertWithFocus hid od =
+    OpenDefinitions { before = toList od, focus = hid, after = [] }
 
 
 {-| Insert after a Hash. If the Hash is not in OpenDefinitions, insert at the
@@ -164,9 +135,9 @@ insertWithFocusAfter afterHash toInsert openDefinitions =
 
                     make ( before, afterInclusive ) =
                         OpenDefinitions
-                            { before = defDictFromList before
+                            { before = before
                             , focus = toInsert
-                            , after = defDictFromList (List.drop 1 afterInclusive)
+                            , after = List.drop 1 afterInclusive
                             }
                 in
                 openDefinitions
@@ -200,32 +171,32 @@ remove hash od =
             Empty
 
         OpenDefinitions data ->
+            let
+                without h list =
+                    ListE.filterNot (.hash >> Hash.equals h) list
+            in
             if Hash.equals hash data.focus.hash then
                 let
                     rightBeforeFocus =
-                        data.before
-                            |> OrderedDict.toList
-                            |> ListE.last
+                        ListE.last data.before
 
                     rightAfterFocus =
-                        data.after
-                            |> OrderedDict.toList
-                            |> List.head
+                        List.head data.after
                 in
                 case rightAfterFocus of
-                    Just ( rawHash, d ) ->
+                    Just hid ->
                         OpenDefinitions
                             { before = data.before
-                            , focus = HashIndexedDefinition (Hash.fromString rawHash) d
-                            , after = OrderedDict.remove rawHash data.after
+                            , focus = hid
+                            , after = without hid.hash data.after
                             }
 
                     Nothing ->
                         case rightBeforeFocus of
-                            Just ( rawHash, d ) ->
+                            Just hid ->
                                 OpenDefinitions
-                                    { before = OrderedDict.remove rawHash data.before
-                                    , focus = HashIndexedDefinition (Hash.fromString rawHash) d
+                                    { before = without hid.hash data.before
+                                    , focus = hid
                                     , after = data.after
                                     }
 
@@ -233,14 +204,10 @@ remove hash od =
                                 Empty
 
             else
-                let
-                    rawHash =
-                        Hash.toString hash
-                in
                 OpenDefinitions
-                    { before = OrderedDict.remove rawHash data.before
+                    { before = without hash data.before
                     , focus = data.focus
-                    , after = OrderedDict.remove rawHash data.after
+                    , after = without hash data.after
                     }
 
 
@@ -250,16 +217,7 @@ remove hash od =
 
 member : Hash -> OpenDefinitions -> Bool
 member hash od =
-    case od of
-        Empty ->
-            False
-
-        OpenDefinitions data ->
-            let
-                rawHash =
-                    Hash.toString hash
-            in
-            Hash.equals data.focus.hash hash || OrderedDict.member rawHash data.before || OrderedDict.member rawHash data.after
+    od |> hashes |> List.member hash
 
 
 hashes : OpenDefinitions -> List Hash
@@ -296,15 +254,15 @@ next openDefinitions =
             Empty
 
         OpenDefinitions data ->
-            case OrderedDict.toList data.after of
+            case data.after of
                 [] ->
                     openDefinitions
 
                 newFocus :: rest ->
                     OpenDefinitions
-                        { before = OrderedDict.insert (Hash.toString data.focus.hash) data.focus.definition data.before
-                        , focus = hashIndexedDefinitionFromRawPair newFocus
-                        , after = OrderedDict.fromList rest
+                        { before = data.before ++ [ data.focus ]
+                        , focus = newFocus
+                        , after = rest
                         }
 
 
@@ -315,27 +273,15 @@ prev openDefinitions =
             Empty
 
         OpenDefinitions data ->
-            let
-                after =
-                    data.after
-                        |> OrderedDict.toList
-                        |> (\l -> hashIndexedDefinitionToRawPair data.focus :: l)
-                        |> OrderedDict.fromList
-
-                before =
-                    data.before
-                        |> OrderedDict.toList
-                        |> ListE.unconsLast
-            in
-            case before of
+            case ListE.unconsLast data.before of
                 Nothing ->
                     openDefinitions
 
                 Just ( newFocus, newBefore ) ->
                     OpenDefinitions
-                        { before = OrderedDict.fromList newBefore
-                        , focus = hashIndexedDefinitionFromRawPair newFocus
-                        , after = after
+                        { before = newBefore
+                        , focus = newFocus
+                        , after = data.focus :: data.after
                         }
 
 
@@ -354,18 +300,13 @@ map f openDefinitions =
 
         OpenDefinitions data ->
             let
-                mapper rawHash d =
-                    f (hashIndexedDefinitionFromRawHash rawHash d)
-
-                newFocus =
-                    { hash = data.focus.hash
-                    , definition = f data.focus
-                    }
+                f_ hid =
+                    { hash = hid.hash, definition = f hid }
             in
             OpenDefinitions
-                { before = OrderedDict.map mapper data.before
-                , focus = newFocus
-                , after = OrderedDict.map mapper data.after
+                { before = List.map f_ data.before
+                , focus = f_ data.focus
+                , after = List.map f_ data.after
                 }
 
 
@@ -379,17 +320,17 @@ mapToList f openDefinitions =
             let
                 before =
                     data.before
-                        |> OrderedDict.toList
-                        |> List.map (\pair -> f (hashIndexedDefinitionFromRawPair pair) False)
+                        |> List.map (\hid -> f hid False)
 
                 after =
                     data.after
-                        |> OrderedDict.toList
-                        |> List.map (\pair -> f (hashIndexedDefinitionFromRawPair pair) False)
+                        |> List.map (\hid -> f hid False)
             in
             before ++ (f data.focus True :: after)
 
 
+{-| Convert the open definitions to a list, looses the focus indicator
+-}
 toList : OpenDefinitions -> List HashIndexedDefinition
 toList openDefinitions =
     case openDefinitions of
@@ -397,39 +338,4 @@ toList openDefinitions =
             []
 
         OpenDefinitions data ->
-            let
-                toList_ =
-                    OrderedDict.toList >> List.map hashIndexedDefinitionFromRawPair
-            in
-            toList_ data.before ++ (data.focus :: toList_ data.after)
-
-
-
--- INTERNAL HELPERS
-
-
-hashIndexedDefinitionFromRawPair :
-    ( String, WebData Definition )
-    -> HashIndexedDefinition
-hashIndexedDefinitionFromRawPair ( rawHash, def ) =
-    hashIndexedDefinitionFromRawHash rawHash def
-
-
-hashIndexedDefinitionFromRawHash :
-    String
-    -> WebData Definition
-    -> HashIndexedDefinition
-hashIndexedDefinitionFromRawHash rawHash def =
-    HashIndexedDefinition (Hash.fromString rawHash) def
-
-
-hashIndexedDefinitionToRawPair :
-    HashIndexedDefinition
-    -> ( String, WebData Definition )
-hashIndexedDefinitionToRawPair hashIndexedDefinition =
-    ( Hash.toString hashIndexedDefinition.hash, hashIndexedDefinition.definition )
-
-
-defDictFromList : List HashIndexedDefinition -> DefinitionDict
-defDictFromList =
-    List.map hashIndexedDefinitionToRawPair >> OrderedDict.fromList
+            data.before ++ (data.focus :: data.after)
