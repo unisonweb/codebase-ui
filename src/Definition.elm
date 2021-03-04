@@ -183,3 +183,12 @@ decodeList =
     Decode.map2 List.append
         (field "termDefinitions" decodeTerms)
         (field "typeDefinitions" decodeTypes)
+
+
+decodeHead : Decode.Decoder Definition
+decodeHead =
+    Decode.map List.head decodeList
+        |> Decode.andThen
+            (Maybe.map Decode.succeed
+                >> Maybe.withDefault (Decode.fail "Empty list")
+            )

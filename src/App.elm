@@ -26,14 +26,13 @@ import Html
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Http
-import List.Extra as ListE
 import NamespaceListing
     exposing
         ( DefinitionListing(..)
         , NamespaceListing(..)
         , NamespaceListingContent
         )
-import OpenDefinitions exposing (OpenDefinitions)
+import OpenDefinitions exposing (HashIndexedDefinition, OpenDefinitions)
 import RemoteData exposing (RemoteData(..), WebData)
 import Task
 import UI
@@ -60,7 +59,7 @@ init _ initialUrl navKey =
         model =
             { navKey = navKey
             , currentUrl = initialUrl
-            , openDefinitions = OpenDefinitions.empty
+            , openDefinitions = OpenDefinitions.init Nothing
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = FQNSet.empty
             }
@@ -82,7 +81,7 @@ type Msg
     | OpenDefinition Hash
     | OpenDefinitionAfter Hash Hash
     | CloseDefinition Hash
-    | FetchOpenDefinitionsFinished (List Hash) (Result Http.Error (List Definition))
+    | FetchOpenDefinitionFinished Hash (WebData Definition)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -163,28 +162,10 @@ update msg model =
             , Cmd.none
             )
 
-        FetchOpenDefinitionsFinished hashes result ->
+        FetchOpenDefinitionFinished hash response ->
             let
-                resultOrFailure definitions h =
-                    let
-                        definitionRequest =
-                            definitions
-                                |> ListE.find (\d -> Hash.equals h (Definition.hash d))
-                                |> Maybe.map Success
-                                |> Maybe.withDefault (Failure (Http.BadStatus 404))
-                    in
-                    ( h, definitionRequest )
-
-                resultList =
-                    case result of
-                        Err err ->
-                            List.map (\h -> ( h, Failure err )) hashes
-
-                        Ok definitions ->
-                            List.map (resultOrFailure definitions) hashes
-
                 nextOpenDefinitions =
-                    OpenDefinitions.replaceItems resultList model.openDefinitions
+                    OpenDefinitions.replace hash response model.openDefinitions
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
 
@@ -206,16 +187,22 @@ openDefinition model afterHash hash =
 
     else
         let
-            nextOpenDefinitions =
+            toInsert =
+                HashIndexedDefinition hash Loading
+
+            insert =
                 case afterHash of
                     Nothing ->
-                        OpenDefinitions.insert ( hash, Loading ) model.openDefinitions
+                        OpenDefinitions.insertWithFocus toInsert
 
                     Just h ->
-                        OpenDefinitions.insertAfter h ( hash, Loading ) model.openDefinitions
+                        OpenDefinitions.insertWithFocusAfter h toInsert
+
+            nextOpenDefinitions =
+                insert model.openDefinitions
         in
         ( { model | openDefinitions = nextOpenDefinitions }
-        , Cmd.batch [ fetchDefinitions [ hash ], scrollToDefinition hash ]
+        , Cmd.batch [ fetchDefinition hash, scrollToDefinition hash ]
         )
 
 
@@ -243,11 +230,16 @@ fetchSubNamespaceListing fqn =
         }
 
 
-fetchDefinitions : List Hash -> Cmd Msg
-fetchDefinitions hashes =
+fetchDefinition : Hash -> Cmd Msg
+fetchDefinition hash =
     Http.get
-        { url = Api.definitions (List.map Hash.toString hashes)
-        , expect = Http.expectJson (FetchOpenDefinitionsFinished hashes) Definition.decodeList
+        { url = Api.definitions [ Hash.toString hash ]
+        , expect =
+            Http.expectJson
+                (RemoteData.fromResult
+                    >> FetchOpenDefinitionFinished hash
+                )
+                Definition.decodeHead
         }
 
 
@@ -409,10 +401,8 @@ viewDefinition hash definition =
 
 
 viewOpenDefinitions : OpenDefinitions -> List (Html Msg)
-viewOpenDefinitions openDefinitions =
-    openDefinitions
-        |> OpenDefinitions.toList
-        |> List.map (\( h, d ) -> viewDefinition h d)
+viewOpenDefinitions =
+    OpenDefinitions.mapToList (\hid _ -> viewDefinition hid.hash hid.definition)
 
 
 viewWorkspace : Model -> Html Msg

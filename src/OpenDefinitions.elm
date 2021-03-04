@@ -1,131 +1,214 @@
+{-
+   OpenDefinitions is the main data structure for working with definitions in
+   the Workspace area. It supports holding Loading definitions and inserting
+   definitions after another.
+
+   It features a `focus` indicator and a before and after just like a Zipper.
+   `focus` can be changed with `next` and `prev`.
+
+   Invariants:
+     It structurally can't hold the invariant that it should not contain
+     duplicates, so this is instead enforced via the API; uniqueness is
+     determined by Hash.
+-}
+
+
 module OpenDefinitions exposing
-    ( OpenDefinitions
-    , definitions
+    ( HashIndexedDefinition
+    , OpenDefinitions
     , empty
-    , fromList
-    , get
+    , focus
+    , fromDefinitions
     , hashes
-    , insert
-    , insertAfter
-    , loading
+    , init
+    , insertWithFocus
+    , insertWithFocusAfter
+    , isEmpty
+    , isFocused
+    , map
+    , mapToList
     , member
+    , next
+    , prev
     , remove
     , replace
-    , replaceItems
+    , singleton
     , toList
-    , update
     )
 
 import Definition exposing (Definition)
 import Hash exposing (Hash)
-import OrderedDict exposing (OrderedDict)
+import List
+import List.Extra as ListE
 import RemoteData exposing (WebData)
 
 
-
-{-
-   OpenDefinitions is the main data structure for working with definitions in
-   the Workspace area. It wraps an OrderedDirect (Hash to Definition), but is
-   opaque to that underlying data structure and only exposes a few key APIs,
-   including a few convenience functions for working with, loading and opening
-   Definitions.
+{-| This technically allows multiple of the same definition across the 3 fields.
+This is conceptionally not allowed and is enforced by the helper functions.
 -}
-
-
 type OpenDefinitions
-    = OpenDefinitions (OrderedDict String (WebData Definition))
+    = Empty
+    | OpenDefinitions
+        { before : List HashIndexedDefinition
+        , focus : HashIndexedDefinition
+        , after : List HashIndexedDefinition
+        }
 
 
+type alias HashIndexedDefinition =
+    { hash : Hash
+    , definition : WebData Definition
+    }
 
--- BUILD
+
+init : Maybe Hash -> OpenDefinitions
+init focused =
+    case focused of
+        Nothing ->
+            Empty
+
+        Just h ->
+            singleton { hash = h, definition = RemoteData.NotAsked }
+
+
+fromDefinitions :
+    List HashIndexedDefinition
+    -> HashIndexedDefinition
+    -> List HashIndexedDefinition
+    -> OpenDefinitions
+fromDefinitions before focus_ after =
+    OpenDefinitions { before = before, focus = focus_, after = after }
 
 
 empty : OpenDefinitions
 empty =
-    OpenDefinitions OrderedDict.empty
+    Empty
 
 
-loading : List Hash -> OpenDefinitions
-loading list =
-    list
-        |> List.map (\h -> ( h, RemoteData.Loading ))
-        |> fromList
+isEmpty : OpenDefinitions -> Bool
+isEmpty openDefinitions =
+    case openDefinitions of
+        Empty ->
+            True
+
+        OpenDefinitions _ ->
+            False
 
 
-fromList : List ( Hash, WebData Definition ) -> OpenDefinitions
-fromList list =
-    list
-        |> List.map (Tuple.mapFirst Hash.toString)
-        |> OrderedDict.fromList
-        |> OpenDefinitions
+singleton : HashIndexedDefinition -> OpenDefinitions
+singleton hashIndexedDefinition =
+    OpenDefinitions { before = [], focus = hashIndexedDefinition, after = [] }
 
 
-update :
-    Hash
-    -> (Maybe (WebData Definition) -> Maybe (WebData Definition))
-    -> OpenDefinitions
-    -> OpenDefinitions
-update h f (OpenDefinitions dict) =
-    OpenDefinitions (OrderedDict.update (Hash.toString h) f dict)
+
+-- MODIFY
 
 
-{-| Replace existing item |
--}
-replace : Hash -> WebData Definition -> OpenDefinitions -> OpenDefinitions
-replace h def openDefinition =
-    update h (Maybe.map (always def)) openDefinition
-
-
-{-| Replace existing items in OpenDefinitions |
--}
-replaceItems :
-    List ( Hash, WebData Definition )
-    -> OpenDefinitions
-    -> OpenDefinitions
-replaceItems items openDefinitions =
-    let
-        replacer ( h, d ) acc =
-            replace h d acc
-    in
-    List.foldl replacer openDefinitions items
-
-
-remove : Hash -> OpenDefinitions -> OpenDefinitions
-remove h (OpenDefinitions dict) =
-    OpenDefinitions (OrderedDict.remove (Hash.toString h) dict)
-
-
-insert : ( Hash, WebData Definition ) -> OpenDefinitions -> OpenDefinitions
-insert ( h, definition ) (OpenDefinitions dict) =
-    OpenDefinitions (OrderedDict.insert (Hash.toString h) definition dict)
+insertWithFocus : HashIndexedDefinition -> OpenDefinitions -> OpenDefinitions
+insertWithFocus hid od =
+    OpenDefinitions { before = toList od, focus = hid, after = [] }
 
 
 {-| Insert after a Hash. If the Hash is not in OpenDefinitions, insert at the
 end. If the element to insert already exists in OpenDefinitions, move it to
-after the provided Hash |
+after the provided Hash
 -}
-insertAfter : Hash -> ( Hash, WebData Definition ) -> OpenDefinitions -> OpenDefinitions
-insertAfter afterHash (( hashToInsert, _ ) as definitionRow) openDefinitions =
-    let
-        after (( h, _ ) as elem) =
-            if Hash.equals afterHash h then
-                [ elem, definitionRow ]
+insertWithFocusAfter :
+    Hash
+    -> HashIndexedDefinition
+    -> OpenDefinitions
+    -> OpenDefinitions
+insertWithFocusAfter afterHash toInsert openDefinitions =
+    case openDefinitions of
+        Empty ->
+            singleton toInsert
+
+        OpenDefinitions _ ->
+            if member afterHash openDefinitions then
+                let
+                    insertAfter def =
+                        if Hash.equals def.hash afterHash then
+                            [ def, toInsert ]
+
+                        else
+                            [ def ]
+
+                    make ( before, afterInclusive ) =
+                        OpenDefinitions
+                            { before = before
+                            , focus = toInsert
+                            , after = List.drop 1 afterInclusive
+                            }
+                in
+                openDefinitions
+                    |> toList
+                    |> List.concatMap insertAfter
+                    |> ListE.splitWhen (\d -> Hash.equals toInsert.hash d.hash)
+                    |> Maybe.map make
+                    |> Maybe.withDefault (singleton toInsert)
 
             else
-                [ elem ]
+                insertWithFocus toInsert openDefinitions
 
-        insertAfter_ defs =
-            defs
-                |> toList
-                |> List.filter (\( h, _ ) -> not (Hash.equals h hashToInsert))
-                |> List.concatMap after
-                |> fromList
+
+replace : Hash -> WebData Definition -> OpenDefinitions -> OpenDefinitions
+replace hash newDef ods =
+    let
+        replaceMatching d =
+            if Hash.equals d.hash hash then
+                newDef
+
+            else
+                d.definition
     in
-    if member afterHash openDefinitions then
-        insertAfter_ openDefinitions
+    map replaceMatching ods
 
-    else
-        insert definitionRow openDefinitions
+
+remove : Hash -> OpenDefinitions -> OpenDefinitions
+remove hash od =
+    case od of
+        Empty ->
+            Empty
+
+        OpenDefinitions data ->
+            let
+                without h list =
+                    ListE.filterNot (.hash >> Hash.equals h) list
+            in
+            if Hash.equals hash data.focus.hash then
+                let
+                    rightBeforeFocus =
+                        ListE.last data.before
+
+                    rightAfterFocus =
+                        List.head data.after
+                in
+                case rightAfterFocus of
+                    Just hid ->
+                        OpenDefinitions
+                            { before = data.before
+                            , focus = hid
+                            , after = without hid.hash data.after
+                            }
+
+                    Nothing ->
+                        case rightBeforeFocus of
+                            Just hid ->
+                                OpenDefinitions
+                                    { before = without hid.hash data.before
+                                    , focus = hid
+                                    , after = data.after
+                                    }
+
+                            Nothing ->
+                                Empty
+
+            else
+                OpenDefinitions
+                    { before = without hash data.before
+                    , focus = data.focus
+                    , after = without hash data.after
+                    }
 
 
 
@@ -133,33 +216,126 @@ insertAfter afterHash (( hashToInsert, _ ) as definitionRow) openDefinitions =
 
 
 member : Hash -> OpenDefinitions -> Bool
-member hash (OpenDefinitions dict) =
-    OrderedDict.member (Hash.toString hash) dict
-
-
-get : Hash -> OpenDefinitions -> Maybe (WebData Definition)
-get h (OpenDefinitions dict) =
-    OrderedDict.get (Hash.toString h) dict
-
-
-
--- CONVERSIONS
+member hash od =
+    od |> hashes |> List.member hash
 
 
 hashes : OpenDefinitions -> List Hash
-hashes (OpenDefinitions dict) =
-    dict
-        |> OrderedDict.keys
-        |> List.map Hash.fromString
+hashes =
+    toList >> List.map .hash
 
 
-definitions : OpenDefinitions -> List (WebData Definition)
-definitions (OpenDefinitions dict) =
-    OrderedDict.values dict
+
+-- Focus
 
 
-toList : OpenDefinitions -> List ( Hash, WebData Definition )
-toList (OpenDefinitions dict) =
-    dict
-        |> OrderedDict.toList
-        |> List.map (Tuple.mapFirst Hash.fromString)
+focus : OpenDefinitions -> Maybe HashIndexedDefinition
+focus openDefinitions =
+    case openDefinitions of
+        Empty ->
+            Nothing
+
+        OpenDefinitions data ->
+            Just data.focus
+
+
+isFocused : Hash -> OpenDefinitions -> Bool
+isFocused hash openDefinitions =
+    openDefinitions
+        |> focus
+        |> Maybe.map (.hash >> Hash.equals hash)
+        |> Maybe.withDefault False
+
+
+next : OpenDefinitions -> OpenDefinitions
+next openDefinitions =
+    case openDefinitions of
+        Empty ->
+            Empty
+
+        OpenDefinitions data ->
+            case data.after of
+                [] ->
+                    openDefinitions
+
+                newFocus :: rest ->
+                    OpenDefinitions
+                        { before = data.before ++ [ data.focus ]
+                        , focus = newFocus
+                        , after = rest
+                        }
+
+
+prev : OpenDefinitions -> OpenDefinitions
+prev openDefinitions =
+    case openDefinitions of
+        Empty ->
+            Empty
+
+        OpenDefinitions data ->
+            case ListE.unconsLast data.before of
+                Nothing ->
+                    openDefinitions
+
+                Just ( newFocus, newBefore ) ->
+                    OpenDefinitions
+                        { before = newBefore
+                        , focus = newFocus
+                        , after = data.focus :: data.after
+                        }
+
+
+
+-- TRANFORM
+
+
+map :
+    (HashIndexedDefinition -> WebData Definition)
+    -> OpenDefinitions
+    -> OpenDefinitions
+map f openDefinitions =
+    case openDefinitions of
+        Empty ->
+            Empty
+
+        OpenDefinitions data ->
+            let
+                f_ hid =
+                    { hash = hid.hash, definition = f hid }
+            in
+            OpenDefinitions
+                { before = List.map f_ data.before
+                , focus = f_ data.focus
+                , after = List.map f_ data.after
+                }
+
+
+mapToList : (HashIndexedDefinition -> Bool -> a) -> OpenDefinitions -> List a
+mapToList f openDefinitions =
+    case openDefinitions of
+        Empty ->
+            []
+
+        OpenDefinitions data ->
+            let
+                before =
+                    data.before
+                        |> List.map (\hid -> f hid False)
+
+                after =
+                    data.after
+                        |> List.map (\hid -> f hid False)
+            in
+            before ++ (f data.focus True :: after)
+
+
+{-| Convert the open definitions to a list, looses the focus indicator
+-}
+toList : OpenDefinitions -> List HashIndexedDefinition
+toList openDefinitions =
+    case openDefinitions of
+        Empty ->
+            []
+
+        OpenDefinitions data ->
+            data.before ++ (data.focus :: data.after)
