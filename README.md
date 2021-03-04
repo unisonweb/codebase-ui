@@ -6,17 +6,19 @@ Unison Codebase UI
 Running
 -------
 
-Start `ucm` and copy the API URL and API Token (this URL is uniquely generated
-by `ucm` at start-up) from the `ucm` start-up output (It's formatted as
-a single URL with a query string. Get the token by from the query string).
+1. Start `ucm` and copy the API URL and API Token (this URL is uniquely generated
+   by `ucm` at start-up) from the `ucm` start-up output (It's formatted as
+   a single URL with a query string. Get the token by from the query string).
 
-Then start the development server, run:
+2. Make sure the latest dependencies are installed with by running `npm install`
 
-```sh
-API_URL="<API URL FROM UCM>" API_TOKEN="<API TOKEN FROM UCM>" npm start
-```
+3. Start the development server, run:
 
-Then visit `http://localhost:8000` to use the UI.
+  ```sh
+  API_URL="<API URL FROM UCM>" API_TOKEN="<API TOKEN FROM UCM>" npm start
+  ```
+
+4. Visit `http://localhost:8000` in a browser.
 
 Generating Icon Sprite
 ----------------------
