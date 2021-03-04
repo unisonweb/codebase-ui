@@ -21,5 +21,8 @@
     "elm-format": "^0.8.5",
     "elm-live": "^4.0.0-rc.1",
     "elm-test": "^0.19.1-revision6"
+  },
+  "engines": {    
+    "node": ">=12.0.0"
   }
 }
