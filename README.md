@@ -8,15 +8,11 @@ Running
 
 1. Start `ucm` and copy the API URL and API Token (this URL is uniquely generated
    by `ucm` at start-up) from the `ucm` start-up output (It's formatted as
-   a single URL with a query string. Get the token by from the query string).
+   a single URL with a query string. Get the token by from the query string, splitting on the `?`).
 
 2. Make sure the latest dependencies are installed with by running `npm install`
 
-3. Start the development server, run:
-
-  ```sh
-  API_URL="<API URL FROM UCM>" API_TOKEN="<API TOKEN FROM UCM>" npm start
-  ```
+3. Start the development server, run: `API_URL="<API URL FROM UCM>" API_TOKEN="<API TOKEN FROM UCM>" npm start`
 
 4. Visit `http://localhost:8000` in a browser.
 
