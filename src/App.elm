@@ -3,6 +3,7 @@ module App exposing (..)
 import Api
 import Browser
 import Browser.Dom as Dom
+import Browser.Events
 import Browser.Navigation as Nav
 import Definition exposing (Definition(..))
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
@@ -26,6 +27,9 @@ import Html
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Http
+import Json.Decode as Decode
+import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
+import Keyboard.Key exposing (Key(..))
 import NamespaceListing
     exposing
         ( DefinitionListing(..)
@@ -75,6 +79,7 @@ type Msg
     = NoOp
     | LinkClicked Browser.UrlRequest
     | UrlChanged Url
+    | HandleKeyboardEvent KeyboardEvent
     | ToggleExpandedNamespaceListing FQN
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
@@ -95,6 +100,9 @@ update msg model =
 
         UrlChanged _ ->
             ( model, Cmd.none )
+
+        HandleKeyboardEvent event ->
+            handleKeyboardEvent model event
 
         ToggleExpandedNamespaceListing fqn ->
             let
@@ -181,9 +189,16 @@ openDefinition :
     -> ( { m | openDefinitions : OpenDefinitions }, Cmd Msg )
 openDefinition model afterHash hash =
     -- We don't want to refetch or replace any already open definitions, but we
-    -- do want to scroll to it
+    -- do want to focus and scroll to it
     if OpenDefinitions.member hash model.openDefinitions then
-        ( model, scrollToDefinition hash )
+        let
+            nextOpenDefinitions =
+                OpenDefinitions.focusOn hash model.openDefinitions
+        in
+        ( { model | openDefinitions = nextOpenDefinitions }
+        , scrollToDefinition
+            hash
+        )
 
     else
         let
@@ -204,6 +219,72 @@ openDefinition model afterHash hash =
         ( { model | openDefinitions = nextOpenDefinitions }
         , Cmd.batch [ fetchDefinition hash, scrollToDefinition hash ]
         )
+
+
+handleKeyboardEvent : Model -> KeyboardEvent -> ( Model, Cmd Msg )
+handleKeyboardEvent model keyboardEvent =
+    let
+        scrollToCmd =
+            OpenDefinitions.focus
+                >> Maybe.map .hash
+                >> Maybe.map scrollToDefinition
+                >> Maybe.withDefault Cmd.none
+
+        nextDefinition =
+            let
+                newOpenDefinitions =
+                    OpenDefinitions.next model.openDefinitions
+            in
+            ( { model | openDefinitions = newOpenDefinitions }, scrollToCmd newOpenDefinitions )
+
+        prevDefinitions =
+            let
+                newOpenDefinitions =
+                    OpenDefinitions.prev model.openDefinitions
+            in
+            ( { model | openDefinitions = newOpenDefinitions }, scrollToCmd newOpenDefinitions )
+    in
+    case keyboardEvent.keyCode of
+        Down ->
+            if keyboardEvent.shiftKey then
+                nextDefinition
+
+            else
+                ( model, Cmd.none )
+
+        J ->
+            if keyboardEvent.shiftKey then
+                nextDefinition
+
+            else
+                ( model, Cmd.none )
+
+        Up ->
+            if keyboardEvent.shiftKey then
+                prevDefinitions
+
+            else
+                ( model, Cmd.none )
+
+        K ->
+            if keyboardEvent.shiftKey then
+                prevDefinitions
+
+            else
+                ( model, Cmd.none )
+
+        X ->
+            let
+                newOpenDefinitions =
+                    model.openDefinitions
+                        |> OpenDefinitions.focus
+                        |> Maybe.map (\hid -> OpenDefinitions.remove hid.hash model.openDefinitions)
+                        |> Maybe.withDefault model.openDefinitions
+            in
+            ( { model | openDefinitions = newOpenDefinitions }, Cmd.none )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 
@@ -265,6 +346,15 @@ scrollToDefinition hash =
                         Task.succeed ()
             )
         |> Task.attempt (always NoOp)
+
+
+
+-- SUBSCRIPTIONS
+
+
+subscriptions : Model -> Sub Msg
+subscriptions _ =
+    Browser.Events.onKeyDown (Decode.map HandleKeyboardEvent decodeKeyboardEvent)
 
 
 
@@ -356,7 +446,9 @@ viewAllNamespaces expandedNamespaceListings namespaceRoot =
         listings =
             case namespaceRoot of
                 Success (NamespaceListing _ _ content) ->
-                    viewNamespaceListingContent expandedNamespaceListings content
+                    viewNamespaceListingContent
+                        expandedNamespaceListings
+                        content
 
                 Failure err ->
                     UI.errorMessage (Api.errorToString err)
@@ -384,25 +476,33 @@ viewMainSidebar model =
         ]
 
 
-viewDefinition : Hash -> WebData Definition -> Html Msg
-viewDefinition hash definition =
-    case definition of
+viewDefinition : HashIndexedDefinition -> Bool -> Html Msg
+viewDefinition hid isFocused =
+    case hid.definition of
         Success def ->
-            Definition.view (CloseDefinition hash) (OpenDefinitionAfter hash) def
+            Definition.view
+                (CloseDefinition hid.hash)
+                (OpenDefinitionAfter hid.hash)
+                def
+                isFocused
 
         Failure err ->
-            Definition.viewError (CloseDefinition hash) hash err
+            Definition.viewError
+                (CloseDefinition hid.hash)
+                hid.hash
+                isFocused
+                err
 
         NotAsked ->
             UI.nothing
 
         Loading ->
-            Definition.viewLoading hash
+            Definition.viewLoading hid.hash isFocused
 
 
 viewOpenDefinitions : OpenDefinitions -> List (Html Msg)
 viewOpenDefinitions =
-    OpenDefinitions.mapToList (\hid _ -> viewDefinition hid.hash hid.definition)
+    OpenDefinitions.mapToList viewDefinition
 
 
 viewWorkspace : Model -> Html Msg

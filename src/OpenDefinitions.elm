@@ -18,6 +18,7 @@ module OpenDefinitions exposing
     , OpenDefinitions
     , empty
     , focus
+    , focusOn
     , fromDefinitions
     , hashes
     , init
@@ -237,6 +238,25 @@ focus openDefinitions =
 
         OpenDefinitions data ->
             Just data.focus
+
+
+focusOn : Hash -> OpenDefinitions -> OpenDefinitions
+focusOn hash openDefinitions =
+    let
+        hidFromSplits ( before, afterInclusive ) =
+            case afterInclusive of
+                [] ->
+                    Nothing
+
+                newFocus :: after ->
+                    Just { before = before, focus = newFocus, after = after }
+    in
+    openDefinitions
+        |> toList
+        |> ListE.splitWhen (.hash >> Hash.equals hash)
+        |> Maybe.andThen hidFromSplits
+        |> Maybe.map OpenDefinitions
+        |> Maybe.withDefault openDefinitions
 
 
 isFocused : Hash -> OpenDefinitions -> Bool

@@ -10,7 +10,7 @@ main =
         { init = App.init
         , update = App.update
         , view = App.view
-        , subscriptions = \_ -> Sub.none
+        , subscriptions = App.subscriptions
         , onUrlRequest = App.LinkClicked
         , onUrlChange = App.UrlChanged
         }
