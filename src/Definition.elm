@@ -3,7 +3,7 @@ module Definition exposing (..)
 import Api
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
-import Html exposing (Html, a, code, div, h3, header, section, text)
+import Html exposing (Html, a, code, div, h3, header, label, section, span, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Http
@@ -65,54 +65,86 @@ hash definition =
 -- VIEW
 
 
-viewDefinitionRow : Hash -> List (Html msg) -> Html msg -> Html msg
-viewDefinitionRow hash_ headerItems content =
-    div [ class "definition-row", id ("definition-" ++ Hash.toString hash_) ]
-        [ header [] headerItems, section [ class "content" ] [ content ] ]
-
-
-viewClosableRow : msg -> Hash -> Html msg -> Html msg -> Html msg
-viewClosableRow closeMsg hash_ title content =
-    viewDefinitionRow
+viewError : msg -> Hash -> Bool -> Http.Error -> Html msg
+viewError closeMsg hash_ isFocused err =
+    viewClosableRow closeMsg
         hash_
-        [ h3 [] [ title ]
-        , a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
-        ]
-        content
+        isFocused
+        (text "Error")
+        (UI.errorMessage (Api.errorToString err))
 
 
-viewError : msg -> Hash -> Http.Error -> Html msg
-viewError closeMsg hash_ err =
-    viewClosableRow closeMsg hash_ (text "Error") (UI.errorMessage (Api.errorToString err))
-
-
-viewLoading : Hash -> Html msg
-viewLoading hash_ =
-    viewDefinitionRow hash_
+viewLoading : Hash -> Bool -> Html msg
+viewLoading hash_ isFocused =
+    viewRow
+        hash_
+        isFocused
         [ UI.loadingPlaceholder ]
-        (div
-            []
-            [ code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ]
-            ]
-        )
+        (div [] [ code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ] ])
 
 
-view : msg -> (Hash -> msg) -> Definition -> Html msg
-view closeMsg toOpenReferenceMsg definition =
+view : msg -> (Hash -> msg) -> Definition -> Bool -> Html msg
+view closeMsg toOpenReferenceMsg definition isFocused =
     let
         viewDefinitionInfo hash_ info source =
             viewClosableRow
                 closeMsg
                 hash_
-                (div [] [ text info.name ])
+                isFocused
+                (text info.name)
                 (div [] [ source ])
     in
     case definition of
         Term h info ->
-            viewDefinitionInfo h info (viewTermSource toOpenReferenceMsg info.name info.source)
+            viewDefinitionInfo h
+                info
+                (viewTermSource toOpenReferenceMsg info.name info.source)
 
         Type h info ->
-            viewDefinitionInfo h info (viewTypeSource toOpenReferenceMsg info.source)
+            viewDefinitionInfo h
+                info
+                (viewTypeSource toOpenReferenceMsg info.source)
+
+
+
+-- VIEW HELPERS
+
+
+viewRow : Hash -> Bool -> List (Html msg) -> Html msg -> Html msg
+viewRow hash_ isFocused headerItems content =
+    let
+        focusedClass =
+            if isFocused then
+                "focused"
+
+            else
+                ""
+
+        indicator : Html msg
+        indicator =
+            span [ class "focus-indicator" ] []
+
+        classNames =
+            "definition-row " ++ focusedClass
+    in
+    div [ class classNames, id ("definition-" ++ Hash.toString hash_) ]
+        [ header [] (indicator :: headerItems)
+        , section
+            [ class "content"
+            ]
+            [ content ]
+        ]
+
+
+viewClosableRow : msg -> Hash -> Bool -> Html msg -> Html msg -> Html msg
+viewClosableRow closeMsg hash_ isFocused title content =
+    viewRow
+        hash_
+        isFocused
+        [ h3 [] [ title ]
+        , a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
+        ]
+        content
 
 
 
