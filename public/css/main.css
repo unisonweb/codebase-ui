@@ -469,7 +469,7 @@ button {
   cursor: pointer;
 }
 
-.namespace-tree .node .definition-type {
+.namespace-tree .node .definition-category {
   font-family: var(--font-monospace);
   color: var(--color-sidebar-subtle-fg);
   margin-left: 0.375rem;

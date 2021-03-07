@@ -17,6 +17,9 @@
   <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" id="icon-checkmark">
     <path d="M2.345 7.406l3.381 3.361 6.205-6.185-.776-.775-5.429 5.409L3.101 6.63l-.756.775z" fill="currentColor"></path>
   </symbol>
+  <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" id="icon-test">
+    <path d="M2.345 7.406l3.381 3.361 6.205-6.185-.776-.775-5.429 5.409L3.101 6.63l-.756.775z" fill="currentColor"></path>
+  </symbol>
   <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" id="icon-chevron-down">
     <path d="M10.324 5.449l-3.32 3.31-3.322-3.31-.756.756 4.077 4.076 4.077-4.076-.756-.756z" fill="currentColor"></path>
   </symbol>
@@ -26,7 +29,7 @@
   <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" id="icon-folder">
     <path d="M.5 3V2a.5.5 0 01.5-.5h4a.5.5 0 01.4.2l.9 1.2.4-.3-.4.3a1.5 1.5 0 001.2.6H13a.5.5 0 01.5.5v8a.5.5 0 01-.5.5H1a.5.5 0 01-.5-.5V3z" stroke="currentColor"></path>
   </symbol>
-  <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" id="icon-document">
+  <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" id="icon-doc">
     <path d="M2 4h2a1 1 0 001-1V1m5.842 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3.914a1 1 0 01.293-.707l1.914-1.914A1 1 0 014.914 1h4.928a1 1 0 011 1z" stroke="currentColor"></path>
   </symbol>
   <symbol fill="none" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 14 14" id="icon-term">
