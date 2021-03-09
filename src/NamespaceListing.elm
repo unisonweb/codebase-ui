@@ -2,6 +2,8 @@ module NamespaceListing exposing
     ( DefinitionListing(..)
     , NamespaceListing(..)
     , NamespaceListingContent
+    , TermCategory(..)
+    , TypeCategory(..)
     , decode
     , map
     )
@@ -13,9 +15,20 @@ import Json.Decode.Extra exposing (when)
 import RemoteData exposing (RemoteData(..), WebData)
 
 
+type TypeCategory
+    = DataType
+    | AbilityType
+
+
+type TermCategory
+    = PlainTerm
+    | TestTerm
+    | DocTerm
+
+
 type DefinitionListing
-    = TypeListing Hash FQN
-    | TermListing Hash FQN
+    = TypeListing Hash FQN TypeCategory
+    | TermListing Hash FQN TermCategory
     | PatchListing String
 
 
@@ -88,18 +101,33 @@ decodeContent parentFqn =
         emptyNamespaceContent =
             { definitions = [], namespaces = [] }
 
+        decodeTypeTag =
+            Decode.oneOf
+                [ when (field "typeTag" Decode.string) ((==) "Data") (Decode.succeed DataType)
+                , when (field "typeTag" Decode.string) ((==) "Ability") (Decode.succeed AbilityType)
+                ]
+
         decodeTypeListing =
             Decode.map SubDefinition
-                (Decode.map2 TypeListing
+                (Decode.map3 TypeListing
                     (field "typeHash" Hash.decode)
                     (field "typeName" (FQN.decodeFromParent parentFqn))
+                    decodeTypeTag
                 )
+
+        decodeTermTag =
+            Decode.oneOf
+                [ when (field "termTag" Decode.string) ((==) "Test") (Decode.succeed TestTerm)
+                , when (field "termTag" Decode.string) ((==) "Doc") (Decode.succeed DocTerm)
+                , Decode.succeed PlainTerm
+                ]
 
         decodeTermListing =
             Decode.map SubDefinition
-                (Decode.map2 TermListing
+                (Decode.map3 TermListing
                     (field "termHash" Hash.decode)
                     (field "termName" (FQN.decodeFromParent parentFqn))
+                    decodeTermTag
                 )
 
         decodePatchListing =

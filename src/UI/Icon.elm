@@ -16,8 +16,9 @@ type Icon
     | Patch
     | Term
     | Ability
+    | Test
     | Type
-    | Document
+    | Doc
     | Folder
     | Plus
     | Hash
@@ -89,8 +90,11 @@ toIdString icon =
         Type ->
             "type"
 
-        Document ->
-            "document"
+        Test ->
+            "test"
+
+        Doc ->
+            "doc"
 
         Folder ->
             "folder"
