@@ -1,5 +1,6 @@
 module Util exposing (..)
 
+import Html
 import Json.Decode as Decode
 import List.Nonempty as NEL
 
