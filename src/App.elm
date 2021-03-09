@@ -35,6 +35,8 @@ import NamespaceListing
         ( DefinitionListing(..)
         , NamespaceListing(..)
         , NamespaceListingContent
+        , TermCategory(..)
+        , TypeCategory(..)
         )
 import OpenDefinitions exposing (HashIndexedDefinition, OpenDefinitions)
 import RemoteData exposing (RemoteData(..), WebData)
@@ -361,29 +363,52 @@ subscriptions _ =
 -- VIEW
 
 
+viewListingRow : Maybe msg -> String -> String -> Icon.Icon -> Html msg
+viewListingRow clickMsg label_ category icon =
+    let
+        containerClass =
+            class ("node " ++ category)
+
+        container =
+            clickMsg
+                |> Maybe.map (\msg -> a [ containerClass, onClick msg ])
+                |> Maybe.withDefault (span [ containerClass ])
+    in
+    container
+        [ Icon.view icon
+        , label [] [ text label_ ]
+        , span [ class "definition-category" ] [ text category ]
+        ]
+
+
 viewDefinitionListing : DefinitionListing -> Html Msg
 viewDefinitionListing listing =
+    let
+        viewDefRow hash fqn =
+            viewListingRow (Just (OpenDefinition hash)) (unqualifiedName fqn)
+    in
     case listing of
-        TypeListing hash fqn ->
-            a [ class "node type", onClick (OpenDefinition hash) ]
-                [ Icon.view Icon.Type
-                , label [] [ text (unqualifiedName fqn) ]
-                , span [ class "definition-type" ] [ text "type" ]
-                ]
+        TypeListing hash fqn category ->
+            case category of
+                DataType ->
+                    viewDefRow hash fqn "type" Icon.Type
 
-        TermListing hash fqn ->
-            a [ class "node term", onClick (OpenDefinition hash) ]
-                [ Icon.view Icon.Term
-                , label [] [ text (unqualifiedName fqn) ]
-                , span [ class "definition-type" ] [ text "term" ]
-                ]
+                AbilityType ->
+                    viewDefRow hash fqn "ability" Icon.Ability
+
+        TermListing hash fqn category ->
+            case category of
+                PlainTerm ->
+                    viewDefRow hash fqn "term" Icon.Term
+
+                TestTerm ->
+                    viewDefRow hash fqn "test" Icon.Test
+
+                DocTerm ->
+                    viewDefRow hash fqn "doc" Icon.Doc
 
         PatchListing _ ->
-            a [ class "node patch" ]
-                [ Icon.view Icon.Patch
-                , label [] [ text "Patch" ]
-                , span [ class "definition-type" ] [ text "patch" ]
-                ]
+            viewListingRow Nothing "Patch" "patch" Icon.Patch
 
 
 viewLoadedNamespaceListingContent : FQNSet -> NamespaceListingContent -> Html Msg
