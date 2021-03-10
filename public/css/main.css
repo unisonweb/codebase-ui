@@ -771,6 +771,6 @@ button:active {
   color: var(--color-main-subtle-fg);
 }
 
-#finder .reset .icon:hover {
+#finder .reset:hover .icon {
   color: var(--color-main-fg);
 }
