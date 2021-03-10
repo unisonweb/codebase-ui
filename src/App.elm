@@ -43,6 +43,7 @@ import OpenDefinitions exposing (HashIndexedDefinition, OpenDefinitions)
 import RemoteData exposing (RemoteData(..), WebData)
 import Task
 import UI
+import UI.Button as Button
 import UI.Icon as Icon
 import Url exposing (Url)
 
@@ -576,7 +577,9 @@ viewOpenDefinitions =
 viewWorkspace : Model -> Html Msg
 viewWorkspace model =
     article [ id "workspace" ]
-        [ header [ id "workspace-toolbar" ] [ UI.button "Open" ShowFinder ]
+        [ header
+            [ id "workspace-toolbar" ]
+            [ Button.secondary ShowFinder "Open" ]
         , section [ id "workspace-content" ]
             [ section
                 [ class "definitions-pane" ]
