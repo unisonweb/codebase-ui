@@ -22,10 +22,6 @@ li {
   --main-sidebar-width: 16rem;
   --border-radius-base: 0.25rem;
 
-  /* -- Animations --------------------------------------------------------- */
-
-  --anim-elastic: cubic-bezier(0.68, -0.4, 0.32, 1.4);
-
   /* -- Font --------------------------------------------------------------- */
 
   --font-sans-serif: "Inter", sans-serif;
@@ -130,7 +126,34 @@ li {
   }
 }
 
+/* -- Animations ----------------------------------------------------------- */
+
+:root {
+  --anim-elastic: cubic-bezier(0.68, -0.4, 0.32, 1.4);
+}
+
+@keyframes fade-in {
+  0% {
+    opacity: 0;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+@keyframes slide-up {
+  0% {
+    opacity: 0;
+    transform: translateY(1rem);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 /* -- Global --------------------------------------------------------------- */
+
 html {
   font-size: var(--base-size);
   font-family: var(--font-sans-serif);
@@ -153,6 +176,17 @@ a:visited {
 
 a:hover {
   text-decoration: underline;
+}
+
+input {
+  border: 0;
+  border-radius: 0;
+  font-family: var(--font-sans-serif);
+  caret-color: var(--color-main-focus-fg);
+}
+
+::placeholder {
+  color: var(--color-main-subtle-fg);
 }
 
 /* -- Syntax --------------------------------------------------------------- */
@@ -352,6 +386,35 @@ button {
   font-weight: bold;
   height: 2rem;
   padding: 0 0.75rem;
+  cursor: pointer;
+  transition: all 0.1s ease-in;
+}
+
+button:focus {
+  outline: none;
+}
+
+button:hover {
+  box-shadow: inset 0 0 0 1px var(--color-gray-lighten-40);
+}
+
+button:active {
+  background: var(--color-blue-base);
+  box-shadow: none;
+}
+
+#modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  flex: 1;
+  flex-shrink: 3;
+  justify-content: center;
+  animation: fade-in 0.2s ease-out;
 }
 
 /* -- Icon ----------------------------------------------------------------- */
@@ -519,17 +582,20 @@ button {
   height: calc(100vh - 3.5rem);
   scroll-behavior: smooth;
   scrollbar-width: auto;
-  scrollbar-color: var(--color-workspace-subtle-fg)
+  scrollbar-color: var(--color-workspace-item-subtle-fg)
     var(--color-workspace-item-bg);
 }
+
 #workspace-content::-webkit-scrollbar {
   width: 0.5rem;
 }
+
 #workspace-content::-webkit-scrollbar-track {
-  background: var(--color-workspace-mg);
+  background: var(--color-workspace-item-bg);
 }
+
 #workspace-content::-webkit-scrollbar-thumb {
-  background-color: var(--color-workspace-subtle-fg);
+  background-color: var(--color-workspace-item-subtle-fg);
   border-radius: var(--border-radius-base);
 }
 
@@ -646,4 +712,65 @@ button {
 
 .definition-row.focused .close .icon {
   color: var(--color-workspace-item-focus-subtle-fg);
+}
+
+/* -- Finder --------------------------------------------------------------- */
+
+#finder {
+  background: var(--color-gray-lighten-100);
+  width: 40rem;
+  margin-top: 4rem;
+  border-radius: var(--border-radius-base);
+  overflow: hidden;
+  height: fit-content;
+  animation: slide-up 0.2s var(--anim-elastic);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+#finder:focus {
+  outline: none;
+}
+
+#finder header {
+  background: var(--color-gray-lighten-60);
+  border-bottom: 1px solid var(--color-gray-lighten-50);
+  display: flex;
+  align-items: center;
+}
+
+#finder header .icon.search {
+  width: 1.125rem;
+  height: 1.125rem;
+  margin-left: 1rem;
+  margin-right: 1rem;
+  color: var(--color-main-subtle-fg);
+}
+
+#finder input {
+  height: 3rem;
+  background: transparent;
+  width: 100%;
+  border-radius: 0;
+  font-size: 1rem;
+  line-height: 3rem;
+}
+
+#finder input:focus {
+  outline: none;
+}
+
+#finder .reset {
+  height: 3rem;
+  padding: 0 1rem;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+}
+
+#finder .reset .icon {
+  color: var(--color-main-subtle-fg);
+}
+
+#finder .reset .icon:hover {
+  color: var(--color-main-fg);
 }

@@ -6,6 +6,7 @@ import Browser.Dom as Dom
 import Browser.Events
 import Browser.Navigation as Nav
 import Definition exposing (Definition(..))
+import Finder
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import Hash exposing (Hash)
@@ -50,12 +51,18 @@ import Url exposing (Url)
 -- MODEL
 
 
+type Modal
+    = NoModal
+    | FinderModal Finder.Model
+
+
 type alias Model =
     { navKey : Nav.Key
     , currentUrl : Url
     , openDefinitions : OpenDefinitions
     , rootNamespaceListing : WebData NamespaceListing
     , expandedNamespaceListings : FQNSet
+    , modal : Modal
     }
 
 
@@ -68,6 +75,7 @@ init _ initialUrl navKey =
             , openDefinitions = OpenDefinitions.init Nothing
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = FQNSet.empty
+            , modal = NoModal
             }
     in
     ( model, fetchRootNamespaceListing )
@@ -89,6 +97,9 @@ type Msg
     | OpenDefinitionAfter Hash Hash
     | CloseDefinition Hash
     | FetchOpenDefinitionFinished Hash (WebData Definition)
+    | ShowFinder
+      -- sub msgs
+    | FinderMsg Finder.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -178,6 +189,26 @@ update msg model =
                     OpenDefinitions.replace hash response model.openDefinitions
             in
             ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
+
+        ShowFinder ->
+            showFinder model
+
+        FinderMsg fMsg ->
+            case model.modal of
+                NoModal ->
+                    ( model, Cmd.none )
+
+                FinderModal fModel ->
+                    let
+                        ( fm, fc, out ) =
+                            Finder.update fMsg fModel
+                    in
+                    case out of
+                        Finder.Remain ->
+                            ( { model | modal = FinderModal fm }, Cmd.map FinderMsg fc )
+
+                        Finder.Exit ->
+                            ( { model | modal = NoModal }, Cmd.none )
 
 
 
@@ -272,6 +303,9 @@ handleKeyboardEvent model keyboardEvent =
             if keyboardEvent.shiftKey then
                 prevDefinitions
 
+            else if keyboardEvent.ctrlKey || keyboardEvent.metaKey then
+                showFinder model
+
             else
                 ( model, Cmd.none )
 
@@ -287,6 +321,15 @@ handleKeyboardEvent model keyboardEvent =
 
         _ ->
             ( model, Cmd.none )
+
+
+showFinder : { m | modal : Modal } -> ( { m | modal : Modal }, Cmd Msg )
+showFinder model =
+    let
+        ( fm, fcmd ) =
+            Finder.init
+    in
+    ( { model | modal = FinderModal fm }, Cmd.map FinderMsg fcmd )
 
 
 
@@ -533,13 +576,23 @@ viewOpenDefinitions =
 viewWorkspace : Model -> Html Msg
 viewWorkspace model =
     article [ id "workspace" ]
-        [ header [ id "workspace-toolbar" ] [ UI.button "Open" NoOp ]
+        [ header [ id "workspace-toolbar" ] [ UI.button "Open" ShowFinder ]
         , section [ id "workspace-content" ]
             [ section
                 [ class "definitions-pane" ]
                 (viewOpenDefinitions model.openDefinitions)
             ]
         ]
+
+
+viewModal : Modal -> Html Msg
+viewModal modal =
+    case modal of
+        NoModal ->
+            UI.nothing
+
+        FinderModal m ->
+            Html.map FinderMsg (Finder.view m)
 
 
 view : Model -> Browser.Document Msg
@@ -549,6 +602,7 @@ view model =
         [ div [ id "app" ]
             [ viewMainSidebar model
             , viewWorkspace model
+            , viewModal model.modal
             ]
         ]
     }
