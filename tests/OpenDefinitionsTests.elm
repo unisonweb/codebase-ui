@@ -262,7 +262,7 @@ next =
 prev : Test
 prev =
     describe "OpenDefinitions.prev"
-        [ test "moves focus to the next element" <|
+        [ test "moves focus to the prev element" <|
             \_ ->
                 let
                     result =

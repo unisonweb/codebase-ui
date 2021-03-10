@@ -1,12 +1,15 @@
 module Finder exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Browser.Dom as Dom
+import Definition exposing (Definition)
 import Html exposing (Html, a, header, input)
 import Html.Attributes exposing (autocomplete, class, id, placeholder, type_, value)
-import Html.Events exposing (on, onClick, onInput)
+import Html.Events exposing (onClick, onInput)
 import Json.Decode as Decode
 import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
 import Keyboard.Key exposing (Key(..))
+import RemoteData exposing (WebData)
+import SearchResults exposing (SearchResults)
 import Task
 import UI.Icon as Icon
 import UI.Modal as Modal
@@ -16,13 +19,17 @@ import UI.Modal as Modal
 -- MODEL
 
 
+type alias FinderSearchResults =
+    SearchResults Definition
+
+
 type alias Model =
-    { query : String }
+    { query : String, results : WebData FinderSearchResults }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { query = "" }, focusSearchInput )
+    ( { query = "", results = RemoteData.NotAsked }, focusSearchInput )
 
 
 

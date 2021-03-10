@@ -7,6 +7,7 @@
     "dependencies": {
         "direct": {
             "Gizra/elm-keyboard-event": "1.0.1",
+            "SwiftsNamesake/proper-keyboard": "4.0.0",
             "elm/browser": "1.0.2",
             "elm/core": "1.0.5",
             "elm/html": "1.0.0",
@@ -16,10 +17,11 @@
             "elm/url": "1.0.0",
             "elm-community/json-extra": "4.3.0",
             "elm-community/list-extra": "8.2.4",
+            "elm-community/maybe-extra": "5.2.0",
             "krisajenkins/remotedata": "6.0.1",
             "mgold/elm-nonempty-list": "4.1.0",
-            "SwiftsNamesake/proper-keyboard": "4.0.0",
-            "stoeffel/set-extra": "1.2.3"
+            "stoeffel/set-extra": "1.2.3",
+            "wernerdegroot/listzipper": "4.0.0"
         },
         "indirect": {
             "elm/bytes": "1.0.8",
