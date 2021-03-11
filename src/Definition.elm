@@ -3,8 +3,8 @@ module Definition exposing (..)
 import Api
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
-import Html exposing (Html, a, code, div, h3, header, label, section, span, text)
-import Html.Attributes exposing (class, id)
+import Html exposing (Html, a, code, div, h3, header, section, span, text)
+import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (at, field)
@@ -113,21 +113,15 @@ view closeMsg toOpenReferenceMsg definition isFocused =
 viewRow : Hash -> Bool -> List (Html msg) -> Html msg -> Html msg
 viewRow hash_ isFocused headerItems content =
     let
-        focusedClass =
-            if isFocused then
-                "focused"
-
-            else
-                ""
-
         indicator : Html msg
         indicator =
             span [ class "focus-indicator" ] []
-
-        classNames =
-            "definition-row " ++ focusedClass
     in
-    div [ class classNames, id ("definition-" ++ Hash.toString hash_) ]
+    div
+        [ classList [ ( "focus", isFocused ), ( "definition-row", True ) ]
+        , id
+            ("definition-" ++ Hash.toString hash_)
+        ]
         [ header [] (indicator :: headerItems)
         , section
             [ class "content"
