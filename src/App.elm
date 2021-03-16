@@ -211,6 +211,9 @@ update msg model =
                         Finder.Exit ->
                             ( { model | modal = NoModal }, Cmd.none )
 
+                        Finder.OpenDefinition hash ->
+                            openDefinition { model | modal = NoModal } Nothing hash
+
 
 
 -- UPDATE HELPERS

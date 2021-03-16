@@ -12,15 +12,29 @@ h5,
 ul,
 p,
 ol,
+table,
+tr,
+td,
 li {
   margin: 0;
   padding: 0;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
 }
 
 :root {
   --size-base: 16px;
   --main-sidebar-width: 16rem;
   --border-radius-base: 0.25rem;
+
+  /* -- Layers ------------------------------------------------------------- */
+  --layer-base: 1;
+  --layer-modal-overlay: 99;
+  --layer-modal: 100;
+  --layer-modal-above: 110;
 
   /* -- Font --------------------------------------------------------------- */
 
@@ -99,6 +113,22 @@ li {
   --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-20);
   --color-workspace-item-focus-mg: var(--color-gray-lighten-50);
   --color-workspace-item-focus-bg: var(--color-gray-lighten-55);
+
+  --color-modal-fg: var(--color-main-fg);
+  --color-modal-mg: var(--color-gray-lighten-60);
+  --color-modal-bg: var(--color-gray-lighten-100);
+  --color-modal-inner-border: var(--color-gray-lighten-50);
+  --color-modal-separator: var(--color-gray-lighten-55);
+  --color-modal-shadow: rgba(24, 24, 28, 0.2); /* 20% gray-darken-30 */
+  --color-modal-overlay: rgba(24, 24, 28, 0.5); /* 50% gray-darken-30 */
+  --color-modal-border: transparent;
+  --color-modal-subtle-fg: var(--color-main-subtle-fg);
+  --color-modal-subtle-fg-em: var(--color-gray-lighten-20);
+  --color-modal-subtle-bg: var(--color-gray-lighten-60);
+  --color-modal-focus-fg: var(--color-main-fg);
+  --color-modal-focus-bg: var(--color-gray-lighten-55);
+  --color-modal-focus-subtle-fg: var(--color-gray-base);
+  --color-modal-focus-subtle-bg: var(--color-gray-lighten-50);
 
   --color-icon-type: var(--color-brand-orange);
   --color-icon-test: var(--color-green-base);
@@ -394,15 +424,34 @@ code a:active {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(0, 0, 0, 0.5);
+  background: var(--color-modal-overlay);
   display: flex;
   flex: 1;
   flex-shrink: 3;
   justify-content: center;
   animation: fade-in 0.2s ease-out;
+  z-index: (--layer-modal-overlay);
 }
 
-/* -- Buttons -------------------------------------------------------------- */
+.modal {
+  position: relative;
+  background: var(--color-modal-bg);
+  border-radius: var(--border-radius-base);
+  border: 1px solid var(--color-modal-border);
+  width: 50rem;
+  margin-top: 4rem;
+  overflow: hidden;
+  height: fit-content;
+  animation: slide-up 0.2s var(--anim-elastic);
+  box-shadow: 0 6px 16px var(--color-modal-shadow);
+  z-index: (--layer-modal);
+}
+
+.modal:focus {
+  outline: none;
+}
+
+/* Buttons */
 
 button {
   border: 0;
@@ -443,7 +492,7 @@ button.secondary:hover {
   background: var(--color-button-secondary-hover-bg);
 }
 
-/* -- Icon ----------------------------------------------------------------- */
+/* Icons */
 
 .icon {
   display: inline-block;
@@ -475,6 +524,30 @@ button.secondary:hover {
 
 .icon.patch {
   color: var(--color-icon-patch);
+}
+
+/* Keyboard shortcut indicators */
+
+.keyboard-shortcut .key {
+  height: 1.5rem;
+  width: 1.5rem;
+  font-size: 0.75rem;
+  border-radius: var(--border-radius-base);
+  text-align: center;
+  display: inline-flex;
+  justify-content: center;
+  align-content: center;
+  align-items: center;
+  background: var(--color-main-subtle-bg);
+  color: var(--color-main-subtle-fg);
+}
+
+.keyboard-shortcut .instruction {
+  display: inline-flex;
+  width: 2rem;
+  font-size: 0.625rem;
+  justify-content: center;
+  color: var(--color-main-subtle-fg);
 }
 
 /* -- Application ---------------------------------------------------------- */
@@ -742,24 +815,13 @@ button.secondary:hover {
 
 /* -- Finder --------------------------------------------------------------- */
 
-#finder {
-  background: var(--color-gray-lighten-100);
-  width: 40rem;
-  margin-top: 4rem;
-  border-radius: var(--border-radius-base);
-  overflow: hidden;
-  height: fit-content;
-  animation: slide-up 0.2s var(--anim-elastic);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
-}
-
 #finder:focus {
   outline: none;
 }
 
 #finder header {
-  background: var(--color-gray-lighten-60);
-  border-bottom: 1px solid var(--color-gray-lighten-50);
+  background: var(--color-modal-mg);
+  border-bottom: 1px solid var(--color-modal-inner-border);
   display: flex;
   align-items: center;
 }
@@ -769,16 +831,21 @@ button.secondary:hover {
   height: 1.125rem;
   margin-left: 1rem;
   margin-right: 1rem;
-  color: var(--color-main-subtle-fg);
+  color: var(--color-modal-subtle-fg);
 }
 
 #finder input {
-  height: 3rem;
+  height: 2rem;
   background: transparent;
   width: 100%;
   border-radius: 0;
   font-size: 1rem;
-  line-height: 3rem;
+  font-weight: bold;
+  line-height: 2rem;
+}
+
+#finder input::placeholder {
+  font-weight: normal;
 }
 
 #finder input:focus {
@@ -794,9 +861,78 @@ button.secondary:hover {
 }
 
 #finder .reset .icon {
-  color: var(--color-main-subtle-fg);
+  color: var(--color-modal-subtle-fg);
 }
 
 #finder .reset:hover .icon {
-  color: var(--color-main-fg);
+  color: var(--color-modal-fg);
+}
+
+#finder .results {
+  position: relative;
+  padding: 0.75rem;
+}
+
+#finder .results .column-line {
+  position: absolute;
+  top: 0.75rem;
+  bottom: 0.75rem;
+  width: 1px;
+  background: var(--color-modal-separator);
+  margin-left: calc(2rem + 0.75rem + 0.875rem);
+}
+
+#finder .definition-match {
+  position: relative;
+  z-index: var(--layer-modal-above);
+  height: 3rem;
+  padding: 0 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#finder .definition-match .icon {
+  margin-right: 0.5rem;
+}
+
+#finder .definition-match code {
+  line-height: inherit;
+}
+
+#finder .definition-match pre {
+  font-size: 0.75rem;
+}
+
+#finder .definition-match .name {
+  font-weight: bold;
+  max-width: 10rem;
+  margin-right: 2rem;
+}
+
+#finder .definition-match .keyboard-shortcut {
+  margin-left: auto;
+  font-size: 0.75rem;
+}
+
+#finder .definition-match .keyboard-shortcut .key {
+  color: var(--color-modal-subtle-fg-em);
+  background: var(--color-modal-subtle-bg);
+}
+
+#finder .definition-match .keyboard-shortcut .instruction {
+  color: var(--color-modal-subtle-fg);
+}
+
+#finder .definition-match.focused {
+  background: var(--color-modal-focus-bg);
+  border-radius: var(--border-radius-base);
+  box-shadow: 0 0 0 0.25rem var(--color-modal-bg);
+}
+
+#finder .definition-match.focused .keyboard-shortcut .key {
+  color: var(--color-modal-focus-subtle-fg);
+  background: var(--color-modal-focus-subtle-bg);
 }

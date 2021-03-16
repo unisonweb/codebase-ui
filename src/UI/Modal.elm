@@ -1,7 +1,7 @@
 module UI.Modal exposing (view)
 
 import Html exposing (Attribute, Html, div)
-import Html.Attributes exposing (id, tabindex)
+import Html.Attributes exposing (class, id, tabindex)
 import Html.Events exposing (on)
 import Json.Decode as Decode
 
@@ -9,7 +9,7 @@ import Json.Decode as Decode
 view : msg -> List (Attribute msg) -> List (Html msg) -> Html msg
 view closeMsg attrs content =
     div [ id overlayId, on "click" (decodeOverlayClick closeMsg) ]
-        [ div (tabindex 0 :: attrs) content
+        [ div (tabindex 0 :: class "modal" :: attrs) content
         ]
 
 
