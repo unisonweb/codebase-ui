@@ -34,7 +34,7 @@ next =
                 let
                     result =
                         SearchResults.from [ "a" ] "b" [ "c" ]
-                            |> SearchResults.map SearchResults.next
+                            |> SearchResults.next
                             |> SearchResults.toMaybe
                             |> Maybe.map SearchResults.focus
                 in
@@ -44,7 +44,7 @@ next =
                 let
                     result =
                         SearchResults.from [ "a", "b" ] "c" []
-                            |> SearchResults.map SearchResults.next
+                            |> SearchResults.next
                             |> SearchResults.toMaybe
                             |> Maybe.map SearchResults.focus
                 in
@@ -60,7 +60,7 @@ prev =
                 let
                     result =
                         SearchResults.from [ "a" ] "b" [ "c" ]
-                            |> SearchResults.map SearchResults.prev
+                            |> SearchResults.prev
                             |> SearchResults.toMaybe
                             |> Maybe.map SearchResults.focus
                 in
@@ -70,7 +70,7 @@ prev =
                 let
                     result =
                         SearchResults.from [] "a" [ "b", "c" ]
-                            |> SearchResults.map SearchResults.prev
+                            |> SearchResults.prev
                             |> SearchResults.toMaybe
                             |> Maybe.map SearchResults.focus
                 in

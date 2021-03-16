@@ -61,6 +61,21 @@ hash definition =
             h
 
 
+name : Definition -> String
+name definition =
+    case definition of
+        Type _ info ->
+            info.name
+
+        Term _ info ->
+            info.name
+
+
+equals : Definition -> Definition -> Bool
+equals a b =
+    Hash.equals (hash a) (hash b)
+
+
 
 -- VIEW
 

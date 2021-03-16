@@ -24,6 +24,11 @@ errorMessage message =
     div [ class "error-message" ] [ text message ]
 
 
+emptyStateMessage : String -> Html msg
+emptyStateMessage message =
+    div [ class "empty-state" ] [ text message ]
+
+
 codeInline : Html msg -> Html msg
 codeInline content =
     code [] [ content ]
@@ -32,3 +37,8 @@ codeInline content =
 codeBlock : Html msg -> Html msg
 codeBlock content =
     pre [] [ code [] [ content ] ]
+
+
+charWidth : Int -> String
+charWidth numChars =
+    String.fromInt numChars ++ "ch"

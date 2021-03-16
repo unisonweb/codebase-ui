@@ -10,6 +10,7 @@ module SearchResults exposing
     , map
     , mapMatchesToList
     , mapToList
+    , matchesToList
     , next
     , prev
     , toList
@@ -97,8 +98,28 @@ toList results =
         Empty ->
             []
 
-        SearchResults (Matches data) ->
-            Zipper.toList data
+        SearchResults matches ->
+            matchesToList matches
+
+
+next : SearchResults a -> SearchResults a
+next =
+    map nextMatch
+
+
+prev : SearchResults a -> SearchResults a
+prev =
+    map prevMatch
+
+
+focusOn : (a -> Bool) -> SearchResults a -> SearchResults a
+focusOn pred results =
+    case results of
+        Empty ->
+            Empty
+
+        SearchResults matches ->
+            SearchResults (focusOnMatch pred matches)
 
 
 
@@ -109,13 +130,13 @@ type Matches a
     = Matches (Zipper a)
 
 
-next : Matches a -> Matches a
-next ((Matches data) as matches) =
+nextMatch : Matches a -> Matches a
+nextMatch ((Matches data) as matches) =
     unwrap matches Matches (Zipper.next data)
 
 
-prev : Matches a -> Matches a
-prev ((Matches data) as matches) =
+prevMatch : Matches a -> Matches a
+prevMatch ((Matches data) as matches) =
     unwrap matches Matches (Zipper.previous data)
 
 
@@ -124,9 +145,16 @@ focus (Matches data) =
     Zipper.current data
 
 
-focusOn : (a -> Bool) -> Matches a -> Matches a
-focusOn pred ((Matches data) as matches) =
+focusOnMatch : (a -> Bool) -> Matches a -> Matches a
+focusOnMatch pred ((Matches data) as matches) =
     unwrap matches Matches (Zipper.findFirst pred data)
+
+
+{-| TODO: Should this be List.Nonempty ? |
+-}
+matchesToList : Matches a -> List a
+matchesToList (Matches data) =
+    Zipper.toList data
 
 
 mapMatchesToList : (a -> Bool -> b) -> Matches a -> List b
