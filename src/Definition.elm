@@ -1,7 +1,7 @@
 module Definition exposing (..)
 
 import Api
-import FullyQualifiedName exposing (FQN)
+import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Html exposing (Html, a, code, div, h3, header, section, span, text)
 import Html.Attributes exposing (class, classList, id)
@@ -9,6 +9,7 @@ import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (at, field)
 import Json.Decode.Extra exposing (when)
+import List.Extra as ListE
 import List.Nonempty as NEL
 import Source
     exposing
@@ -18,6 +19,8 @@ import Source
         , viewTermSource
         , viewTypeSource
         )
+import String.Extra exposing (pluralize)
+import String.Interpolate exposing (interpolate)
 import Syntax
 import UI
 import UI.Icon as Icon
@@ -29,22 +32,50 @@ import Util
 
 
 type alias TypeDefinitionInfo =
-    { fqns : NEL.Nonempty FQN
-    , name : String
-    , source : TypeSource
-    }
+    DefinitionInfo TypeSource
 
 
 type alias TermDefinitionInfo =
-    { fqns : NEL.Nonempty FQN
-    , name : String
-    , source : TermSource
+    DefinitionInfo TermSource
+
+
+type alias DefinitionInfo s =
+    { name : String
+    , namespace : Maybe String
+    , otherNames : List FQN
+    , source : s
     }
 
 
 type Definition
     = Term Hash TermDefinitionInfo
     | Type Hash TypeDefinitionInfo
+
+
+makeTypeDefinitionInfo :
+    String
+    -> NEL.Nonempty FQN
+    -> TypeSource
+    -> TypeDefinitionInfo
+makeTypeDefinitionInfo name_ allFqns source =
+    let
+        ( namespace, otherNames ) =
+            namespaceAndOtherNames name_ allFqns
+    in
+    DefinitionInfo name_ namespace otherNames source
+
+
+makeTermDefinitionInfo :
+    String
+    -> NEL.Nonempty FQN
+    -> TermSource
+    -> TermDefinitionInfo
+makeTermDefinitionInfo name_ allFqns source =
+    let
+        ( namespace, otherNames ) =
+            namespaceAndOtherNames name_ allFqns
+    in
+    DefinitionInfo name_ namespace otherNames source
 
 
 
@@ -76,6 +107,22 @@ equals a b =
     Hash.equals (hash a) (hash b)
 
 
+namespaceAndOtherNames : String -> NEL.Nonempty FQN -> ( Maybe String, List FQN )
+namespaceAndOtherNames suffixName fqns =
+    let
+        fqnWithin =
+            fqns
+                |> NEL.filter (FQN.isSuffixOf suffixName) (NEL.head fqns)
+                |> NEL.head
+
+        fqnsWithout =
+            fqns
+                |> NEL.toList
+                |> ListE.filterNot (FQN.equals fqnWithin)
+    in
+    ( FQN.namespaceOf suffixName fqnWithin, fqnsWithout )
+
+
 
 -- VIEW
 
@@ -85,7 +132,7 @@ viewError closeMsg hash_ isFocused err =
     viewClosableRow closeMsg
         hash_
         isFocused
-        (text "Error")
+        (h3 [] [ text "Error" ])
         (UI.errorMessage (Api.errorToString err))
 
 
@@ -98,6 +145,53 @@ viewLoading hash_ isFocused =
         (div [] [ code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ] ])
 
 
+viewNames :
+    { a | name : String, namespace : Maybe String, otherNames : List FQN }
+    -> Html msg
+viewNames info =
+    let
+        namespace =
+            case info.namespace of
+                Just ns ->
+                    div [ class "namespace" ]
+                        [ span [ class "separator in" ] [ text "in" ]
+                        , text ns
+                        ]
+
+                Nothing ->
+                    UI.nothing
+
+        numOtherNames =
+            List.length info.otherNames
+
+        otherNames =
+            if numOtherNames > 0 then
+                let
+                    otherNamesTooltipContent =
+                        div [] (List.map (\n -> div [] [ text (FQN.toString n) ]) info.otherNames)
+
+                    otherNamesLabel =
+                        [ String.fromInt numOtherNames, pluralize "name" "names" numOtherNames ]
+                            |> interpolate "{0} other {1}..."
+                            |> text
+                in
+                div []
+                    [ span [ class "separator" ] [ text "•" ]
+                    , span [ class "other-names" ] [ UI.withTooltip otherNamesTooltipContent otherNamesLabel ]
+                    ]
+
+            else
+                UI.nothing
+    in
+    div [ class "names" ]
+        [ h3 [ class "name" ] [ text info.name ]
+        , div [ class "info" ]
+            [ namespace
+            , otherNames
+            ]
+        ]
+
+
 view : msg -> (Hash -> msg) -> Definition -> Bool -> Html msg
 view closeMsg toOpenReferenceMsg definition isFocused =
     let
@@ -106,7 +200,7 @@ view closeMsg toOpenReferenceMsg definition isFocused =
                 closeMsg
                 hash_
                 isFocused
-                (text info.name)
+                (viewNames info)
                 (div [] [ source ])
     in
     case definition of
@@ -133,27 +227,21 @@ viewRow hash_ isFocused headerItems content =
             span [ class "focus-indicator" ] []
     in
     div
-        [ classList [ ( "focus", isFocused ), ( "definition-row", True ) ]
-        , id
-            ("definition-" ++ Hash.toString hash_)
+        [ classList [ ( "focused", isFocused ), ( "definition-row", True ) ]
+        , id ("definition-" ++ Hash.toString hash_)
         ]
         [ header [] (indicator :: headerItems)
-        , section
-            [ class "content"
-            ]
-            [ content ]
+        , section [ class "content" ] [ content ]
         ]
 
 
 viewClosableRow : msg -> Hash -> Bool -> Html msg -> Html msg -> Html msg
-viewClosableRow closeMsg hash_ isFocused title content =
-    viewRow
-        hash_
-        isFocused
-        [ h3 [] [ title ]
-        , a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
-        ]
-        content
+viewClosableRow closeMsg hash_ isFocused header content =
+    let
+        close =
+            a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
+    in
+    viewRow hash_ isFocused [ header, close ] content
 
 
 
@@ -169,9 +257,9 @@ decodeTypeDefInfo =
         decodeUserObject =
             Decode.map TypeSource (at [ "typeDefinition", "contents" ] Syntax.decode)
     in
-    Decode.map3 TypeDefinitionInfo
-        (field "typeNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
+    Decode.map3 makeTypeDefinitionInfo
         (field "bestTypeName" Decode.string)
+        (field "typeNames" (Util.decodeNonEmptyList FQN.decode))
         (Decode.oneOf
             [ when decodeTypeDefTag ((==) "UserObject") decodeUserObject
             , when decodeTypeDefTag ((==) "BuiltinObject") (Decode.succeed BuiltinType)
@@ -200,9 +288,9 @@ decodeTermDefInfo =
         decodeBuiltin =
             Decode.map (TypeSignature >> BuiltinTerm) (field "signature" Syntax.decode)
     in
-    Decode.map3 TermDefinitionInfo
-        (field "termNames" (Util.decodeNonEmptyList FullyQualifiedName.decode))
+    Decode.map3 makeTermDefinitionInfo
         (field "bestTermName" Decode.string)
+        (field "termNames" (Util.decodeNonEmptyList FQN.decode))
         (Decode.oneOf
             [ when decodeTermDefTag ((==) "UserObject") decodeUserObject
             , when decodeTermDefTag ((==) "BuiltinObject") decodeBuiltin
