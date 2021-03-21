@@ -16,8 +16,8 @@ list rawFQN =
 
 
 definitions : List String -> String
-definitions hashes =
-    hashes
+definitions fqnsOrHashes =
+    fqnsOrHashes
         |> List.map (string "names")
         |> serverUrl [ "getDefinition" ]
 

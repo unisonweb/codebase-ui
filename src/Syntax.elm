@@ -56,7 +56,7 @@ type SyntaxType
     | UseKeyword
     | UsePrefix
     | UseSuffix
-      -- TODO: Should this be NameOnly Name | HashOnly Hash | HashQualified Name Hash
+      -- TODO: This should be a HashQualified
     | HashQualifier String
       -- ! '
     | DelayForceChar
