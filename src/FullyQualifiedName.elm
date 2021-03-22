@@ -5,12 +5,15 @@ module FullyQualifiedName exposing
     , equals
     , fromParent
     , fromString
+    , isSuffixOf
+    , namespaceOf
     , toString
     , unqualifiedName
     )
 
 import Json.Decode as Decode
 import List.Nonempty as NEL
+import String.Extra as StringE
 
 
 type FQN
@@ -75,6 +78,39 @@ unqualifiedName (FQN nameParts) =
 equals : FQN -> FQN -> Bool
 equals a b =
     toString a == toString b
+
+
+{-| This is passed through a string as a suffix name can include
+namespaces like List.map (where the FQN would be
+base.List.map)
+-}
+isSuffixOf : String -> FQN -> Bool
+isSuffixOf suffixName fqn =
+    String.endsWith suffixName (toString fqn)
+
+
+{-| TODO: We should distinquish between FQN, Namespace and SuffixName on a type
+level, or rename the FQN type to Name
+-}
+namespaceOf : String -> FQN -> Maybe String
+namespaceOf suffixName fqn =
+    let
+        dropLastDot s =
+            if String.endsWith "." s then
+                String.dropRight 1 s
+
+            else
+                s
+    in
+    if isSuffixOf suffixName fqn then
+        fqn
+            |> toString
+            |> String.replace suffixName ""
+            |> StringE.nonEmpty
+            |> Maybe.map dropLastDot
+
+    else
+        Nothing
 
 
 

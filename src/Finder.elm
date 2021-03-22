@@ -38,25 +38,29 @@ init =
         mockedResults =
             SearchResults.fromList
                 [ Definition.Type (Hash.fromString "#base.List")
-                    { fqns = NEL.fromElement (FQN.fromString "base.List")
-                    , name = "List"
-                    , source = BuiltinType
-                    }
+                    (Definition.makeTypeDefinitionInfo
+                        "List"
+                        (NEL.fromElement (FQN.fromString "base.List"))
+                        BuiltinType
+                    )
                 , Definition.Type (Hash.fromString "#base.Map")
-                    { fqns = NEL.fromElement (FQN.fromString "base.Map")
-                    , name = "Map"
-                    , source = BuiltinType
-                    }
+                    (Definition.makeTypeDefinitionInfo
+                        "Map"
+                        (NEL.fromElement (FQN.fromString "base.Map"))
+                        BuiltinType
+                    )
                 , Definition.Type (Hash.fromString "#base.Set")
-                    { fqns = NEL.fromElement (FQN.fromString "base.Set")
-                    , name = "Set"
-                    , source = BuiltinType
-                    }
+                    (Definition.makeTypeDefinitionInfo
+                        "Set"
+                        (NEL.fromElement (FQN.fromString "base.Set"))
+                        BuiltinType
+                    )
                 , Definition.Type (Hash.fromString "#base.List.Nonempty")
-                    { fqns = NEL.fromElement (FQN.fromString "base.List.Nonempty")
-                    , name = "List.Nonempty"
-                    , source = BuiltinType
-                    }
+                    (Definition.makeTypeDefinitionInfo
+                        "List.Nonempty"
+                        (NEL.fromElement (FQN.fromString "base.List.Nonempty"))
+                        BuiltinType
+                    )
                 ]
     in
     ( { query = "", results = Success mockedResults }, focusSearchInput )

@@ -1,6 +1,6 @@
 module UI exposing (..)
 
-import Html exposing (Html, code, div, pre, text)
+import Html exposing (Html, code, div, pre, span, text)
 import Html.Attributes exposing (class)
 
 
@@ -42,3 +42,13 @@ codeBlock content =
 charWidth : Int -> String
 charWidth numChars =
     String.fromInt numChars ++ "ch"
+
+
+tooltip : Html msg -> Html msg
+tooltip content =
+    div [ class "tooltip" ] [ content ]
+
+
+withTooltip : Html msg -> Html msg -> Html msg
+withTooltip content triggerContent =
+    span [ class "with-tooltip" ] [ tooltip content, triggerContent ]
