@@ -21,13 +21,22 @@ type FQN
 -- HELPERS
 
 
-{-| Turn a string, like "base.List.map" into FQN ["base", "List", "map"] |
+{-| Turn a string, like "base.List.map" into FQN ["base", "List", "map"]
 -}
 fromString : String -> FQN
 fromString rawFqn =
+    let
+        rootEmptyToDot i s =
+            if i == 0 && String.isEmpty s then
+                "."
+
+            else
+                s
+    in
     rawFqn
         |> String.split "."
         |> List.map String.trim
+        |> List.indexedMap rootEmptyToDot
         |> List.filter (\s -> String.length s > 0)
         |> NEL.fromList
         |> Maybe.withDefault (NEL.fromElement ".")
@@ -36,9 +45,21 @@ fromString rawFqn =
 
 toString : FQN -> String
 toString (FQN nameParts) =
+    let
+        -- Absolute FQNs start with a dot, so when also
+        -- joining parts using a dot, we get dot dot (..),
+        -- which we don't want.
+        trimLeadingDot str =
+            if String.startsWith ".." str then
+                String.dropLeft 1 str
+
+            else
+                str
+    in
     nameParts
         |> NEL.toList
         |> String.join "."
+        |> trimLeadingDot
 
 
 fromParent : FQN -> String -> FQN

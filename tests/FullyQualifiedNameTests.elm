@@ -11,7 +11,7 @@ fromString =
         [ test "Creates an FQN from a string" <|
             \_ ->
                 Expect.equal "a.b.c" (FQN.toString (FQN.fromString "a.b.c"))
-        , describe "With an empty raw path"
+        , describe "Root"
             [ test "Creates a root FQN from \"\"" <|
                 \_ ->
                     Expect.equal "." (FQN.toString (FQN.fromString ""))
@@ -22,6 +22,18 @@ fromString =
                 \_ ->
                     Expect.equal "." (FQN.toString (FQN.fromString "."))
             ]
+        ]
+
+
+toString : Test
+toString =
+    describe "FullyQualifiedName.toString"
+        [ test "serializes the FQN" <|
+            \_ ->
+                Expect.equal "foo.bar" (FQN.toString (FQN.fromString "foo.bar"))
+        , test "includes root dot when an absolute fqn" <|
+            \_ ->
+                Expect.equal ".foo.bar" (FQN.toString (FQN.fromString ".foo.bar"))
         ]
 
 

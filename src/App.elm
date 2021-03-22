@@ -10,6 +10,7 @@ import Finder
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import Hash exposing (Hash)
+import HashQualified exposing (HashQualified)
 import Html
     exposing
         ( Html
@@ -94,10 +95,10 @@ type Msg
     | ToggleExpandedNamespaceListing FQN
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
-    | OpenDefinition Hash
+    | OpenDefinition HashQualified
     | OpenDefinitionAfter Hash Hash
     | CloseDefinition Hash
-    | FetchOpenDefinitionFinished Hash (WebData Definition)
+    | FetchOpenDefinitionFinished HashQualified (WebData Definition)
     | ShowFinder
       -- sub msgs
     | FinderMsg Finder.Msg
@@ -169,11 +170,11 @@ update msg model =
                 Err err ->
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
-        OpenDefinition hash ->
-            openDefinition model Nothing hash
+        OpenDefinition hq ->
+            openDefinition model Nothing hq
 
         OpenDefinitionAfter afterHash hash ->
-            openDefinition model (Just afterHash) hash
+            openDefinition model (Just afterHash) (HashQualified.HashOnly hash)
 
         CloseDefinition hash ->
             ( { model
@@ -184,8 +185,11 @@ update msg model =
             , Cmd.none
             )
 
-        FetchOpenDefinitionFinished hash response ->
+        FetchOpenDefinitionFinished hq response ->
             let
+                hash =
+                    HashQualified.hash hq
+
                 nextOpenDefinitions =
                     OpenDefinitions.replace hash response model.openDefinitions
             in
@@ -212,7 +216,7 @@ update msg model =
                             ( { model | modal = NoModal }, Cmd.none )
 
                         Finder.OpenDefinition hash ->
-                            openDefinition { model | modal = NoModal } Nothing hash
+                            openDefinition { model | modal = NoModal } Nothing (HashQualified.HashOnly hash)
 
 
 
@@ -222,9 +226,13 @@ update msg model =
 openDefinition :
     { m | openDefinitions : OpenDefinitions }
     -> Maybe Hash
-    -> Hash
+    -> HashQualified
     -> ( { m | openDefinitions : OpenDefinitions }, Cmd Msg )
-openDefinition model afterHash hash =
+openDefinition model afterHash hq =
+    let
+        hash =
+            HashQualified.hash hq
+    in
     -- We don't want to refetch or replace any already open definitions, but we
     -- do want to focus and scroll to it
     if OpenDefinitions.member hash model.openDefinitions then
@@ -254,7 +262,7 @@ openDefinition model afterHash hash =
                 insert model.openDefinitions
         in
         ( { model | openDefinitions = nextOpenDefinitions }
-        , Cmd.batch [ fetchDefinition hash, scrollToDefinition hash ]
+        , Cmd.batch [ fetchDefinition hq, scrollToDefinition hash ]
         )
 
 
@@ -360,14 +368,14 @@ fetchSubNamespaceListing fqn =
         }
 
 
-fetchDefinition : Hash -> Cmd Msg
-fetchDefinition hash =
+fetchDefinition : HashQualified -> Cmd Msg
+fetchDefinition hq =
     Http.get
-        { url = Api.definitions [ Hash.toString hash ]
+        { url = Api.definitions [ HashQualified.toString HashQualified.PreferName hq ]
         , expect =
             Http.expectJson
                 (RemoteData.fromResult
-                    >> FetchOpenDefinitionFinished hash
+                    >> FetchOpenDefinitionFinished hq
                 )
                 Definition.decodeHead
         }
@@ -432,7 +440,7 @@ viewDefinitionListing : DefinitionListing -> Html Msg
 viewDefinitionListing listing =
     let
         viewDefRow hash fqn =
-            viewListingRow (Just (OpenDefinition hash)) (unqualifiedName fqn)
+            viewListingRow (Just (OpenDefinition (HashQualified.HashQualified fqn hash))) (unqualifiedName fqn)
     in
     case listing of
         TypeListing hash fqn category ->
