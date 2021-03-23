@@ -826,10 +826,11 @@ button.secondary:hover {
 }
 
 .definition-row header .names .info {
-  margin-top: 0.1rem;
   font-size: var(--font-size-small);
   display: flex;
   flex-direction: row;
+  align-self: flex-end;
+  margin-bottom: 0.1rem;
 }
 
 .definition-row header .names .namespace .in {
