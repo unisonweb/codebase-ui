@@ -1,8 +1,8 @@
-module Api exposing (definitions, errorToString, list)
+module Api exposing (errorToString, find, getDefinition, list)
 
 import Env
 import Http
-import Url.Builder exposing (QueryParameter, absolute, string)
+import Url.Builder exposing (QueryParameter, absolute, int, string)
 
 
 {-| TODO: Be more explicit about Root |
@@ -15,11 +15,21 @@ list rawFQN =
         |> serverUrl [ "list" ]
 
 
-definitions : List String -> String
-definitions fqnsOrHashes =
+getDefinition : List String -> String
+getDefinition fqnsOrHashes =
     fqnsOrHashes
         |> List.map (string "names")
         |> serverUrl [ "getDefinition" ]
+
+
+find : Int -> Int -> String -> String
+find limit sourceWidth query =
+    serverUrl
+        [ "find" ]
+        [ int "limit" limit
+        , int "renderWidth" sourceWidth
+        , string "query" query
+        ]
 
 
 

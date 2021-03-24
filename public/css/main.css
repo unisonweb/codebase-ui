@@ -155,7 +155,7 @@ table {
   --color-tooltip-bg: var(--color-gray-darken-30);
 
   /* Syntax */
-  --color-syntax-plain: var(--color-main-fg);
+  --color-syntax-base: var(--color-main-fg);
   --color-syntax-subtle: var(--color-main-subtle-fg);
   --color-syntax-keyword: #225ebe;
   --color-syntax-operator: #c7474e;
@@ -163,6 +163,12 @@ table {
   --color-syntax-type: #225ebe;
   --color-syntax-variant: #438443;
   --color-syntax-text: #438443;
+
+  --color-syntax-monochrome-subtle: var(--color-main-subtle-fg);
+  --color-syntax-monochrome-base: var(--color-gray-base);
+  --color-syntax-monochrome-em: var(--color-main-fg);
+
+  --color-syntax-plain: var(--color-main-fg);
 }
 
 @supports (font-variation-settings: normal) {
@@ -276,146 +282,147 @@ code a:active {
   transform: translate(0, 0.1rem);
 }
 
-.builtin {
-  color: var(--color-syntax-base);
-  font-style: italic;
-}
-
-.comment {
-  color: var(--color-syntax-subtle);
-}
-
-.numberic-literal {
-  color: var(--color-syntax-name);
-}
-
-.text-literal {
+.rich .text-literal,
+.rich .bytes-literal,
+.rich .char-literal {
   color: var(--color-syntax-text);
 }
 
-.bytes-literal {
-  color: var(--color-syntax-text);
-}
-
-.char-literal {
-  color: var(--color-syntax-text);
-}
-
-.boolean-literal {
+.rich .boolean-literal,
+.rich .constructor {
   color: var(--color-syntax-variant);
 }
 
-.blank {
+.rich .blank,
+.rich .var,
+.rich .data-type-params {
   color: var(--color-syntax-base);
 }
 
-.var {
-  color: var(--color-syntax-base);
-}
-
-.type-reference {
+.rich .numberic-literal,
+.rich .term-reference,
+.rich .type-reference,
+.rich .data-type-modifier,
+.rich .hash-qualifier,
+.rich .request {
   color: var(--color-syntax-name);
 }
 
-.term-reference {
-  color: var(--color-syntax-name);
-}
-
-.op.cons {
+.rich .op.cons,
+.rich .op.snoc,
+.rich .op.concat,
+.rich .type-operator,
+.rich .type-ascription-colon {
   color: var(--color-syntax-operator);
 }
 
-.op.snoc {
-  color: var(--color-syntax-operator);
-}
-
-.op.concat {
-  color: var(--color-syntax-operator);
-}
-
-.constructor {
-  color: var(--color-syntax-variant);
-}
-
-.request {
-  color: var(--color-syntax-name);
-}
-
-.ability-braces {
-  color: var(--color-syntax-subtle);
-}
-
-.control-keyword {
-  color: var(--color-syntax-keyword);
-}
-
-.type-operator {
-  color: var(--color-syntax-operator);
-}
-
-.binding-equals {
-  color: var(--color-syntax-subtle);
-}
-
-.type-ascription-colon {
-  color: var(--color-syntax-operator);
-}
-
-.data-type-keyword {
-  color: var(--color-syntax-keyword);
-}
-
-.data-type-params {
-  color: var(--color-syntax-plain);
-}
-
-.unit {
-  color: var(--color-syntax-subtle);
-}
-
-.data-type-modifier {
-  color: var(--color-syntax-name);
-}
-
-.use-keyword {
-  color: var(--color-syntax-keyword);
-}
-
-.use-prefix {
-  color: var(--color-syntax-name);
-}
-
-.use-suffix {
-  color: var(--color-syntax-variant);
-}
-
-.hash-qualifier {
-  color: var(--color-syntax-name);
-}
-
-.delay-force-char {
+.rich .delay-force-char {
   color: var(--color-syntax-operator);
   font-weight: bold;
 }
 
-.delimeter-char {
-  color: var(--color-syntax-subtle);
-}
-
-.parenthesis {
-  color: var(--color-syntax-subtle);
-}
-
-.link-keyword {
+.rich .control-keyword,
+.rich .data-type-keyword,
+.rich .link-keyword,
+.rich .doc-keyword {
   color: var(--color-syntax-keyword);
 }
 
-.doc-delimeter {
+.rich .comment,
+.rich .ability-braces,
+.rich .binding-equals,
+.rich .unit,
+.rich .use-keyword,
+.rich .use-prefix,
+.rich .use-suffix,
+.rich .delimeter-char,
+.rich .parenthesis,
+.rich .doc-delimeter {
   color: var(--color-syntax-subtle);
 }
 
-.doc-keyword {
-  color: var(--color-syntax-keyword);
+.monochrome .text-literal,
+.monochrome .bytes-literal,
+.monochrome .char-literal,
+.monochrome .blank,
+.monochrome .var,
+.monochrome .data-type-params {
+  color: var(--color-syntax-monochrome-base);
+}
+
+.monochrome .type-reference,
+.monochrome .boolean-literal,
+.monochrome .constructor,
+.monochrome .numberic-literal,
+.monochrome .term-reference,
+.monochrome .data-type-modifier,
+.monochrome .hash-qualifier,
+.monochrome .request {
+  color: var(--color-syntax-monochrome-em);
+}
+
+.monochrome .delay-force-char {
+  color: var(--color-syntax-monochrome-em);
+  font-weight: bold;
+}
+
+.monochrome .op.cons,
+.monochrome .op.snoc,
+.monochrome .op.concat,
+.monochrome .type-operator,
+.monochrome .type-ascription-colon,
+.monochrome .control-keyword,
+.monochrome .data-type-keyword,
+.monochrome .link-keyword,
+.monochrome .doc-keyword,
+.monochrome .comment,
+.monochrome .ability-braces,
+.monochrome .binding-equals,
+.monochrome .unit,
+.monochrome .use-keyword,
+.monochrome .use-prefix,
+.monochrome .use-suffix,
+.monochrome .delimeter-char,
+.monochrome .parenthesis,
+.monochrome .doc-delimeter {
+  color: var(--color-syntax-monochrome-subtle);
+}
+
+.plain .text-literal,
+.plain .bytes-literal,
+.plain .char-literal,
+.plain .boolean-literal,
+.plain .constructor,
+.plain .blank,
+.plain .var,
+.plain .data-type-params,
+.plain .numberic-literal,
+.plain .term-reference,
+.plain .data-type-modifier,
+.plain .hash-qualifier,
+.plain .request,
+.plain .type-reference,
+.plain .op.cons,
+.plain .op.snoc,
+.plain .op.concat,
+.plain .type-operator,
+.plain .type-ascription-colon,
+.plain .delay-force-char,
+.plain .control-keyword,
+.plain .data-type-keyword,
+.plain .link-keyword,
+.plain .doc-keyword,
+.plain .comment,
+.plain .ability-braces,
+.plain .binding-equals,
+.plain .unit,
+.plain .use-keyword,
+.plain .use-prefix,
+.plain .use-suffix,
+.plain .delimeter-char,
+.plain .parenthesis,
+.plain .doc-delimeter {
+  color: var(--color-syntax-plain);
 }
 
 /* -- UI ------------------------------------------------------------------- */
@@ -453,13 +460,13 @@ code a:active {
   position: relative;
   background: var(--color-modal-bg);
   border-radius: var(--border-radius-base);
-  border: 1px solid var(--color-modal-border);
   width: 50rem;
   margin-top: 4rem;
   overflow: hidden;
   height: fit-content;
   animation: slide-up 0.2s var(--anim-elastic);
-  box-shadow: 0 6px 16px var(--color-modal-shadow);
+  box-shadow: 0 6px 16px var(--color-modal-shadow),
+    0 0 0 1px var(--color-modal-border);
   z-index: (--layer-modal);
 }
 
@@ -915,7 +922,6 @@ button.secondary:hover {
 
 #finder header {
   background: var(--color-modal-mg);
-  border-bottom: 1px solid var(--color-modal-inner-border);
   display: flex;
   align-items: center;
 }
@@ -965,15 +971,14 @@ button.secondary:hover {
 #finder .results {
   position: relative;
   padding: 0.75rem;
+  border-top: 1px solid var(--color-modal-inner-border);
 }
 
-#finder .results .column-line {
-  position: absolute;
-  top: 0.75rem;
-  bottom: 0.75rem;
-  width: 1px;
-  background: var(--color-modal-separator);
-  margin-left: calc(2rem + 0.75rem + 0.875rem);
+#finder .empty-state {
+  padding: 2rem;
+  text-align: center;
+  border-top: 1px solid var(--color-modal-inner-border);
+  color: var(--color-modal-subtle-fg);
 }
 
 #finder .definition-match {
@@ -981,11 +986,16 @@ button.secondary:hover {
   z-index: var(--layer-modal-above);
   height: 3rem;
   padding: 0 0.75rem;
-  font-size: 0.875rem;
   line-height: 1.5rem;
   display: flex;
   flex-direction: row;
   align-items: center;
+  cursor: pointer;
+  border-radius: var(--border-radius-base);
+}
+
+#finder .definition-match:hover {
+  background: var(--color-modal-mg);
 }
 
 #finder .definition-match .icon {
@@ -1001,9 +1011,24 @@ button.secondary:hover {
 }
 
 #finder .definition-match .name {
+  cursor: pointer;
   font-weight: bold;
-  max-width: 10rem;
-  margin-right: 2rem;
+  max-width: 14rem;
+  font-size: 0.875rem;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+#finder .definition-match .source {
+  height: 3rem;
+  display: flex;
+  padding: 0 1rem;
+  align-items: center;
+  border-left: 1px solid var(--color-modal-separator);
+}
+#finder .definition-match.focused .source {
+  border-color: var(--color-modal-focus-bg);
 }
 
 #finder .definition-match .keyboard-shortcut {
@@ -1022,8 +1047,27 @@ button.secondary:hover {
 
 #finder .definition-match.focused {
   background: var(--color-modal-focus-bg);
-  border-radius: var(--border-radius-base);
   box-shadow: 0 0 0 0.25rem var(--color-modal-bg);
+}
+
+#finder .definition-match.focused:before {
+  position: absolute;
+  top: -0.25rem;
+  left: 0;
+  right: 0;
+  height: 0.25rem;
+  content: "";
+  background: var(--color-modal-bg);
+}
+
+#finder .definition-match.focused + .definition-match:before {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 0.25rem;
+  content: "";
+  background: var(--color-modal-bg);
 }
 
 #finder .definition-match.focused .keyboard-shortcut .key {

@@ -43,7 +43,7 @@ viewShortcut : Shortcut -> Html msg
 viewShortcut shortcut =
     let
         instruction text_ =
-            span [ class "shortcut-instruction" ] [ text text_ ]
+            span [ class "instruction" ] [ text text_ ]
 
         content =
             case shortcut of

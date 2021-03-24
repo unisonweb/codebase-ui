@@ -171,9 +171,7 @@ viewNames info =
                         div [] (List.map (\n -> div [] [ text (FQN.toString n) ]) info.otherNames)
 
                     otherNamesLabel =
-                        [ String.fromInt numOtherNames, pluralize "name" "names" numOtherNames ]
-                            |> interpolate "{0} other {1}..."
-                            |> text
+                        text (pluralize "other name..." "other names..." numOtherNames)
                 in
                 div []
                     [ span [ class "separator" ] [ text "•" ]
@@ -207,12 +205,12 @@ view closeMsg toOpenReferenceMsg definition isFocused =
         Term h info ->
             viewDefinitionInfo h
                 info
-                (viewTermSource toOpenReferenceMsg info.name info.source)
+                (viewTermSource (Source.Rich toOpenReferenceMsg) info.name info.source)
 
         Type h info ->
             viewDefinitionInfo h
                 info
-                (viewTypeSource toOpenReferenceMsg info.source)
+                (viewTypeSource (Source.Rich toOpenReferenceMsg) info.source)
 
 
 
@@ -283,7 +281,9 @@ decodeTermDefInfo =
             at [ "termDefinition", "tag" ] Decode.string
 
         decodeUserObject =
-            Decode.map TermSource (at [ "termDefinition", "contents" ] Syntax.decode)
+            Decode.map2 TermSource
+                (Decode.map TypeSignature (field "signature" Syntax.decode))
+                (at [ "termDefinition", "contents" ] Syntax.decode)
 
         decodeBuiltin =
             Decode.map (TypeSignature >> BuiltinTerm) (field "signature" Syntax.decode)

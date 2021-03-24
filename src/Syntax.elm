@@ -1,4 +1,11 @@
-module Syntax exposing (Syntax, SyntaxSegment(..), SyntaxType(..), decode, view)
+module Syntax exposing
+    ( Linked(..)
+    , Syntax
+    , SyntaxSegment(..)
+    , SyntaxType(..)
+    , decode
+    , view
+    )
 
 import Hash exposing (Hash)
 import Html exposing (Html, a, span, text)
@@ -70,6 +77,11 @@ type SyntaxType
     | DocDelimiter
       -- the 'include' in @[include], etc
     | DocKeyword
+
+
+type Linked msg
+    = Linked (Hash -> msg)
+    | NotLinked
 
 
 
@@ -181,8 +193,8 @@ syntaxTypeToClassName sType =
             "doc-keyword"
 
 
-viewSegment : (Hash -> msg) -> SyntaxSegment -> Html msg
-viewSegment toReferenceClickMsg (SyntaxSegment sType sText) =
+viewSegment : Linked msg -> SyntaxSegment -> Html msg
+viewSegment linked (SyntaxSegment sType sText) =
     let
         hash =
             case sType of
@@ -198,20 +210,20 @@ viewSegment toReferenceClickMsg (SyntaxSegment sType sText) =
         className =
             syntaxTypeToClassName sType
     in
-    case hash of
-        Just h ->
+    case ( linked, hash ) of
+        ( Linked toReferenceClickMsg, Just h ) ->
             a [ class className, onClick (toReferenceClickMsg h) ] [ text sText ]
 
-        Nothing ->
+        _ ->
             span [ class className ] [ text sText ]
 
 
-view : (Hash -> msg) -> Syntax -> Html msg
-view toReferenceClickMsg (Syntax segments) =
+view : Linked msg -> Syntax -> Html msg
+view linked (Syntax segments) =
     let
         renderedSegments =
             segments
-                |> NEL.map (viewSegment toReferenceClickMsg)
+                |> NEL.map (viewSegment linked)
                 |> NEL.toList
     in
     span [ class "syntax" ] renderedSegments
