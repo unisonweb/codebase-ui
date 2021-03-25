@@ -2,27 +2,23 @@ module App exposing (..)
 
 import Api
 import Browser
-import Browser.Dom as Dom
 import Browser.Events
 import Browser.Navigation as Nav
 import Definition exposing (Definition(..))
 import Finder
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
-import Hash exposing (Hash)
 import HashQualified exposing (HashQualified)
 import Html
     exposing
         ( Html
         , a
-        , article
         , aside
         , div
         , h1
         , h2
         , header
         , label
-        , section
         , span
         , text
         )
@@ -40,13 +36,11 @@ import NamespaceListing
         , TermCategory(..)
         , TypeCategory(..)
         )
-import OpenDefinitions exposing (HashIndexedDefinition, OpenDefinitions)
 import RemoteData exposing (RemoteData(..), WebData)
-import Task
 import UI
-import UI.Button as Button
 import UI.Icon as Icon
 import Url exposing (Url)
+import Workspace
 
 
 
@@ -61,7 +55,7 @@ type Modal
 type alias Model =
     { navKey : Nav.Key
     , currentUrl : Url
-    , openDefinitions : OpenDefinitions
+    , workspace : Workspace.Model
     , rootNamespaceListing : WebData NamespaceListing
     , expandedNamespaceListings : FQNSet
     , modal : Modal
@@ -71,16 +65,21 @@ type alias Model =
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init _ initialUrl navKey =
     let
+        ( workspace, workspaceCmd ) =
+            Workspace.init
+
         model =
             { navKey = navKey
             , currentUrl = initialUrl
-            , openDefinitions = OpenDefinitions.init Nothing
+            , workspace = workspace
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = FQNSet.empty
             , modal = NoModal
             }
     in
-    ( model, fetchRootNamespaceListing )
+    ( model
+    , Cmd.batch [ fetchRootNamespaceListing, Cmd.map WorkspaceMsg workspaceCmd ]
+    )
 
 
 
@@ -96,12 +95,9 @@ type Msg
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
     | OpenDefinition HashQualified
-    | OpenDefinitionAfter Hash Hash
-    | CloseDefinition Hash
-    | FetchOpenDefinitionFinished HashQualified (WebData Definition)
-    | ShowFinder
       -- sub msgs
     | FinderMsg Finder.Msg
+    | WorkspaceMsg Workspace.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -171,32 +167,26 @@ update msg model =
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
         OpenDefinition hq ->
-            openDefinition model Nothing hq
-
-        OpenDefinitionAfter afterHash hash ->
-            openDefinition model (Just afterHash) (HashQualified.HashOnly hash)
-
-        CloseDefinition hash ->
-            ( { model
-                | openDefinitions =
-                    OpenDefinitions.remove hash
-                        model.openDefinitions
-              }
-            , Cmd.none
-            )
-
-        FetchOpenDefinitionFinished hq response ->
             let
-                hash =
-                    HashQualified.hash hq
-
-                nextOpenDefinitions =
-                    OpenDefinitions.replace hash response model.openDefinitions
+                ( workspace, cmd ) =
+                    Workspace.open model.workspace hq
             in
-            ( { model | openDefinitions = nextOpenDefinitions }, Cmd.none )
+            ( { model | workspace = workspace }, Cmd.map WorkspaceMsg cmd )
 
-        ShowFinder ->
-            showFinder model
+        WorkspaceMsg wMsg ->
+            let
+                ( workspace, wCmd, out ) =
+                    Workspace.update wMsg model.workspace
+
+                ( newModel, fCmd ) =
+                    case out of
+                        Workspace.None ->
+                            ( model, Cmd.none )
+
+                        Workspace.ShowFinderRequest ->
+                            showFinder model
+            in
+            ( { newModel | workspace = workspace }, Cmd.batch [ fCmd, Cmd.map WorkspaceMsg wCmd ] )
 
         FinderMsg fMsg ->
             case model.modal of
@@ -216,120 +206,26 @@ update msg model =
                             ( { model | modal = NoModal }, Cmd.none )
 
                         Finder.OpenDefinition hash ->
-                            openDefinition { model | modal = NoModal } Nothing (HashQualified.HashOnly hash)
+                            let
+                                ( workspace, cmd ) =
+                                    Workspace.open model.workspace (HashQualified.HashOnly hash)
+                            in
+                            ( { model | workspace = workspace }, Cmd.map WorkspaceMsg cmd )
 
 
 
 -- UPDATE HELPERS
 
 
-openDefinition :
-    { m | openDefinitions : OpenDefinitions }
-    -> Maybe Hash
-    -> HashQualified
-    -> ( { m | openDefinitions : OpenDefinitions }, Cmd Msg )
-openDefinition model afterHash hq =
-    let
-        hash =
-            HashQualified.hash hq
-    in
-    -- We don't want to refetch or replace any already open definitions, but we
-    -- do want to focus and scroll to it
-    if OpenDefinitions.member hash model.openDefinitions then
-        let
-            nextOpenDefinitions =
-                OpenDefinitions.focusOn hash model.openDefinitions
-        in
-        ( { model | openDefinitions = nextOpenDefinitions }
-        , scrollToDefinition
-            hash
-        )
-
-    else
-        let
-            toInsert =
-                HashIndexedDefinition hash Loading
-
-            insert =
-                case afterHash of
-                    Nothing ->
-                        OpenDefinitions.insertWithFocus toInsert
-
-                    Just h ->
-                        OpenDefinitions.insertWithFocusAfter h toInsert
-
-            nextOpenDefinitions =
-                insert model.openDefinitions
-        in
-        ( { model | openDefinitions = nextOpenDefinitions }
-        , Cmd.batch [ fetchDefinition hq, scrollToDefinition hash ]
-        )
-
-
 handleKeyboardEvent : Model -> KeyboardEvent -> ( Model, Cmd Msg )
 handleKeyboardEvent model keyboardEvent =
-    let
-        scrollToCmd =
-            OpenDefinitions.focus
-                >> Maybe.map .hash
-                >> Maybe.map scrollToDefinition
-                >> Maybe.withDefault Cmd.none
-
-        nextDefinition =
-            let
-                newOpenDefinitions =
-                    OpenDefinitions.next model.openDefinitions
-            in
-            ( { model | openDefinitions = newOpenDefinitions }, scrollToCmd newOpenDefinitions )
-
-        prevDefinitions =
-            let
-                newOpenDefinitions =
-                    OpenDefinitions.prev model.openDefinitions
-            in
-            ( { model | openDefinitions = newOpenDefinitions }, scrollToCmd newOpenDefinitions )
-    in
     case keyboardEvent.keyCode of
-        Down ->
-            if keyboardEvent.shiftKey then
-                nextDefinition
-
-            else
-                ( model, Cmd.none )
-
-        J ->
-            if keyboardEvent.shiftKey then
-                nextDefinition
-
-            else
-                ( model, Cmd.none )
-
-        Up ->
-            if keyboardEvent.shiftKey then
-                prevDefinitions
-
-            else
-                ( model, Cmd.none )
-
         K ->
-            if keyboardEvent.shiftKey then
-                prevDefinitions
-
-            else if keyboardEvent.ctrlKey || keyboardEvent.metaKey then
+            if keyboardEvent.ctrlKey || keyboardEvent.metaKey then
                 showFinder model
 
             else
                 ( model, Cmd.none )
-
-        X ->
-            let
-                newOpenDefinitions =
-                    model.openDefinitions
-                        |> OpenDefinitions.focus
-                        |> Maybe.map (\hid -> OpenDefinitions.remove hid.hash model.openDefinitions)
-                        |> Maybe.withDefault model.openDefinitions
-            in
-            ( { model | openDefinitions = newOpenDefinitions }, Cmd.none )
 
         _ ->
             ( model, Cmd.none )
@@ -368,50 +264,16 @@ fetchSubNamespaceListing fqn =
         }
 
 
-fetchDefinition : HashQualified -> Cmd Msg
-fetchDefinition hq =
-    Http.get
-        { url = Api.definitions [ HashQualified.toString HashQualified.PreferName hq ]
-        , expect =
-            Http.expectJson
-                (RemoteData.fromResult
-                    >> FetchOpenDefinitionFinished hq
-                )
-                Definition.decodeHead
-        }
-
-
-scrollToDefinition : Hash -> Cmd Msg
-scrollToDefinition hash =
-    let
-        id =
-            "definition-" ++ Hash.toString hash
-    in
-    Task.sequence
-        [ Dom.getElement id |> Task.map (.element >> .y)
-        , Dom.getElement "workspace-content" |> Task.map (.element >> .y)
-        , Dom.getViewportOf "workspace-content" |> Task.map (.viewport >> .y)
-        ]
-        |> Task.andThen
-            (\outcome ->
-                case outcome of
-                    elY :: viewportY :: viewportScrollTop :: [] ->
-                        Dom.setViewportOf "workspace-content" 0 (viewportScrollTop + (elY - viewportY))
-                            |> Task.onError (\_ -> Task.succeed ())
-
-                    _ ->
-                        Task.succeed ()
-            )
-        |> Task.attempt (always NoOp)
-
-
 
 -- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Browser.Events.onKeyDown (Decode.map HandleKeyboardEvent decodeKeyboardEvent)
+subscriptions model =
+    Sub.batch
+        [ Browser.Events.onKeyDown (Decode.map HandleKeyboardEvent decodeKeyboardEvent)
+        , Sub.map WorkspaceMsg (Workspace.subscriptions model.workspace)
+        ]
 
 
 
@@ -556,49 +418,6 @@ viewMainSidebar model =
         ]
 
 
-viewDefinition : HashIndexedDefinition -> Bool -> Html Msg
-viewDefinition hid isFocused =
-    case hid.definition of
-        Success def ->
-            Definition.view
-                (CloseDefinition hid.hash)
-                (OpenDefinitionAfter hid.hash)
-                def
-                isFocused
-
-        Failure err ->
-            Definition.viewError
-                (CloseDefinition hid.hash)
-                hid.hash
-                isFocused
-                err
-
-        NotAsked ->
-            UI.nothing
-
-        Loading ->
-            Definition.viewLoading hid.hash isFocused
-
-
-viewOpenDefinitions : OpenDefinitions -> List (Html Msg)
-viewOpenDefinitions =
-    OpenDefinitions.mapToList viewDefinition
-
-
-viewWorkspace : Model -> Html Msg
-viewWorkspace model =
-    article [ id "workspace" ]
-        [ header
-            [ id "workspace-toolbar" ]
-            [ Button.secondary ShowFinder "Open" ]
-        , section [ id "workspace-content" ]
-            [ section
-                [ class "definitions-pane" ]
-                (viewOpenDefinitions model.openDefinitions)
-            ]
-        ]
-
-
 viewModal : Modal -> Html Msg
 viewModal modal =
     case modal of
@@ -615,7 +434,7 @@ view model =
     , body =
         [ div [ id "app" ]
             [ viewMainSidebar model
-            , viewWorkspace model
+            , Html.map WorkspaceMsg (Workspace.view model.workspace)
             , viewModal model.modal
             ]
         ]
