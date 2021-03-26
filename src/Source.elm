@@ -3,13 +3,15 @@ module Source exposing
     , TypeSignature(..)
     , TypeSource(..)
     , ViewConfig(..)
+    , numTermLines
+    , numTypeLines
     , viewTermSignature
     , viewTermSource
     , viewTypeSource
     )
 
 import Hash exposing (Hash)
-import Html exposing (Html, code, pre, span, text)
+import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
 import Syntax exposing (Syntax)
 import UI
@@ -35,6 +37,34 @@ type ViewConfig msg
     | Plain
 
 
+
+-- HELPERS
+
+
+numTypeLines : TypeSource -> Int
+numTypeLines source =
+    case source of
+        TypeSource syntax ->
+            Syntax.numLines syntax
+
+        BuiltinType ->
+            1
+
+
+numTermLines : TermSource -> Int
+numTermLines source =
+    case source of
+        TermSource _ syntax ->
+            Syntax.numLines syntax
+
+        BuiltinTerm (TypeSignature syntax) ->
+            Syntax.numLines syntax
+
+
+
+-- VIEW
+
+
 viewTypeSource : ViewConfig msg -> TypeSource -> Html msg
 viewTypeSource viewConfig source =
     let
@@ -46,7 +76,7 @@ viewTypeSource viewConfig source =
                 BuiltinType ->
                     span
                         []
-                        [ span [ class "builtin" ] [ text "builtin " ]
+                        [ span [] [ text "builtin " ]
                         , span [ class "data-type-keyword" ] [ text "type" ]
                         ]
     in
@@ -77,10 +107,6 @@ viewTermSource viewConfig termName source =
                         [ span [ class "hash-qualifier" ] [ text termName ]
                         , span [ class "type-ascription-colon" ] [ text " : " ]
                         , viewSyntax viewConfig syntax
-                        , span [ class "blank" ] [ text "\n" ]
-                        , span [ class "hash-qualifier" ] [ text termName ]
-                        , span [ class "binding-equals" ] [ text " = " ]
-                        , span [ class "builtin" ] [ text "builtin" ]
                         ]
     in
     viewCode viewConfig content
@@ -92,7 +118,9 @@ viewTermSource viewConfig termName source =
 
 viewCode : ViewConfig msg -> Html msg -> Html msg
 viewCode viewConfig content =
-    pre [ class (viewConfigToClassName viewConfig) ] [ code [] [ content ] ]
+    UI.codeBlock
+        [ class (viewConfigToClassName viewConfig) ]
+        content
 
 
 viewConfigToClassName : ViewConfig msg -> String

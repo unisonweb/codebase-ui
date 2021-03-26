@@ -1,9 +1,10 @@
 module Definition exposing (..)
 
 import Api
+import Definition.Category as Category exposing (Category)
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
-import Html exposing (Html, a, code, div, h3, header, section, span, text)
+import Html exposing (Html, a, code, div, h3, header, section, span, strong, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import Http
@@ -20,7 +21,6 @@ import Source
         , viewTypeSource
         )
 import String.Extra exposing (pluralize)
-import String.Interpolate exposing (interpolate)
 import Syntax
 import UI
 import UI.Icon as Icon
@@ -127,22 +127,57 @@ namespaceAndOtherNames suffixName fqns =
 -- VIEW
 
 
+viewBuiltinBadge : String -> Category -> Html msg
+viewBuiltinBadge name_ category =
+    let
+        content =
+            span
+                []
+                [ strong [] [ text name_ ]
+                , text " is a "
+                , strong [] [ text ("built-in " ++ Category.name category) ]
+                , text " provided by the Unison runtime"
+                ]
+    in
+    UI.badge content
+
+
+viewBuiltin : Definition -> Html msg
+viewBuiltin definition =
+    case definition of
+        Term _ info ->
+            case info.source of
+                BuiltinTerm _ ->
+                    div [ class "built-in" ] [ viewBuiltinBadge info.name (Category.Term Category.PlainTerm) ]
+
+                TermSource _ _ ->
+                    UI.nothing
+
+        Type _ info ->
+            case info.source of
+                BuiltinType ->
+                    div [ class "built-in" ] [ viewBuiltinBadge info.name (Category.Type Category.DataType) ]
+
+                TypeSource _ ->
+                    UI.nothing
+
+
 viewError : msg -> Hash -> Bool -> Http.Error -> Html msg
 viewError closeMsg hash_ isFocused err =
     viewClosableRow closeMsg
         hash_
         isFocused
         (h3 [] [ text "Error" ])
-        (UI.errorMessage (Api.errorToString err))
+        [ ( UI.nothing, UI.errorMessage (Api.errorToString err) ) ]
 
 
 viewLoading : Hash -> Bool -> Html msg
 viewLoading hash_ isFocused =
-    viewRow
+    viewDefinitionRow
         hash_
         isFocused
-        [ UI.loadingPlaceholder ]
-        (div [] [ code [] [ UI.loadingPlaceholder, UI.loadingPlaceholder ] ])
+        ( UI.nothing, UI.loadingPlaceholder )
+        [ ( UI.nothing, div [] [ code [] [ UI.loadingPlaceholder ] ] ) ]
 
 
 viewNames :
@@ -182,64 +217,118 @@ viewNames info =
                 UI.nothing
     in
     div [ class "names" ]
-        [ h3 [ class "name" ] [ text info.name ]
-        , div [ class "info" ]
-            [ namespace
-            , otherNames
-            ]
+        [ Icon.view Icon.CaretDown
+        , Icon.view Icon.Type
+        , h3 [ class "name" ] [ text info.name ]
+        , div [ class "info" ] [ namespace, otherNames ]
         ]
+
+
+viewSource : (Hash -> msg) -> Definition -> ( Html msg, Html msg )
+viewSource toOpenReferenceMsg definition =
+    let
+        sourceConfig =
+            Source.Rich toOpenReferenceMsg
+
+        viewLineGutter numLines =
+            let
+                lines =
+                    numLines
+                        |> List.range 1
+                        |> List.map (String.fromInt >> text >> List.singleton >> div [])
+            in
+            UI.codeBlock [] (div [] lines)
+
+        viewToggableSource icon disabled renderedSource =
+            div [ class "source" ]
+                [ div
+                    [ classList
+                        [ ( "source-toggle", True )
+                        , ( "disabled", disabled )
+                        ]
+                    ]
+                    [ Icon.view icon ]
+                , renderedSource
+                ]
+    in
+    case definition of
+        Term _ info ->
+            ( info.source, info.source )
+                |> Tuple.mapBoth Source.numTermLines (viewTermSource sourceConfig info.name)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretDown False)
+
+        Type _ info ->
+            ( info.source, info.source )
+                |> Tuple.mapBoth Source.numTypeLines (viewTypeSource sourceConfig)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
 
 
 view : msg -> (Hash -> msg) -> Definition -> Bool -> Html msg
 view closeMsg toOpenReferenceMsg definition isFocused =
     let
-        viewDefinitionInfo hash_ info source =
+        viewDefinitionInfo hash_ info =
             viewClosableRow
                 closeMsg
                 hash_
                 isFocused
                 (viewNames info)
-                (div [] [ source ])
+                [ ( UI.nothing, viewBuiltin definition )
+                , viewSource toOpenReferenceMsg definition
+                ]
     in
     case definition of
         Term h info ->
-            viewDefinitionInfo h
-                info
-                (viewTermSource (Source.Rich toOpenReferenceMsg) info.name info.source)
+            viewDefinitionInfo h info
 
         Type h info ->
-            viewDefinitionInfo h
-                info
-                (viewTypeSource (Source.Rich toOpenReferenceMsg) info.source)
+            viewDefinitionInfo h info
 
 
 
 -- VIEW HELPERS
 
 
-viewRow : Hash -> Bool -> List (Html msg) -> Html msg -> Html msg
-viewRow hash_ isFocused headerItems content =
+viewGutter : Html msg -> Html msg
+viewGutter content =
+    div [ class "gutter" ] [ content ]
+
+
+viewDefinitionRow :
+    Hash
+    -> Bool
+    -> ( Html msg, Html msg )
+    -> List ( Html msg, Html msg )
+    -> Html msg
+viewDefinitionRow hash_ isFocused ( headerGutter, headerContent ) content =
     let
-        indicator : Html msg
-        indicator =
-            span [ class "focus-indicator" ] []
+        headerItems =
+            [ viewGutter headerGutter, headerContent ]
+
+        contentRows =
+            List.map (\( g, c ) -> div [ class "inner-row" ] [ viewGutter g, c ]) content
     in
     div
         [ classList [ ( "focused", isFocused ), ( "definition-row", True ) ]
         , id ("definition-" ++ Hash.toString hash_)
         ]
-        [ header [] (indicator :: headerItems)
-        , section [ class "content" ] [ content ]
+        [ header [ class "inner-row" ] headerItems
+        , section [ class "content" ] contentRows
         ]
 
 
-viewClosableRow : msg -> Hash -> Bool -> Html msg -> Html msg -> Html msg
-viewClosableRow closeMsg hash_ isFocused header content =
+viewClosableRow :
+    msg
+    -> Hash
+    -> Bool
+    -> Html msg
+    -> List ( Html msg, Html msg )
+    -> Html msg
+viewClosableRow closeMsg hash_ isFocused header contentItems =
     let
         close =
             a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
     in
-    viewRow hash_ isFocused [ header, close ] content
+    viewDefinitionRow hash_ isFocused ( close, header ) contentItems
 
 
 

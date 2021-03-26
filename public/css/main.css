@@ -99,21 +99,22 @@ table {
   --color-sidebar-focus-bg: var(--color-gray-darken-5);
 
   --color-workspace-fg: var(--color-main-fg);
-  --color-workspace-bg: var(--color-gray-lighten-50);
-  --color-workspace-border: var(--color-main-border);
+  --color-workspace-bg: var(--color-main-bg);
+  --color-workspace-subtle-bg: var(--color-gray-lighten-60);
+  --color-workspace-border: var(--color-gray-lighten-50);
 
   --color-workspace-item-fg: var(--color-gray-darken-30);
-  --color-workspace-item-mg: var(--color-gray-lighten-60);
-  --color-workspace-item-bg: var(--color-gray-lighten-100);
-  --color-workspace-item-subtle-fg: var(--color-main-subtle-fg);
+  --color-workspace-item-mg: transparent;
+  --color-workspace-item-bg: transparent;
+  --color-workspace-item-subtle-fg: var(--color-gray-lighten-40);
   --color-workspace-item-subtle-fg-em: var(--color-gray-lighten-20);
   --color-workspace-item-subtle-bg: var(--color-main-subtle-bg);
-  --color-workspace-item-border: var(--color-gray-lighten-50);
+  --color-workspace-item-border: transparent;
 
-  --color-workspace-item-focus-fg: var(--color-blue-darken-20);
+  --color-workspace-item-focus-fg: var(--color-blue-base);
   --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-20);
-  --color-workspace-item-focus-mg: var(--color-gray-lighten-50);
-  --color-workspace-item-focus-bg: var(--color-gray-lighten-55);
+  --color-workspace-item-focus-mg: transparent;
+  --color-workspace-item-focus-bg: transparent;
 
   --color-modal-fg: var(--color-main-fg);
   --color-modal-mg: var(--color-gray-lighten-60);
@@ -465,13 +466,25 @@ code a:active {
   overflow: hidden;
   height: fit-content;
   animation: slide-up 0.2s var(--anim-elastic);
-  box-shadow: 0 6px 16px var(--color-modal-shadow),
+  box-shadow: 0 0.375rem 1rem var(--color-modal-shadow),
     0 0 0 1px var(--color-modal-border);
   z-index: (--layer-modal);
 }
 
 .modal:focus {
   outline: none;
+}
+
+.badge {
+  color: var(--color-gray-base);
+  background: var(--color-gray-lighten-60);
+  border: 1px solid var(--color-gray-lighten-50);
+  font-size: 0.75rem;
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  padding: 0 0.5rem;
+  border-radius: var(--border-radius-base);
 }
 
 /* Buttons */
@@ -720,6 +733,10 @@ button.secondary:hover {
   color: var(--color-sidebar-focus-fg);
 }
 
+.namespace-tree .node.open label {
+  font-weight: bold;
+}
+
 .namespace-tree .namespace-content {
   margin-left: 1rem;
 }
@@ -743,10 +760,12 @@ button.secondary:hover {
 #workspace-content {
   overflow: auto;
   height: calc(100vh - 3.5rem);
+  padding-top: 2rem;
   scroll-behavior: smooth;
   scrollbar-width: auto;
   scrollbar-color: var(--color-workspace-item-subtle-fg)
     var(--color-workspace-item-bg);
+  box-shadow: inset 2rem 0 0 var(--color-workspace-subtle-bg);
 }
 
 #workspace-content::-webkit-scrollbar {
@@ -765,14 +784,30 @@ button.secondary:hover {
 /* -- Definitions ---------------------------------------------------------- */
 
 .definition-row {
+  position: relative;
   color: var(--color-workspace-item-fg);
   background: var(--color-workspace-item-bg);
-  padding: 1rem;
+  padding: 1rem 0;
   border-bottom: 1px solid var(--color-workspace-item-border);
+  margin-bottom: 1.5rem;
 }
 
-.definition-row:last-child {
-  border-bottom: 1px solid var(--color-workspace-border);
+.definition-row .inner-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.definition-row .icon.caret-right,
+.definition-row .icon.caret-down {
+  color: var(--color-workspace-item-subtle-fg);
+}
+
+.definition-row .gutter {
+  display: flex;
+  justify-content: center;
+  width: 2rem;
+  margin-right: 0.375rem;
+  color: var(--color-workspace-item-subtle-fg);
 }
 
 .definition-row .loading-placeholder {
@@ -786,43 +821,45 @@ button.secondary:hover {
   flex: 1;
   align-items: center;
   height: 1rem;
+  margin-bottom: 1.5rem;
 }
 
 .definition-row .close {
-  margin-left: auto;
+  width: 2rem;
+  height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .definition-row .close .icon {
-  color: var(--color-workspace-item-subtle-fg);
+  color: var(--color-workspace-item-subtle-fg-em);
+  width: 0.5rem;
+  height: 0.5rem;
 }
 
 .definition-row .close:hover .icon {
   color: var(--color-workspace-item-fg);
 }
 
-.definition-row header .focus-indicator {
-  background: var(--color-blue-base);
-  border-radius: var(--border-radius-base);
-  width: 0.375rem;
-  height: 1rem;
-  will-change: transform;
-  transform: translate(-2rem, 0);
-  transition: transform 0.2s ease-out;
-  margin-top: -2px;
-}
-
 .definition-row header .names {
   display: flex;
   flex-direction: row;
-  will-change: transform;
-  transition: color 0.2s, transform 0.3s var(--anim-elastic);
-  transform: translate(0, 0);
-  margin-left: -0.375rem; /* countering the focus-indicator width */
+  align-items: center;
+}
+
+.definition-row header .names .icon {
+  margin-right: 0.375rem;
+}
+.definition-row header .names .icon.caret-right,
+.definition-row header .names .icon.caret-down {
+  margin-right: 0.25rem;
 }
 
 .definition-row header .names .name {
   color: var(--color-workspace-item-fg);
   font-size: var(--font-size-base);
+  transition: color 0.2s;
   font-weight: bold;
 }
 
@@ -847,7 +884,7 @@ button.secondary:hover {
 .definition-row header .names .other-names {
   height: 1rem;
   color: var(--color-workspace-item-subtle-fg-em);
-  transition: all 0.2s;
+  transition: color 0.2s;
   cursor: help;
 }
 
@@ -855,19 +892,35 @@ button.secondary:hover {
   color: var(--color-workspace-item-fg);
 }
 
-.definition-row .content {
-  margin: 2rem 1rem 1rem;
+.definition-row .content .gutter {
+  margin-right: 1.5rem;
 }
 
 .definition-row .content .docs {
-  margin-bottom: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.definition-row .content code {
-  display: block;
-  padding: 1rem 1.25rem;
-  border-radius: var(--border-radius-base);
+.definition-row .content .built-in {
+  margin-bottom: 1.5rem;
+  margin-left: 1.25rem;
+}
+
+.definition-row .content .source {
+  display: flex;
+  flex-direction: row;
   background: var(--color-workspace-item-mg);
+}
+
+.definition-row .content .source .source-toggle {
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  margin-right: 0.375rem;
+  padding-top: 0.2rem;
+}
+
+.definition-row .content .source .source-toggle.disabled {
+  opacity: 0.5;
 }
 
 /* Definition Row: Loading */
@@ -893,25 +946,27 @@ button.secondary:hover {
   background: var(--color-workspace-item-focus-bg);
 }
 
+.definition-row.focused:before {
+  position: absolute;
+  top: 0;
+  left: 2rem;
+  bottom: 0;
+  content: "";
+  background: var(--color-workspace-item-focus-fg);
+  width: 0.15rem;
+  transform: translateX(-50%);
+}
+
 .definition-row.focused .content code {
   background: var(--color-workspace-item-focus-mg);
 }
 
-.definition-row.focused header .names {
-  transform: translate(1.125rem, 0);
-}
-
 .definition-row.focused header .name {
-  color: var(--color-blue-darken-20);
+  color: var(--color-workspace-item-focus-fg);
 }
 
-.definition-row.focused header .focus-indicator {
-  transform: translate(0, 0);
-  transition: transform 0.2s ease-in;
-}
-
-.definition-row.focused .close .icon {
-  color: var(--color-workspace-item-focus-subtle-fg);
+.definition-row.focused header .icon {
+  color: var(--color-workspace-item-focus-fg);
 }
 
 /* -- Finder --------------------------------------------------------------- */

@@ -4,6 +4,7 @@ module Syntax exposing
     , SyntaxSegment(..)
     , SyntaxType(..)
     , decode
+    , numLines
     , view
     )
 
@@ -82,6 +83,25 @@ type SyntaxType
 type Linked msg
     = Linked (Hash -> msg)
     | NotLinked
+
+
+
+-- HELPERS
+
+
+{-| TODO: Parse Syntax into a list of lines and this function can be removed
+-}
+numLines : Syntax -> Int
+numLines (Syntax segments) =
+    let
+        count (SyntaxSegment _ segment) acc =
+            if String.contains "\n" segment then
+                acc + 1
+
+            else
+                acc
+    in
+    NEL.foldl count 1 segments
 
 
 

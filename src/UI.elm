@@ -1,12 +1,22 @@
 module UI exposing (..)
 
-import Html exposing (Html, div, span, text)
+import Html exposing (Attribute, Html, code, div, pre, span, text)
 import Html.Attributes exposing (class)
+
+
+codeBlock : List (Attribute msg) -> Html msg -> Html msg
+codeBlock attrs code_ =
+    pre attrs [ code [] [ code_ ] ]
 
 
 nothing : Html msg
 nothing =
     text ""
+
+
+badge : Html msg -> Html msg
+badge content =
+    span [ class "badge" ] [ content ]
 
 
 spinner : Html msg

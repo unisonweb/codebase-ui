@@ -5,6 +5,7 @@ import Browser
 import Browser.Events
 import Browser.Navigation as Nav
 import Definition exposing (Definition(..))
+import Definition.Category
 import Finder
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
@@ -33,8 +34,6 @@ import NamespaceListing
         ( DefinitionListing(..)
         , NamespaceListing(..)
         , NamespaceListingContent
-        , TermCategory(..)
-        , TypeCategory(..)
         )
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
@@ -306,23 +305,10 @@ viewDefinitionListing listing =
     in
     case listing of
         TypeListing hash fqn category ->
-            case category of
-                DataType ->
-                    viewDefRow hash fqn "type" Icon.Type
-
-                AbilityType ->
-                    viewDefRow hash fqn "ability" Icon.Ability
+            viewDefRow hash fqn (Definition.Category.name category) (Definition.Category.icon category)
 
         TermListing hash fqn category ->
-            case category of
-                PlainTerm ->
-                    viewDefRow hash fqn "term" Icon.Term
-
-                TestTerm ->
-                    viewDefRow hash fqn "test" Icon.Test
-
-                DocTerm ->
-                    viewDefRow hash fqn "doc" Icon.Doc
+            viewDefRow hash fqn (Definition.Category.name category) (Definition.Category.icon category)
 
         PatchListing _ ->
             viewListingRow Nothing "Patch" "patch" Icon.Patch
