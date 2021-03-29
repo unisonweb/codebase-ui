@@ -2,12 +2,11 @@ module NamespaceListing exposing
     ( DefinitionListing(..)
     , NamespaceListing(..)
     , NamespaceListingContent
-    , TermCategory(..)
-    , TypeCategory(..)
     , decode
     , map
     )
 
+import Definition.Category as Category exposing (Category, TermCategory(..), TypeCategory(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode exposing (andThen, field)
@@ -15,20 +14,9 @@ import Json.Decode.Extra exposing (when)
 import RemoteData exposing (RemoteData(..), WebData)
 
 
-type TypeCategory
-    = DataType
-    | AbilityType
-
-
-type TermCategory
-    = PlainTerm
-    | TestTerm
-    | DocTerm
-
-
 type DefinitionListing
-    = TypeListing Hash FQN TypeCategory
-    | TermListing Hash FQN TermCategory
+    = TypeListing Hash FQN Category
+    | TermListing Hash FQN Category
     | PatchListing String
 
 
@@ -103,8 +91,8 @@ decodeContent parentFqn =
 
         decodeTypeTag =
             Decode.oneOf
-                [ when (field "typeTag" Decode.string) ((==) "Data") (Decode.succeed DataType)
-                , when (field "typeTag" Decode.string) ((==) "Ability") (Decode.succeed AbilityType)
+                [ when (field "typeTag" Decode.string) ((==) "Data") (Decode.succeed (Category.Type DataType))
+                , when (field "typeTag" Decode.string) ((==) "Ability") (Decode.succeed (Category.Type AbilityType))
                 ]
 
         decodeTypeListing =
@@ -117,9 +105,9 @@ decodeContent parentFqn =
 
         decodeTermTag =
             Decode.oneOf
-                [ when (field "termTag" Decode.string) ((==) "Test") (Decode.succeed TestTerm)
-                , when (field "termTag" Decode.string) ((==) "Doc") (Decode.succeed DocTerm)
-                , Decode.succeed PlainTerm
+                [ when (field "termTag" Decode.string) ((==) "Test") (Decode.succeed (Category.Term TestTerm))
+                , when (field "termTag" Decode.string) ((==) "Doc") (Decode.succeed (Category.Term DocTerm))
+                , Decode.succeed (Category.Term PlainTerm)
                 ]
 
         decodeTermListing =
