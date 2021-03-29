@@ -199,7 +199,7 @@ handleKeyboardEvent model keyboardEvent =
 fetchDefinition : HashQualified -> Cmd Msg
 fetchDefinition hq =
     Http.get
-        { url = Api.definitions [ HashQualified.toString HashQualified.PreferName hq ]
+        { url = Api.getDefinition [ HashQualified.toString HashQualified.PreferName hq ]
         , expect =
             Http.expectJson
                 (RemoteData.fromResult

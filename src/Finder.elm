@@ -1,16 +1,17 @@
 module Finder exposing (Model, Msg, OutMsg(..), init, update, view)
 
+import Api
 import Browser.Dom as Dom
-import Definition exposing (Definition)
-import FullyQualifiedName as FQN
+import Definition
+import DefinitionMatch exposing (DefinitionMatch)
 import Hash exposing (Hash)
 import Html exposing (Html, a, div, header, input, label, li, ol, section, text)
 import Html.Attributes exposing (autocomplete, class, classList, id, placeholder, style, type_, value)
-import Html.Events exposing (onClick, onInput, onMouseOver)
+import Html.Events exposing (onClick, onInput)
+import Http
 import Keyboard.Event exposing (KeyboardEvent)
 import Keyboard.Key exposing (Key(..))
 import KeyboardShortcuts
-import List.Nonempty as NEL
 import RemoteData exposing (RemoteData(..), WebData)
 import SearchResults exposing (SearchResults(..))
 import Source exposing (TypeSource(..))
@@ -25,7 +26,7 @@ import UI.Modal as Modal
 
 
 type alias FinderSearchResults =
-    SearchResults Definition
+    SearchResults DefinitionMatch
 
 
 type alias Model =
@@ -34,36 +35,7 @@ type alias Model =
 
 init : ( Model, Cmd Msg )
 init =
-    let
-        mockedResults =
-            SearchResults.fromList
-                [ Definition.Type (Hash.fromString "#base.List")
-                    (Definition.makeTypeDefinitionInfo
-                        "List"
-                        (NEL.fromElement (FQN.fromString "base.List"))
-                        BuiltinType
-                    )
-                , Definition.Type (Hash.fromString "#base.Map")
-                    (Definition.makeTypeDefinitionInfo
-                        "Map"
-                        (NEL.fromElement (FQN.fromString "base.Map"))
-                        BuiltinType
-                    )
-                , Definition.Type (Hash.fromString "#base.Set")
-                    (Definition.makeTypeDefinitionInfo
-                        "Set"
-                        (NEL.fromElement (FQN.fromString "base.Set"))
-                        BuiltinType
-                    )
-                , Definition.Type (Hash.fromString "#base.List.Nonempty")
-                    (Definition.makeTypeDefinitionInfo
-                        "List.Nonempty"
-                        (NEL.fromElement (FQN.fromString "base.List.Nonempty"))
-                        BuiltinType
-                    )
-                ]
-    in
-    ( { query = "", results = Success mockedResults }, focusSearchInput )
+    ( { query = "", results = NotAsked }, focusSearchInput )
 
 
 
@@ -75,9 +47,9 @@ type Msg
     | UpdateQuery String
     | ResetOrClose
     | Close
-    | FocusOn Hash
     | Select Hash
     | Keydown KeyboardEvent
+    | FetchMatchesFinished String (WebData (List DefinitionMatch))
 
 
 type OutMsg
@@ -93,7 +65,7 @@ update msg model =
             ( model, Cmd.none, Exit )
 
         reset =
-            ( { model | query = "" }, focusSearchInput, Remain )
+            ( { model | query = "", results = NotAsked }, focusSearchInput, Remain )
 
         resetOrClose =
             if model.query == "" then
@@ -104,24 +76,31 @@ update msg model =
     in
     case msg of
         UpdateQuery query ->
-            ( { model | query = query }, Cmd.none, Remain )
+            if String.isEmpty query then
+                ( { model | query = query, results = NotAsked }, Cmd.none, Remain )
+
+            else if String.length query > 1 then
+                ( { model | query = query }, fetchMatches query, Remain )
+
+            else
+                ( { model | query = query }, Cmd.none, Remain )
 
         Close ->
             exit
 
+        FetchMatchesFinished query matches ->
+            let
+                results =
+                    RemoteData.map SearchResults.fromList matches
+            in
+            if query == model.query then
+                ( { model | results = results }, Cmd.none, Remain )
+
+            else
+                ( model, Cmd.none, Remain )
+
         ResetOrClose ->
             resetOrClose
-
-        FocusOn hash ->
-            let
-                definitionEqs =
-                    Definition.hash >> Hash.equals hash
-
-                results =
-                    model.results
-                        |> RemoteData.map (SearchResults.focusOn definitionEqs)
-            in
-            ( { model | results = results }, Cmd.none, Remain )
 
         Select hash ->
             ( model, Cmd.none, OpenDefinition hash )
@@ -153,7 +132,7 @@ update msg model =
                                     Remain
 
                                 SearchResults matches ->
-                                    OpenDefinition ((SearchResults.focus >> Definition.hash) matches)
+                                    OpenDefinition ((SearchResults.focus >> .definition >> Definition.hash) matches)
 
                         out =
                             model.results
@@ -173,6 +152,24 @@ update msg model =
 -- EFFECTS
 
 
+fetchMatches : String -> Cmd Msg
+fetchMatches query =
+    let
+        limit =
+            9
+
+        sourceWidth =
+            100
+    in
+    Http.get
+        { url = Api.find limit sourceWidth query
+        , expect =
+            Http.expectJson
+                (RemoteData.fromResult >> FetchMatchesFinished query)
+                DefinitionMatch.decodeMatches
+        }
+
+
 focusSearchInput : Cmd Msg
 focusSearchInput =
     Task.attempt (\_ -> NoOp) (Dom.focus "search")
@@ -182,8 +179,8 @@ focusSearchInput =
 -- VIEW
 
 
-viewMatch : String -> Definition -> Bool -> Maybe String -> Html Msg
-viewMatch nameWidth def isFocused shortcut =
+viewMatch : String -> DefinitionMatch -> Bool -> Maybe String -> Html Msg
+viewMatch nameWidth match isFocused shortcut =
     let
         shortcutIndicator =
             if isFocused then
@@ -203,39 +200,38 @@ viewMatch nameWidth def isFocused shortcut =
                     [ ( "definition-match", True )
                     , ( "focused", isFocused )
                     ]
-                , onMouseOver (FocusOn hash)
                 , onClick (Select hash)
                 ]
                 [ Icon.view Icon.Type
                 , label [ class "name", style "width" nameWidth ] [ text info.name ]
-                , source
+                , div [ class "source" ] [ source ]
                 , shortcutIndicator
                 ]
     in
-    case def of
+    case match.definition of
         Definition.Type hash info ->
             viewMatch_
                 hash
                 info
-                (Source.viewTypeSource (\_ -> NoOp) info.source)
+                (Source.viewTypeSource Source.Monochrome info.source)
 
         Definition.Term hash info ->
             viewMatch_
                 hash
                 info
-                (Source.viewTermSource (\_ -> NoOp) info.name info.source)
+                (Source.viewTermSignature Source.Monochrome info.name info.source)
 
 
-maxNumNameChars : SearchResults.Matches Definition -> Int
+maxNumNameChars : SearchResults.Matches DefinitionMatch -> Int
 maxNumNameChars matches =
     matches
         |> SearchResults.matchesToList
-        |> List.map (Definition.name >> String.length)
+        |> List.map (.definition >> Definition.name >> String.length)
         |> List.maximum
         |> Maybe.withDefault 0
 
 
-viewMatches : SearchResults.Matches Definition -> Html Msg
+viewMatches : SearchResults.Matches DefinitionMatch -> Html Msg
 viewMatches matches =
     let
         nameWidth =
@@ -247,10 +243,7 @@ viewMatches matches =
                 |> List.indexedMap (\i ( d, f ) -> ( d, f, KeyboardShortcuts.indexToShortcut i ))
                 |> List.map (\( d, f, s ) -> viewMatch nameWidth d f s)
     in
-    section [ class "results" ]
-        [ ol [] matchItems
-        , div [ class "column-line", style "left" nameWidth ] []
-        ]
+    section [ class "results" ] [ ol [] matchItems ]
 
 
 view : Model -> Html Msg
@@ -261,10 +254,13 @@ view model =
                 Success res ->
                     case res of
                         Empty ->
-                            UI.emptyStateMessage "Could not find any matches"
+                            UI.emptyStateMessage ("No matching definitions found for '" ++ model.query ++ "'")
 
                         SearchResults matches ->
                             viewMatches matches
+
+                Failure error ->
+                    div [] [ text (Api.errorToString error) ]
 
                 _ ->
                     UI.nothing
