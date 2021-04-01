@@ -5,6 +5,7 @@ import Browser.Dom as Dom
 import Definition
 import DefinitionMatch exposing (DefinitionMatch)
 import Hash exposing (Hash)
+import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, header, input, label, li, ol, section, text)
 import Html.Attributes exposing (autocomplete, class, classList, id, placeholder, style, type_, value)
 import Html.Events exposing (onClick, onInput)
@@ -55,7 +56,7 @@ type Msg
 type OutMsg
     = Remain
     | Exit
-    | OpenDefinition Hash
+    | OpenDefinition HashQualified
 
 
 update : Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -103,7 +104,7 @@ update msg model =
             resetOrClose
 
         Select hash ->
-            ( model, Cmd.none, OpenDefinition hash )
+            ( model, Cmd.none, OpenDefinition (HashOnly hash) )
 
         Keydown event ->
             case event.keyCode of
@@ -132,7 +133,7 @@ update msg model =
                                     Remain
 
                                 SearchResults matches ->
-                                    OpenDefinition ((SearchResults.focus >> .definition >> Definition.hash) matches)
+                                    OpenDefinition ((SearchResults.focus >> .definition >> Definition.hash >> HashOnly) matches)
 
                         out =
                             model.results

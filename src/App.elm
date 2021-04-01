@@ -36,6 +36,7 @@ import NamespaceListing
         , NamespaceListingContent
         )
 import RemoteData exposing (RemoteData(..), WebData)
+import Route exposing (Route)
 import UI
 import UI.Icon as Icon
 import Url exposing (Url)
@@ -53,7 +54,7 @@ type Modal
 
 type alias Model =
     { navKey : Nav.Key
-    , currentUrl : Url
+    , route : Route
     , workspace : Workspace.Model
     , rootNamespaceListing : WebData NamespaceListing
     , expandedNamespaceListings : FQNSet
@@ -62,14 +63,25 @@ type alias Model =
 
 
 init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
-init _ initialUrl navKey =
+init _ url navKey =
     let
+        route =
+            Route.fromUrl url
+
         ( workspace, workspaceCmd ) =
-            Workspace.init
+            case route of
+                Route.Type _ hq ->
+                    Workspace.init (Just hq)
+
+                Route.Term _ hq ->
+                    Workspace.init (Just hq)
+
+                _ ->
+                    Workspace.init Nothing
 
         model =
             { navKey = navKey
-            , currentUrl = initialUrl
+            , route = route
             , workspace = workspace
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = FQNSet.empty
@@ -86,8 +98,7 @@ init _ initialUrl navKey =
 
 
 type Msg
-    = NoOp
-    | LinkClicked Browser.UrlRequest
+    = LinkClicked Browser.UrlRequest
     | UrlChanged Url
     | HandleKeyboardEvent KeyboardEvent
     | ToggleExpandedNamespaceListing FQN
@@ -102,14 +113,14 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
-        NoOp ->
-            ( model, Cmd.none )
-
         LinkClicked _ ->
             ( model, Cmd.none )
 
-        UrlChanged _ ->
-            ( model, Cmd.none )
+        UrlChanged url ->
+            -- URL changes happen when setting focus on a definitions.
+            -- Currently, the URL change is a result of that as oppose to focus
+            -- being a result of a URL change
+            ( { model | route = Route.fromUrl url }, Cmd.none )
 
         HandleKeyboardEvent event ->
             handleKeyboardEvent model event
@@ -166,26 +177,20 @@ update msg model =
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
         OpenDefinition hq ->
-            let
-                ( workspace, cmd ) =
-                    Workspace.open model.workspace hq
-            in
-            ( { model | workspace = workspace }, Cmd.map WorkspaceMsg cmd )
+            openDefinition model hq
 
         WorkspaceMsg wMsg ->
             let
-                ( workspace, wCmd, out ) =
+                ( workspace, wCmd, outMsg ) =
                     Workspace.update wMsg model.workspace
 
-                ( newModel, fCmd ) =
-                    case out of
-                        Workspace.None ->
-                            ( model, Cmd.none )
+                model2 =
+                    { model | workspace = workspace }
 
-                        Workspace.ShowFinderRequest ->
-                            showFinder model
+                ( model3, cmd ) =
+                    handleWorkspaceOutMsg model2 outMsg
             in
-            ( { newModel | workspace = workspace }, Cmd.batch [ fCmd, Cmd.map WorkspaceMsg wCmd ] )
+            ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
 
         FinderMsg fMsg ->
             case model.modal of
@@ -204,16 +209,46 @@ update msg model =
                         Finder.Exit ->
                             ( { model | modal = NoModal }, Cmd.none )
 
-                        Finder.OpenDefinition hash ->
-                            let
-                                ( workspace, cmd ) =
-                                    Workspace.open model.workspace (HashQualified.HashOnly hash)
-                            in
-                            ( { model | workspace = workspace }, Cmd.map WorkspaceMsg cmd )
+                        Finder.OpenDefinition hq ->
+                            openDefinition { model | modal = NoModal } hq
 
 
 
 -- UPDATE HELPERS
+
+
+openDefinition : Model -> HashQualified -> ( Model, Cmd Msg )
+openDefinition model hq =
+    let
+        ( workspace, wCmd, outMsg ) =
+            Workspace.open model.workspace hq
+
+        model2 =
+            { model | workspace = workspace }
+
+        ( model3, cmd ) =
+            handleWorkspaceOutMsg model2 outMsg
+    in
+    ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
+
+
+handleWorkspaceOutMsg : Model -> Workspace.OutMsg -> ( Model, Cmd Msg )
+handleWorkspaceOutMsg model out =
+    case out of
+        Workspace.None ->
+            ( model, Cmd.none )
+
+        Workspace.ShowFinderRequest ->
+            showFinder model
+
+        Workspace.TypeFocused hq ->
+            ( model, Route.navigateToType model.navKey model.route hq )
+
+        Workspace.TermFocused hq ->
+            ( model, Route.navigateToTerm model.navKey model.route hq )
+
+        Workspace.Emptied ->
+            ( model, Route.navigateToLatest model.navKey )
 
 
 handleKeyboardEvent : Model -> KeyboardEvent -> ( Model, Cmd Msg )
@@ -301,7 +336,7 @@ viewDefinitionListing : DefinitionListing -> Html Msg
 viewDefinitionListing listing =
     let
         viewDefRow hash fqn =
-            viewListingRow (Just (OpenDefinition (HashQualified.HashQualified fqn hash))) (unqualifiedName fqn)
+            viewListingRow (Just (OpenDefinition (HashQualified.HashOnly hash))) (unqualifiedName fqn)
     in
     case listing of
         TypeListing hash fqn category ->

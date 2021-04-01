@@ -5,15 +5,20 @@ module FullyQualifiedName exposing
     , equals
     , fromParent
     , fromString
+    , fromUrlString
     , isSuffixOf
     , namespaceOf
+    , segments
     , toString
+    , toUrlString
     , unqualifiedName
+    , urlParser
     )
 
 import Json.Decode as Decode
 import List.Nonempty as NEL
 import String.Extra as StringE
+import Url.Parser
 
 
 type FQN
@@ -46,6 +51,13 @@ fromString rawFqn =
         |> FQN
 
 
+fromUrlString : String -> FQN
+fromUrlString str =
+    str
+        |> String.replace "/" "."
+        |> fromString
+
+
 toString : FQN -> String
 toString (FQN nameParts) =
     let
@@ -63,6 +75,18 @@ toString (FQN nameParts) =
         |> NEL.toList
         |> String.join "."
         |> trimLeadingDot
+
+
+toUrlString : FQN -> String
+toUrlString fqn =
+    fqn
+        |> toString
+        |> String.replace "." "/"
+
+
+segments : FQN -> NEL.Nonempty String
+segments (FQN segments_) =
+    segments_
 
 
 fromParent : FQN -> String -> FQN
@@ -114,7 +138,12 @@ namespaceOf suffixName fqn =
 
 
 
--- JSON DECODE
+-- PARSERS
+
+
+urlParser : Url.Parser.Parser (FQN -> a) a
+urlParser =
+    Url.Parser.custom "FQN" (fromUrlString >> Just)
 
 
 decodeFromParent : FQN -> Decode.Decoder FQN
