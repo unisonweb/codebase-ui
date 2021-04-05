@@ -5,6 +5,7 @@ module Route exposing
     , navigateToLatest
     , navigateToTerm
     , navigateToType
+    , relativeTo
     , toTerm
     , toType
     , toUrlString
@@ -15,6 +16,7 @@ import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import HashQualified as HQ exposing (HashQualified(..))
 import List.Nonempty as NEL
+import RelativeTo exposing (RelativeTo)
 import Url exposing (Url)
 import Url.Builder exposing (absolute)
 import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
@@ -60,15 +62,10 @@ type NamespaceReference
     | HashReference Hash
 
 
-type WithinNamespace
-    = WithinLatest
-    | WithinHash Hash
-
-
 type Route
     = Namespace NamespaceReference
-    | Type WithinNamespace HashQualified
-    | Term WithinNamespace HashQualified
+    | Type RelativeTo HashQualified
+    | Term RelativeTo HashQualified
 
 
 
@@ -82,8 +79,8 @@ urlParser =
         , Parser.map (Namespace Latest) (s "latest")
         , Parser.map Namespace (s "latest" </> s "namespaces" </> Hash.urlParser |> Parser.map HashReference)
         , Parser.map Namespace (s "latest" </> s "namespaces" </> FQN.urlParser |> Parser.map NameReference)
-        , Parser.map (Type WithinLatest) (s "latest" </> s "types" </> HQ.urlParser)
-        , Parser.map (Term WithinLatest) (s "latest" </> s "terms" </> HQ.urlParser)
+        , Parser.map (Type RelativeTo.Codebase) (s "latest" </> s "types" </> HQ.urlParser)
+        , Parser.map (Term RelativeTo.Codebase) (s "latest" </> s "terms" </> HQ.urlParser)
         ]
 
 
@@ -92,6 +89,31 @@ fromUrl url =
     url
         |> Parser.parse urlParser
         |> Maybe.withDefault (Namespace Latest)
+
+
+
+-- HELPERS
+
+
+relativeTo : Route -> Maybe RelativeTo
+relativeTo route =
+    case route of
+        Namespace ref ->
+            case ref of
+                Latest ->
+                    Just RelativeTo.Codebase
+
+                NameReference _ ->
+                    Nothing
+
+                HashReference h ->
+                    Just (RelativeTo.Namespace h)
+
+        Type relTo _ ->
+            Just relTo
+
+        Term relTo _ ->
+            Just relTo
 
 
 
@@ -104,13 +126,13 @@ toType oldRoute hq =
         Namespace ref ->
             case ref of
                 Latest ->
-                    Type WithinLatest hq
+                    Type RelativeTo.Codebase hq
 
                 NameReference _ ->
-                    Type WithinLatest hq
+                    Type RelativeTo.Codebase hq
 
                 HashReference hash ->
-                    Type (WithinHash hash) hq
+                    Type (RelativeTo.Namespace hash) hq
 
         Type within _ ->
             Type within hq
@@ -125,32 +147,24 @@ toTerm oldRoute hq =
         Namespace ref ->
             case ref of
                 Latest ->
-                    Term WithinLatest hq
+                    Term RelativeTo.Codebase hq
 
                 NameReference _ ->
-                    Term WithinLatest hq
+                    Term RelativeTo.Codebase hq
 
                 HashReference hash ->
-                    Term (WithinHash hash) hq
+                    Term (RelativeTo.Namespace hash) hq
 
-        Type within _ ->
-            Term within hq
+        Type relTo _ ->
+            Term relTo hq
 
-        Term within _ ->
-            Term within hq
+        Term relTo _ ->
+            Term relTo hq
 
 
 toUrlString : Route -> String
 toUrlString route =
     let
-        withinToPath within =
-            case within of
-                WithinLatest ->
-                    "latest"
-
-                WithinHash h ->
-                    Hash.toUrlString h
-
         hqToPath hq =
             case hq of
                 NameOnly fqn ->
@@ -175,11 +189,11 @@ toUrlString route =
                         HashReference hash ->
                             [ "@" ++ Hash.toString hash ]
 
-                Type within hq ->
-                    [ withinToPath within, "types" ] ++ hqToPath hq
+                Type relTo hq ->
+                    [ RelativeTo.toUrlPath relTo, "types" ] ++ hqToPath hq
 
-                Term within hq ->
-                    [ withinToPath within, "terms" ] ++ hqToPath hq
+                Term relTo hq ->
+                    [ RelativeTo.toUrlPath relTo, "terms" ] ++ hqToPath hq
     in
     absolute path []
 
