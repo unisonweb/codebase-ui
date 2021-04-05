@@ -25,15 +25,47 @@ fromString =
         ]
 
 
+fromUrlString : Test
+fromUrlString =
+    describe "FullyQualifiedName.fromUrlString"
+        [ test "Creates an FQN from a URL string (segments separate by /)" <|
+            \_ ->
+                Expect.equal "a.b.c" (FQN.toString (FQN.fromUrlString "a/b/c"))
+        , describe "Root"
+            [ test "Creates a root FQN from \"\"" <|
+                \_ ->
+                    Expect.equal "." (FQN.toString (FQN.fromUrlString ""))
+            , test "Creates a root FQN from \" \"" <|
+                \_ ->
+                    Expect.equal "." (FQN.toString (FQN.fromUrlString " "))
+            , test "Creates a root FQN from \"/\"" <|
+                \_ ->
+                    Expect.equal "." (FQN.toString (FQN.fromUrlString "/"))
+            ]
+        ]
+
+
 toString : Test
 toString =
-    describe "FullyQualifiedName.toString"
+    describe "FullyQualifiedName.toString with segments separate by ."
         [ test "serializes the FQN" <|
             \_ ->
                 Expect.equal "foo.bar" (FQN.toString (FQN.fromString "foo.bar"))
         , test "includes root dot when an absolute fqn" <|
             \_ ->
                 Expect.equal ".foo.bar" (FQN.toString (FQN.fromString ".foo.bar"))
+        ]
+
+
+toUrlString : Test
+toUrlString =
+    describe "FullyQualifiedName.toUrlString"
+        [ test "serializes the FQN with segments separate by /" <|
+            \_ ->
+                Expect.equal "foo/bar" (FQN.toUrlString (FQN.fromString "foo.bar"))
+        , test "includes root dot when an absolute fqn" <|
+            \_ ->
+                Expect.equal "/foo/bar" (FQN.toUrlString (FQN.fromString ".foo.bar"))
         ]
 
 
