@@ -35,6 +35,7 @@ import NamespaceListing
         , NamespaceListing(..)
         , NamespaceListingContent
         )
+import RelativeTo exposing (RelativeTo(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import Route exposing (Route)
 import UI
@@ -55,6 +56,7 @@ type Modal
 type alias Model =
     { navKey : Nav.Key
     , route : Route
+    , relativeTo : RelativeTo
     , workspace : Workspace.Model
     , rootNamespaceListing : WebData NamespaceListing
     , expandedNamespaceListings : FQNSet
@@ -79,9 +81,15 @@ init _ url navKey =
                 _ ->
                     Workspace.init Nothing
 
+        {--| TODO: When we can't get a relative to, we need to resolve the name
+          in the url to a hash-}
+        relativeTo =
+            Maybe.withDefault Codebase (Route.relativeTo route)
+
         model =
             { navKey = navKey
             , route = route
+            , relativeTo = relativeTo
             , workspace = workspace
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = FQNSet.empty
