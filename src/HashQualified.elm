@@ -8,11 +8,28 @@ module HashQualified exposing
     , urlParser
     )
 
-import Debug
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Maybe.Extra as MaybeE
 import Url.Parser
+
+
+
+{--
+
+  HashQualified: Definition Identifier
+  ====================================
+
+  The `NameOnly` variant doesn't mean that the definition doesn't have a
+  `Hash`, but that we aren't using the `Hash` to identify it, same with
+  `HashOnly`.
+
+  The `HashQualified` variant is used when the name isn't enough to identify a
+  definition; meaning there are multiple definitions with the same name.  To
+  disambiguate a `Hash` is added in addition to the name.  The stringified
+  example of this looks like so: `base.List.map@abc123`.
+
+--}
 
 
 type HashQualified
@@ -122,7 +139,7 @@ hashQualifiedFromUrlString str =
             parts =
                 String.split "@" str
         in
-        case Debug.log "f" parts of
+        case parts of
             [] ->
                 Nothing
 
