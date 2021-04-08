@@ -3,8 +3,10 @@ module Workspace.WorkspaceItemsTests exposing (..)
 import Expect
 import Hash
 import HashQualified exposing (HashQualified(..))
+import Http exposing (Error(..))
 import Test exposing (..)
 import Workspace.Reference as Reference exposing (Reference(..))
+import Workspace.WorkspaceItem exposing (WorkspaceItem(..), reference)
 import Workspace.WorkspaceItems as WorkspaceItems exposing (..)
 
 
@@ -90,7 +92,7 @@ replace =
             \_ ->
                 let
                     newItem =
-                        Failure (TermReference (HashOnly (Hash.fromString "#b"))) (Error "err")
+                        Failure (TermReference (HashOnly (Hash.fromString "#b"))) (Http.BadUrl "err")
 
                     expected =
                         [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
@@ -110,7 +112,7 @@ replace =
             \_ ->
                 let
                     newItem =
-                        Failure (TermReference (HashOnly (Hash.fromString "#focus"))) (Error "err")
+                        Failure (TermReference (HashOnly (Hash.fromString "#focus"))) (Http.BadUrl "err")
 
                     expected =
                         [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
@@ -130,7 +132,7 @@ replace =
             \_ ->
                 let
                     newItem =
-                        Failure (TermReference (HashOnly (Hash.fromString "#d"))) (Error "err")
+                        Failure (TermReference (HashOnly (Hash.fromString "#d"))) (Http.BadUrl "err")
 
                     expected =
                         [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
@@ -298,15 +300,15 @@ map =
                 let
                     result =
                         workspaceItems
-                            |> WorkspaceItems.map (\i -> Failure (reference i) (Error "err"))
+                            |> WorkspaceItems.map (\i -> Failure (reference i) (Http.BadUrl "err"))
                             |> WorkspaceItems.toList
 
                     expected =
-                        [ Failure (TermReference (HashOnly (Hash.fromString "#a"))) (Error "err")
-                        , Failure (TermReference (HashOnly (Hash.fromString "#b"))) (Error "err")
-                        , Failure (TermReference (HashOnly (Hash.fromString "#focus"))) (Error "err")
-                        , Failure (TermReference (HashOnly (Hash.fromString "#c"))) (Error "err")
-                        , Failure (TermReference (HashOnly (Hash.fromString "#d"))) (Error "err")
+                        [ Failure (TermReference (HashOnly (Hash.fromString "#a"))) (Http.BadUrl "err")
+                        , Failure (TermReference (HashOnly (Hash.fromString "#b"))) (Http.BadUrl "err")
+                        , Failure (TermReference (HashOnly (Hash.fromString "#focus"))) (Http.BadUrl "err")
+                        , Failure (TermReference (HashOnly (Hash.fromString "#c"))) (Http.BadUrl "err")
+                        , Failure (TermReference (HashOnly (Hash.fromString "#d"))) (Http.BadUrl "err")
                         ]
                 in
                 Expect.equal expected result
@@ -380,4 +382,4 @@ workspaceItems =
 
 getFocusedRef : WorkspaceItems -> Maybe Reference
 getFocusedRef =
-    WorkspaceItems.focus >> Maybe.map WorkspaceItems.reference
+    WorkspaceItems.focus >> Maybe.map reference

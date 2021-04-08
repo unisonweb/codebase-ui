@@ -3,27 +3,20 @@ module Workspace exposing (Model, Msg, OutMsg(..), init, open, subscriptions, up
 import Api
 import Browser.Dom as Dom
 import Browser.Events
-import Definition exposing (Definition)
-import Hash exposing (Hash)
 import HashQualified exposing (HashQualified(..))
-import Html
-    exposing
-        ( Html
-        , article
-        , header
-        , section
-        )
+import Html exposing (Html, article, header, section, text)
 import Html.Attributes exposing (class, id)
 import Http
 import Json.Decode as Decode
 import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
 import Keyboard.Key exposing (Key(..))
-import OpenDefinitions exposing (HashIndexedDefinition, OpenDefinitions)
-import RemoteData exposing (RemoteData(..), WebData)
 import Route exposing (Route(..))
 import Task
 import UI
 import UI.Button as Button
+import Workspace.Reference as Reference exposing (Reference)
+import Workspace.WorkspaceItem as WorkspaceItem exposing (Item(..), WorkspaceItem(..))
+import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 
 
 
@@ -31,23 +24,23 @@ import UI.Button as Button
 
 
 type alias Model =
-    OpenDefinitions
+    WorkspaceItems
 
 
-init : Maybe HashQualified -> ( Model, Cmd Msg )
-init definitionHq =
+init : Maybe Reference -> ( Model, Cmd Msg )
+init mRef =
     let
         model =
-            OpenDefinitions.init Nothing
+            WorkspaceItems.init Nothing
     in
-    case definitionHq of
+    case mRef of
         Nothing ->
             ( model, Cmd.none )
 
-        Just hq ->
+        Just ref ->
             let
                 ( m, c, _ ) =
-                    openDefinition model Nothing hq
+                    open model ref
             in
             ( m, c )
 
@@ -59,16 +52,15 @@ init definitionHq =
 type Msg
     = NoOp
     | Find
-    | OpenDefinitionAfter Hash Hash
-    | CloseDefinition Hash
-    | FetchOpenDefinitionFinished HashQualified (WebData Definition)
+    | OpenDefinitionAfter Reference Reference
+    | CloseDefinition Reference
+    | FetchItemFinished Reference (Result Http.Error Item)
     | HandleKeyboardEvent KeyboardEvent
 
 
 type OutMsg
     = None
-    | TermFocused HashQualified
-    | TypeFocused HashQualified
+    | Focused Reference
     | Emptied
     | ShowFinderRequest
 
@@ -82,24 +74,26 @@ update msg model =
         Find ->
             ( model, Cmd.none, ShowFinderRequest )
 
-        OpenDefinitionAfter afterHash hash ->
-            openDefinition model (Just afterHash) (HashQualified.HashOnly hash)
+        OpenDefinitionAfter afterRef ref ->
+            openItem model (Just afterRef) ref
 
-        CloseDefinition hash ->
-            ( OpenDefinitions.remove hash model, Cmd.none, None )
+        CloseDefinition ref ->
+            ( WorkspaceItems.remove model ref, Cmd.none, None )
 
-        FetchOpenDefinitionFinished hq response ->
-            case HashQualified.hash hq of
-                Just h ->
-                    let
-                        nextOpenDefinitions =
-                            OpenDefinitions.replace h response model
-                    in
-                    ( nextOpenDefinitions, Cmd.none, openDefinitionsFocusToOutMsg nextOpenDefinitions )
+        FetchItemFinished ref itemResult ->
+            let
+                workspaceItem =
+                    case itemResult of
+                        Err e ->
+                            WorkspaceItem.Failure ref e
 
-                Nothing ->
-                    -- TODO
-                    ( model, Cmd.none, None )
+                        Ok i ->
+                            WorkspaceItem.Success ref i
+
+                nextWorkspaceItems =
+                    WorkspaceItems.replace model ref workspaceItem
+            in
+            ( nextWorkspaceItems, Cmd.none, openDefinitionsFocusToOutMsg nextWorkspaceItems )
 
         HandleKeyboardEvent event ->
             handleKeyboardEvent model event
@@ -109,72 +103,57 @@ update msg model =
 -- UPDATE HELPERS
 
 
-open : Model -> HashQualified -> ( Model, Cmd Msg, OutMsg )
-open model hiq =
-    openDefinition model Nothing hiq
+open : Model -> Reference -> ( Model, Cmd Msg, OutMsg )
+open model ref =
+    openItem model Nothing ref
 
 
-openDefinition : Model -> Maybe Hash -> HashQualified -> ( Model, Cmd Msg, OutMsg )
-openDefinition model afterHash hq =
-    case HashQualified.hash hq of
-        -- TODO: OpenDefinitions should be indexed by HashQualified instead of Hash
-        Nothing ->
-            ( model, Cmd.none, None )
+openItem : Model -> Maybe Reference -> Reference -> ( Model, Cmd Msg, OutMsg )
+openItem model afterRef ref =
+    -- We don't want to refetch or replace any already open definitions, but we
+    -- do want to focus and scroll to it
+    if WorkspaceItems.member model ref then
+        let
+            nextWorkspaceItems =
+                WorkspaceItems.focusOn model ref
+        in
+        ( nextWorkspaceItems
+        , scrollToDefinition ref
+        , openDefinitionsFocusToOutMsg nextWorkspaceItems
+        )
 
-        Just hash ->
-            -- We don't want to refetch or replace any already open definitions, but we
-            -- do want to focus and scroll to it
-            if OpenDefinitions.member hash model then
-                let
-                    nextOpenDefinitions =
-                        OpenDefinitions.focusOn hash model
-                in
-                ( nextOpenDefinitions
-                , scrollToDefinition hash
-                , openDefinitionsFocusToOutMsg nextOpenDefinitions
-                )
+    else
+        let
+            toInsert =
+                WorkspaceItem.Loading ref
 
-            else
-                let
-                    toInsert =
-                        HashIndexedDefinition hash Loading
+            nextWorkspaceItems =
+                case afterRef of
+                    Nothing ->
+                        WorkspaceItems.insertWithFocus model toInsert
 
-                    insert =
-                        case afterHash of
-                            Nothing ->
-                                OpenDefinitions.insertWithFocus toInsert
-
-                            Just h ->
-                                OpenDefinitions.insertWithFocusAfter h toInsert
-
-                    nextOpenDefinitions =
-                        insert model
-                in
-                ( nextOpenDefinitions
-                , Cmd.batch [ fetchDefinition hq, scrollToDefinition hash ]
-                , openDefinitionsFocusToOutMsg nextOpenDefinitions
-                )
+                    Just r ->
+                        WorkspaceItems.insertWithFocusAfter model r toInsert
+        in
+        ( nextWorkspaceItems
+        , Cmd.batch [ fetchDefinition ref, scrollToDefinition ref ]
+        , openDefinitionsFocusToOutMsg nextWorkspaceItems
+        )
 
 
-openDefinitionsFocusToOutMsg : OpenDefinitions -> OutMsg
+openDefinitionsFocusToOutMsg : WorkspaceItems -> OutMsg
 openDefinitionsFocusToOutMsg openDefs =
     let
-        toFocusedOut : HashIndexedDefinition -> OutMsg
-        toFocusedOut hid =
-            case hid.definition of
-                Success def ->
-                    case def of
-                        Definition.Type h _ ->
-                            TypeFocused (HashOnly h)
-
-                        Definition.Term h _ ->
-                            TermFocused (HashOnly h)
+        toFocusedOut workspaceItem =
+            case workspaceItem of
+                Success ref _ ->
+                    Focused ref
 
                 _ ->
                     None
     in
     openDefs
-        |> OpenDefinitions.focus
+        |> WorkspaceItems.focus
         |> Maybe.map toFocusedOut
         |> Maybe.withDefault Emptied
 
@@ -183,22 +162,22 @@ handleKeyboardEvent : Model -> KeyboardEvent -> ( Model, Cmd Msg, OutMsg )
 handleKeyboardEvent model keyboardEvent =
     let
         scrollToCmd =
-            OpenDefinitions.focus
-                >> Maybe.map .hash
+            WorkspaceItems.focus
+                >> Maybe.map WorkspaceItem.reference
                 >> Maybe.map scrollToDefinition
                 >> Maybe.withDefault Cmd.none
 
         nextDefinition =
             let
                 next =
-                    OpenDefinitions.next model
+                    WorkspaceItems.next model
             in
             ( next, scrollToCmd next, openDefinitionsFocusToOutMsg next )
 
         prevDefinitions =
             let
                 prev =
-                    OpenDefinitions.prev model
+                    WorkspaceItems.prev model
             in
             ( prev, scrollToCmd prev, openDefinitionsFocusToOutMsg prev )
 
@@ -238,8 +217,8 @@ handleKeyboardEvent model keyboardEvent =
             let
                 without =
                     model
-                        |> OpenDefinitions.focus
-                        |> Maybe.map (\hid -> OpenDefinitions.remove hid.hash model)
+                        |> WorkspaceItems.focus
+                        |> Maybe.map (WorkspaceItem.reference >> WorkspaceItems.remove model)
                         |> Maybe.withDefault model
             in
             ( without, Cmd.none, openDefinitionsFocusToOutMsg without )
@@ -252,24 +231,22 @@ handleKeyboardEvent model keyboardEvent =
 -- EFFECTS
 
 
-fetchDefinition : HashQualified -> Cmd Msg
-fetchDefinition hq =
+fetchDefinition : Reference -> Cmd Msg
+fetchDefinition ref =
     Http.get
-        { url = Api.getDefinition [ HashQualified.toString hq ]
+        { url = Api.getDefinition [ (Reference.hashQualified >> HashQualified.toString) ref ]
         , expect =
             Http.expectJson
-                (RemoteData.fromResult
-                    >> FetchOpenDefinitionFinished hq
-                )
-                Definition.decodeHead
+                (FetchItemFinished ref)
+                WorkspaceItem.decodeItem
         }
 
 
-scrollToDefinition : Hash -> Cmd Msg
-scrollToDefinition hash =
+scrollToDefinition : Reference -> Cmd Msg
+scrollToDefinition ref =
     let
         id =
-            "definition-" ++ Hash.toString hash
+            "definition-" ++ Reference.toString ref
     in
     Task.sequence
         [ Dom.getElement id |> Task.map (.element >> .y)
@@ -313,34 +290,23 @@ view model =
             [ Button.secondary Find "Find" ]
         , section
             [ id "workspace-content" ]
-            [ section [ class "definitions-pane" ] (viewOpenDefinitions model) ]
+            [ section [ class "definitions-pane" ] (viewWorkspaceItems model) ]
         ]
 
 
-viewDefinition : HashIndexedDefinition -> Bool -> Html Msg
-viewDefinition hid isFocused =
-    case hid.definition of
-        Success def ->
-            Definition.view
-                (CloseDefinition hid.hash)
-                (OpenDefinitionAfter hid.hash)
-                def
-                isFocused
-
-        Failure err ->
-            Definition.viewError
-                (CloseDefinition hid.hash)
-                hid.hash
-                isFocused
-                err
-
-        NotAsked ->
-            UI.nothing
-
-        Loading ->
-            Definition.viewLoading hid.hash isFocused
+viewItem : WorkspaceItem -> Bool -> Html Msg
+viewItem workspaceItem isFocused =
+    let
+        ref =
+            WorkspaceItem.reference workspaceItem
+    in
+    WorkspaceItem.view
+        (CloseDefinition ref)
+        (OpenDefinitionAfter ref)
+        workspaceItem
+        isFocused
 
 
-viewOpenDefinitions : OpenDefinitions -> List (Html Msg)
-viewOpenDefinitions =
-    OpenDefinitions.mapToList viewDefinition
+viewWorkspaceItems : WorkspaceItems -> List (Html Msg)
+viewWorkspaceItems =
+    WorkspaceItems.mapToList viewItem

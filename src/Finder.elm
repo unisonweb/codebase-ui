@@ -4,7 +4,6 @@ import Api
 import Browser.Dom as Dom
 import Definition
 import DefinitionMatch exposing (DefinitionMatch)
-import Hash exposing (Hash)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, header, input, label, li, ol, section, text)
 import Html.Attributes exposing (autocomplete, class, classList, id, placeholder, style, type_, value)
@@ -20,6 +19,7 @@ import Task
 import UI
 import UI.Icon as Icon
 import UI.Modal as Modal
+import Workspace.Reference exposing (Reference(..))
 
 
 
@@ -48,7 +48,7 @@ type Msg
     | UpdateQuery String
     | ResetOrClose
     | Close
-    | Select Hash
+    | Select Reference
     | Keydown KeyboardEvent
     | FetchMatchesFinished String (WebData (List DefinitionMatch))
 
@@ -56,7 +56,7 @@ type Msg
 type OutMsg
     = Remain
     | Exit
-    | OpenDefinition HashQualified
+    | OpenDefinition Reference
 
 
 update : Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -103,8 +103,8 @@ update msg model =
         ResetOrClose ->
             resetOrClose
 
-        Select hash ->
-            ( model, Cmd.none, OpenDefinition (HashOnly hash) )
+        Select ref ->
+            ( model, Cmd.none, OpenDefinition ref )
 
         Keydown event ->
             case event.keyCode of
@@ -133,7 +133,7 @@ update msg model =
                                     Remain
 
                                 SearchResults matches ->
-                                    OpenDefinition ((SearchResults.focus >> .definition >> Definition.hash >> HashOnly) matches)
+                                    OpenDefinition ((SearchResults.focus >> .definition >> Definition.reference) matches)
 
                         out =
                             model.results
@@ -195,13 +195,13 @@ viewMatch nameWidth match isFocused shortcut =
                     Just key ->
                         KeyboardShortcuts.viewShortcut (KeyboardShortcuts.Sequence ";" key)
 
-        viewMatch_ hash info source =
+        viewMatch_ reference info source =
             li
                 [ classList
                     [ ( "definition-match", True )
                     , ( "focused", isFocused )
                     ]
-                , onClick (Select hash)
+                , onClick (Select reference)
                 ]
                 [ Icon.view Icon.Type
                 , label [ class "name", style "width" nameWidth ] [ text info.name ]
@@ -212,13 +212,13 @@ viewMatch nameWidth match isFocused shortcut =
     case match.definition of
         Definition.Type hash info ->
             viewMatch_
-                hash
+                (TypeReference (HashOnly hash))
                 info
                 (Source.viewTypeSource Source.Monochrome info.source)
 
         Definition.Term hash info ->
             viewMatch_
-                hash
+                (TermReference (HashOnly hash))
                 info
                 (Source.viewTermSignature Source.Monochrome info.name info.source)
 

@@ -2,6 +2,7 @@ module Route exposing
     ( Route(..)
     , fromUrl
     , navigate
+    , navigateToByReference
     , navigateToLatest
     , navigateToTerm
     , navigateToType
@@ -20,6 +21,7 @@ import RelativeTo exposing (RelativeTo)
 import Url exposing (Url)
 import Url.Builder exposing (absolute)
 import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
+import Workspace.Reference exposing (Reference(..))
 
 
 
@@ -212,6 +214,16 @@ navigate navKey route =
 navigateToLatest : Nav.Key -> Cmd msg
 navigateToLatest navKey =
     navigate navKey (Namespace Latest)
+
+
+navigateToByReference : Nav.Key -> Route -> Reference -> Cmd msg
+navigateToByReference navKey currentRoute reference =
+    case reference of
+        TypeReference hq ->
+            navigateToType navKey currentRoute hq
+
+        TermReference hq ->
+            navigateToTerm navKey currentRoute hq
 
 
 navigateToType : Nav.Key -> Route -> HashQualified -> Cmd msg

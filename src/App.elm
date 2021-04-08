@@ -9,7 +9,7 @@ import Definition.Category
 import Finder
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
-import HashQualified exposing (HashQualified)
+import HashQualified exposing (HashQualified(..))
 import Html
     exposing
         ( Html
@@ -42,6 +42,7 @@ import UI
 import UI.Icon as Icon
 import Url exposing (Url)
 import Workspace
+import Workspace.Reference exposing (Reference(..))
 
 
 
@@ -73,10 +74,10 @@ init _ url navKey =
         ( workspace, workspaceCmd ) =
             case route of
                 Route.Type _ hq ->
-                    Workspace.init (Just hq)
+                    Workspace.init (Just (TypeReference hq))
 
                 Route.Term _ hq ->
-                    Workspace.init (Just hq)
+                    Workspace.init (Just (TermReference hq))
 
                 _ ->
                     Workspace.init Nothing
@@ -112,7 +113,7 @@ type Msg
     | ToggleExpandedNamespaceListing FQN
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
-    | OpenDefinition HashQualified
+    | OpenDefinition Reference
       -- sub msgs
     | FinderMsg Finder.Msg
     | WorkspaceMsg Workspace.Msg
@@ -184,8 +185,8 @@ update msg model =
                 Err err ->
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none )
 
-        OpenDefinition hq ->
-            openDefinition model hq
+        OpenDefinition ref ->
+            openDefinition model ref
 
         WorkspaceMsg wMsg ->
             let
@@ -217,19 +218,19 @@ update msg model =
                         Finder.Exit ->
                             ( { model | modal = NoModal }, Cmd.none )
 
-                        Finder.OpenDefinition hq ->
-                            openDefinition { model | modal = NoModal } hq
+                        Finder.OpenDefinition ref ->
+                            openDefinition { model | modal = NoModal } ref
 
 
 
 -- UPDATE HELPERS
 
 
-openDefinition : Model -> HashQualified -> ( Model, Cmd Msg )
-openDefinition model hq =
+openDefinition : Model -> Reference -> ( Model, Cmd Msg )
+openDefinition model ref =
     let
         ( workspace, wCmd, outMsg ) =
-            Workspace.open model.workspace hq
+            Workspace.open model.workspace ref
 
         model2 =
             { model | workspace = workspace }
@@ -249,11 +250,8 @@ handleWorkspaceOutMsg model out =
         Workspace.ShowFinderRequest ->
             showFinder model
 
-        Workspace.TypeFocused hq ->
-            ( model, Route.navigateToType model.navKey model.route hq )
-
-        Workspace.TermFocused hq ->
-            ( model, Route.navigateToTerm model.navKey model.route hq )
+        Workspace.Focused ref ->
+            ( model, Route.navigateToByReference model.navKey model.route ref )
 
         Workspace.Emptied ->
             ( model, Route.navigateToLatest model.navKey )
@@ -343,15 +341,15 @@ viewListingRow clickMsg label_ category icon =
 viewDefinitionListing : DefinitionListing -> Html Msg
 viewDefinitionListing listing =
     let
-        viewDefRow hash fqn =
-            viewListingRow (Just (OpenDefinition (HashQualified.HashOnly hash))) (unqualifiedName fqn)
+        viewDefRow ref fqn =
+            viewListingRow (Just (OpenDefinition ref)) (unqualifiedName fqn)
     in
     case listing of
         TypeListing hash fqn category ->
-            viewDefRow hash fqn (Definition.Category.name category) (Definition.Category.icon category)
+            viewDefRow (TypeReference (HashOnly hash)) fqn (Definition.Category.name category) (Definition.Category.icon category)
 
         TermListing hash fqn category ->
-            viewDefRow hash fqn (Definition.Category.name category) (Definition.Category.icon category)
+            viewDefRow (TermReference (HashOnly hash)) fqn (Definition.Category.name category) (Definition.Category.icon category)
 
         PatchListing _ ->
             viewListingRow Nothing "Patch" "patch" Icon.Patch
