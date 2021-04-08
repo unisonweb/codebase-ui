@@ -1,5 +1,6 @@
 module HashQualified exposing
     ( HashQualified(..)
+    , fromString
     , fromUrlString
     , hash
     , name
@@ -42,12 +43,21 @@ type HashQualified
 -- CREATE
 
 
+fromString : String -> HashQualified
+fromString str =
+    str
+        |> Hash.fromString
+        |> Maybe.map HashOnly
+        |> MaybeE.orElse (hashQualifiedFromString Hash.prefix str)
+        |> Maybe.withDefault (NameOnly (FQN.fromString str))
+
+
 fromUrlString : String -> HashQualified
 fromUrlString str =
     str
         |> Hash.fromUrlString
         |> Maybe.map HashOnly
-        |> MaybeE.orElse (hashQualifiedFromUrlString str)
+        |> MaybeE.orElse (hashQualifiedFromString Hash.urlPrefix str)
         |> Maybe.withDefault (NameOnly (FQN.fromUrlString str))
 
 
@@ -129,15 +139,15 @@ toUrlString hq =
 
 isRawHashQualified : String -> Bool
 isRawHashQualified str =
-    not (Hash.isRawHash str) && String.contains "@" str
+    not (Hash.isRawHash str) && String.contains Hash.urlPrefix str
 
 
-hashQualifiedFromUrlString : String -> Maybe HashQualified
-hashQualifiedFromUrlString str =
+hashQualifiedFromString : String -> String -> Maybe HashQualified
+hashQualifiedFromString sep str =
     if isRawHashQualified str then
         let
             parts =
-                String.split "@" str
+                String.split sep str
         in
         case parts of
             [] ->
@@ -149,8 +159,9 @@ hashQualifiedFromUrlString str =
             "" :: _ ->
                 Nothing
 
-            name_ :: hash_ :: [] ->
-                Just (HashQualified (FQN.fromString name_) (Hash.fromString ("#" ++ hash_)))
+            name_ :: unprefixedHash :: [] ->
+                Hash.fromString (Hash.prefix ++ unprefixedHash)
+                    |> Maybe.map (HashQualified (FQN.fromString name_))
 
             _ ->
                 Nothing

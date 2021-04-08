@@ -37,18 +37,18 @@ insertWithFocusAfter : Test
 insertWithFocusAfter =
     let
         afterRef =
-            TermReference (HashOnly (Hash.fromString "#a"))
+            termRefFromStr "#a"
 
         toInsert =
             term
 
         expected =
-            [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
+            [ Loading (termRefFromStr "#a")
             , Loading termRef
-            , Loading (TermReference (HashOnly (Hash.fromString "#b")))
-            , Loading (TermReference (HashOnly (Hash.fromString "#focus")))
-            , Loading (TermReference (HashOnly (Hash.fromString "#c")))
-            , Loading (TermReference (HashOnly (Hash.fromString "#d")))
+            , Loading (termRefFromStr "#b")
+            , Loading (termRefFromStr "#focus")
+            , Loading (termRefFromStr "#c")
+            , Loading (termRefFromStr "#d")
             ]
 
         inserted =
@@ -68,17 +68,17 @@ insertWithFocusAfter =
             \_ ->
                 let
                     atEnd =
-                        [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#b")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#focus")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#c")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#d")))
+                        [ Loading (termRefFromStr "#a")
+                        , Loading (termRefFromStr "#b")
+                        , Loading (termRefFromStr "#focus")
+                        , Loading (termRefFromStr "#c")
+                        , Loading (termRefFromStr "#d")
                         , Loading (reference toInsert)
                         ]
 
                     result =
                         toInsert
-                            |> WorkspaceItems.insertWithFocusAfter workspaceItems (TermReference (HashOnly (Hash.fromString "#notfound")))
+                            |> WorkspaceItems.insertWithFocusAfter workspaceItems notFoundRef
                             |> WorkspaceItems.toList
                 in
                 Expect.equal atEnd result
@@ -92,19 +92,19 @@ replace =
             \_ ->
                 let
                     newItem =
-                        Failure (TermReference (HashOnly (Hash.fromString "#b"))) (Http.BadUrl "err")
+                        Failure (termRefFromStr "#b") (Http.BadUrl "err")
 
                     expected =
-                        [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
+                        [ Loading (termRefFromStr "#a")
                         , newItem
-                        , Loading (TermReference (HashOnly (Hash.fromString "#focus")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#c")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#d")))
+                        , Loading (termRefFromStr "#focus")
+                        , Loading (termRefFromStr "#c")
+                        , Loading (termRefFromStr "#d")
                         ]
 
                     result =
                         newItem
-                            |> WorkspaceItems.replace workspaceItems (TermReference (HashOnly (Hash.fromString "#b")))
+                            |> WorkspaceItems.replace workspaceItems (termRefFromStr "#b")
                             |> WorkspaceItems.toList
                 in
                 Expect.equal expected result
@@ -112,19 +112,19 @@ replace =
             \_ ->
                 let
                     newItem =
-                        Failure (TermReference (HashOnly (Hash.fromString "#focus"))) (Http.BadUrl "err")
+                        Failure (termRefFromStr "#focus") (Http.BadUrl "err")
 
                     expected =
-                        [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#b")))
+                        [ Loading (termRefFromStr "#a")
+                        , Loading (termRefFromStr "#b")
                         , newItem
-                        , Loading (TermReference (HashOnly (Hash.fromString "#c")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#d")))
+                        , Loading (termRefFromStr "#c")
+                        , Loading (termRefFromStr "#d")
                         ]
 
                     result =
                         newItem
-                            |> WorkspaceItems.replace workspaceItems (TermReference (HashOnly (Hash.fromString "#focus")))
+                            |> WorkspaceItems.replace workspaceItems (termRefFromStr "#focus")
                             |> WorkspaceItems.toList
                 in
                 Expect.equal expected result
@@ -132,19 +132,19 @@ replace =
             \_ ->
                 let
                     newItem =
-                        Failure (TermReference (HashOnly (Hash.fromString "#d"))) (Http.BadUrl "err")
+                        Failure (termRefFromStr "#d") (Http.BadUrl "err")
 
                     expected =
-                        [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#b")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#focus")))
-                        , Loading (TermReference (HashOnly (Hash.fromString "#c")))
+                        [ Loading (termRefFromStr "#a")
+                        , Loading (termRefFromStr "#b")
+                        , Loading (termRefFromStr "#focus")
+                        , Loading (termRefFromStr "#c")
                         , newItem
                         ]
 
                     result =
                         newItem
-                            |> WorkspaceItems.replace workspaceItems (TermReference (HashOnly (Hash.fromString "#d")))
+                            |> WorkspaceItems.replace workspaceItems (termRefFromStr "#d")
                             |> WorkspaceItems.toList
                 in
                 Expect.equal expected result
@@ -170,7 +170,7 @@ remove =
             \_ ->
                 let
                     toRemove =
-                        TermReference (HashOnly (Hash.fromString "#a"))
+                        termRefFromStr "#a"
 
                     result =
                         WorkspaceItems.remove workspaceItems toRemove
@@ -180,10 +180,10 @@ remove =
             \_ ->
                 let
                     toRemove =
-                        TermReference (HashOnly (Hash.fromString "#focus"))
+                        termRefFromStr "#focus"
 
                     expectedNewFocus =
-                        TermReference (HashOnly (Hash.fromString "#c"))
+                        termRefFromStr "#c"
 
                     result =
                         WorkspaceItems.remove workspaceItems toRemove
@@ -193,10 +193,10 @@ remove =
             \_ ->
                 let
                     toRemove =
-                        TermReference (HashOnly (Hash.fromString "#focus"))
+                        termRefFromStr "#focus"
 
                     expectedNewFocus =
-                        TermReference (HashOnly (Hash.fromString "#b"))
+                        termRefFromStr "#b"
 
                     result =
                         WorkspaceItems.remove (WorkspaceItems.fromItems before focused []) toRemove
@@ -304,11 +304,11 @@ map =
                             |> WorkspaceItems.toList
 
                     expected =
-                        [ Failure (TermReference (HashOnly (Hash.fromString "#a"))) (Http.BadUrl "err")
-                        , Failure (TermReference (HashOnly (Hash.fromString "#b"))) (Http.BadUrl "err")
-                        , Failure (TermReference (HashOnly (Hash.fromString "#focus"))) (Http.BadUrl "err")
-                        , Failure (TermReference (HashOnly (Hash.fromString "#c"))) (Http.BadUrl "err")
-                        , Failure (TermReference (HashOnly (Hash.fromString "#d"))) (Http.BadUrl "err")
+                        [ Failure (termRefFromStr "#a") (Http.BadUrl "err")
+                        , Failure (termRefFromStr "#b") (Http.BadUrl "err")
+                        , Failure (termRefFromStr "#focus") (Http.BadUrl "err")
+                        , Failure (termRefFromStr "#c") (Http.BadUrl "err")
+                        , Failure (termRefFromStr "#d") (Http.BadUrl "err")
                         ]
                 in
                 Expect.equal expected result
@@ -336,6 +336,11 @@ mapToList =
 -- TEST HELPERS
 
 
+termRefFromStr : String -> Reference
+termRefFromStr str =
+    Reference.fromString TermReference str
+
+
 termRef : Reference
 termRef =
     TermReference hashQualified
@@ -343,12 +348,12 @@ termRef =
 
 notFoundRef : Reference
 notFoundRef =
-    TermReference (HashOnly (Hash.fromString "#notfound"))
+    termRefFromStr "#notfound"
 
 
 hashQualified : HashQualified
 hashQualified =
-    HashOnly (Hash.fromString "#testhash")
+    HashQualified.fromString "#testhash"
 
 
 term : WorkspaceItem
@@ -358,20 +363,20 @@ term =
 
 before : List WorkspaceItem
 before =
-    [ Loading (TermReference (HashOnly (Hash.fromString "#a")))
-    , Loading (TermReference (HashOnly (Hash.fromString "#b")))
+    [ Loading (termRefFromStr "#a")
+    , Loading (termRefFromStr "#b")
     ]
 
 
 focused : WorkspaceItem
 focused =
-    Loading (TermReference (HashOnly (Hash.fromString "#focus")))
+    Loading (termRefFromStr "#focus")
 
 
 after : List WorkspaceItem
 after =
-    [ Loading (TermReference (HashOnly (Hash.fromString "#c")))
-    , Loading (TermReference (HashOnly (Hash.fromString "#d")))
+    [ Loading (termRefFromStr "#c")
+    , Loading (termRefFromStr "#d")
     ]
 
 

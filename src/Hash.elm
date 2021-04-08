@@ -5,13 +5,16 @@ module Hash exposing
     , fromString
     , fromUrlString
     , isRawHash
+    , prefix
     , toString
     , toUrlString
     , urlParser
+    , urlPrefix
     )
 
 import Json.Decode as Decode
 import Url.Parser
+import Util
 
 
 type Hash
@@ -28,9 +31,13 @@ toString (Hash raw) =
     raw
 
 
-fromString : String -> Hash
+fromString : String -> Maybe Hash
 fromString raw =
-    Hash raw
+    if String.startsWith prefix raw then
+        Just (Hash raw)
+
+    else
+        Nothing
 
 
 isRawHash : String -> Bool
@@ -44,7 +51,6 @@ fromUrlString str =
         str
             |> String.replace urlPrefix prefix
             |> fromString
-            |> Just
 
     else
         Nothing
@@ -55,6 +61,16 @@ toUrlString hash =
     hash
         |> toString
         |> String.replace prefix urlPrefix
+
+
+prefix : String
+prefix =
+    "#"
+
+
+urlPrefix : String
+urlPrefix =
+    "@"
 
 
 
@@ -68,18 +84,4 @@ urlParser =
 
 decode : Decode.Decoder Hash
 decode =
-    Decode.map fromString Decode.string
-
-
-
--- INTERNAL
-
-
-prefix : String
-prefix =
-    "#"
-
-
-urlPrefix : String
-urlPrefix =
-    "@"
+    Decode.map fromString Decode.string |> Decode.andThen (Util.decodeFailInvalid "Invalid Hash")

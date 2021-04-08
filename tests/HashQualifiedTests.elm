@@ -21,16 +21,16 @@ name =
             \_ ->
                 let
                     hq =
-                        HashQualified.HashOnly hash_
+                        Maybe.map HashQualified.HashOnly hash_
                 in
-                Expect.equal Nothing (HashQualified.name hq)
+                Expect.equal Nothing (Maybe.andThen HashQualified.name hq)
         , test "Returns Just name when HashQualified" <|
             \_ ->
                 let
                     hq =
-                        HashQualified.HashQualified name_ hash_
+                        Maybe.map (HashQualified.HashQualified name_) hash_
                 in
-                Expect.equal (Just "test.name") (Maybe.map FQN.toString (HashQualified.name hq))
+                Expect.equal (Just "test.name") (Maybe.map FQN.toString (Maybe.andThen HashQualified.name hq))
         ]
 
 
@@ -48,16 +48,16 @@ hash =
             \_ ->
                 let
                     hq =
-                        HashQualified.HashOnly hash_
+                        Maybe.map HashQualified.HashOnly hash_
                 in
-                Expect.equal (Just "#testhash") (Maybe.map Hash.toString (HashQualified.hash hq))
+                Expect.equal (Just "#testhash") (Maybe.map Hash.toString (Maybe.andThen HashQualified.hash hq))
         , test "Returns Just hash when HashQualified" <|
             \_ ->
                 let
                     hq =
-                        HashQualified.HashQualified name_ hash_
+                        Maybe.map (HashQualified.HashQualified name_) hash_
                 in
-                Expect.equal (Just "#testhash") (Maybe.map Hash.toString (HashQualified.hash hq))
+                Expect.equal (Just "#testhash") (Maybe.map Hash.toString (Maybe.andThen HashQualified.hash hq))
         ]
 
 
@@ -68,16 +68,16 @@ fromUrlString =
             \_ ->
                 let
                     expected =
-                        HashQualified.HashOnly hash_
+                        Maybe.map HashQualified.HashOnly hash_
                 in
-                Expect.equal expected (HashQualified.fromUrlString "@testhash")
+                Expect.equal expected (Just (HashQualified.fromUrlString "@testhash"))
         , test "HashQualified when called with a string and name" <|
             \_ ->
                 let
                     expected =
-                        HashQualified.HashQualified name_ hash_
+                        Maybe.map (HashQualified.HashQualified name_) hash_
                 in
-                Expect.equal expected (HashQualified.fromUrlString "test.name@testhash")
+                Expect.equal expected (Just (HashQualified.fromUrlString "test.name@testhash"))
         , test "NameOnly when called with a name" <|
             \_ ->
                 let
@@ -97,6 +97,6 @@ name_ =
     FQN.fromString "test.name"
 
 
-hash_ : Hash
+hash_ : Maybe Hash
 hash_ =
     Hash.fromString "#testhash"

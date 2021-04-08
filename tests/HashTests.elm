@@ -12,12 +12,12 @@ equals =
             \_ ->
                 Expect.true
                     "Expected Hash \"#foo\" and Hash \"#foo\" to be equal"
-                    (Hash.equals (Hash.fromString "#foo") (Hash.fromString "#foo"))
+                    (Maybe.withDefault False (Maybe.map2 Hash.equals (Hash.fromString "#foo") (Hash.fromString "#foo")))
         , test "Returns False when not equal" <|
             \_ ->
                 Expect.false
                     "Expected Hash \"#foo\" and Hash \"#bar\" to *not* be equal"
-                    (Hash.equals (Hash.fromString "#foo") (Hash.fromString "#bar"))
+                    (Maybe.withDefault False (Maybe.map2 Hash.equals (Hash.fromString "#foo") (Hash.fromString "#bar")))
         ]
 
 
@@ -27,10 +27,13 @@ toString =
         [ test "Extracts the raw hash value" <|
             \_ ->
                 let
-                    hash =
-                        Hash.fromString "#foo"
+                    result =
+                        "#foo"
+                            |> Hash.fromString
+                            |> Maybe.map Hash.toString
+                            |> Maybe.withDefault "fail"
                 in
-                Expect.equal "#foo" (Hash.toString hash)
+                Expect.equal "#foo" result
         ]
 
 
@@ -40,10 +43,47 @@ toUrlString =
         [ test "Extracts the raw hash value in a URL format" <|
             \_ ->
                 let
+                    result =
+                        "#foo"
+                            |> Hash.fromString
+                            |> Maybe.map Hash.toUrlString
+                            |> Maybe.withDefault "fail"
+                in
+                Expect.equal "@foo" result
+        ]
+
+
+fromString : Test
+fromString =
+    describe "Hash.fromString"
+        [ test "Creates a Hash with a valid prefixed raw hash" <|
+            \_ ->
+                let
                     hash =
                         Hash.fromString "#foo"
                 in
-                Expect.equal "@foo" (Hash.toUrlString hash)
+                Expect.equal (Just "#foo") (Maybe.map Hash.toString hash)
+        , test "Fails to create a hash with an incorrect prefix" <|
+            \_ ->
+                let
+                    hash =
+                        Hash.fromString "$foo"
+                in
+                Expect.equal Nothing (Maybe.map Hash.toString hash)
+        , test "Fails to create a hash with an @ symbol prefix" <|
+            \_ ->
+                let
+                    hash =
+                        Hash.fromString "@foo"
+                in
+                Expect.equal Nothing (Maybe.map Hash.toString hash)
+        , test "Fails to create a hash with no symbol prefix" <|
+            \_ ->
+                let
+                    hash =
+                        Hash.fromString "foo"
+                in
+                Expect.equal Nothing (Maybe.map Hash.toString hash)
         ]
 
 
@@ -64,11 +104,18 @@ fromUrlString =
                         Hash.fromUrlString "$foo"
                 in
                 Expect.equal Nothing (Maybe.map Hash.toString hash)
-        , test "Fails to create a hash with an Hash symbol prefix" <|
+        , test "Fails to create a hash with an # symbol prefix" <|
             \_ ->
                 let
                     hash =
                         Hash.fromUrlString "#foo"
+                in
+                Expect.equal Nothing (Maybe.map Hash.toString hash)
+        , test "Fails to create a hash with no symbol prefix" <|
+            \_ ->
+                let
+                    hash =
+                        Hash.fromUrlString "foo"
                 in
                 Expect.equal Nothing (Maybe.map Hash.toString hash)
         ]
