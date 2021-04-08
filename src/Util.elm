@@ -20,3 +20,13 @@ decodeNonEmptyList =
                     Nothing ->
                         Decode.fail "Decoded an empty list"
             )
+
+
+decodeFailInvalid : String -> Maybe a -> Decode.Decoder a
+decodeFailInvalid failMessage m =
+    case m of
+        Nothing ->
+            Decode.fail failMessage
+
+        Just a ->
+            Decode.succeed a

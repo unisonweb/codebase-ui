@@ -8,6 +8,16 @@ type Reference
     | TypeReference HashQualified
 
 
+fromString : (HashQualified -> Reference) -> String -> Reference
+fromString toRef str =
+    str |> HashQualified.fromString |> toRef
+
+
+fromUrlString : (HashQualified -> Reference) -> String -> Reference
+fromUrlString toRef str =
+    str |> HashQualified.fromUrlString |> toRef
+
+
 toString : Reference -> String
 toString ref =
     case ref of

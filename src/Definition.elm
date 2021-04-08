@@ -16,6 +16,7 @@ import Json.Decode as Decode exposing (at, field)
 import Json.Decode.Extra exposing (when)
 import List.Extra as ListE
 import List.Nonempty as NEL
+import Maybe.Extra as MaybeE
 import Source
     exposing
         ( TermSource(..)
@@ -373,7 +374,8 @@ decodeTypes : Decode.Decoder (List Definition)
 decodeTypes =
     let
         buildTypes =
-            List.map (\( h, d ) -> Type (Hash.fromString h) d)
+            List.map (\( h, d ) -> Maybe.map (\h_ -> Type h_ d) (Hash.fromString h))
+                >> MaybeE.values
     in
     Decode.keyValuePairs decodeTypeDefInfo |> Decode.map buildTypes
 
@@ -406,7 +408,8 @@ decodeTerms : Decode.Decoder (List Definition)
 decodeTerms =
     let
         buildTerms =
-            List.map (\( h, d ) -> Term (Hash.fromString h) d)
+            List.map (\( h, d ) -> Maybe.map (\h_ -> Term h_ d) (Hash.fromString h))
+                >> MaybeE.values
     in
     Decode.keyValuePairs decodeTermDefInfo |> Decode.map buildTerms
 

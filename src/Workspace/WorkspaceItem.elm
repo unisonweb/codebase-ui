@@ -9,13 +9,14 @@ import Definition.Type as Type exposing (Type(..), TypeDetail, TypeSource(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, a, code, div, h3, header, section, span, strong, text)
+import Html exposing (Html, a, div, h3, header, section, span, strong, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (at, field)
 import Json.Decode.Extra exposing (when)
 import List.Nonempty as NEL
+import Maybe.Extra as MaybeE
 import String.Extra exposing (pluralize)
 import Syntax
 import UI
@@ -307,8 +308,13 @@ decodeTypeNamesAndSource =
 decodeTypes : Decode.Decoder (List TypeDetail)
 decodeTypes =
     let
+        makeType ( hash_, i ) =
+            hash_
+                |> Hash.fromString
+                |> Maybe.map (\h -> Type (Info.makeInfo h i.name i.otherNames) i.source)
+
         buildTypes =
-            List.map (\( h, i ) -> Type (Info.makeInfo (Hash.fromString h) i.name i.otherNames) i.source)
+            List.map makeType >> MaybeE.values
     in
     Decode.keyValuePairs decodeTypeNamesAndSource |> Decode.map buildTypes
 
@@ -351,8 +357,13 @@ decodeTermNamesAndSource =
 decodeTerms : Decode.Decoder (List TermDetail)
 decodeTerms =
     let
+        makeTerm ( hash_, i ) =
+            hash_
+                |> Hash.fromString
+                |> Maybe.map (\h -> Term (Info.makeInfo h i.name i.otherNames) i.source)
+
         buildTerms =
-            List.map (\( h, i ) -> Term (Info.makeInfo (Hash.fromString h) i.name i.otherNames) i.source)
+            List.map makeTerm >> MaybeE.values
     in
     Decode.keyValuePairs decodeTermNamesAndSource |> Decode.map buildTerms
 
