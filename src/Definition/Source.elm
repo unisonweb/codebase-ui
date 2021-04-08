@@ -1,11 +1,5 @@
--- TODO: DEPRECATE
-
-
-module Source exposing
-    ( TermSource(..)
-    , TypeSignature(..)
-    , TypeSource(..)
-    , ViewConfig(..)
+module Definition.Source exposing
+    ( ViewConfig(..)
     , numTermLines
     , numTypeLines
     , viewTermSignature
@@ -13,25 +7,13 @@ module Source exposing
     , viewTypeSource
     )
 
+import Definition.Term as Term exposing (TermSignature(..), TermSource)
+import Definition.Type as Type exposing (TypeSource)
 import Hash exposing (Hash)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
-import Syntax exposing (Syntax)
+import Syntax
 import UI
-
-
-type TypeSource
-    = TypeSource Syntax
-    | BuiltinType
-
-
-type TypeSignature
-    = TypeSignature Syntax
-
-
-type TermSource
-    = TermSource TypeSignature Syntax
-    | BuiltinTerm TypeSignature
 
 
 type ViewConfig msg
@@ -47,20 +29,20 @@ type ViewConfig msg
 numTypeLines : TypeSource -> Int
 numTypeLines source =
     case source of
-        TypeSource syntax ->
+        Type.Source syntax ->
             Syntax.numLines syntax
 
-        BuiltinType ->
+        Type.Builtin ->
             1
 
 
 numTermLines : TermSource -> Int
 numTermLines source =
     case source of
-        TermSource _ syntax ->
+        Term.Source _ syntax ->
             Syntax.numLines syntax
 
-        BuiltinTerm (TypeSignature syntax) ->
+        Term.Builtin (TermSignature syntax) ->
             Syntax.numLines syntax
 
 
@@ -73,10 +55,10 @@ viewTypeSource viewConfig source =
     let
         content =
             case source of
-                TypeSource syntax ->
+                Type.Source syntax ->
                     viewSyntax viewConfig syntax
 
-                BuiltinType ->
+                Type.Builtin ->
                     span
                         []
                         [ span [] [ text "builtin " ]
@@ -89,10 +71,10 @@ viewTypeSource viewConfig source =
 viewTermSignature : ViewConfig msg -> String -> TermSource -> Html msg
 viewTermSignature viewConfig _ source =
     case source of
-        TermSource (TypeSignature signature) _ ->
+        Term.Source (TermSignature signature) _ ->
             viewCode viewConfig (viewSyntax viewConfig signature)
 
-        BuiltinTerm (TypeSignature signature) ->
+        Term.Builtin (TermSignature signature) ->
             viewCode viewConfig (viewSyntax viewConfig signature)
 
 
@@ -101,10 +83,10 @@ viewTermSource viewConfig termName source =
     let
         content =
             case source of
-                TermSource _ syntax ->
+                Term.Source _ syntax ->
                     viewSyntax viewConfig syntax
 
-                BuiltinTerm (TypeSignature syntax) ->
+                Term.Builtin (TermSignature syntax) ->
                     span
                         []
                         [ span [ class "hash-qualifier" ] [ text termName ]

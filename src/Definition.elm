@@ -1,9 +1,13 @@
+-- TODO: DEPRECATE
+
+
 module Definition exposing (..)
 
 import Api
 import Definition.Category as Category exposing (Category)
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
+import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, code, div, h3, header, section, span, strong, text)
 import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
@@ -25,6 +29,7 @@ import Syntax
 import UI
 import UI.Icon as Icon
 import Util
+import Workspace.Reference exposing (Reference(..))
 
 
 
@@ -100,6 +105,16 @@ name definition =
 
         Term _ info ->
             info.name
+
+
+reference : Definition -> Reference
+reference definition =
+    case definition of
+        Type h _ ->
+            TypeReference (HashOnly h)
+
+        Term h _ ->
+            TermReference (HashOnly h)
 
 
 equals : Definition -> Definition -> Bool

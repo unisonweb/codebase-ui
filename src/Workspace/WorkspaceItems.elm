@@ -17,15 +17,10 @@
 
 module Workspace.WorkspaceItems exposing (..)
 
-import Definition.Term exposing (TermDetail)
-import Definition.Type exposing (TypeDetail)
 import List
 import List.Extra as ListE
 import Workspace.Reference exposing (Reference)
-
-
-type Error
-    = Error String
+import Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
 
 
 {-| This technically allows multiple of the same definition across the 3 fields.
@@ -38,30 +33,6 @@ type WorkspaceItems
         , focus : WorkspaceItem
         , after : List WorkspaceItem
         }
-
-
-type Item
-    = TermItem TermDetail
-    | TypeItem TypeDetail
-
-
-type WorkspaceItem
-    = Loading Reference
-    | Failure Reference Error
-    | Success Reference Item
-
-
-reference : WorkspaceItem -> Reference
-reference item =
-    case item of
-        Loading r ->
-            r
-
-        Failure r _ ->
-            r
-
-        Success r _ ->
-            r
 
 
 init : Maybe WorkspaceItem -> WorkspaceItems
@@ -130,7 +101,7 @@ insertWithFocusAfter items afterRef toInsert =
             if member items afterRef then
                 let
                     insertAfter item =
-                        if reference item == afterRef then
+                        if WorkspaceItem.isSameReference item afterRef then
                             [ item, toInsert ]
 
                         else
@@ -146,7 +117,7 @@ insertWithFocusAfter items afterRef toInsert =
                 items
                     |> toList
                     |> List.concatMap insertAfter
-                    |> ListE.splitWhen (\i -> reference toInsert == reference i)
+                    |> ListE.splitWhen (WorkspaceItem.isSameByReference toInsert)
                     |> Maybe.map make
                     |> Maybe.withDefault (singleton toInsert)
 
@@ -158,7 +129,7 @@ replace : WorkspaceItems -> Reference -> WorkspaceItem -> WorkspaceItems
 replace items ref newItem =
     let
         replaceMatching i =
-            if reference i == ref then
+            if WorkspaceItem.isSameReference i ref then
                 newItem
 
             else
@@ -176,9 +147,9 @@ remove items ref =
         WorkspaceItems data ->
             let
                 without r =
-                    ListE.filterNot (\i -> reference i == r)
+                    ListE.filterNot (\i -> WorkspaceItem.isSameReference i r)
             in
-            if ref == reference data.focus then
+            if WorkspaceItem.isSameReference data.focus ref then
                 let
                     rightBeforeFocus =
                         ListE.last data.before
@@ -191,14 +162,14 @@ remove items ref =
                         WorkspaceItems
                             { before = data.before
                             , focus = i
-                            , after = without (reference i) data.after
+                            , after = without (WorkspaceItem.reference i) data.after
                             }
 
                     Nothing ->
                         case rightBeforeFocus of
                             Just i ->
                                 WorkspaceItems
-                                    { before = without (reference i) data.before
+                                    { before = without (WorkspaceItem.reference i) data.before
                                     , focus = i
                                     , after = data.after
                                     }
@@ -229,7 +200,7 @@ references : WorkspaceItems -> List Reference
 references items =
     items
         |> toList
-        |> List.map reference
+        |> List.map WorkspaceItem.reference
 
 
 
@@ -259,7 +230,7 @@ focusOn items ref =
     in
     items
         |> toList
-        |> ListE.splitWhen (\i -> reference i == ref)
+        |> ListE.splitWhen (\i -> WorkspaceItem.isSameReference i ref)
         |> Maybe.andThen fromSplits
         |> Maybe.map WorkspaceItems
         |> Maybe.withDefault items
@@ -269,7 +240,7 @@ isFocused : WorkspaceItems -> Reference -> Bool
 isFocused workspaceItems ref =
     workspaceItems
         |> focus
-        |> Maybe.map (\i -> reference i == ref)
+        |> Maybe.map (\i -> WorkspaceItem.isSameReference i ref)
         |> Maybe.withDefault False
 
 
