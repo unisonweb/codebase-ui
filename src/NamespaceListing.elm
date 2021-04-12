@@ -6,7 +6,9 @@ module NamespaceListing exposing
     , map
     )
 
-import Definition.Category as Category exposing (Category, TermCategory(..), TypeCategory(..))
+import Definition.Category as Category exposing (Category)
+import Definition.Term exposing (TermCategory(..))
+import Definition.Type exposing (TypeCategory(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode exposing (andThen, field)

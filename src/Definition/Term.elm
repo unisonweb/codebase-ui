@@ -1,7 +1,29 @@
-module Definition.Term exposing (..)
+module Definition.Term exposing
+    ( Term(..)
+    , TermCategory(..)
+    , TermDetail
+    , TermListing
+    , TermSignature(..)
+    , TermSource(..)
+    , TermSummary
+    , decodeFQN
+    , decodeHash
+    , decodeTermCategory
+    , decodeTermSignature
+    )
 
 import Definition.Info exposing (Info)
+import FullyQualifiedName as FQN exposing (FQN)
+import Hash exposing (Hash)
+import Json.Decode as Decode exposing (field, string)
+import Json.Decode.Extra exposing (when)
 import Syntax exposing (Syntax)
+
+
+type TermCategory
+    = PlainTerm
+    | TestTerm
+    | DocTerm
 
 
 type TermSource
@@ -10,7 +32,7 @@ type TermSource
 
 
 type Term a
-    = Term Info a
+    = Term Hash TermCategory a
 
 
 type TermSignature
@@ -18,12 +40,40 @@ type TermSignature
 
 
 type alias TermDetail =
-    Term TermSource
+    Term { info : Info, source : TermSource }
 
 
 type alias TermSummary =
-    Term TermSignature
+    Term { fqn : FQN, name : String, signature : TermSignature }
 
 
 type alias TermListing =
-    Term ()
+    Term FQN
+
+
+
+-- JSON DECODERS
+
+
+decodeTermCategory : Decode.Decoder TermCategory
+decodeTermCategory =
+    Decode.oneOf
+        [ when (field "termTag" string) ((==) "Test") (Decode.succeed TestTerm)
+        , when (field "termTag" string) ((==) "Doc") (Decode.succeed DocTerm)
+        , Decode.succeed PlainTerm
+        ]
+
+
+decodeTermSignature : Decode.Decoder TermSignature
+decodeTermSignature =
+    Decode.map TermSignature (field "termType" Syntax.decode)
+
+
+decodeHash : Decode.Decoder Hash
+decodeHash =
+    field "termHash" Hash.decode
+
+
+decodeFQN : Decode.Decoder FQN
+decodeFQN =
+    field "termName" FQN.decode

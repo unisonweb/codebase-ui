@@ -1,30 +1,24 @@
 module Definition.Info exposing (..)
 
 import FullyQualifiedName as FQN exposing (FQN)
-import Hash exposing (Hash)
 import List.Extra as ListE
 import List.Nonempty as NEL
 
 
 type alias Info =
-    { hash : Hash
-    , name : String
+    { name : String
     , namespace : Maybe String
     , otherNames : List FQN
     }
 
 
-makeInfo :
-    Hash
-    -> String
-    -> NEL.Nonempty FQN
-    -> Info
-makeInfo hash_ name_ allFqns =
+makeInfo : String -> NEL.Nonempty FQN -> Info
+makeInfo name_ allFqns =
     let
         ( namespace, otherNames ) =
             namespaceAndOtherNames name_ allFqns
     in
-    Info hash_ name_ namespace otherNames
+    Info name_ namespace otherNames
 
 
 

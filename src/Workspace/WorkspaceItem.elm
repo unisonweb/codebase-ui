@@ -81,20 +81,20 @@ viewBuiltinBadge name_ category =
 viewBuiltin : Item -> Html msg
 viewBuiltin item =
     case item of
-        TermItem (Term info source) ->
-            case source of
+        TermItem (Term _ category detail) ->
+            case detail.source of
                 Term.Builtin _ ->
                     div [ class "built-in" ]
-                        [ viewBuiltinBadge info.name (Category.Term Category.PlainTerm) ]
+                        [ viewBuiltinBadge detail.info.name (Category.Term category) ]
 
                 Term.Source _ _ ->
                     UI.nothing
 
-        TypeItem (Type info source) ->
-            case source of
+        TypeItem (Type _ category detail) ->
+            case detail.source of
                 Type.Builtin ->
                     div [ class "built-in" ]
-                        [ viewBuiltinBadge info.name (Category.Type Category.DataType) ]
+                        [ viewBuiltinBadge detail.info.name (Category.Type category) ]
 
                 Type.Source _ ->
                     UI.nothing
@@ -174,13 +174,13 @@ viewSource toOpenReferenceMsg item =
                 ]
     in
     case item of
-        TermItem (Term info source) ->
-            ( source, source )
-                |> Tuple.mapBoth Source.numTermLines (Source.viewTermSource (Source.Rich (HashOnly >> TermReference >> toOpenReferenceMsg)) info.name)
+        TermItem (Term _ _ detail) ->
+            ( detail.source, detail.source )
+                |> Tuple.mapBoth Source.numTermLines (Source.viewTermSource (Source.Rich (HashOnly >> TermReference >> toOpenReferenceMsg)) detail.info.name)
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretDown False)
 
-        TypeItem (Type _ source) ->
-            ( source, source )
+        TypeItem (Type _ _ detail) ->
+            ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich (HashOnly >> TypeReference >> toOpenReferenceMsg)))
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
 
@@ -188,22 +188,22 @@ viewSource toOpenReferenceMsg item =
 viewItem : msg -> (Reference -> msg) -> Reference -> Item -> Bool -> Html msg
 viewItem closeMsg toOpenReferenceMsg ref item isFocused =
     case item of
-        TermItem (Term info _) ->
+        TermItem (Term _ category detail) ->
             viewClosableRow
                 closeMsg
                 ref
                 isFocused
-                (viewNames info (Category.Term Category.PlainTerm))
+                (viewNames detail.info (Category.Term category))
                 [ ( UI.nothing, viewBuiltin item )
                 , viewSource toOpenReferenceMsg item
                 ]
 
-        TypeItem (Type info _) ->
+        TypeItem (Type _ category detail) ->
             viewClosableRow
                 closeMsg
                 ref
                 isFocused
-                (viewNames info (Category.Type Category.DataType))
+                (viewNames detail.info (Category.Type category))
                 [ ( UI.nothing, viewBuiltin item )
                 , viewSource toOpenReferenceMsg item
                 ]
@@ -311,7 +311,7 @@ decodeTypes =
         makeType ( hash_, i ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Type (Info.makeInfo h i.name i.otherNames) i.source)
+                |> Maybe.map (\h -> Type h Type.DataType { info = Info.makeInfo i.name i.otherNames, source = i.source })
 
         buildTypes =
             List.map makeType >> MaybeE.values
@@ -360,7 +360,7 @@ decodeTerms =
         makeTerm ( hash_, i ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Term (Info.makeInfo h i.name i.otherNames) i.source)
+                |> Maybe.map (\h -> Term h Term.PlainTerm { info = Info.makeInfo i.name i.otherNames, source = i.source })
 
         buildTerms =
             List.map makeTerm >> MaybeE.values
