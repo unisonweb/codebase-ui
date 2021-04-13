@@ -3,8 +3,10 @@ module Finder.FinderMatch exposing (..)
 import Definition.Term as Term exposing (Term(..), TermSummary)
 import Definition.Type as Type exposing (Type(..), TypeSummary)
 import HashQualified exposing (HashQualified(..))
-import Json.Decode as Decode exposing (field, string)
+import Json.Decode as Decode exposing (at, field, string)
 import Json.Decode.Extra exposing (when)
+import List.Nonempty as NEL
+import Util exposing (decodeNonEmptyList, decodeTag)
 import Workspace.Reference exposing (Reference(..))
 
 
@@ -13,8 +15,18 @@ type FinderItem
     | TypeItem TypeSummary
 
 
+type MatchSegment
+    = Gap String
+    | Match String
+
+
+type alias MatchSegments =
+    NEL.Nonempty MatchSegment
+
+
 type alias FinderMatch =
     { score : Int
+    , match : MatchSegments
     , item : FinderItem
     }
 
@@ -86,23 +98,32 @@ decodeTermItem =
 
 decodeItem : Decode.Decoder FinderItem
 decodeItem =
-    let
-        decodeTag =
-            field "tag" string
-    in
     Decode.oneOf
         [ when decodeTag ((==) "FoundTermResult") (field "contents" decodeTermItem)
         , when decodeTag ((==) "FoundTypeResult") (field "contents" decodeTypeItem)
         ]
 
 
-decodeMatch : Decode.Decoder FinderMatch
-decodeMatch =
-    Decode.map2 FinderMatch
+decodeMatchSegments : Decode.Decoder (NEL.Nonempty MatchSegment)
+decodeMatchSegments =
+    let
+        decodeMatchSegment =
+            Decode.oneOf
+                [ when (field "tag" string) ((==) "Gap") (Decode.map Gap (field "contents" string))
+                , when (field "tag" string) ((==) "Match") (Decode.map Match (field "contents" string))
+                ]
+    in
+    at [ "result", "segments" ] (decodeNonEmptyList decodeMatchSegment)
+
+
+decodeFinderMatch : Decode.Decoder FinderMatch
+decodeFinderMatch =
+    Decode.map3 FinderMatch
         (Decode.index 0 decodeScore)
+        (Decode.index 0 decodeMatchSegments)
         (Decode.index 1 decodeItem)
 
 
 decodeMatches : Decode.Decoder (List FinderMatch)
 decodeMatches =
-    Decode.list decodeMatch
+    Decode.list decodeFinderMatch

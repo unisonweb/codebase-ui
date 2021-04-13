@@ -88,6 +88,8 @@ table {
   --color-main-subtle-border: var(--color-gray-lighten-50);
   --color-main-focus-fg: var(--color-blue-base);
   --color-main-focus-bg: var(--color-blue-base);
+  --color-main-mark-fg: var(--color-blue-base);
+  --color-main-mark-bg: transparent;
 
   --color-sidebar-fg: var(--color-gray-lighten-50);
   --color-sidebar-bg: var(--color-gray-darken-20);
@@ -131,6 +133,8 @@ table {
   --color-modal-focus-bg: var(--color-gray-lighten-55);
   --color-modal-focus-subtle-fg: var(--color-gray-base);
   --color-modal-focus-subtle-bg: var(--color-gray-lighten-50);
+  --color-modal-mark-fg: var(--color-blue-base);
+  --colodalmain-mark-bg: transparent;
 
   /* Icons */
   --color-icon-type: var(--color-brand-orange);
@@ -1128,4 +1132,9 @@ button.secondary:hover {
 #finder .definition-match.focused .keyboard-shortcut .key {
   color: var(--color-modal-focus-subtle-fg);
   background: var(--color-modal-focus-subtle-bg);
+}
+
+#finder mark {
+  color: var(--color-modal-mark-fg);
+  background: var(--color-modal-mark-bg);
 }

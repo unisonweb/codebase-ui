@@ -30,3 +30,8 @@ decodeFailInvalid failMessage m =
 
         Just a ->
             Decode.succeed a
+
+
+decodeTag : Decode.Decoder String
+decodeTag =
+    Decode.field "tag" Decode.string
