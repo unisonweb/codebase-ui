@@ -128,6 +128,7 @@ table {
   --color-modal-border: transparent;
   --color-modal-subtle-fg: var(--color-main-subtle-fg);
   --color-modal-subtle-fg-em: var(--color-gray-lighten-20);
+  --color-modal-subtle-mg: var(--color-gray-lighten-55);
   --color-modal-subtle-bg: var(--color-gray-lighten-60);
   --color-modal-focus-fg: var(--color-main-fg);
   --color-modal-focus-bg: var(--color-gray-lighten-55);
@@ -1043,12 +1044,9 @@ button.secondary:hover {
 #finder .definition-match {
   position: relative;
   z-index: var(--layer-modal-above);
-  height: 3rem;
-  padding: 0 0.75rem;
-  line-height: 1.5rem;
+  padding: 1rem 0.75rem;
   display: flex;
   flex-direction: row;
-  align-items: center;
   cursor: pointer;
   border-radius: var(--border-radius-base);
 }
@@ -1057,8 +1055,14 @@ button.secondary:hover {
   background: var(--color-modal-mg);
 }
 
+#finder .definition-match:hover .keyboard-shortcut .key {
+  background: var(--color-modal-subtle-mg);
+}
+
 #finder .definition-match .icon {
+  align-self: flex-start;
   margin-right: 0.5rem;
+  margin-top: 0.2rem;
 }
 
 #finder .definition-match code {
@@ -1069,23 +1073,49 @@ button.secondary:hover {
   font-size: 0.75rem;
 }
 
-#finder .definition-match .name {
-  cursor: pointer;
-  font-weight: bold;
-  max-width: 14rem;
-  font-size: 0.875rem;
+#finder .definition-match mark {
+  color: var(--color-modal-mark-fg);
+  background: var(--color-modal-mark-bg);
+}
+
+#finder .definition-match .naming {
   overflow: hidden;
   white-space: nowrap;
   text-overflow: ellipsis;
+  max-width: 14rem;
+  display: flex;
+  flex-direction: column;
+  cursor: pointer;
+  /* the width of .naming is dynamically calculated based on the number of
+   * chars in the namespace and set with a ch unit which pixel width is based
+   * on the fontsize, so we set the font size of .naming to the font size of
+   * .namespace */
+  font-size: 0.625rem;
+}
+
+#finder .definition-match .name {
+  font-weight: bold;
+  font-size: 0.875rem;
+  display: flex;
+  align-items: center;
+}
+
+#finder .definition-match .namespace {
+  font-size: 0.625rem;
+  margin-top: 0.25rem;
+}
+
+#finder .definition-match .namespace .in {
+  color: var(--color-modal-subtle-fg-em);
+  margin-right: 0.25rem;
 }
 
 #finder .definition-match .source {
-  height: 3rem;
-  display: flex;
-  padding: 0 1rem;
-  align-items: center;
+  padding: 1rem;
+  margin: -1rem 0;
   border-left: 1px solid var(--color-modal-separator);
 }
+
 #finder .definition-match.focused .source {
   border-color: var(--color-modal-focus-bg);
 }
@@ -1093,6 +1123,7 @@ button.secondary:hover {
 #finder .definition-match .keyboard-shortcut {
   margin-left: auto;
   font-size: 0.75rem;
+  align-self: center;
 }
 
 #finder .definition-match .keyboard-shortcut .key {
@@ -1132,9 +1163,4 @@ button.secondary:hover {
 #finder .definition-match.focused .keyboard-shortcut .key {
   color: var(--color-modal-focus-subtle-fg);
   background: var(--color-modal-focus-subtle-bg);
-}
-
-#finder mark {
-  color: var(--color-modal-mark-fg);
-  background: var(--color-modal-mark-bg);
 }

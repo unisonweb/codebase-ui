@@ -14,7 +14,7 @@ module Definition.Type exposing
 import Definition.Info exposing (Info)
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
-import Json.Decode as Decode exposing (at, field, string)
+import Json.Decode as Decode exposing (field, string)
 import Json.Decode.Extra exposing (when)
 import Syntax exposing (Syntax)
 
@@ -38,7 +38,12 @@ type alias TypeDetail =
 
 
 type alias TypeSummary =
-    Type { fqn : FQN, name : String, source : TypeSource }
+    Type
+        { fqn : FQN
+        , name : String
+        , namespace : Maybe String
+        , source : TypeSource
+        }
 
 
 type alias TypeListing =
