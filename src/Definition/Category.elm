@@ -1,17 +1,8 @@
 module Definition.Category exposing (..)
 
+import Definition.Term exposing (TermCategory(..))
+import Definition.Type exposing (TypeCategory(..))
 import UI.Icon as Icon exposing (Icon)
-
-
-type TypeCategory
-    = DataType
-    | AbilityType
-
-
-type TermCategory
-    = PlainTerm
-    | TestTerm
-    | DocTerm
 
 
 type Category

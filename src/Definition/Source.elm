@@ -68,14 +68,9 @@ viewTypeSource viewConfig source =
     viewCode viewConfig content
 
 
-viewTermSignature : ViewConfig msg -> String -> TermSource -> Html msg
-viewTermSignature viewConfig _ source =
-    case source of
-        Term.Source (TermSignature signature) _ ->
-            viewCode viewConfig (viewSyntax viewConfig signature)
-
-        Term.Builtin (TermSignature signature) ->
-            viewCode viewConfig (viewSyntax viewConfig signature)
+viewTermSignature : ViewConfig msg -> TermSignature -> Html msg
+viewTermSignature viewConfig (TermSignature syntax) =
+    viewCode viewConfig (viewSyntax viewConfig syntax)
 
 
 viewTermSource : ViewConfig msg -> String -> TermSource -> Html msg

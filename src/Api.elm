@@ -2,6 +2,7 @@ module Api exposing (errorToString, find, getDefinition, list)
 
 import Env
 import Http
+import Syntax
 import Url.Builder exposing (QueryParameter, absolute, int, string)
 
 
@@ -22,8 +23,8 @@ getDefinition fqnsOrHashes =
         |> serverUrl [ "getDefinition" ]
 
 
-find : Int -> Int -> String -> String
-find limit sourceWidth query =
+find : Int -> Syntax.Width -> String -> String
+find limit (Syntax.Width sourceWidth) query =
     serverUrl
         [ "find" ]
         [ int "limit" limit

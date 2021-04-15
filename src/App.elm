@@ -4,7 +4,6 @@ import Api
 import Browser
 import Browser.Events
 import Browser.Navigation as Nav
-import Definition exposing (Definition(..))
 import Definition.Category
 import Finder
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)

@@ -3,6 +3,7 @@ module Syntax exposing
     , Syntax
     , SyntaxSegment(..)
     , SyntaxType(..)
+    , Width(..)
     , decode
     , numLines
     , view
@@ -16,6 +17,10 @@ import Json.Decode as Decode exposing (andThen, at, field)
 import Json.Decode.Extra exposing (when)
 import List.Nonempty as NEL
 import Util
+
+
+type Width
+    = Width Int
 
 
 type Syntax

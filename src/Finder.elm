@@ -2,8 +2,11 @@ module Finder exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Api
 import Browser.Dom as Dom
-import Definition
-import DefinitionMatch exposing (DefinitionMatch)
+import Definition.Category as Category
+import Definition.Source as Source
+import Definition.Term exposing (Term(..))
+import Definition.Type exposing (Type(..))
+import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, header, input, label, li, ol, section, text)
 import Html.Attributes exposing (autocomplete, class, classList, id, placeholder, style, type_, value)
@@ -14,7 +17,7 @@ import Keyboard.Key exposing (Key(..))
 import KeyboardShortcuts
 import RemoteData exposing (RemoteData(..), WebData)
 import SearchResults exposing (SearchResults(..))
-import Source exposing (TypeSource(..))
+import Syntax
 import Task
 import UI
 import UI.Icon as Icon
@@ -27,7 +30,7 @@ import Workspace.Reference exposing (Reference(..))
 
 
 type alias FinderSearchResults =
-    SearchResults DefinitionMatch
+    SearchResults FinderMatch
 
 
 type alias Model =
@@ -50,7 +53,7 @@ type Msg
     | Close
     | Select Reference
     | Keydown KeyboardEvent
-    | FetchMatchesFinished String (WebData (List DefinitionMatch))
+    | FetchMatchesFinished String (WebData (List FinderMatch))
 
 
 type OutMsg
@@ -133,7 +136,7 @@ update msg model =
                                     Remain
 
                                 SearchResults matches ->
-                                    OpenDefinition ((SearchResults.focus >> .definition >> Definition.reference) matches)
+                                    OpenDefinition ((SearchResults.focus >> FinderMatch.reference) matches)
 
                         out =
                             model.results
@@ -160,14 +163,14 @@ fetchMatches query =
             9
 
         sourceWidth =
-            100
+            Syntax.Width 100
     in
     Http.get
         { url = Api.find limit sourceWidth query
         , expect =
             Http.expectJson
                 (RemoteData.fromResult >> FetchMatchesFinished query)
-                DefinitionMatch.decodeMatches
+                FinderMatch.decodeMatches
         }
 
 
@@ -180,7 +183,7 @@ focusSearchInput =
 -- VIEW
 
 
-viewMatch : String -> DefinitionMatch -> Bool -> Maybe String -> Html Msg
+viewMatch : String -> FinderMatch -> Bool -> Maybe String -> Html Msg
 viewMatch nameWidth match isFocused shortcut =
     let
         shortcutIndicator =
@@ -195,7 +198,7 @@ viewMatch nameWidth match isFocused shortcut =
                     Just key ->
                         KeyboardShortcuts.viewShortcut (KeyboardShortcuts.Sequence ";" key)
 
-        viewMatch_ reference info source =
+        viewMatch_ reference category name source =
             li
                 [ classList
                     [ ( "definition-match", True )
@@ -203,36 +206,39 @@ viewMatch nameWidth match isFocused shortcut =
                     ]
                 , onClick (Select reference)
                 ]
-                [ Icon.view Icon.Type
-                , label [ class "name", style "width" nameWidth ] [ text info.name ]
+                [ Icon.view (Category.icon category)
+                , label [ class "name", style "width" nameWidth ] [ text name ]
                 , div [ class "source" ] [ source ]
                 , shortcutIndicator
                 ]
     in
-    case match.definition of
-        Definition.Type hash info ->
+    case match.item of
+        FinderMatch.TypeItem (Type hash category { name, source }) ->
             viewMatch_
                 (TypeReference (HashOnly hash))
-                info
-                (Source.viewTypeSource Source.Monochrome info.source)
+                (Category.Type category)
+                name
+                (Source.viewTypeSource Source.Monochrome source)
 
-        Definition.Term hash info ->
+        -- (Source.viewTypeSource Source.Monochrome info.source)
+        FinderMatch.TermItem (Term hash category { name, signature }) ->
             viewMatch_
                 (TermReference (HashOnly hash))
-                info
-                (Source.viewTermSignature Source.Monochrome info.name info.source)
+                (Category.Term category)
+                name
+                (Source.viewTermSignature Source.Monochrome signature)
 
 
-maxNumNameChars : SearchResults.Matches DefinitionMatch -> Int
+maxNumNameChars : SearchResults.Matches FinderMatch -> Int
 maxNumNameChars matches =
     matches
         |> SearchResults.matchesToList
-        |> List.map (.definition >> Definition.name >> String.length)
+        |> List.map (FinderMatch.name >> String.length)
         |> List.maximum
         |> Maybe.withDefault 0
 
 
-viewMatches : SearchResults.Matches DefinitionMatch -> Html Msg
+viewMatches : SearchResults.Matches FinderMatch -> Html Msg
 viewMatches matches =
     let
         nameWidth =
