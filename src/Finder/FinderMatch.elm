@@ -158,7 +158,7 @@ decodeTermItem =
             (field "namedTerm" Term.decodeTermCategory)
             (Decode.map3 makeSummary
                 (field "namedTerm" Term.decodeFQN)
-                (field "bestTermName" string)
+                (field "bestFoundTermName" string)
                 (field "namedTerm" Term.decodeTermSignature)
             )
         )
