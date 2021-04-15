@@ -836,6 +836,7 @@ button.secondary:hover {
   color: var(--color-workspace-item-subtle-fg-em);
   width: 0.5rem;
   height: 0.5rem;
+  stroke-width: 2px;
 }
 
 .definition-row .close:hover .icon {
