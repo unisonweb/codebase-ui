@@ -146,4 +146,14 @@ namespaceOf =
                         FQN.fromString "base.List.map"
                 in
                 Expect.equal Nothing (FQN.namespaceOf suffix fqn)
+        , test "When the suffix is included more than once, only the last match of the FQN is removed" <|
+            \_ ->
+                let
+                    suffix =
+                        "Map"
+
+                    fqn =
+                        FQN.fromString "base.Map.Map"
+                in
+                Expect.equal (Just "base.Map") (FQN.namespaceOf suffix fqn)
         ]
