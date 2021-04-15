@@ -2,6 +2,7 @@ module Finder.FinderMatch exposing (..)
 
 import Definition.Term as Term exposing (Term(..), TermSummary)
 import Definition.Type as Type exposing (Type(..), TypeSummary)
+import FullyQualifiedName as FQN
 import HashQualified exposing (HashQualified(..))
 import Json.Decode as Decode exposing (at, field, string)
 import Json.Decode.Extra exposing (when)
@@ -24,11 +25,33 @@ type alias MatchSegments =
     NEL.Nonempty MatchSegment
 
 
+type alias MatchPositions =
+    NEL.Nonempty Int
+
+
 type alias FinderMatch =
     { score : Int
-    , match : MatchSegments
+    , matchSegments : MatchSegments
+    , matchPositions : MatchPositions
     , item : FinderItem
     }
+
+
+
+-- CREATE
+
+
+finderMatch : Int -> MatchSegments -> FinderItem -> FinderMatch
+finderMatch score matchSegments item =
+    let
+        matchPositions =
+            matchSegmentsToMatchPositions matchSegments
+    in
+    FinderMatch score matchSegments matchPositions item
+
+
+
+-- HELPERS
 
 
 name : FinderMatch -> String
@@ -41,6 +64,16 @@ name fm =
             summary.name
 
 
+namespace : FinderMatch -> Maybe String
+namespace fm =
+    case fm.item of
+        TypeItem (Type _ _ summary) ->
+            summary.namespace
+
+        TermItem (Term _ _ summary) ->
+            summary.namespace
+
+
 reference : FinderMatch -> Reference
 reference fm =
     case fm.item of
@@ -49,6 +82,33 @@ reference fm =
 
         TermItem (Term h _ _) ->
             TermReference (HashOnly h)
+
+
+matchSegmentsToMatchPositions : MatchSegments -> NEL.Nonempty Int
+matchSegmentsToMatchPositions segments =
+    let
+        f s ( cur, is ) =
+            case s of
+                Gap str ->
+                    ( cur + String.length str, is )
+
+                Match str ->
+                    let
+                        matches =
+                            str
+                                |> String.toList
+                                |> List.indexedMap (\i _ -> i + cur)
+                    in
+                    ( cur + String.length str, is ++ matches )
+
+        ( _, positions ) =
+            NEL.foldl f ( 0, [] ) segments
+    in
+    -- This `NEL.fromElement 0` is a random value to satisfy the Maybe. It
+    -- is literally impossible (since there will always be a position for
+    -- segments) and thats prolly a good indication that I'm not doing this
+    -- right...
+    Maybe.withDefault (NEL.fromElement 0) (NEL.fromList positions)
 
 
 
@@ -64,7 +124,11 @@ decodeTypeItem : Decode.Decoder FinderItem
 decodeTypeItem =
     let
         makeSummary fqn name_ source =
-            { fqn = fqn, name = name_, source = source }
+            { fqn = fqn
+            , name = name_
+            , namespace = FQN.namespaceOf name_ fqn
+            , source = source
+            }
     in
     Decode.map TypeItem
         (Decode.map3 Type
@@ -82,7 +146,11 @@ decodeTermItem : Decode.Decoder FinderItem
 decodeTermItem =
     let
         makeSummary fqn name_ signature =
-            { fqn = fqn, name = name_, signature = signature }
+            { fqn = fqn
+            , name = name_
+            , namespace = FQN.namespaceOf name_ fqn
+            , signature = signature
+            }
     in
     Decode.map TermItem
         (Decode.map3 Term
@@ -118,7 +186,7 @@ decodeMatchSegments =
 
 decodeFinderMatch : Decode.Decoder FinderMatch
 decodeFinderMatch =
-    Decode.map3 FinderMatch
+    Decode.map3 finderMatch
         (Decode.index 0 decodeScore)
         (Decode.index 0 decodeMatchSegments)
         (Decode.index 1 decodeItem)

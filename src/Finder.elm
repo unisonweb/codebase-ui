@@ -8,13 +8,39 @@ import Definition.Term exposing (Term(..))
 import Definition.Type exposing (Type(..))
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, a, div, header, input, label, li, ol, section, text)
-import Html.Attributes exposing (autocomplete, class, classList, id, placeholder, style, type_, value)
+import Html
+    exposing
+        ( Html
+        , a
+        , div
+        , header
+        , input
+        , label
+        , li
+        , mark
+        , ol
+        , section
+        , span
+        , text
+        )
+import Html.Attributes
+    exposing
+        ( autocomplete
+        , class
+        , classList
+        , id
+        , placeholder
+        , spellcheck
+        , style
+        , type_
+        , value
+        )
 import Html.Events exposing (onClick, onInput)
 import Http
 import Keyboard.Event exposing (KeyboardEvent)
 import Keyboard.Key exposing (Key(..))
 import KeyboardShortcuts
+import List.Nonempty as NEL
 import RemoteData exposing (RemoteData(..), WebData)
 import SearchResults exposing (SearchResults(..))
 import Syntax
@@ -183,6 +209,43 @@ focusSearchInput =
 -- VIEW
 
 
+viewMarkedNaming : String -> FinderMatch.MatchPositions -> Maybe String -> String -> Html msg
+viewMarkedNaming nameWidth matchedPositions namespace name =
+    let
+        namespaceMod =
+            namespace
+                |> Maybe.map String.length
+                |> Maybe.map ((+) 1)
+                |> Maybe.withDefault 0
+
+        mark_ mod i s =
+            if NEL.member (i + mod) matchedPositions then
+                mark [] [ text s ]
+
+            else
+                text s
+
+        markedName =
+            name
+                |> String.toList
+                |> List.map (List.singleton >> String.fromList)
+                |> List.indexedMap (mark_ namespaceMod)
+
+        markedNamespace =
+            namespace
+                |> Maybe.map String.toList
+                |> Maybe.map (List.map (List.singleton >> String.fromList))
+                |> Maybe.map (List.indexedMap (mark_ 0))
+                |> Maybe.map (\ns -> span [ class "in" ] [ text "in" ] :: ns)
+                |> Maybe.withDefault []
+    in
+    div
+        [ class "naming", style "width" nameWidth ]
+        [ label [ class "name" ] markedName
+        , label [ class "namespace" ] markedNamespace
+        ]
+
+
 viewMatch : String -> FinderMatch -> Bool -> Maybe String -> Html Msg
 viewMatch nameWidth match isFocused shortcut =
     let
@@ -198,42 +261,48 @@ viewMatch nameWidth match isFocused shortcut =
                     Just key ->
                         KeyboardShortcuts.viewShortcut (KeyboardShortcuts.Sequence ";" key)
 
-        viewMatch_ reference category name source =
+        viewMatch_ reference category naming source =
             li
-                [ classList
-                    [ ( "definition-match", True )
-                    , ( "focused", isFocused )
-                    ]
+                [ classList [ ( "definition-match", True ), ( "focused", isFocused ) ]
                 , onClick (Select reference)
                 ]
                 [ Icon.view (Category.icon category)
-                , label [ class "name", style "width" nameWidth ] [ text name ]
+                , naming
                 , div [ class "source" ] [ source ]
                 , shortcutIndicator
                 ]
     in
     case match.item of
-        FinderMatch.TypeItem (Type hash category { name, source }) ->
+        FinderMatch.TypeItem (Type hash category { name, namespace, source }) ->
             viewMatch_
                 (TypeReference (HashOnly hash))
                 (Category.Type category)
-                name
+                (viewMarkedNaming nameWidth match.matchPositions namespace name)
                 (Source.viewTypeSource Source.Monochrome source)
 
-        -- (Source.viewTypeSource Source.Monochrome info.source)
-        FinderMatch.TermItem (Term hash category { name, signature }) ->
+        FinderMatch.TermItem (Term hash category { name, namespace, signature }) ->
             viewMatch_
                 (TermReference (HashOnly hash))
                 (Category.Term category)
-                name
+                (viewMarkedNaming nameWidth match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
 
 
 maxNumNameChars : SearchResults.Matches FinderMatch -> Int
 maxNumNameChars matches =
+    let
+        nameWidth =
+            FinderMatch.name >> String.length
+
+        namespaceWidth =
+            FinderMatch.namespace >> Maybe.map String.length >> Maybe.withDefault 0
+
+        nameLengthOrNamespaceLength fm =
+            max (nameWidth fm) (namespaceWidth fm)
+    in
     matches
         |> SearchResults.matchesToList
-        |> List.map (FinderMatch.name >> String.length)
+        |> List.map nameLengthOrNamespaceLength
         |> List.maximum
         |> Maybe.withDefault 0
 
@@ -284,6 +353,7 @@ view model =
                 [ type_ "text"
                 , id "search"
                 , autocomplete False
+                , spellcheck False
                 , placeholder "Search by name, namespace, and/or type"
                 , onInput UpdateQuery
                 , value model.query

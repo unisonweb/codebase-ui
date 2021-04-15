@@ -5,6 +5,14 @@ import List.Extra as ListE
 import List.Nonempty as NEL
 
 
+
+-- TODO: Without `otherNames` and if the `FQN` was added,
+-- `Info` would be translatable to
+-- `TermSummary`/`TypeSummary`.
+-- Perhaps it should be `Naming` instead?
+-- `otherNames` is a detail thing only.
+
+
 type alias Info =
     { name : String
     , namespace : Maybe String

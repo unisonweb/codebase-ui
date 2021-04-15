@@ -44,7 +44,12 @@ type alias TermDetail =
 
 
 type alias TermSummary =
-    Term { fqn : FQN, name : String, signature : TermSignature }
+    Term
+        { fqn : FQN
+        , name : String
+        , namespace : Maybe String
+        , signature : TermSignature
+        }
 
 
 type alias TermListing =

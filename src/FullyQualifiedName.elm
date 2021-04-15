@@ -129,7 +129,7 @@ namespaceOf suffixName fqn =
     if isSuffixOf suffixName fqn then
         fqn
             |> toString
-            |> String.replace suffixName ""
+            |> String.dropRight (String.length suffixName)
             |> StringE.nonEmpty
             |> Maybe.map dropLastDot
 
