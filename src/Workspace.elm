@@ -4,12 +4,12 @@ import Api
 import Browser.Dom as Dom
 import Browser.Events
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, article, header, section, text)
+import Html exposing (Html, article, header, section)
 import Html.Attributes exposing (class, id)
 import Http
 import Json.Decode as Decode
-import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
-import Keyboard.Key exposing (Key(..))
+import KeyboardShortcut.Key exposing (Key(..))
+import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Route exposing (Route(..))
 import Task
 import UI
@@ -184,36 +184,36 @@ handleKeyboardEvent model keyboardEvent =
         passthrough =
             ( model, Cmd.none, None )
     in
-    case keyboardEvent.keyCode of
-        Down ->
+    case keyboardEvent.key of
+        ArrowDown ->
             if keyboardEvent.shiftKey then
                 nextDefinition
 
             else
                 passthrough
 
-        J ->
+        J _ ->
             if keyboardEvent.shiftKey then
                 nextDefinition
 
             else
                 passthrough
 
-        Up ->
+        ArrowUp ->
             if keyboardEvent.shiftKey then
                 prevDefinitions
 
             else
                 passthrough
 
-        K ->
+        K _ ->
             if keyboardEvent.shiftKey then
                 prevDefinitions
 
             else
                 passthrough
 
-        X ->
+        X _ ->
             let
                 without =
                     model
@@ -274,7 +274,7 @@ subscriptions : Model -> Sub Msg
 subscriptions _ =
     Browser.Events.onKeyDown
         (Decode.map HandleKeyboardEvent
-            decodeKeyboardEvent
+            KeyboardEvent.decode
         )
 
 

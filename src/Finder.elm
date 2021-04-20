@@ -37,9 +37,9 @@ import Html.Attributes
         )
 import Html.Events exposing (onClick, onInput)
 import Http
-import Keyboard.Event exposing (KeyboardEvent)
-import Keyboard.Key exposing (Key(..))
-import KeyboardShortcuts
+import KeyboardShortcut
+import KeyboardShortcut.Key as Key exposing (Key(..))
+import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import List.Nonempty as NEL
 import RemoteData exposing (RemoteData(..), WebData)
 import SearchResults exposing (SearchResults(..))
@@ -136,18 +136,18 @@ update msg model =
             ( model, Cmd.none, OpenDefinition ref )
 
         Keydown event ->
-            case event.keyCode of
+            case event.key of
                 Escape ->
                     resetOrClose
 
-                Up ->
+                ArrowUp ->
                     let
                         newResults =
                             RemoteData.map SearchResults.prev model.results
                     in
                     ( { model | results = newResults }, Cmd.none, Remain )
 
-                Down ->
+                ArrowDown ->
                     let
                         newResults =
                             RemoteData.map SearchResults.next model.results
@@ -209,6 +209,19 @@ focusSearchInput =
 -- VIEW
 
 
+indexToShortcut : Int -> Maybe Key
+indexToShortcut index =
+    let
+        n =
+            index + 1
+    in
+    if n > 9 then
+        Nothing
+
+    else
+        n |> String.fromInt |> Key.fromString |> Just
+
+
 viewMarkedNaming : String -> FinderMatch.MatchPositions -> Maybe String -> String -> Html msg
 viewMarkedNaming nameWidth matchedPositions namespace name =
     let
@@ -246,12 +259,12 @@ viewMarkedNaming nameWidth matchedPositions namespace name =
         ]
 
 
-viewMatch : String -> FinderMatch -> Bool -> Maybe String -> Html Msg
+viewMatch : String -> FinderMatch -> Bool -> Maybe Key -> Html Msg
 viewMatch nameWidth match isFocused shortcut =
     let
         shortcutIndicator =
             if isFocused then
-                KeyboardShortcuts.viewShortcut (KeyboardShortcuts.Single "↵ ")
+                KeyboardShortcut.viewShortcut (KeyboardShortcut.Single Key.Enter)
 
             else
                 case shortcut of
@@ -259,7 +272,7 @@ viewMatch nameWidth match isFocused shortcut =
                         UI.nothing
 
                     Just key ->
-                        KeyboardShortcuts.viewShortcut (KeyboardShortcuts.Sequence ";" key)
+                        KeyboardShortcut.viewShortcut (KeyboardShortcut.Sequence Key.Semicolon key)
 
         viewMatch_ reference category naming source =
             li
@@ -316,7 +329,7 @@ viewMatches matches =
         matchItems =
             matches
                 |> SearchResults.mapMatchesToList (\d f -> ( d, f ))
-                |> List.indexedMap (\i ( d, f ) -> ( d, f, KeyboardShortcuts.indexToShortcut i ))
+                |> List.indexedMap (\i ( d, f ) -> ( d, f, indexToShortcut i ))
                 |> List.map (\( d, f, s ) -> viewMatch nameWidth d f s)
     in
     section [ class "results" ] [ ol [] matchItems ]
@@ -346,7 +359,7 @@ view model =
     -- type those letters into the search field
     Modal.view
         Close
-        [ id "finder", KeyboardShortcuts.stopPropagationOnKeydown Keydown ]
+        [ id "finder", KeyboardEvent.stopPropagationOn KeyboardEvent.Keydown Keydown ]
         [ header []
             [ Icon.view Icon.Search
             , input
