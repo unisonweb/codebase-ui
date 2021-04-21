@@ -26,8 +26,8 @@ import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode
-import Keyboard.Event exposing (KeyboardEvent, decodeKeyboardEvent)
-import Keyboard.Key exposing (Key(..))
+import KeyboardShortcut.Key exposing (Key(..))
+import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import NamespaceListing
     exposing
         ( DefinitionListing(..)
@@ -258,8 +258,8 @@ handleWorkspaceOutMsg model out =
 
 handleKeyboardEvent : Model -> KeyboardEvent -> ( Model, Cmd Msg )
 handleKeyboardEvent model keyboardEvent =
-    case keyboardEvent.keyCode of
-        K ->
+    case keyboardEvent.key of
+        K _ ->
             if keyboardEvent.ctrlKey || keyboardEvent.metaKey then
                 showFinder model
 
@@ -310,7 +310,7 @@ fetchSubNamespaceListing fqn =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Browser.Events.onKeyDown (Decode.map HandleKeyboardEvent decodeKeyboardEvent)
+        [ Browser.Events.onKeyDown (Decode.map HandleKeyboardEvent KeyboardEvent.decode)
         , Sub.map WorkspaceMsg (Workspace.subscriptions model.workspace)
         ]
 

@@ -15,7 +15,6 @@ list rawFQN =
         |> Maybe.withDefault []
         |> serverUrl [ "list" ]
 
-
 getDefinition : List String -> String
 getDefinition fqnsOrHashes =
     fqnsOrHashes
