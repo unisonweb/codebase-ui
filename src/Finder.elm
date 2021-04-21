@@ -37,7 +37,7 @@ import Html.Attributes
         )
 import Html.Events exposing (onClick, onInput)
 import Http
-import KeyboardShortcut
+import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import List.Nonempty as NEL
@@ -60,12 +60,20 @@ type alias FinderSearchResults =
 
 
 type alias Model =
-    { query : String, results : WebData FinderSearchResults }
+    { query : String
+    , results : WebData FinderSearchResults
+    , keyboardShortcut : KeyboardShortcut.Model
+    }
 
 
 init : ( Model, Cmd Msg )
 init =
-    ( { query = "", results = NotAsked }, focusSearchInput )
+    ( { query = ""
+      , results = NotAsked
+      , keyboardShortcut = KeyboardShortcut.init
+      }
+    , focusSearchInput
+    )
 
 
 
@@ -80,6 +88,7 @@ type Msg
     | Select Reference
     | Keydown KeyboardEvent
     | FetchMatchesFinished String (WebData (List FinderMatch))
+    | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
 type OutMsg
@@ -105,15 +114,25 @@ update msg model =
                 reset
     in
     case msg of
+        NoOp ->
+            ( model, Cmd.none, Remain )
+
         UpdateQuery query ->
+            let
+                isSequenceShortcutInput =
+                    String.contains ";" query
+            in
             if String.isEmpty query then
                 ( { model | query = query, results = NotAsked }, Cmd.none, Remain )
 
-            else if String.length query > 1 then
+            else if String.length query > 1 && not isSequenceShortcutInput then
                 ( { model | query = query }, fetchMatches query, Remain )
 
-            else
+            else if not isSequenceShortcutInput then
                 ( { model | query = query }, Cmd.none, Remain )
+
+            else
+                ( model, Cmd.none, Remain )
 
         Close ->
             exit
@@ -136,25 +155,38 @@ update msg model =
             ( model, Cmd.none, OpenDefinition ref )
 
         Keydown event ->
-            case event.key of
-                Escape ->
+            let
+                ( keyboardShortcut, kCmd ) =
+                    KeyboardShortcut.collect model.keyboardShortcut event.key
+
+                cmd =
+                    Cmd.map KeyboardShortcutMsg kCmd
+
+                newModel =
+                    { model | keyboardShortcut = keyboardShortcut }
+
+                shortcut =
+                    KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
+            in
+            case shortcut of
+                Sequence _ Escape ->
                     resetOrClose
 
-                ArrowUp ->
+                Sequence _ ArrowUp ->
                     let
                         newResults =
                             RemoteData.map SearchResults.prev model.results
                     in
-                    ( { model | results = newResults }, Cmd.none, Remain )
+                    ( { newModel | results = newResults }, cmd, Remain )
 
-                ArrowDown ->
+                Sequence _ ArrowDown ->
                     let
                         newResults =
                             RemoteData.map SearchResults.next model.results
                     in
-                    ( { model | results = newResults }, Cmd.none, Remain )
+                    ( { newModel | results = newResults }, cmd, Remain )
 
-                Enter ->
+                Sequence _ Enter ->
                     let
                         openFocused results =
                             case results of
@@ -169,13 +201,34 @@ update msg model =
                                 |> RemoteData.map openFocused
                                 |> RemoteData.withDefault Remain
                     in
-                    ( model, Cmd.none, out )
+                    ( newModel, cmd, out )
+
+                Sequence (Just Semicolon) k ->
+                    case Key.toNumber k of
+                        Just n ->
+                            let
+                                out =
+                                    model.results
+                                        |> RemoteData.toMaybe
+                                        |> Maybe.andThen (SearchResults.getAt (n - 1))
+                                        |> Maybe.map FinderMatch.reference
+                                        |> Maybe.map OpenDefinition
+                                        |> Maybe.withDefault Remain
+                            in
+                            ( newModel, cmd, out )
+
+                        Nothing ->
+                            ( newModel, cmd, Remain )
 
                 _ ->
-                    ( model, Cmd.none, Remain )
+                    ( newModel, cmd, Remain )
 
-        _ ->
-            ( model, Cmd.none, Remain )
+        KeyboardShortcutMsg kMsg ->
+            let
+                ( keyboardShortcut, cmd ) =
+                    KeyboardShortcut.update kMsg model.keyboardShortcut
+            in
+            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd, Remain )
 
 
 
@@ -259,12 +312,12 @@ viewMarkedNaming nameWidth matchedPositions namespace name =
         ]
 
 
-viewMatch : String -> FinderMatch -> Bool -> Maybe Key -> Html Msg
-viewMatch nameWidth match isFocused shortcut =
+viewMatch : KeyboardShortcut.Model -> String -> FinderMatch -> Bool -> Maybe Key -> Html Msg
+viewMatch keyboardShortcut nameWidth match isFocused shortcut =
     let
         shortcutIndicator =
             if isFocused then
-                KeyboardShortcut.viewShortcut (KeyboardShortcut.Single Key.Enter)
+                KeyboardShortcut.viewShortcut keyboardShortcut (Sequence Nothing Key.Enter)
 
             else
                 case shortcut of
@@ -272,7 +325,7 @@ viewMatch nameWidth match isFocused shortcut =
                         UI.nothing
 
                     Just key ->
-                        KeyboardShortcut.viewShortcut (KeyboardShortcut.Sequence Key.Semicolon key)
+                        KeyboardShortcut.viewShortcut keyboardShortcut (Sequence (Just Key.Semicolon) key)
 
         viewMatch_ reference category naming source =
             li
@@ -320,8 +373,8 @@ maxNumNameChars matches =
         |> Maybe.withDefault 0
 
 
-viewMatches : SearchResults.Matches FinderMatch -> Html Msg
-viewMatches matches =
+viewMatches : KeyboardShortcut.Model -> SearchResults.Matches FinderMatch -> Html Msg
+viewMatches keyboardShortcut matches =
     let
         nameWidth =
             UI.charWidth (maxNumNameChars matches)
@@ -330,7 +383,7 @@ viewMatches matches =
             matches
                 |> SearchResults.mapMatchesToList (\d f -> ( d, f ))
                 |> List.indexedMap (\i ( d, f ) -> ( d, f, indexToShortcut i ))
-                |> List.map (\( d, f, s ) -> viewMatch nameWidth d f s)
+                |> List.map (\( d, f, s ) -> viewMatch keyboardShortcut nameWidth d f s)
     in
     section [ class "results" ] [ ol [] matchItems ]
 
@@ -346,7 +399,7 @@ view model =
                             UI.emptyStateMessage ("No matching definitions found for '" ++ model.query ++ "'")
 
                         SearchResults matches ->
-                            viewMatches matches
+                            viewMatches model.keyboardShortcut matches
 
                 Failure error ->
                     div [] [ text (Api.errorToString error) ]

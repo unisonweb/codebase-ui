@@ -3,6 +3,8 @@ module KeyboardShortcut.Key exposing
     , LetterCase(..)
     , decode
     , fromString
+    , isModifier
+    , toNumber
     , view
     )
 
@@ -92,9 +94,77 @@ type Key
     | Raw String
 
 
+
+-- HELPERS
+
+
+isModifier : Key -> Bool
+isModifier k =
+    case k of
+        Ctrl ->
+            True
+
+        Alt ->
+            True
+
+        Meta ->
+            True
+
+        Shift ->
+            True
+
+        _ ->
+            False
+
+
+toNumber : Key -> Maybe Int
+toNumber k =
+    case k of
+        Zero ->
+            Just 0
+
+        One ->
+            Just 1
+
+        Two ->
+            Just 2
+
+        Three ->
+            Just 3
+
+        Four ->
+            Just 4
+
+        Five ->
+            Just 5
+
+        Six ->
+            Just 6
+
+        Seven ->
+            Just 7
+
+        Eight ->
+            Just 8
+
+        Nine ->
+            Just 9
+
+        _ ->
+            Nothing
+
+
+
+-- DECODE
+
+
 decode : Decode.Decoder Key
 decode =
     Decode.map fromString Decode.string
+
+
+
+-- CREATE
 
 
 fromString : String -> Key
@@ -399,6 +469,10 @@ fromString str =
 
         _ ->
             Raw str
+
+
+
+-- VIEW
 
 
 view : Key -> String

@@ -1,16 +1,58 @@
+{--| 
+
+  KeyboardShortcut.KeyboardEvent
+  ==============================
+
+  Modelled after https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
+
+  It specifically does **not** work on the ASCII code properties
+  (`keyCode`, `charCode`, etc) as those are all deprecated and replaced by
+  `key` and `code`.
+  This also means that this module doesn't support older browsers.
+
+  * https://caniuse.com/keyboardevent-key
+  * https://caniuse.com/keyboardevent-code
+
+  `key` is decoded to `KeyboardShortcut.Key`.
+
+  Event Handlers
+  --------------
+
+  It's possible to use the core Elm event handlers with KeyboardEvent.decode,
+  but this module also provides a few helpers that directly relates to
+  subscribing to keyboard events:
+
+  * `on` and `stopPropagationOn` for DOM node Attribute style keyboard events
+  * `subscribe` for global/window keyboard events through Sub
+
+  All of these take the `KeyboardEventType` custom type for configuring which
+  kind of event to listen for.
+
+  Modifiers
+  ---------
+
+  A few keyboard modifier helper functions are included for detirmining if a
+  modifier is being held.
+
+--}
+
+
 module KeyboardShortcut.KeyboardEvent exposing
     ( KeyboardEvent
     , KeyboardEventType(..)
-    , considerKeyboardEvent
     , decode
+    , decodeToMsg
     , isHoldingModifier
     , modifiersHeld
+    , on
     , stopPropagationOn
+    , subscribe
     )
 
+import Browser.Events
 import Html
 import Html.Events
-import Json.Decode as Decode exposing (Decoder, andThen, bool, fail, field, map7, string, succeed)
+import Json.Decode as Decode exposing (Decoder, bool, field, map7, string)
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
@@ -20,20 +62,6 @@ type KeyboardEventType
     = Keyup
     | Keydown
     | Keypress
-
-
-
-{--| KeyboardEvent
-
-Modelled after https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent
-
-It does **not** work on ASCII codes as those are all deprecated and relaced by
-Key and Code. This also means that this module doesn't support older browsers.
-
-* https://caniuse.com/keyboardevent-key
-* https://caniuse.com/keyboardevent-code
-
---}
 
 
 type alias KeyboardEvent =
@@ -84,35 +112,8 @@ modifiersHeld { altKey, ctrlKey, metaKey, shiftKey } =
         |> NEL.fromList
 
 
-keyboardEventTypeToEventString : KeyboardEventType -> String
-keyboardEventTypeToEventString keyboardEventType =
-    case keyboardEventType of
-        Keypress ->
-            "keypress"
-
-        Keyup ->
-            "keyup"
-
-        Keydown ->
-            "keydown"
-
-
 
 -- EVENTS
-
-
-considerKeyboardEvent : (KeyboardEvent -> Maybe msg) -> Decoder msg
-considerKeyboardEvent func =
-    andThen
-        (\event ->
-            case func event of
-                Just msg ->
-                    succeed msg
-
-                Nothing ->
-                    fail "Ignoring keyboard event"
-        )
-        decode
 
 
 stopPropagationOn : KeyboardEventType -> (KeyboardEvent -> msg) -> Html.Attribute msg
@@ -128,6 +129,30 @@ stopPropagationOn keyboardEventType toMsg =
                         }
                 )
         )
+
+
+on : KeyboardEventType -> (KeyboardEvent -> msg) -> Html.Attribute msg
+on eventType toMsg =
+    Html.Events.on
+        (keyboardEventTypeToEventString eventType)
+        (Decode.map toMsg decode)
+
+
+subscribe : KeyboardEventType -> (KeyboardEvent -> msg) -> Sub msg
+subscribe eventType toMsg =
+    let
+        handler =
+            Decode.map toMsg decode
+    in
+    case eventType of
+        Keydown ->
+            Browser.Events.onKeyDown handler
+
+        Keyup ->
+            Browser.Events.onKeyUp handler
+
+        Keypress ->
+            Browser.Events.onKeyPress handler
 
 
 
@@ -149,3 +174,20 @@ decode =
 decodeToMsg : (KeyboardEvent -> msg) -> Decode.Decoder msg
 decodeToMsg toMsg =
     Decode.map toMsg decode
+
+
+
+-- INTERNAL
+
+
+keyboardEventTypeToEventString : KeyboardEventType -> String
+keyboardEventTypeToEventString keyboardEventType =
+    case keyboardEventType of
+        Keypress ->
+            "keypress"
+
+        Keyup ->
+            "keyup"
+
+        Keydown ->
+            "keydown"

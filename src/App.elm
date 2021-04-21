@@ -2,7 +2,6 @@ module App exposing (..)
 
 import Api
 import Browser
-import Browser.Events
 import Browser.Navigation as Nav
 import Definition.Category
 import Finder
@@ -25,7 +24,7 @@ import Html
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import Http
-import Json.Decode as Decode
+import KeyboardShortcut
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import NamespaceListing
@@ -61,6 +60,7 @@ type alias Model =
     , rootNamespaceListing : WebData NamespaceListing
     , expandedNamespaceListings : FQNSet
     , modal : Modal
+    , keyboardShortcut : KeyboardShortcut.Model
     }
 
 
@@ -94,6 +94,7 @@ init _ url navKey =
             , rootNamespaceListing = Loading
             , expandedNamespaceListings = FQNSet.empty
             , modal = NoModal
+            , keyboardShortcut = KeyboardShortcut.init
             }
     in
     ( model
@@ -108,7 +109,7 @@ init _ url navKey =
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url
-    | HandleKeyboardEvent KeyboardEvent
+    | Keydown KeyboardEvent
     | ToggleExpandedNamespaceListing FQN
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
@@ -116,6 +117,7 @@ type Msg
       -- sub msgs
     | FinderMsg Finder.Msg
     | WorkspaceMsg Workspace.Msg
+    | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -130,8 +132,8 @@ update msg model =
             -- being a result of a URL change
             ( { model | route = Route.fromUrl url }, Cmd.none )
 
-        HandleKeyboardEvent event ->
-            handleKeyboardEvent model event
+        Keydown event ->
+            keydown model event
 
         ToggleExpandedNamespaceListing fqn ->
             let
@@ -220,6 +222,13 @@ update msg model =
                         Finder.OpenDefinition ref ->
                             openDefinition { model | modal = NoModal } ref
 
+        KeyboardShortcutMsg kMsg ->
+            let
+                ( keyboardShortcut, cmd ) =
+                    KeyboardShortcut.update kMsg model.keyboardShortcut
+            in
+            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd )
+
 
 
 -- UPDATE HELPERS
@@ -256,15 +265,18 @@ handleWorkspaceOutMsg model out =
             ( model, Route.navigateToLatest model.navKey )
 
 
-handleKeyboardEvent : Model -> KeyboardEvent -> ( Model, Cmd Msg )
-handleKeyboardEvent model keyboardEvent =
-    case keyboardEvent.key of
-        K _ ->
-            if keyboardEvent.ctrlKey || keyboardEvent.metaKey then
-                showFinder model
+keydown : Model -> KeyboardEvent -> ( Model, Cmd Msg )
+keydown model keyboardEvent =
+    let
+        shortcut =
+            KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut keyboardEvent
+    in
+    case shortcut of
+        KeyboardShortcut.Chord Ctrl (K _) ->
+            showFinder model
 
-            else
-                ( model, Cmd.none )
+        KeyboardShortcut.Chord Meta (K _) ->
+            showFinder model
 
         _ ->
             ( model, Cmd.none )
@@ -310,7 +322,7 @@ fetchSubNamespaceListing fqn =
 subscriptions : Model -> Sub Msg
 subscriptions model =
     Sub.batch
-        [ Browser.Events.onKeyDown (Decode.map HandleKeyboardEvent KeyboardEvent.decode)
+        [ KeyboardEvent.subscribe KeyboardEvent.Keydown Keydown
         , Sub.map WorkspaceMsg (Workspace.subscriptions model.workspace)
         ]
 
