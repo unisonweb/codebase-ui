@@ -2,12 +2,10 @@ module Workspace exposing (Model, Msg, OutMsg(..), init, open, subscriptions, up
 
 import Api
 import Browser.Dom as Dom
-import Browser.Events
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, article, header, section)
 import Html.Attributes exposing (class, id)
 import Http
-import Json.Decode as Decode
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Route exposing (Route(..))
@@ -55,7 +53,7 @@ type Msg
     | OpenDefinitionAfter Reference Reference
     | CloseDefinition Reference
     | FetchItemFinished Reference (Result Http.Error Item)
-    | HandleKeyboardEvent KeyboardEvent
+    | Keydown KeyboardEvent
 
 
 type OutMsg
@@ -95,8 +93,8 @@ update msg model =
             in
             ( nextWorkspaceItems, Cmd.none, openDefinitionsFocusToOutMsg nextWorkspaceItems )
 
-        HandleKeyboardEvent event ->
-            handleKeyboardEvent model event
+        Keydown event ->
+            keydown model event
 
 
 
@@ -158,8 +156,8 @@ openDefinitionsFocusToOutMsg openDefs =
         |> Maybe.withDefault Emptied
 
 
-handleKeyboardEvent : Model -> KeyboardEvent -> ( Model, Cmd Msg, OutMsg )
-handleKeyboardEvent model keyboardEvent =
+keydown : Model -> KeyboardEvent -> ( Model, Cmd Msg, OutMsg )
+keydown model keyboardEvent =
     let
         scrollToCmd =
             WorkspaceItems.focus
@@ -272,10 +270,7 @@ scrollToDefinition ref =
 
 subscriptions : Model -> Sub Msg
 subscriptions _ =
-    Browser.Events.onKeyDown
-        (Decode.map HandleKeyboardEvent
-            KeyboardEvent.decode
-        )
+    KeyboardEvent.subscribe KeyboardEvent.Keydown Keydown
 
 
 

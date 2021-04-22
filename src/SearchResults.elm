@@ -5,6 +5,7 @@ module SearchResults exposing
     , focusOn
     , from
     , fromList
+    , getAt
     , isEmpty
     , length
     , map
@@ -17,6 +18,7 @@ module SearchResults exposing
     , toMaybe
     )
 
+import List.Extra as ListE
 import List.Zipper as Zipper exposing (Zipper)
 import Maybe.Extra exposing (unwrap)
 
@@ -60,6 +62,11 @@ length results =
             data
                 |> Zipper.toList
                 |> List.length
+
+
+getAt : Int -> SearchResults a -> Maybe a
+getAt index results =
+    results |> toList |> ListE.getAt index
 
 
 map : (Matches a -> Matches a) -> SearchResults a -> SearchResults a

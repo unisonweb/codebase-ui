@@ -1,7 +1,6 @@
 module Workspace.WorkspaceItemsTests exposing (..)
 
 import Expect
-import Hash
 import HashQualified exposing (HashQualified(..))
 import Http exposing (Error(..))
 import Test exposing (..)

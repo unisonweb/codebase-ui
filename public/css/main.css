@@ -1132,6 +1132,11 @@ button.secondary:hover {
   background: var(--color-modal-subtle-bg);
 }
 
+#finder .definition-match .keyboard-shortcut .key.active {
+  color: var(--color-modal-focus-subtle-fg);
+  background: var(--color-modal-focus-subtle-bg);
+}
+
 #finder .definition-match .keyboard-shortcut .instruction {
   color: var(--color-modal-subtle-fg);
 }

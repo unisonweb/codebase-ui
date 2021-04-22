@@ -79,6 +79,37 @@ prev =
 
 
 
+-- QUERY
+
+
+getAt : Test
+getAt =
+    describe "SearchResults.getAt"
+        [ test "When there are no results it returns Nothing" <|
+            \_ ->
+                let
+                    result =
+                        SearchResults.fromList [] |> SearchResults.getAt 3
+                in
+                Expect.equal Nothing result
+        , test "When there the index is out of bounds it returns Nothing" <|
+            \_ ->
+                let
+                    result =
+                        SearchResults.fromList [ "foo", "bar", "baz" ] |> SearchResults.getAt 10
+                in
+                Expect.equal Nothing result
+        , test "When there is an item at the index it returns Just of that item" <|
+            \_ ->
+                let
+                    result =
+                        SearchResults.fromList [ "foo", "bar", "baz" ] |> SearchResults.getAt 1
+                in
+                Expect.equal (Just "bar") result
+        ]
+
+
+
 -- MAP
 
 
