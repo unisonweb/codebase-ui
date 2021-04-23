@@ -60,11 +60,11 @@ type alias TermListing =
 -- JSON DECODERS
 
 
-decodeTermCategory : Decode.Decoder TermCategory
-decodeTermCategory =
+decodeTermCategory : String -> Decode.Decoder TermCategory
+decodeTermCategory tagFieldName =
     Decode.oneOf
-        [ when (field "termTag" string) ((==) "Test") (Decode.succeed TestTerm)
-        , when (field "termTag" string) ((==) "Doc") (Decode.succeed DocTerm)
+        [ when (field tagFieldName string) ((==) "Test") (Decode.succeed TestTerm)
+        , when (field tagFieldName string) ((==) "Doc") (Decode.succeed DocTerm)
         , Decode.succeed PlainTerm
         ]
 

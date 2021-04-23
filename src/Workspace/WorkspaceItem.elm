@@ -4,8 +4,8 @@ import Api
 import Definition.Category as Category exposing (Category)
 import Definition.Info as Info
 import Definition.Source as Source
-import Definition.Term as Term exposing (Term(..), TermDetail, TermSignature(..), TermSource(..))
-import Definition.Type as Type exposing (Type(..), TypeDetail, TypeSource(..))
+import Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, TermSignature(..), TermSource(..))
+import Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash
 import HashQualified exposing (HashQualified(..))
@@ -278,16 +278,17 @@ viewClosableRow closeMsg hash_ isFocused header contentItems =
 -- JSON DECODERS
 
 
-decodeTypeNamesAndSource :
+decodeTypeDetails :
     Decode.Decoder
-        { name : String
+        { category : TypeCategory
+        , name : String
         , otherNames : NEL.Nonempty FQN
         , source : TypeSource
         }
-decodeTypeNamesAndSource =
+decodeTypeDetails =
     let
-        make name otherNames source =
-            { name = name, otherNames = otherNames, source = source }
+        make cat name otherNames source =
+            { category = cat, name = name, otherNames = otherNames, source = source }
 
         decodeTypeDefTag =
             at [ "typeDefinition", "tag" ] Decode.string
@@ -295,7 +296,8 @@ decodeTypeNamesAndSource =
         decodeUserObject =
             Decode.map Type.Source (at [ "typeDefinition", "contents" ] Syntax.decode)
     in
-    Decode.map3 make
+    Decode.map4 make
+        (Type.decodeTypeCategory "defnTypeTag")
         (field "bestTypeName" Decode.string)
         (field "typeNames" (Util.decodeNonEmptyList FQN.decode))
         (Decode.oneOf
@@ -308,27 +310,29 @@ decodeTypeNamesAndSource =
 decodeTypes : Decode.Decoder (List TypeDetail)
 decodeTypes =
     let
-        makeType ( hash_, i ) =
+        makeType ( hash_, d ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Type h Type.DataType { info = Info.makeInfo i.name i.otherNames, source = i.source })
+                |> Maybe.map (\h -> Type h d.category { info = Info.makeInfo d.name d.otherNames, source = d.source })
 
         buildTypes =
             List.map makeType >> MaybeE.values
     in
-    Decode.keyValuePairs decodeTypeNamesAndSource |> Decode.map buildTypes
+    Decode.keyValuePairs decodeTypeDetails |> Decode.map buildTypes
 
 
 decodeTermNamesAndSource :
     Decode.Decoder
-        { name : String
+        { category : TermCategory
+        , name : String
         , otherNames : NEL.Nonempty FQN
         , source : TermSource
         }
 decodeTermNamesAndSource =
     let
-        make name otherNames source =
-            { name = name
+        make cat name otherNames source =
+            { category = cat
+            , name = name
             , otherNames = otherNames
             , source = source
             }
@@ -344,7 +348,8 @@ decodeTermNamesAndSource =
         decodeBuiltin =
             Decode.map (TermSignature >> Term.Builtin) (field "signature" Syntax.decode)
     in
-    Decode.map3 make
+    Decode.map4 make
+        (Term.decodeTermCategory "defnTermTag")
         (field "bestTermName" Decode.string)
         (field "termNames" (Util.decodeNonEmptyList FQN.decode))
         (Decode.oneOf
@@ -357,10 +362,10 @@ decodeTermNamesAndSource =
 decodeTerms : Decode.Decoder (List TermDetail)
 decodeTerms =
     let
-        makeTerm ( hash_, i ) =
+        makeTerm ( hash_, d ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Term h Term.PlainTerm { info = Info.makeInfo i.name i.otherNames, source = i.source })
+                |> Maybe.map (\h -> Term h d.category { info = Info.makeInfo d.name d.otherNames, source = d.source })
 
         buildTerms =
             List.map makeTerm >> MaybeE.values
