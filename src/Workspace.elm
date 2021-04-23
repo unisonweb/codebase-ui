@@ -76,7 +76,11 @@ update msg model =
             openItem model (Just afterRef) ref
 
         CloseDefinition ref ->
-            ( WorkspaceItems.remove model ref, Cmd.none, None )
+            let
+                nextModel =
+                    WorkspaceItems.remove model ref
+            in
+            ( nextModel, Cmd.none, openDefinitionsFocusToOutMsg nextModel )
 
         FetchItemFinished ref itemResult ->
             let
