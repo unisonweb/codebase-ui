@@ -14,7 +14,7 @@ Running
 
 3. Start the development server, run: `API_URL="<API URL FROM UCM>" API_TOKEN="<API TOKEN FROM UCM>" npm start`
 
-4. Visit `http://localhost:8000` in a browser.
+4. Visit `http://localhost:1234` in a browser.
 
 Generating Icon Sprite
 ----------------------
