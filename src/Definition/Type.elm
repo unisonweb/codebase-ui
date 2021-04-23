@@ -54,11 +54,11 @@ type alias TypeListing =
 -- JSON DECODERS
 
 
-decodeTypeCategory : Decode.Decoder TypeCategory
-decodeTypeCategory =
+decodeTypeCategory : String -> Decode.Decoder TypeCategory
+decodeTypeCategory tagFieldName =
     Decode.oneOf
-        [ when (field "typeTag" string) ((==) "Data") (Decode.succeed DataType)
-        , when (field "typeTag" string) ((==) "Ability") (Decode.succeed AbilityType)
+        [ when (field tagFieldName string) ((==) "Data") (Decode.succeed DataType)
+        , when (field tagFieldName string) ((==) "Ability") (Decode.succeed AbilityType)
         ]
 
 

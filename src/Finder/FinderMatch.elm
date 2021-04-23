@@ -133,7 +133,7 @@ decodeTypeItem =
     Decode.map TypeItem
         (Decode.map3 Type
             (field "namedType" Type.decodeHash)
-            (field "namedType" Type.decodeTypeCategory)
+            (field "namedType" (Type.decodeTypeCategory "typeTag"))
             (Decode.map3 makeSummary
                 (field "namedType" Type.decodeFQN)
                 (field "bestFoundTypeName" string)
@@ -155,7 +155,7 @@ decodeTermItem =
     Decode.map TermItem
         (Decode.map3 Term
             (field "namedTerm" Term.decodeHash)
-            (field "namedTerm" Term.decodeTermCategory)
+            (field "namedTerm" (Term.decodeTermCategory "termTag"))
             (Decode.map3 makeSummary
                 (field "namedTerm" Term.decodeFQN)
                 (field "bestFoundTermName" string)

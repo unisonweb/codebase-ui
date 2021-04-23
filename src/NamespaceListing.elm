@@ -7,8 +7,8 @@ module NamespaceListing exposing
     )
 
 import Definition.Category as Category exposing (Category)
-import Definition.Term exposing (TermCategory(..))
-import Definition.Type exposing (TypeCategory(..))
+import Definition.Term as Term exposing (TermCategory(..))
+import Definition.Type as Type exposing (TypeCategory(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode exposing (andThen, field)
@@ -91,33 +91,20 @@ decodeContent parentFqn =
         emptyNamespaceContent =
             { definitions = [], namespaces = [] }
 
-        decodeTypeTag =
-            Decode.oneOf
-                [ when (field "typeTag" Decode.string) ((==) "Data") (Decode.succeed (Category.Type DataType))
-                , when (field "typeTag" Decode.string) ((==) "Ability") (Decode.succeed (Category.Type AbilityType))
-                ]
-
         decodeTypeListing =
             Decode.map SubDefinition
                 (Decode.map3 TypeListing
                     (field "typeHash" Hash.decode)
                     (field "typeName" (FQN.decodeFromParent parentFqn))
-                    decodeTypeTag
+                    (Decode.map Category.Type (Type.decodeTypeCategory "typeTag"))
                 )
-
-        decodeTermTag =
-            Decode.oneOf
-                [ when (field "termTag" Decode.string) ((==) "Test") (Decode.succeed (Category.Term TestTerm))
-                , when (field "termTag" Decode.string) ((==) "Doc") (Decode.succeed (Category.Term DocTerm))
-                , Decode.succeed (Category.Term PlainTerm)
-                ]
 
         decodeTermListing =
             Decode.map SubDefinition
                 (Decode.map3 TermListing
                     (field "termHash" Hash.decode)
                     (field "termName" (FQN.decodeFromParent parentFqn))
-                    decodeTermTag
+                    (Decode.map Category.Term (Term.decodeTermCategory "termTag"))
                 )
 
         decodePatchListing =
