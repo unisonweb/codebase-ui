@@ -1,7 +1,14 @@
-require("./index.html");
+import "./css/fonts.css";
+import "./css/main.css";
+import { Elm } from "./Main.elm";
 
-var Elm = require("./Main.elm").Elm;
+console.log(`
+ _____     _
+|  |  |___|_|___ ___ ___
+|  |  |   | |_ -| . |   |
+|_____|_|_|_|___|___|_|_|
 
-var app = Elm.Main.init({
-  node: document.querySelector("main"),
-});
+
+`);
+
+Elm.Main.init();

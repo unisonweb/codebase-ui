@@ -1,35 +1,46 @@
-var path = require("path");
+const path = require("path");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const API_URL = process.env.API_URL || "127.0.0.1:8080";
 
 module.exports = {
-  // If your entry-point is at "src/index.js" and
-  // your output is in "/dist", you can ommit
-  // these parts of the config
+  entry: "./src/index.js",
+
+  plugins: [new HtmlWebpackPlugin({ favicon: "./static/favicon.ico" })],
+
+  output: {
+    filename: "[name].[contenthash].js",
+    path: path.resolve(__dirname, "dist"),
+    clean: true,
+  },
+
   module: {
     rules: [
-      {
-        test: /\.html$/,
-        exclude: /node_modules/,
-        loader: "file-loader",
-      },
-      {
-        test: /\.elm$/,
-        exclude: [/elm-stuff/, /node_modules/],
-        loader: "elm-webpack-loader",
-        options: {
-          debug: false,
-        },
-      },
       {
         test: /\.css$/i,
         use: ["style-loader", "css-loader"],
       },
       {
-        test: /\.(woff(2)?|ttf|eot|svg|ico)(\?v=\d+\.\d+\.\d+)?$/,
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
+        type: "asset/resource",
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot)$/i,
+        type: "asset/resource",
+      },
+      {
+        test: /\.elm$/,
+        exclude: [/elm-stuff/, /node_modules/],
         use: [
           {
-            loader: "file-loader",
+            loader: "elm-asset-webpack-loader",
+          },
+          {
+            loader: "elm-webpack-loader",
+            options: {
+              debug: false,
+              cwd: __dirname,
+            },
           },
         ],
       },

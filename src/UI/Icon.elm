@@ -54,7 +54,7 @@ view icon =
 
 spritePath : String
 spritePath =
-    "/img/icons.svg"
+    "require:src/img/icons.svg"
 
 
 toIdString : Icon -> String
