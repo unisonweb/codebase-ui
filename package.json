@@ -8,6 +8,7 @@
   },
   "scripts": {
     "build": "npm run makeElmEnv; webpack --mode production",
+    "clean": "rm -rf dist",
     "watch": "npm run makeElmEnv; webpack --mode development --watch",
     "start": "npm run makeElmEnv; webpack serve --mode development --port 1234",
     "test": "elm-test",
@@ -20,11 +21,11 @@
   "devDependencies": {
     "css-loader": "^5.2.4",
     "elm": "^0.19.1-5",
+    "elm-asset-webpack-loader": "^1.1.2",
     "elm-format": "^0.8.5",
     "elm-test": "^0.19.1-revision6",
     "elm-webpack-loader": "^8.0.0",
-    "file-loader": "^6.2.0",
-    "loader-utils": "^2.0.0",
+    "html-webpack-plugin": "^5.3.1",
     "style-loader": "^2.0.0",
     "webpack": "^5.35.0",
     "webpack-cli": "^4.6.0",
