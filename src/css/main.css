@@ -538,6 +538,7 @@ button.secondary:hover {
 
 .icon {
   display: inline-block;
+  font-size: 0.875rem;
   width: 0.875rem;
   height: 0.875rem;
   color: var(--color-main-fg);
@@ -710,6 +711,7 @@ button.secondary:hover {
 .namespace-tree .node .icon {
   width: 0.875rem;
   height: 0.875rem;
+  font-size: 0.875rem;
   text-align: center;
   margin-right: 0.5rem;
 }
@@ -841,6 +843,7 @@ button.secondary:hover {
   color: var(--color-workspace-item-subtle-fg-em);
   width: 0.5rem;
   height: 0.5rem;
+  font-size: 0.5rem;
   stroke-width: 2px;
 }
 
@@ -990,6 +993,7 @@ button.secondary:hover {
 #finder header .icon.search {
   width: 1.125rem;
   height: 1.125rem;
+  font-size: 1.125rem;
   margin-left: 1rem;
   margin-right: 1rem;
   color: var(--color-modal-subtle-fg);
