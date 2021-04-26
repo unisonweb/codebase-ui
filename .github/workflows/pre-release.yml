@@ -1,8 +1,11 @@
 name: "pre-release"
 
 on:
-  push:
+  workflow_run:
+    workflows: ["CI"]
     branches: [ main ]
+    types: 
+      - completed
 
 jobs:
   pre-release:
@@ -15,9 +18,7 @@ jobs:
         uses: actions/setup-node@v1
         with:
           node-version: ${{ matrix.node-version }}
-      - run: npm ci
       - run: API_TOKEN=ci npm run makeElmEnv
-      - run: npm test
       - run: npm run build
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
