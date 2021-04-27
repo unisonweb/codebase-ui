@@ -165,8 +165,8 @@ decode =
         (field "altKey" bool)
         (field "ctrlKey" bool)
         (field "metaKey" bool)
-        (field "repeat" bool)
         (field "shiftKey" bool)
+        (field "repeat" bool)
         (field "key" Key.decode)
         (field "code" string)
 
