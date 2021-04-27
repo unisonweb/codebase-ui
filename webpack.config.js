@@ -11,6 +11,7 @@ module.exports = {
   output: {
     filename: "[name].[contenthash].js",
     path: path.resolve(__dirname, "dist"),
+    publicPath: "/",
     clean: true,
   },
 
@@ -49,9 +50,7 @@ module.exports = {
 
   devServer: {
     contentBase: path.join(__dirname, "src"),
-    historyApiFallback: {
-      index: "index.html",
-    },
+    historyApiFallback: true,
     stats: "errors-only",
     proxy: {
       "/api": {
