@@ -1,6 +1,8 @@
 import "./css/fonts.css";
 import "./css/main.css";
-import { Elm } from "./Main.elm";
+import { Elm } from "./Ucm.elm";
+
+// The main entry point for the `ucm` target of the Codebase UI.
 
 console.log(`
  _____     _
@@ -11,4 +13,4 @@ console.log(`
 
 `);
 
-Elm.Main.init();
+Elm.Ucm.init();
