@@ -38,8 +38,8 @@ table {
 
   /* -- Font --------------------------------------------------------------- */
 
-  --font-sans-serif: "Inter", sans-serif;
-  --font-monospace: "Roboto Mono", monospace;
+  --font-sans-serif: "Inter var", sans-serif;
+  --font-monospace: "Roboto Mono var", monospace;
 
   --font-size-base: 1rem;
   --font-size-medium: 0.875rem;
@@ -175,13 +175,6 @@ table {
   --color-syntax-monochrome-em: var(--color-main-fg);
 
   --color-syntax-plain: var(--color-main-fg);
-}
-
-@supports (font-variation-settings: normal) {
-  :root {
-    --font-sans-serif: "Inter var", sans-serif;
-    --font-monospace: "Roboto Mono var", monospace;
-  }
 }
 
 /* -- Animations ----------------------------------------------------------- */
