@@ -16,12 +16,14 @@ import Html
         , header
         , input
         , label
-        , li
         , mark
-        , ol
         , section
         , span
+        , table
+        , tbody
+        , td
         , text
+        , tr
         )
 import Html.Attributes
     exposing
@@ -31,7 +33,6 @@ import Html.Attributes
         , id
         , placeholder
         , spellcheck
-        , style
         , type_
         , value
         )
@@ -275,8 +276,8 @@ indexToShortcut index =
         n |> String.fromInt |> Key.fromString |> Just
 
 
-viewMarkedNaming : String -> FinderMatch.MatchPositions -> Maybe String -> String -> Html msg
-viewMarkedNaming nameWidth matchedPositions namespace name =
+viewMarkedNaming : FinderMatch.MatchPositions -> Maybe String -> String -> Html msg
+viewMarkedNaming matchedPositions namespace name =
     let
         namespaceMod =
             namespace
@@ -305,15 +306,15 @@ viewMarkedNaming nameWidth matchedPositions namespace name =
                 |> Maybe.map (\ns -> span [ class "in" ] [ text "in" ] :: ns)
                 |> Maybe.withDefault []
     in
-    div
-        [ class "naming", style "width" nameWidth ]
+    td
+        [ class "naming" ]
         [ label [ class "name" ] markedName
         , label [ class "namespace" ] markedNamespace
         ]
 
 
-viewMatch : KeyboardShortcut.Model -> String -> FinderMatch -> Bool -> Maybe Key -> Html Msg
-viewMatch keyboardShortcut nameWidth match isFocused shortcut =
+viewMatch : KeyboardShortcut.Model -> FinderMatch -> Bool -> Maybe Key -> Html Msg
+viewMatch keyboardShortcut match isFocused shortcut =
     let
         shortcutIndicator =
             if isFocused then
@@ -328,14 +329,14 @@ viewMatch keyboardShortcut nameWidth match isFocused shortcut =
                         KeyboardShortcut.viewShortcut keyboardShortcut (Sequence (Just Key.Semicolon) key)
 
         viewMatch_ reference category naming source =
-            li
+            tr
                 [ classList [ ( "definition-match", True ), ( "focused", isFocused ) ]
                 , onClick (Select reference)
                 ]
-                [ Icon.view (Category.icon category)
+                [ td [ class "category" ] [ Icon.view (Category.icon category) ]
                 , naming
-                , div [ class "source" ] [ source ]
-                , shortcutIndicator
+                , td [ class "source" ] [ source ]
+                , td [ class "shortcut" ] [ shortcutIndicator ]
                 ]
     in
     case match.item of
@@ -343,49 +344,27 @@ viewMatch keyboardShortcut nameWidth match isFocused shortcut =
             viewMatch_
                 (TypeReference (HashOnly hash))
                 (Category.Type category)
-                (viewMarkedNaming nameWidth match.matchPositions namespace name)
+                (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTypeSource Source.Monochrome source)
 
         FinderMatch.TermItem (Term hash category { name, namespace, signature }) ->
             viewMatch_
                 (TermReference (HashOnly hash))
                 (Category.Term category)
-                (viewMarkedNaming nameWidth match.matchPositions namespace name)
+                (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
-
-
-maxNumNameChars : SearchResults.Matches FinderMatch -> Int
-maxNumNameChars matches =
-    let
-        nameWidth =
-            FinderMatch.name >> String.length
-
-        namespaceWidth =
-            FinderMatch.namespace >> Maybe.map String.length >> Maybe.withDefault 0
-
-        nameLengthOrNamespaceLength fm =
-            max (nameWidth fm) (namespaceWidth fm)
-    in
-    matches
-        |> SearchResults.matchesToList
-        |> List.map nameLengthOrNamespaceLength
-        |> List.maximum
-        |> Maybe.withDefault 0
 
 
 viewMatches : KeyboardShortcut.Model -> SearchResults.Matches FinderMatch -> Html Msg
 viewMatches keyboardShortcut matches =
     let
-        nameWidth =
-            UI.charWidth (maxNumNameChars matches)
-
         matchItems =
             matches
                 |> SearchResults.mapMatchesToList (\d f -> ( d, f ))
                 |> List.indexedMap (\i ( d, f ) -> ( d, f, indexToShortcut i ))
-                |> List.map (\( d, f, s ) -> viewMatch keyboardShortcut nameWidth d f s)
+                |> List.map (\( d, f, s ) -> viewMatch keyboardShortcut d f s)
     in
-    section [ class "results" ] [ ol [] matchItems ]
+    section [ class "results" ] [ table [] [ tbody [] matchItems ] ]
 
 
 view : Model -> Html Msg
