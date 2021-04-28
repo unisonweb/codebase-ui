@@ -1,4 +1,4 @@
-module Main exposing (..)
+module Hub exposing (..)
 
 import App
 import Browser
