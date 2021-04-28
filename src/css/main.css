@@ -1022,12 +1022,6 @@ button.secondary:hover {
   color: var(--color-modal-fg);
 }
 
-#finder .results {
-  position: relative;
-  padding: 0.75rem;
-  border-top: 1px solid var(--color-modal-inner-border);
-}
-
 #finder .empty-state {
   padding: 2rem;
   text-align: center;
@@ -1035,41 +1029,51 @@ button.secondary:hover {
   color: var(--color-modal-subtle-fg);
 }
 
+/* results */
+
+#finder .results {
+  position: relative;
+  padding: 0.75rem;
+  border-top: 1px solid var(--color-modal-inner-border);
+}
+
+#finder .results table {
+  width: 100%;
+}
+
+#finder .results table td {
+  height: 4rem;
+  vertical-align: top;
+  padding: 0.75rem;
+}
+
 #finder .definition-match {
   position: relative;
   z-index: var(--layer-modal-above);
   padding: 1rem 0.75rem;
-  display: flex;
-  flex-direction: row;
   cursor: pointer;
-  border-radius: var(--border-radius-base);
 }
 
-#finder .definition-match:hover {
-  background: var(--color-modal-mg);
+#finder .definition-match td:first-child {
+  border-radius: var(--border-radius-base) 0 0 var(--border-radius-base);
 }
 
-#finder .definition-match:hover .keyboard-shortcut .key {
-  background: var(--color-modal-subtle-mg);
-}
-
-#finder .definition-match .icon {
-  align-self: flex-start;
-  margin-right: 0.5rem;
-  margin-top: 0.2rem;
-}
-
-#finder .definition-match code {
-  line-height: inherit;
-}
-
-#finder .definition-match pre {
-  font-size: 0.75rem;
+#finder .definition-match td:last-child {
+  border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
 }
 
 #finder .definition-match mark {
   color: var(--color-modal-mark-fg);
   background: var(--color-modal-mark-bg);
+}
+
+#finder .definition-match .category {
+  width: 0.875rem;
+  padding: 0.75rem 0 0 0.75rem;
+}
+
+#finder .definition-match .category .icon {
+  margin-top: 0.2rem;
 }
 
 #finder .definition-match .naming {
@@ -1080,23 +1084,23 @@ button.secondary:hover {
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  /* the width of .naming is dynamically calculated based on the number of
-   * chars in the namespace and set with a ch unit which pixel width is based
-   * on the fontsize, so we set the font size of .naming to the font size of
-   * .namespace */
-  font-size: 0.625rem;
+  padding-left: 0.5rem;
 }
 
 #finder .definition-match .name {
   font-weight: bold;
   font-size: 0.875rem;
-  display: flex;
-  align-items: center;
+  text-overflow: ellipsis;
+  max-width: 14rem;
+  overflow: hidden;
 }
 
 #finder .definition-match .namespace {
   font-size: 0.625rem;
   margin-top: 0.25rem;
+  text-overflow: ellipsis;
+  max-width: 14rem;
+  overflow: hidden;
 }
 
 #finder .definition-match .namespace .in {
@@ -1105,13 +1109,27 @@ button.secondary:hover {
 }
 
 #finder .definition-match .source {
-  padding: 1rem;
-  margin: -1rem 0;
   border-left: 1px solid var(--color-modal-separator);
+  width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 0.9rem 0.75rem;
+  position: relative;
 }
 
-#finder .definition-match.focused .source {
-  border-color: var(--color-modal-focus-bg);
+#finder .definition-match .source code {
+  line-height: inherit;
+}
+
+#finder .definition-match .source pre {
+  font-size: 0.75rem;
+}
+
+#finder .definition-match .shortcut {
+  white-space: nowrap;
+  text-align: right;
+  padding-top: 1.125rem;
 }
 
 #finder .definition-match .keyboard-shortcut {
@@ -1134,32 +1152,27 @@ button.secondary:hover {
   color: var(--color-modal-subtle-fg);
 }
 
-#finder .definition-match.focused {
+/* focused */
+
+#finder .definition-match.focused td {
   background: var(--color-modal-focus-bg);
-  box-shadow: 0 0 0 0.25rem var(--color-modal-bg);
 }
 
-#finder .definition-match.focused:before {
-  position: absolute;
-  top: -0.25rem;
-  left: 0;
-  right: 0;
-  height: 0.25rem;
-  content: "";
-  background: var(--color-modal-bg);
-}
-
-#finder .definition-match.focused + .definition-match:before {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 0.25rem;
-  content: "";
-  background: var(--color-modal-bg);
+#finder .definition-match.focused .source {
+  border-color: var(--color-modal-focus-bg);
 }
 
 #finder .definition-match.focused .keyboard-shortcut .key {
   color: var(--color-modal-focus-subtle-fg);
   background: var(--color-modal-focus-subtle-bg);
+}
+
+/* hover */
+
+#finder .definition-match:not(.focused):hover td {
+  background: var(--color-modal-mg);
+}
+
+#finder .definition-match:not(.focused):hover .keyboard-shortcut .key {
+  background: var(--color-modal-subtle-mg);
 }
