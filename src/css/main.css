@@ -1111,6 +1111,7 @@ button.secondary:hover {
 #finder .definition-match .source {
   border-left: 1px solid var(--color-modal-separator);
   width: 100%;
+  max-width: 20rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
