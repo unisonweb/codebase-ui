@@ -2,6 +2,7 @@ module Api exposing (errorToString, find, getDefinition, list)
 
 import Env
 import Http
+import Regex
 import Syntax
 import Url.Builder exposing (QueryParameter, absolute, int, string)
 
@@ -15,9 +16,18 @@ list rawFQN =
         |> Maybe.withDefault []
         |> serverUrl [ "list" ]
 
+
 getDefinition : List String -> String
 getDefinition fqnsOrHashes =
+    let
+        re =
+            Maybe.withDefault Regex.never (Regex.fromString "#[d|a|](\\d+)$")
+
+        stripConstructorPositionFromHash =
+            Regex.replace re (always "")
+    in
     fqnsOrHashes
+        |> List.map stripConstructorPositionFromHash
         |> List.map (string "names")
         |> serverUrl [ "getDefinition" ]
 
