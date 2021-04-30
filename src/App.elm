@@ -72,11 +72,8 @@ init _ url navKey =
 
         ( workspace, workspaceCmd ) =
             case route of
-                Route.Type _ hq ->
-                    Workspace.init (Just (TypeReference hq))
-
-                Route.Term _ hq ->
-                    Workspace.init (Just (TermReference hq))
+                Route.ByReference _ ref ->
+                    Workspace.init (Just ref)
 
                 _ ->
                     Workspace.init Nothing

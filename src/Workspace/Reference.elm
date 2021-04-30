@@ -1,6 +1,7 @@
 module Workspace.Reference exposing (..)
 
-import HashQualified exposing (HashQualified)
+import HashQualified as HQ exposing (HashQualified)
+import Url.Parser
 
 
 type Reference
@@ -8,24 +9,27 @@ type Reference
     | TypeReference HashQualified
 
 
+
+-- CREATE
+
+
 fromString : (HashQualified -> Reference) -> String -> Reference
 fromString toRef str =
-    str |> HashQualified.fromString |> toRef
+    str |> HQ.fromString |> toRef
 
 
 fromUrlString : (HashQualified -> Reference) -> String -> Reference
 fromUrlString toRef str =
-    str |> HashQualified.fromUrlString |> toRef
+    str |> HQ.fromUrlString |> toRef
 
 
-toString : Reference -> String
-toString ref =
-    case ref of
-        TermReference hq ->
-            "term/" ++ HashQualified.toString hq
+urlParser : (HashQualified -> Reference) -> Url.Parser.Parser (Reference -> a) a
+urlParser toRef =
+    Url.Parser.map toRef HQ.urlParser
 
-        TypeReference hq ->
-            "type/" ++ HashQualified.toString hq
+
+
+-- HELPERS
 
 
 hashQualified : Reference -> HashQualified
@@ -36,3 +40,17 @@ hashQualified ref =
 
         TypeReference hq ->
             hq
+
+
+
+-- TRANSFORM
+
+
+toString : Reference -> String
+toString ref =
+    case ref of
+        TermReference hq ->
+            "term/" ++ HQ.toString hq
+
+        TypeReference hq ->
+            "type/" ++ HQ.toString hq

@@ -15,13 +15,13 @@ module Route exposing
 import Browser.Navigation as Nav
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
-import HashQualified as HQ exposing (HashQualified(..))
+import HashQualified exposing (HashQualified(..))
 import List.Nonempty as NEL
 import RelativeTo exposing (RelativeTo)
 import Url exposing (Url)
 import Url.Builder exposing (absolute)
 import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
-import Workspace.Reference exposing (Reference(..))
+import Workspace.Reference as Reference exposing (Reference(..))
 
 
 
@@ -66,8 +66,7 @@ type NamespaceReference
 
 type Route
     = Namespace NamespaceReference
-    | Type RelativeTo HashQualified
-    | Term RelativeTo HashQualified
+    | ByReference RelativeTo Reference
 
 
 
@@ -81,8 +80,8 @@ urlParser =
         , Parser.map (Namespace Latest) (s "latest")
         , Parser.map Namespace (s "latest" </> s "namespaces" </> Hash.urlParser |> Parser.map HashReference)
         , Parser.map Namespace (s "latest" </> s "namespaces" </> FQN.urlParser |> Parser.map NameReference)
-        , Parser.map (Type RelativeTo.Codebase) (s "latest" </> s "types" </> HQ.urlParser)
-        , Parser.map (Term RelativeTo.Codebase) (s "latest" </> s "terms" </> HQ.urlParser)
+        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "types" </> Reference.urlParser TypeReference)
+        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "terms" </> Reference.urlParser TermReference)
         ]
 
 
@@ -111,10 +110,7 @@ relativeTo route =
                 HashReference h ->
                     Just (RelativeTo.Namespace h)
 
-        Type relTo _ ->
-            Just relTo
-
-        Term relTo _ ->
+        ByReference relTo _ ->
             Just relTo
 
 
@@ -122,46 +118,32 @@ relativeTo route =
 -- TRANSFORM
 
 
-toType : Route -> HashQualified -> Route
-toType oldRoute hq =
+toReference : Route -> Reference -> Route
+toReference oldRoute ref =
     case oldRoute of
-        Namespace ref ->
-            case ref of
+        Namespace nsRef ->
+            case nsRef of
                 Latest ->
-                    Type RelativeTo.Codebase hq
+                    ByReference RelativeTo.Codebase ref
 
                 NameReference _ ->
-                    Type RelativeTo.Codebase hq
+                    ByReference RelativeTo.Codebase ref
 
                 HashReference hash ->
-                    Type (RelativeTo.Namespace hash) hq
+                    ByReference (RelativeTo.Namespace hash) ref
 
-        Type within _ ->
-            Type within hq
+        ByReference within _ ->
+            ByReference within ref
 
-        Term within _ ->
-            Type within hq
+
+toType : Route -> HashQualified -> Route
+toType oldRoute hq =
+    toReference oldRoute (TypeReference hq)
 
 
 toTerm : Route -> HashQualified -> Route
 toTerm oldRoute hq =
-    case oldRoute of
-        Namespace ref ->
-            case ref of
-                Latest ->
-                    Term RelativeTo.Codebase hq
-
-                NameReference _ ->
-                    Term RelativeTo.Codebase hq
-
-                HashReference hash ->
-                    Term (RelativeTo.Namespace hash) hq
-
-        Type relTo _ ->
-            Term relTo hq
-
-        Term relTo _ ->
-            Term relTo hq
+    toReference oldRoute (TermReference hq)
 
 
 toUrlString : Route -> String
@@ -191,11 +173,13 @@ toUrlString route =
                         HashReference hash ->
                             [ "@" ++ Hash.toString hash ]
 
-                Type relTo hq ->
-                    [ RelativeTo.toUrlPath relTo, "types" ] ++ hqToPath hq
+                ByReference relTo ref ->
+                    case ref of
+                        TypeReference hq ->
+                            [ RelativeTo.toUrlPath relTo, "types" ] ++ hqToPath hq
 
-                Term relTo hq ->
-                    [ RelativeTo.toUrlPath relTo, "terms" ] ++ hqToPath hq
+                        TermReference hq ->
+                            [ RelativeTo.toUrlPath relTo, "terms" ] ++ hqToPath hq
     in
     absolute path []
 
