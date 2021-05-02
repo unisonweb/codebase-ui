@@ -7,8 +7,8 @@ module Definition.Type exposing
     , TypeSummary
     , decodeFQN
     , decodeHash
+    , decodeSource
     , decodeTypeCategory
-    , decodeTypeSource
     )
 
 import Definition.Info exposing (Info)
@@ -62,8 +62,8 @@ decodeTypeCategory tagFieldName =
         ]
 
 
-decodeTypeSource : Decode.Decoder TypeSource
-decodeTypeSource =
+decodeSource : Decode.Decoder TypeSource
+decodeSource =
     let
         decodeUserObject =
             Decode.map Source (field "contents" Syntax.decode)

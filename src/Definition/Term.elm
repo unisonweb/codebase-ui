@@ -8,8 +8,8 @@ module Definition.Term exposing
     , TermSummary
     , decodeFQN
     , decodeHash
+    , decodeSignature
     , decodeTermCategory
-    , decodeTermSignature
     )
 
 import Definition.Info exposing (Info)
@@ -69,8 +69,8 @@ decodeTermCategory tagFieldName =
         ]
 
 
-decodeTermSignature : Decode.Decoder TermSignature
-decodeTermSignature =
+decodeSignature : Decode.Decoder TermSignature
+decodeSignature =
     Decode.map TermSignature (field "termType" Syntax.decode)
 
 

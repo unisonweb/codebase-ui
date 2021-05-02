@@ -6,12 +6,14 @@ module NamespaceListing exposing
     , map
     )
 
+import Definition.AbilityConstructor as AbilityConstructor
 import Definition.Category as Category exposing (Category)
+import Definition.DataConstructor as DataConstructor
 import Definition.Term as Term exposing (TermCategory(..))
 import Definition.Type as Type exposing (TypeCategory(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
-import Json.Decode as Decode exposing (andThen, field)
+import Json.Decode as Decode exposing (andThen, at, field)
 import Json.Decode.Extra exposing (when)
 import RemoteData exposing (RemoteData(..), WebData)
 
@@ -19,6 +21,8 @@ import RemoteData exposing (RemoteData(..), WebData)
 type DefinitionListing
     = TypeListing Hash FQN Category
     | TermListing Hash FQN Category
+    | DataConstructorListing Hash FQN
+    | AbilityConstructorListing Hash FQN
     | PatchListing String
 
 
@@ -88,8 +92,35 @@ decodeContent parentFqn =
         decodeTag =
             field "tag" Decode.string
 
+        termTypeByHash hash =
+            if AbilityConstructor.isAbilityConstructorHash hash then
+                "AbilityConstructor"
+
+            else if DataConstructor.isDataConstructorHash hash then
+                "DataConstructor"
+
+            else
+                "Term"
+
+        decodeConstructorSuffix =
+            Decode.map termTypeByHash (at [ "contents", "termHash" ] Hash.decode)
+
         emptyNamespaceContent =
             { definitions = [], namespaces = [] }
+
+        decodeAbilityConstructorListing =
+            Decode.map SubDefinition
+                (Decode.map2 AbilityConstructorListing
+                    (field "termHash" Hash.decode)
+                    (field "termName" (FQN.decodeFromParent parentFqn))
+                )
+
+        decodeDataConstructorListing =
+            Decode.map SubDefinition
+                (Decode.map2 DataConstructorListing
+                    (field "termHash" Hash.decode)
+                    (field "termName" (FQN.decodeFromParent parentFqn))
+                )
 
         decodeTypeListing =
             Decode.map SubDefinition
@@ -113,6 +144,8 @@ decodeContent parentFqn =
         decodeChild =
             Decode.oneOf
                 [ when decodeTag ((==) "Subnamespace") (field "contents" (decodeSubNamespace parentFqn))
+                , when decodeConstructorSuffix ((==) "DataConstructor") (field "contents" decodeDataConstructorListing)
+                , when decodeConstructorSuffix ((==) "AbilityConstructor") (field "contents" decodeAbilityConstructorListing)
                 , when decodeTag ((==) "TypeObject") (field "contents" decodeTypeListing)
                 , when decodeTag ((==) "TermObject") (field "contents" decodeTermListing)
                 , when decodeTag ((==) "PatchObject") (field "contents" decodePatchListing)

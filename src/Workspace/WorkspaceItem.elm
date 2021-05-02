@@ -1,7 +1,9 @@
 module Workspace.WorkspaceItem exposing (..)
 
 import Api
+import Definition.AbilityConstructor as AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail, AbilityConstructorSource(..))
 import Definition.Category as Category exposing (Category)
+import Definition.DataConstructor as DataConstructor exposing (DataConstructor(..), DataConstructorDetail, DataConstructorSource(..))
 import Definition.Info as Info
 import Definition.Source as Source
 import Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, TermSignature(..), TermSource(..))
@@ -34,6 +36,8 @@ type WorkspaceItem
 type Item
     = TermItem TermDetail
     | TypeItem TypeDetail
+    | DataConstructorItem DataConstructorDetail
+    | AbilityConstructorItem AbilityConstructorDetail
 
 
 reference : WorkspaceItem -> Reference
@@ -95,6 +99,24 @@ viewBuiltin item =
                 Type.Builtin ->
                     div [ class "built-in" ]
                         [ viewBuiltinBadge detail.info.name (Category.Type category) ]
+
+                Type.Source _ ->
+                    UI.nothing
+
+        DataConstructorItem (DataConstructor _ detail) ->
+            case detail.source of
+                Type.Builtin ->
+                    div [ class "built-in" ]
+                        [ viewBuiltinBadge detail.info.name (Category.Type Type.DataType) ]
+
+                Type.Source _ ->
+                    UI.nothing
+
+        AbilityConstructorItem (AbilityConstructor _ detail) ->
+            case detail.source of
+                Type.Builtin ->
+                    div [ class "built-in" ]
+                        [ viewBuiltinBadge detail.info.name (Category.Type Type.AbilityType) ]
 
                 Type.Source _ ->
                     UI.nothing
@@ -174,6 +196,11 @@ viewSource toOpenReferenceMsg item =
                 ]
     in
     case item of
+        -- TODO, this reference config created like so: (Source.Rich (HashOnly
+        -- >> TermReference >> toOpenReferenceMsg) is wrong. It creates a
+        -- TermReference for all things referenced from the source. The
+        -- Reference variant should be determined by the SyntaxSegment variant
+        -- and if the hash has a constructor suffix.
         TermItem (Term _ _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTermLines (Source.viewTermSource (Source.Rich (HashOnly >> TermReference >> toOpenReferenceMsg)) detail.info.name)
@@ -182,6 +209,16 @@ viewSource toOpenReferenceMsg item =
         TypeItem (Type _ _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich (HashOnly >> TypeReference >> toOpenReferenceMsg)))
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
+
+        DataConstructorItem (DataConstructor _ detail) ->
+            ( detail.source, detail.source )
+                |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich (HashOnly >> DataConstructorReference >> toOpenReferenceMsg)))
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
+
+        AbilityConstructorItem (AbilityConstructor _ detail) ->
+            ( detail.source, detail.source )
+                |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich (HashOnly >> AbilityConstructorReference >> toOpenReferenceMsg)))
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
 
 
@@ -204,6 +241,26 @@ viewItem closeMsg toOpenReferenceMsg ref item isFocused =
                 ref
                 isFocused
                 (viewNames detail.info (Category.Type category))
+                [ ( UI.nothing, viewBuiltin item )
+                , viewSource toOpenReferenceMsg item
+                ]
+
+        DataConstructorItem (DataConstructor _ detail) ->
+            viewClosableRow
+                closeMsg
+                ref
+                isFocused
+                (viewNames detail.info (Category.Type Type.DataType))
+                [ ( UI.nothing, viewBuiltin item )
+                , viewSource toOpenReferenceMsg item
+                ]
+
+        AbilityConstructorItem (AbilityConstructor _ detail) ->
+            viewClosableRow
+                closeMsg
+                ref
+                isFocused
+                (viewNames detail.info (Category.Type Type.AbilityType))
                 [ ( UI.nothing, viewBuiltin item )
                 , viewSource toOpenReferenceMsg item
                 ]
