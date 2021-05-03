@@ -16,8 +16,10 @@ type Icon
     | Patch
     | Term
     | Ability
+    | AbilityConstructor
     | Test
     | Type
+    | DataConstructor
     | Doc
     | Folder
     | Plus
@@ -87,8 +89,14 @@ toIdString icon =
         Ability ->
             "ability"
 
+        AbilityConstructor ->
+            "ability-constructor"
+
         Type ->
             "type"
+
+        DataConstructor ->
+            "data-constructor"
 
         Test ->
             "test"

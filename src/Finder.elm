@@ -7,7 +7,7 @@ import Definition.Category as Category
 import Definition.DataConstructor exposing (DataConstructor(..))
 import Definition.Source as Source
 import Definition.Term exposing (Term(..))
-import Definition.Type as Type exposing (Type(..))
+import Definition.Type exposing (Type(..))
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import HashQualified exposing (HashQualified(..))
 import Html
@@ -359,14 +359,14 @@ viewMatch keyboardShortcut match isFocused shortcut =
         FinderMatch.DataConstructorItem (DataConstructor hash { name, namespace, signature }) ->
             viewMatch_
                 (DataConstructorReference (HashOnly hash))
-                Icon.Type
+                Icon.DataConstructor
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
 
         FinderMatch.AbilityConstructorItem (AbilityConstructor hash { name, namespace, signature }) ->
             viewMatch_
                 (AbilityConstructorReference (HashOnly hash))
-                Icon.Ability
+                Icon.AbilityConstructor
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
 
