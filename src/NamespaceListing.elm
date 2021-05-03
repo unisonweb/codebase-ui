@@ -2,6 +2,7 @@ module NamespaceListing exposing
     ( DefinitionListing(..)
     , NamespaceListing(..)
     , NamespaceListingContent
+    , contentFetched
     , decode
     , map
     )
@@ -44,6 +45,16 @@ map f (NamespaceListing hash fqn content) =
             { c | namespaces = List.map (map f) c.namespaces }
     in
     f (NamespaceListing hash fqn (RemoteData.map mapContent content))
+
+
+contentFetched : NamespaceListing -> FQN -> Bool
+contentFetched (NamespaceListing _ fqn content) needleFqn =
+    let
+        contentIncludes c =
+            List.any (\l -> contentFetched l needleFqn) c.namespaces
+    in
+    (FQN.equals fqn needleFqn && RemoteData.isSuccess content)
+        || (content |> RemoteData.map contentIncludes |> RemoteData.withDefault False)
 
 
 

@@ -145,8 +145,13 @@ update msg model =
                                 model.expandedNamespaceListings
                     }
 
+                namespaceContentFetched =
+                    model.rootNamespaceListing
+                        |> RemoteData.map (\nl -> NamespaceListing.contentFetched nl fqn)
+                        |> RemoteData.withDefault False
+
                 cmd =
-                    if shouldExpand then
+                    if shouldExpand && not namespaceContentFetched then
                         fetchSubNamespaceListing fqn
 
                     else
