@@ -360,10 +360,10 @@ viewDefinitionListing listing =
             viewDefRow (TermReference (HashOnly hash)) fqn (Category.name category) (Category.icon category)
 
         DataConstructorListing hash fqn ->
-            viewDefRow (DataConstructorReference (HashOnly hash)) fqn "constructor" Icon.Type
+            viewDefRow (DataConstructorReference (HashOnly hash)) fqn "constructor" Icon.DataConstructor
 
         AbilityConstructorListing hash fqn ->
-            viewDefRow (AbilityConstructorReference (HashOnly hash)) fqn "constructor" Icon.Ability
+            viewDefRow (AbilityConstructorReference (HashOnly hash)) fqn "constructor" Icon.AbilityConstructor
 
         PatchListing _ ->
             viewListingRow Nothing "Patch" "patch" Icon.Patch

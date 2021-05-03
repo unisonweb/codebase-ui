@@ -139,9 +139,11 @@ table {
 
   /* Icons */
   --color-icon-type: var(--color-brand-orange);
+  --color-icon-data-constructor: var(--color-brand-orange);
   --color-icon-test: var(--color-green-base);
   --color-icon-term: var(--color-purple-base);
   --color-icon-ability: var(--color-brand-bright-red);
+  --color-icon-ability-constructor: var(--color-brand-bright-red);
   --color-icon-doc: var(--color-brand-yellow);
   --color-icon-patch: var(--color-blue-base);
 
@@ -538,7 +540,8 @@ button.secondary:hover {
   transition: all 0.2s;
 }
 
-.icon.type {
+.icon.type,
+.icon.data-constructor {
   color: var(--color-icon-type);
 }
 
@@ -550,7 +553,8 @@ button.secondary:hover {
   color: var(--color-icon-term);
 }
 
-.icon.ability {
+.icon.ability,
+.icon.ability-constructor {
   color: var(--color-icon-ability);
 }
 
