@@ -7,6 +7,8 @@ import Url.Parser
 type Reference
     = TermReference HashQualified
     | TypeReference HashQualified
+    | AbilityConstructorReference HashQualified
+    | DataConstructorReference HashQualified
 
 
 
@@ -41,6 +43,12 @@ hashQualified ref =
         TypeReference hq ->
             hq
 
+        AbilityConstructorReference hq ->
+            hq
+
+        DataConstructorReference hq ->
+            hq
+
 
 
 -- TRANSFORM
@@ -50,7 +58,13 @@ toString : Reference -> String
 toString ref =
     case ref of
         TermReference hq ->
-            "term/" ++ HQ.toString hq
+            "term__" ++ HQ.toString hq
 
         TypeReference hq ->
-            "type/" ++ HQ.toString hq
+            "type__" ++ HQ.toString hq
+
+        AbilityConstructorReference hq ->
+            "ability_constructor__" ++ HQ.toString hq
+
+        DataConstructorReference hq ->
+            "data_constructor__" ++ HQ.toString hq

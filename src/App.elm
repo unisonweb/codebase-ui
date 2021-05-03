@@ -3,7 +3,7 @@ module App exposing (..)
 import Api
 import Browser
 import Browser.Navigation as Nav
-import Definition.Category
+import Definition.Category as Category
 import Finder
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
@@ -354,10 +354,16 @@ viewDefinitionListing listing =
     in
     case listing of
         TypeListing hash fqn category ->
-            viewDefRow (TypeReference (HashOnly hash)) fqn (Definition.Category.name category) (Definition.Category.icon category)
+            viewDefRow (TypeReference (HashOnly hash)) fqn (Category.name category) (Category.icon category)
 
         TermListing hash fqn category ->
-            viewDefRow (TermReference (HashOnly hash)) fqn (Definition.Category.name category) (Definition.Category.icon category)
+            viewDefRow (TermReference (HashOnly hash)) fqn (Category.name category) (Category.icon category)
+
+        DataConstructorListing hash fqn ->
+            viewDefRow (DataConstructorReference (HashOnly hash)) fqn "constructor" Icon.Type
+
+        AbilityConstructorListing hash fqn ->
+            viewDefRow (AbilityConstructorReference (HashOnly hash)) fqn "constructor" Icon.Ability
 
         PatchListing _ ->
             viewListingRow Nothing "Patch" "patch" Icon.Patch

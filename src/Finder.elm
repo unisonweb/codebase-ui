@@ -2,10 +2,12 @@ module Finder exposing (Model, Msg, OutMsg(..), init, update, view)
 
 import Api
 import Browser.Dom as Dom
+import Definition.AbilityConstructor exposing (AbilityConstructor(..))
 import Definition.Category as Category
+import Definition.DataConstructor exposing (DataConstructor(..))
 import Definition.Source as Source
 import Definition.Term exposing (Term(..))
-import Definition.Type exposing (Type(..))
+import Definition.Type as Type exposing (Type(..))
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import HashQualified exposing (HashQualified(..))
 import Html
@@ -328,12 +330,12 @@ viewMatch keyboardShortcut match isFocused shortcut =
                     Just key ->
                         KeyboardShortcut.viewShortcut keyboardShortcut (Sequence (Just Key.Semicolon) key)
 
-        viewMatch_ reference category naming source =
+        viewMatch_ reference icon naming source =
             tr
                 [ classList [ ( "definition-match", True ), ( "focused", isFocused ) ]
                 , onClick (Select reference)
                 ]
-                [ td [ class "category" ] [ Icon.view (Category.icon category) ]
+                [ td [ class "category" ] [ Icon.view icon ]
                 , naming
                 , td [ class "source" ] [ source ]
                 , td [ class "shortcut" ] [ shortcutIndicator ]
@@ -343,14 +345,28 @@ viewMatch keyboardShortcut match isFocused shortcut =
         FinderMatch.TypeItem (Type hash category { name, namespace, source }) ->
             viewMatch_
                 (TypeReference (HashOnly hash))
-                (Category.Type category)
+                (Category.icon (Category.Type category))
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTypeSource Source.Monochrome source)
 
         FinderMatch.TermItem (Term hash category { name, namespace, signature }) ->
             viewMatch_
                 (TermReference (HashOnly hash))
-                (Category.Term category)
+                (Category.icon (Category.Term category))
+                (viewMarkedNaming match.matchPositions namespace name)
+                (Source.viewTermSignature Source.Monochrome signature)
+
+        FinderMatch.DataConstructorItem (DataConstructor hash { name, namespace, signature }) ->
+            viewMatch_
+                (DataConstructorReference (HashOnly hash))
+                Icon.Type
+                (viewMarkedNaming match.matchPositions namespace name)
+                (Source.viewTermSignature Source.Monochrome signature)
+
+        FinderMatch.AbilityConstructorItem (AbilityConstructor hash { name, namespace, signature }) ->
+            viewMatch_
+                (AbilityConstructorReference (HashOnly hash))
+                Icon.Ability
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
 

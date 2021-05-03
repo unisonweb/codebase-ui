@@ -4,11 +4,7 @@ module Route exposing
     , navigate
     , navigateToByReference
     , navigateToLatest
-    , navigateToTerm
-    , navigateToType
     , relativeTo
-    , toTerm
-    , toType
     , toUrlString
     )
 
@@ -82,6 +78,8 @@ urlParser =
         , Parser.map Namespace (s "latest" </> s "namespaces" </> FQN.urlParser |> Parser.map NameReference)
         , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "types" </> Reference.urlParser TypeReference)
         , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "terms" </> Reference.urlParser TermReference)
+        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
+        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
         ]
 
 
@@ -136,16 +134,6 @@ toReference oldRoute ref =
             ByReference within ref
 
 
-toType : Route -> HashQualified -> Route
-toType oldRoute hq =
-    toReference oldRoute (TypeReference hq)
-
-
-toTerm : Route -> HashQualified -> Route
-toTerm oldRoute hq =
-    toReference oldRoute (TermReference hq)
-
-
 toUrlString : Route -> String
 toUrlString route =
     let
@@ -180,6 +168,12 @@ toUrlString route =
 
                         TermReference hq ->
                             [ RelativeTo.toUrlPath relTo, "terms" ] ++ hqToPath hq
+
+                        AbilityConstructorReference hq ->
+                            [ RelativeTo.toUrlPath relTo, "ability-constructors" ] ++ hqToPath hq
+
+                        DataConstructorReference hq ->
+                            [ RelativeTo.toUrlPath relTo, "data-constructors" ] ++ hqToPath hq
     in
     absolute path []
 
@@ -202,19 +196,4 @@ navigateToLatest navKey =
 
 navigateToByReference : Nav.Key -> Route -> Reference -> Cmd msg
 navigateToByReference navKey currentRoute reference =
-    case reference of
-        TypeReference hq ->
-            navigateToType navKey currentRoute hq
-
-        TermReference hq ->
-            navigateToTerm navKey currentRoute hq
-
-
-navigateToType : Nav.Key -> Route -> HashQualified -> Cmd msg
-navigateToType navKey currentRoute hq =
-    navigate navKey (toType currentRoute hq)
-
-
-navigateToTerm : Nav.Key -> Route -> HashQualified -> Cmd msg
-navigateToTerm navKey currentRoute hq =
-    navigate navKey (toTerm currentRoute hq)
+    navigate navKey (toReference currentRoute reference)

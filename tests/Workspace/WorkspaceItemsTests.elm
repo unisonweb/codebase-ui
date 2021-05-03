@@ -247,7 +247,7 @@ next =
                             |> getFocusedRef
                             |> Maybe.map Reference.toString
                 in
-                Expect.equal (Just "term/#c") result
+                Expect.equal (Just "term__#c") result
         , test "keeps focus if no elements after" <|
             \_ ->
                 let
@@ -257,7 +257,7 @@ next =
                             |> getFocusedRef
                             |> Maybe.map Reference.toString
                 in
-                Expect.equal (Just "term/#focus") result
+                Expect.equal (Just "term__#focus") result
         ]
 
 
@@ -273,7 +273,7 @@ prev =
                             |> getFocusedRef
                             |> Maybe.map Reference.toString
                 in
-                Expect.equal (Just "term/#b") result
+                Expect.equal (Just "term__#b") result
         , test "keeps focus if no elements before" <|
             \_ ->
                 let
@@ -283,7 +283,7 @@ prev =
                             |> getFocusedRef
                             |> Maybe.map Reference.toString
                 in
-                Expect.equal (Just "term/#focus") result
+                Expect.equal (Just "term__#focus") result
         ]
 
 
@@ -325,7 +325,7 @@ mapToList =
                             |> WorkspaceItems.mapToList (\i _ -> Reference.toString (reference i))
 
                     expected =
-                        [ "term/#a", "term/#b", "term/#focus", "term/#c", "term/#d" ]
+                        [ "term__#a", "term__#b", "term__#focus", "term__#c", "term__#d" ]
                 in
                 Expect.equal expected result
         ]

@@ -1,8 +1,11 @@
 module Finder.FinderMatch exposing (..)
 
+import Definition.AbilityConstructor as AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorSummary)
+import Definition.DataConstructor as DataConstructor exposing (DataConstructor(..), DataConstructorSummary)
 import Definition.Term as Term exposing (Term(..), TermSummary)
 import Definition.Type as Type exposing (Type(..), TypeSummary)
 import FullyQualifiedName as FQN
+import Hash
 import HashQualified exposing (HashQualified(..))
 import Json.Decode as Decode exposing (at, field, string)
 import Json.Decode.Extra exposing (when)
@@ -14,6 +17,8 @@ import Workspace.Reference exposing (Reference(..))
 type FinderItem
     = TermItem TermSummary
     | TypeItem TypeSummary
+    | DataConstructorItem DataConstructorSummary
+    | AbilityConstructorItem AbilityConstructorSummary
 
 
 type MatchSegment
@@ -63,6 +68,12 @@ name fm =
         TermItem (Term _ _ summary) ->
             summary.name
 
+        DataConstructorItem (DataConstructor _ summary) ->
+            summary.name
+
+        AbilityConstructorItem (AbilityConstructor _ summary) ->
+            summary.name
+
 
 namespace : FinderMatch -> Maybe String
 namespace fm =
@@ -71,6 +82,12 @@ namespace fm =
             summary.namespace
 
         TermItem (Term _ _ summary) ->
+            summary.namespace
+
+        DataConstructorItem (DataConstructor _ summary) ->
+            summary.namespace
+
+        AbilityConstructorItem (AbilityConstructor _ summary) ->
             summary.namespace
 
 
@@ -82,6 +99,12 @@ reference fm =
 
         TermItem (Term h _ _) ->
             TermReference (HashOnly h)
+
+        DataConstructorItem (DataConstructor h _) ->
+            DataConstructorReference (HashOnly h)
+
+        AbilityConstructorItem (AbilityConstructor h _) ->
+            AbilityConstructorReference (HashOnly h)
 
 
 matchSegmentsToMatchPositions : MatchSegments -> NEL.Nonempty Int
@@ -137,7 +160,7 @@ decodeTypeItem =
             (Decode.map3 makeSummary
                 (field "namedType" Type.decodeFQN)
                 (field "bestFoundTypeName" string)
-                (field "typeDef" Type.decodeTypeSource)
+                (field "typeDef" Type.decodeSource)
             )
         )
 
@@ -159,15 +182,73 @@ decodeTermItem =
             (Decode.map3 makeSummary
                 (field "namedTerm" Term.decodeFQN)
                 (field "bestFoundTermName" string)
-                (field "namedTerm" Term.decodeTermSignature)
+                (field "namedTerm" Term.decodeSignature)
+            )
+        )
+
+
+decodeAbilityConstructorItem : Decode.Decoder FinderItem
+decodeAbilityConstructorItem =
+    let
+        makeSummary fqn name_ signature =
+            { fqn = fqn
+            , name = name_
+            , namespace = FQN.namespaceOf name_ fqn
+            , signature = signature
+            }
+    in
+    Decode.map AbilityConstructorItem
+        (Decode.map2 AbilityConstructor
+            (at [ "namedTerm", "termHash" ] Hash.decode)
+            (Decode.map3 makeSummary
+                (at [ "namedTerm", "termName" ] FQN.decode)
+                (field "bestFoundTermName" string)
+                (field "namedTerm" AbilityConstructor.decodeSignature)
+            )
+        )
+
+
+decodeDataConstructorItem : Decode.Decoder FinderItem
+decodeDataConstructorItem =
+    let
+        makeSummary fqn name_ signature =
+            { fqn = fqn
+            , name = name_
+            , namespace = FQN.namespaceOf name_ fqn
+            , signature = signature
+            }
+    in
+    Decode.map DataConstructorItem
+        (Decode.map2 DataConstructor
+            (at [ "namedTerm", "termHash" ] Hash.decode)
+            (Decode.map3 makeSummary
+                (at [ "namedTerm", "termName" ] FQN.decode)
+                (field "bestFoundTermName" string)
+                (field "namedTerm" DataConstructor.decodeSignature)
             )
         )
 
 
 decodeItem : Decode.Decoder FinderItem
 decodeItem =
+    let
+        termTypeByHash hash =
+            if AbilityConstructor.isAbilityConstructorHash hash then
+                "AbilityConstructor"
+
+            else if DataConstructor.isDataConstructorHash hash then
+                "DataConstructor"
+
+            else
+                "Term"
+
+        decodeConstructorSuffix =
+            Decode.map termTypeByHash (at [ "contents", "namedTerm", "termHash" ] Hash.decode)
+    in
     Decode.oneOf
-        [ when decodeTag ((==) "FoundTermResult") (field "contents" decodeTermItem)
+        [ when decodeConstructorSuffix ((==) "AbilityConstructor") (field "contents" decodeAbilityConstructorItem)
+        , when decodeConstructorSuffix ((==) "DataConstructor") (field "contents" decodeDataConstructorItem)
+        , when decodeTag ((==) "FoundTermResult") (field "contents" decodeTermItem)
         , when decodeTag ((==) "FoundTypeResult") (field "contents" decodeTypeItem)
         ]
 
