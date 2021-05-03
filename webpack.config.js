@@ -47,12 +47,13 @@ const hubCfg = {
     new HtmlWebpackPlugin({
       favicon: "./static/favicon.ico",
       template: "./src/hub.ejs",
+      filename: "../index.html",
     }),
   ],
 
   output: {
     filename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "dist/hub"),
+    path: path.resolve(__dirname, "dist/hub/static"),
     publicPath: "/",
     clean: true,
   },
@@ -67,12 +68,13 @@ const ucmCfg = {
     new HtmlWebpackPlugin({
       favicon: "./static/favicon.ico",
       template: "./src/ucm.ejs",
+      filename: "../index.html",
     }),
   ],
 
   output: {
     filename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "dist/ucm"),
+    path: path.resolve(__dirname, "dist/ucm/static"),
     publicPath: "/",
     clean: true,
   },
@@ -84,7 +86,6 @@ const ucmCfg = {
     proxy: {
       "/api": {
         target: API_URL,
-        pathRewrite: { "^/api": "" },
         logLevel: "debug",
       },
     },
