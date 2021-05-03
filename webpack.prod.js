@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const FileManagerPlugin = require("filemanager-webpack-plugin");
 
 const shared = {
   module: {
@@ -49,6 +50,14 @@ const hubCfg = {
       filename: path.resolve(__dirname, "dist/hub/index.html"),
       publicPath: "/static/",
     }),
+
+    new FileManagerPlugin({
+      events: {
+        onEnd: {
+          archive: [{ source: "dist/hub", destination: "dist/hub.zip" }],
+        },
+      },
+    }),
   ],
 
   output: {
@@ -70,6 +79,14 @@ const ucmCfg = {
       inject: "body",
       publicPath: "/static/",
       filename: path.resolve(__dirname, "dist/ucm/index.html"),
+    }),
+
+    new FileManagerPlugin({
+      events: {
+        onEnd: {
+          archive: [{ source: "dist/ucm", destination: "dist/ucm.zip" }],
+        },
+      },
     }),
   ],
 
