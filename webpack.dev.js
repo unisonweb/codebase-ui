@@ -3,7 +3,9 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const API_URL = process.env.API_URL || "127.0.0.1:8080";
 
-const shared = {
+module.exports = {
+  entry: "./src/ucm.js",
+
   module: {
     rules: [
       {
@@ -36,46 +38,20 @@ const shared = {
       },
     ],
   },
-};
-
-const hubCfg = {
-  ...shared,
-
-  entry: "./src/hub.js",
-
-  plugins: [
-    new HtmlWebpackPlugin({
-      favicon: "./static/favicon.ico",
-      template: "./src/hub.ejs",
-      filename: "../index.html",
-    }),
-  ],
-
-  output: {
-    filename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "dist/hub/static"),
-    publicPath: "/",
-    clean: true,
-  },
-};
-
-const ucmCfg = {
-  ...shared,
-
-  entry: "./src/ucm.js",
 
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "./static/favicon.ico",
       template: "./src/ucm.ejs",
-      filename: "../index.html",
+      inject: "body",
+      publicPath: "/",
+      filename: path.resolve(__dirname, "dist/dev/index.html"),
     }),
   ],
 
   output: {
     filename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "dist/ucm/static"),
-    publicPath: "/",
+    path: path.resolve(__dirname, "dist/dev"),
     clean: true,
   },
 
@@ -91,5 +67,3 @@ const ucmCfg = {
     },
   },
 };
-
-module.exports = [hubCfg, ucmCfg];
