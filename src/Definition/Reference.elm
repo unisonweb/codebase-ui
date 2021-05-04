@@ -1,4 +1,4 @@
-module Workspace.Reference exposing (..)
+module Definition.Reference exposing (..)
 
 import HashQualified as HQ exposing (HashQualified)
 import Url.Parser

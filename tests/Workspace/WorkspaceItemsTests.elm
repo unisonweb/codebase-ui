@@ -1,10 +1,10 @@
 module Workspace.WorkspaceItemsTests exposing (..)
 
+import Definition.Reference as Reference exposing (Reference(..))
 import Expect
 import HashQualified exposing (HashQualified(..))
 import Http exposing (Error(..))
 import Test exposing (..)
-import Workspace.Reference as Reference exposing (Reference(..))
 import Workspace.WorkspaceItem exposing (WorkspaceItem(..), reference)
 import Workspace.WorkspaceItems as WorkspaceItems exposing (..)
 

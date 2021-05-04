@@ -2,6 +2,7 @@ module Finder.FinderMatch exposing (..)
 
 import Definition.AbilityConstructor as AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorSummary)
 import Definition.DataConstructor as DataConstructor exposing (DataConstructor(..), DataConstructorSummary)
+import Definition.Reference exposing (Reference(..))
 import Definition.Term as Term exposing (Term(..), TermSummary)
 import Definition.Type as Type exposing (Type(..), TypeSummary)
 import FullyQualifiedName as FQN
@@ -11,7 +12,6 @@ import Json.Decode as Decode exposing (at, field, string)
 import Json.Decode.Extra exposing (when)
 import List.Nonempty as NEL
 import Util exposing (decodeNonEmptyList, decodeTag)
-import Workspace.Reference exposing (Reference(..))
 
 
 type FinderItem
