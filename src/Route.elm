@@ -9,6 +9,7 @@ module Route exposing
     )
 
 import Browser.Navigation as Nav
+import Definition.Reference as Reference exposing (Reference(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import HashQualified exposing (HashQualified(..))
@@ -17,7 +18,6 @@ import RelativeTo exposing (RelativeTo)
 import Url exposing (Url)
 import Url.Builder exposing (absolute)
 import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
-import Workspace.Reference as Reference exposing (Reference(..))
 
 
 

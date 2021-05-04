@@ -2,6 +2,7 @@ module Workspace exposing (Model, Msg, OutMsg(..), init, open, subscriptions, up
 
 import Api
 import Browser.Dom as Dom
+import Definition.Reference as Reference exposing (Reference)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, article, header, section)
 import Html.Attributes exposing (class, id)
@@ -12,7 +13,6 @@ import Route exposing (Route(..))
 import Task
 import UI
 import UI.Button as Button
-import Workspace.Reference as Reference exposing (Reference)
 import Workspace.WorkspaceItem as WorkspaceItem exposing (Item(..), WorkspaceItem(..))
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 

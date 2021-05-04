@@ -17,9 +17,9 @@
 
 module Workspace.WorkspaceItems exposing (..)
 
+import Definition.Reference exposing (Reference)
 import List
 import List.Extra as ListE
-import Workspace.Reference exposing (Reference)
 import Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
 
 

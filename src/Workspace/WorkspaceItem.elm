@@ -5,6 +5,7 @@ import Definition.AbilityConstructor as AbilityConstructor exposing (AbilityCons
 import Definition.Category as Category exposing (Category)
 import Definition.DataConstructor as DataConstructor exposing (DataConstructor(..), DataConstructorDetail, DataConstructorSource(..))
 import Definition.Info as Info
+import Definition.Reference as Reference exposing (Reference(..))
 import Definition.Source as Source
 import Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, TermSignature(..), TermSource(..))
 import Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource(..))
@@ -24,7 +25,6 @@ import Syntax
 import UI
 import UI.Icon as Icon
 import Util
-import Workspace.Reference as Reference exposing (Reference(..))
 
 
 type WorkspaceItem

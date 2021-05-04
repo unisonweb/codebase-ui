@@ -5,6 +5,7 @@ import Browser.Dom as Dom
 import Definition.AbilityConstructor exposing (AbilityConstructor(..))
 import Definition.Category as Category
 import Definition.DataConstructor exposing (DataConstructor(..))
+import Definition.Reference exposing (Reference(..))
 import Definition.Source as Source
 import Definition.Term exposing (Term(..))
 import Definition.Type exposing (Type(..))
@@ -51,7 +52,6 @@ import Task
 import UI
 import UI.Icon as Icon
 import UI.Modal as Modal
-import Workspace.Reference exposing (Reference(..))
 
 
 

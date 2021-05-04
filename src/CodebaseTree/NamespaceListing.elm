@@ -1,4 +1,4 @@
-module NamespaceListing exposing
+module CodebaseTree.NamespaceListing exposing
     ( DefinitionListing(..)
     , NamespaceListing(..)
     , NamespaceListingContent
