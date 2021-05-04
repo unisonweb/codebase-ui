@@ -1,6 +1,6 @@
-module UI.Icon exposing (Icon(..), view)
+module UI.Icon exposing (Icon(..), custom, view)
 
-import Html exposing (Html, div)
+import Html exposing (Attribute, Html, div)
 import Html.Attributes exposing (class)
 import Svg exposing (svg, use)
 import Svg.Attributes exposing (height, width, xlinkHref)
@@ -30,10 +30,8 @@ type Icon
     | Search
 
 
-{-| Example: UI.Icon.view UI.Icon.Checkmark |
--}
-view : Icon -> Html msg
-view icon =
+custom : List (Attribute msg) -> Icon -> Html msg
+custom attrs icon =
     let
         iconName =
             toIdString icon
@@ -44,10 +42,17 @@ view icon =
         className =
             "icon " ++ iconName
     in
-    -- Random, its not possible to dynamically set classNames on svg elements
-    div [ class className ]
+    -- Randomly, its not possible to dynamically set classNames on svg elements
+    div (class className :: attrs)
         [ svg [ width "100%", height "100%" ] [ use [ xlinkHref ref ] [] ]
         ]
+
+
+{-| Example: UI.Icon.view UI.Icon.Checkmark |
+-}
+view : Icon -> Html msg
+view icon =
+    custom [] icon
 
 
 

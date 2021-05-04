@@ -13,7 +13,7 @@ import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, h2, label, span, text)
-import Html.Attributes exposing (class, id)
+import Html.Attributes exposing (class, classList, id)
 import Html.Events exposing (onClick)
 import Http
 import RemoteData exposing (RemoteData(..), WebData)
@@ -220,9 +220,9 @@ viewNamespaceListingContent expandedNamespaceListings content =
 viewNamespaceListing : FQNSet -> NamespaceListing -> Html Msg
 viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) =
     let
-        ( caretIcon, namespaceContent ) =
+        ( isExpanded, namespaceContent ) =
             if FQNSet.member fqn expandedNamespaceListings then
-                ( Icon.CaretDown
+                ( True
                 , div [ class "namespace-content" ]
                     [ viewNamespaceListingContent
                         expandedNamespaceListings
@@ -231,14 +231,16 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) 
                 )
 
             else
-                ( Icon.CaretRight, UI.nothing )
+                ( False, UI.nothing )
     in
     div [ class "subtree" ]
         [ a
             [ class "node namespace"
             , onClick (ToggleExpandedNamespaceListing fqn)
             ]
-            [ Icon.view caretIcon, label [] [ text (unqualifiedName fqn) ] ]
+            [ Icon.custom [ classList [ ( "expanded", isExpanded ) ] ] Icon.CaretRight
+            , label [] [ text (unqualifiedName fqn) ]
+            ]
         , namespaceContent
         ]
 
@@ -262,7 +264,7 @@ view model =
                 Loading ->
                     UI.spinner
     in
-    div [ id "all-namespaces" ]
+    div [ id "codebase-tree" ]
         [ h2 [] [ text "All Namespaces" ]
         , div [ class "namespace-tree" ] [ listings ]
         ]
