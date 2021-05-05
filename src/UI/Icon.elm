@@ -7,7 +7,8 @@ import Svg.Attributes exposing (height, width, xlinkHref)
 
 
 type Icon
-    = ChevronDown
+    = UnisonMark
+    | ChevronDown
     | ChevronUp
     | CaretLeft
     | CaretRight
@@ -62,6 +63,9 @@ spritePath =
 toIdString : Icon -> String
 toIdString icon =
     case icon of
+        UnisonMark ->
+            "unison-mark"
+
         ChevronDown ->
             "chevron-down"
 

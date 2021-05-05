@@ -743,6 +743,30 @@ button.secondary:hover {
   margin-left: 1rem;
 }
 
+#main-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  justify-self: flex-end;
+  margin-top: auto;
+  padding-top: 2rem;
+}
+
+#main-sidebar nav a {
+  height: 1.5rem;
+  transition: all 0.2s;
+}
+
+#main-sidebar nav a,
+#main-sidebar nav .icon {
+  color: var(--color-sidebar-subtle-fg);
+}
+
+#main-sidebar nav a:hover,
+#main-sidebar nav a:hover .icon {
+  color: var(--color-sidebar-fg);
+  text-decoration: none;
+}
+
 /* -- Workspace ------------------------------------------------------------ */
 
 #workspace {

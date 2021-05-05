@@ -6,8 +6,8 @@ import CodebaseTree
 import Definition.Reference exposing (Reference(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, aside, div, h1, header, text)
-import Html.Attributes exposing (id)
+import Html exposing (Html, a, aside, div, h1, header, nav, text)
+import Html.Attributes exposing (href, id, target)
 import KeyboardShortcut
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
@@ -15,6 +15,7 @@ import RelativeTo exposing (RelativeTo(..))
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import UI
+import UI.Icon as Icon
 import Url exposing (Url)
 import Workspace
 
@@ -247,7 +248,13 @@ viewMainSidebar model =
     aside
         [ id "main-sidebar" ]
         [ header [] [ h1 [] [ text "~/.unison" ] ]
-        , Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree)
+        , div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
+        , nav []
+            [ a [ href "https://unison-lang.org", target "_blank" ] [ Icon.view Icon.UnisonMark ]
+            , a [ href "https://unison-lang.org/docs", target "_blank" ] [ text "Docs" ]
+            , a [ href "https://unison-lang.org/community", target "_blank" ] [ text "Community" ]
+            , a [ href "https://unison-lang.org/docs/language-reference", target "_blank" ] [ text "Language Reference" ]
+            ]
         ]
 
 
