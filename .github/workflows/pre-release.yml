@@ -20,7 +20,7 @@ jobs:
         with:
           node-version: ${{ matrix.node-version }}
       - run: npm ci
-      - run: API_TOKEN=ci npm run makeElmEnv
+      - run: API_TOKEN=API_TOKEN npm run makeElmEnv
       - run: npm run build
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
