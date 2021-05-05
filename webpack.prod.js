@@ -77,7 +77,7 @@ const ucmCfg = {
       favicon: "./static/favicon.ico",
       template: "./src/ucm.ejs",
       inject: "body",
-      publicPath: "/static/",
+      publicPath: "/ui/static/",
       filename: path.resolve(__dirname, "dist/ucm/index.html"),
     }),
 
