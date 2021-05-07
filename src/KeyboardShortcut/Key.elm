@@ -1,3 +1,20 @@
+{--
+
+  KeyboardShortcut.Key
+  ====================
+
+  Parsing from KeyboardEvent.key string
+  -------------------------------------
+
+  Not all `key` values are consistent across browsers:
+  https://developer.mozilla.org/en-US/docs/Web/API/KeyboardEvent/key/Key_Values
+
+  This library does not attempt to support older inconsistent browser values,
+  besides `Meta` and `OS` for Firefox.
+
+--}
+
+
 module KeyboardShortcut.Key exposing
     ( Key(..)
     , LetterCase(..)
@@ -9,6 +26,7 @@ module KeyboardShortcut.Key exposing
     )
 
 import Json.Decode as Decode
+import System exposing (OperatingSystem(..))
 
 
 type LetterCase
@@ -91,6 +109,7 @@ type Key
     | Plus
     | Minus
     | ForwardSlash
+    | QuestionMark
     | Raw String
 
 
@@ -359,10 +378,15 @@ fromString str =
         "Tab" ->
             Tab
 
+        -- Windows key is "OS" in Firefox, but will fixed to
+        -- produce Meta in: https://bugzilla.mozilla.org/show_bug.cgi?id=1232918
+        "OS" ->
+            Meta
+
         "Meta" ->
             Meta
 
-        "Space" ->
+        " " ->
             Space
 
         "Escape" ->
@@ -467,6 +491,9 @@ fromString str =
         "/" ->
             ForwardSlash
 
+        "?" ->
+            QuestionMark
+
         _ ->
             Raw str
 
@@ -475,164 +502,95 @@ fromString str =
 -- VIEW
 
 
-view : Key -> String
-view key =
+view : OperatingSystem -> Key -> String
+view os key =
+    let
+        letter l casing =
+            case casing of
+                Lower ->
+                    String.toLower l
+
+                Upper ->
+                    String.toUpper l
+    in
     case key of
-        A Lower ->
-            "a"
+        A casing ->
+            letter "a" casing
 
-        A Upper ->
-            "A"
+        B casing ->
+            letter "b" casing
 
-        B Lower ->
-            "b"
+        C casing ->
+            letter "c" casing
 
-        B Upper ->
-            "B"
+        D casing ->
+            letter "d" casing
 
-        C Lower ->
-            "c"
+        E casing ->
+            letter "e" casing
 
-        C Upper ->
-            "C"
+        F casing ->
+            letter "f" casing
 
-        D Lower ->
-            "d"
+        G casing ->
+            letter "g" casing
 
-        D Upper ->
-            "D"
+        H casing ->
+            letter "h" casing
 
-        E Lower ->
-            "e"
+        I casing ->
+            letter "i" casing
 
-        E Upper ->
-            "E"
+        J casing ->
+            letter "j" casing
 
-        F Lower ->
-            "f"
+        K casing ->
+            letter "k" casing
 
-        F Upper ->
-            "F"
+        L casing ->
+            letter "l" casing
 
-        G Lower ->
-            "g"
+        M casing ->
+            letter "m" casing
 
-        G Upper ->
-            "G"
+        N casing ->
+            letter "n" casing
 
-        H Lower ->
-            "h"
+        O casing ->
+            letter "o" casing
 
-        H Upper ->
-            "H"
+        P casing ->
+            letter "p" casing
 
-        I Lower ->
-            "i"
+        Q casing ->
+            letter "q" casing
 
-        I Upper ->
-            "I"
+        R casing ->
+            letter "r" casing
 
-        J Lower ->
-            "j"
+        S casing ->
+            letter "s" casing
 
-        J Upper ->
-            "J"
+        T casing ->
+            letter "t" casing
 
-        K Lower ->
-            "k"
+        U casing ->
+            letter "u" casing
 
-        K Upper ->
-            "K"
+        V casing ->
+            letter "v" casing
 
-        L Lower ->
-            "l"
+        W casing ->
+            letter "w" casing
 
-        L Upper ->
-            "L"
+        X casing ->
+            letter "x" casing
 
-        M Lower ->
-            "m"
+        Y casing ->
+            letter "y" casing
 
-        M Upper ->
-            "M"
-
-        N Lower ->
-            "n"
-
-        N Upper ->
-            "N"
-
-        O Lower ->
-            "o"
-
-        O Upper ->
-            "O"
-
-        P Lower ->
-            "p"
-
-        P Upper ->
-            "P"
-
-        Q Lower ->
-            "q"
-
-        Q Upper ->
-            "Q"
-
-        R Lower ->
-            "r"
-
-        R Upper ->
-            "R"
-
-        S Lower ->
-            "s"
-
-        S Upper ->
-            "S"
-
-        T Lower ->
-            "t"
-
-        T Upper ->
-            "T"
-
-        U Lower ->
-            "u"
-
-        U Upper ->
-            "U"
-
-        V Lower ->
-            "v"
-
-        V Upper ->
-            "V"
-
-        W Lower ->
-            "w"
-
-        W Upper ->
-            "W"
-
-        X Lower ->
-            "x"
-
-        X Upper ->
-            "X"
-
-        Y Lower ->
-            "y"
-
-        Y Upper ->
-            "Y"
-
-        Z Lower ->
-            "z"
-
-        Z Upper ->
-            "Z"
+        Z casing ->
+            letter "z" casing
 
         Semicolon ->
             ";"
@@ -659,18 +617,24 @@ view key =
             "⇧"
 
         Ctrl ->
-            "CTRL"
+            "Ctrl"
 
         Alt ->
-            "ALT"
+            "Alt"
 
         Tab ->
             "⇥ "
 
-        -- Windows -> "⊞"
-        -- Command -> "⌘ "
         Meta ->
-            "Meta"
+            case os of
+                Windows ->
+                    "⊞"
+
+                MacOS ->
+                    "⌘ "
+
+                _ ->
+                    "Meta"
 
         Space ->
             "Space"
@@ -776,6 +740,9 @@ view key =
 
         ForwardSlash ->
             "/"
+
+        QuestionMark ->
+            "?"
 
         Raw str ->
             str

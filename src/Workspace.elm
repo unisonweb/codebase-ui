@@ -182,38 +182,19 @@ keydown model keyboardEvent =
                     WorkspaceItems.prev model
             in
             ( prev, scrollToCmd prev, openDefinitionsFocusToOutMsg prev )
-
-        passthrough =
-            ( model, Cmd.none, None )
     in
     case keyboardEvent.key of
         ArrowDown ->
-            if keyboardEvent.shiftKey then
-                nextDefinition
-
-            else
-                passthrough
+            nextDefinition
 
         J _ ->
-            if keyboardEvent.shiftKey then
-                nextDefinition
-
-            else
-                passthrough
+            nextDefinition
 
         ArrowUp ->
-            if keyboardEvent.shiftKey then
-                prevDefinitions
-
-            else
-                passthrough
+            prevDefinitions
 
         K _ ->
-            if keyboardEvent.shiftKey then
-                prevDefinitions
-
-            else
-                passthrough
+            prevDefinitions
 
         X _ ->
             let
@@ -226,7 +207,7 @@ keydown model keyboardEvent =
             ( without, Cmd.none, openDefinitionsFocusToOutMsg without )
 
         _ ->
-            passthrough
+            ( model, Cmd.none, None )
 
 
 

@@ -4,7 +4,7 @@ import App
 import Browser
 
 
-main : Program () App.Model App.Msg
+main : Program App.Flags App.Model App.Msg
 main =
     Browser.application
         { init = App.init

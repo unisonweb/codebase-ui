@@ -48,6 +48,7 @@ import List.Nonempty as NEL
 import RemoteData exposing (RemoteData(..), WebData)
 import SearchResults exposing (SearchResults(..))
 import Syntax
+import System exposing (System)
 import Task
 import UI
 import UI.Icon as Icon
@@ -69,11 +70,11 @@ type alias Model =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : System -> ( Model, Cmd Msg )
+init system =
     ( { query = ""
       , results = NotAsked
-      , keyboardShortcut = KeyboardShortcut.init
+      , keyboardShortcut = KeyboardShortcut.init system.operatingSystem
       }
     , focusSearchInput
     )
@@ -320,7 +321,7 @@ viewMatch keyboardShortcut match isFocused shortcut =
     let
         shortcutIndicator =
             if isFocused then
-                KeyboardShortcut.viewShortcut keyboardShortcut (Sequence Nothing Key.Enter)
+                KeyboardShortcut.view keyboardShortcut (Sequence Nothing Key.Enter)
 
             else
                 case shortcut of
@@ -328,7 +329,7 @@ viewMatch keyboardShortcut match isFocused shortcut =
                         UI.nothing
 
                     Just key ->
-                        KeyboardShortcut.viewShortcut keyboardShortcut (Sequence (Just Key.Semicolon) key)
+                        KeyboardShortcut.view keyboardShortcut (Sequence (Just Key.Semicolon) key)
 
         viewMatch_ reference icon naming source =
             tr
@@ -338,7 +339,7 @@ viewMatch keyboardShortcut match isFocused shortcut =
                 [ td [ class "category" ] [ Icon.view icon ]
                 , naming
                 , td [ class "source" ] [ source ]
-                , td [ class "shortcut" ] [ shortcutIndicator ]
+                , td [] [ div [ class "shortcut" ] [ shortcutIndicator ] ]
                 ]
     in
     case match.item of
@@ -401,26 +402,32 @@ view model =
 
                 _ ->
                     UI.nothing
+
+        content =
+            Modal.CustomContent
+                (div
+                    []
+                    [ header []
+                        [ Icon.view Icon.Search
+                        , input
+                            [ type_ "text"
+                            , id "search"
+                            , autocomplete False
+                            , spellcheck False
+                            , placeholder "Search by name, namespace, and/or type"
+                            , onInput UpdateQuery
+                            , value model.query
+                            ]
+                            []
+                        , a [ class "reset", onClick ResetOrClose ] [ Icon.view Icon.X ]
+                        ]
+                    , results
+                    ]
+                )
     in
-    -- We stopPropagation such that movement shortcuts, like J or K, for the
-    -- workspace aren't triggered when in the modal when the use is trying to
-    -- type those letters into the search field
-    Modal.view
-        Close
-        [ id "finder", KeyboardEvent.stopPropagationOn KeyboardEvent.Keydown Keydown ]
-        [ header []
-            [ Icon.view Icon.Search
-            , input
-                [ type_ "text"
-                , id "search"
-                , autocomplete False
-                , spellcheck False
-                , placeholder "Search by name, namespace, and/or type"
-                , onInput UpdateQuery
-                , value model.query
-                ]
-                []
-            , a [ class "reset", onClick ResetOrClose ] [ Icon.view Icon.X ]
-            ]
-        , results
-        ]
+    Modal.modal "finder" Close content
+        -- We stopPropagation such that movement shortcuts, like J or K, for the
+        -- workspace aren't triggered when in the modal when the use is trying to
+        -- type those letters into the search field
+        |> Modal.withAttributes [ KeyboardEvent.stopPropagationOn KeyboardEvent.Keydown Keydown ]
+        |> Modal.view

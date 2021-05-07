@@ -24,6 +24,11 @@ spinner =
     div [ class "spinner" ] [ text "Loading..." ]
 
 
+subtle : String -> Html msg
+subtle label =
+    span [ class "subtle" ] [ text label ]
+
+
 loadingPlaceholder : Html msg
 loadingPlaceholder =
     div [ class "loading-placeholder" ] []

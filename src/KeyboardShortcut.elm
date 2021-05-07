@@ -43,6 +43,7 @@ import KeyboardShortcut.Key as Key exposing (Key)
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import List.Nonempty as NEL
 import Process
+import System exposing (OperatingSystem)
 import Task
 
 
@@ -58,16 +59,25 @@ type
 
 
 
+-- CREATE
+
+
+single : Key -> KeyboardShortcut
+single key =
+    Sequence Nothing key
+
+
+
 -- MODEL
 
 
 type alias Model =
-    Maybe Key
+    { key : Maybe Key, operatingSystem : OperatingSystem }
 
 
-init : Model
-init =
-    Nothing
+init : OperatingSystem -> Model
+init os =
+    { key = Nothing, operatingSystem = os }
 
 
 
@@ -83,19 +93,19 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         CollectKey key ->
-            ( Just key, decay key )
+            ( { model | key = Just key }, decay key )
 
         Decay key ->
-            case model of
+            case model.key of
                 Just k ->
                     if k == key then
-                        ( Nothing, Cmd.none )
+                        ( { model | key = Nothing }, Cmd.none )
 
                     else
                         ( model, Cmd.none )
 
                 Nothing ->
-                    ( Nothing, Cmd.none )
+                    ( { model | key = Nothing }, Cmd.none )
 
 
 collect : Model -> Key -> ( Model, Cmd Msg )
@@ -115,7 +125,7 @@ decay key =
 fromKeyboardEvent : Model -> KeyboardEvent -> KeyboardShortcut
 fromKeyboardEvent model event =
     if Key.isModifier event.key then
-        Sequence model event.key
+        Sequence model.key event.key
 
     else
         case KeyboardEvent.modifiersHeld event of
@@ -123,44 +133,72 @@ fromKeyboardEvent model event =
                 Chord (NEL.head modifiers) event.key
 
             Nothing ->
-                Sequence model event.key
+                Sequence model.key event.key
 
 
 startedSequenceWith : Model -> Key -> Bool
 startedSequenceWith model key =
-    Just key == model
+    Just key == model.key
 
 
 
 -- VIEW
 
 
-viewKey : Key -> Bool -> Html msg
-viewKey key isActive =
-    span [ classList [ ( "key", True ), ( "active", isActive ) ] ] [ text (Key.view key) ]
+viewKeyBase : String -> Bool -> Html msg
+viewKeyBase key isActive =
+    span [ classList [ ( "key", True ), ( "active", isActive ) ] ] [ text key ]
 
 
-viewShortcut : Model -> KeyboardShortcut -> Html msg
-viewShortcut model shortcut =
+viewBase : List (Html msg) -> Html msg
+viewBase shortcut =
+    span [ class "keyboard-shortcut" ] shortcut
+
+
+viewKey : OperatingSystem -> Key -> Bool -> Html msg
+viewKey os key isActive =
+    viewKeyBase (Key.view os key) isActive
+
+
+viewThen : Html msg
+viewThen =
+    span [ class "then" ] [ text "then" ]
+
+
+view : Model -> KeyboardShortcut -> Html msg
+view model shortcut =
     let
-        instruction text_ =
-            span [ class "instruction" ] [ text text_ ]
+        os =
+            model.operatingSystem
 
         content =
             case shortcut of
                 Sequence Nothing key ->
-                    [ viewKey key False ]
+                    [ viewKey os key False ]
 
                 Sequence (Just keyA) keyB ->
-                    [ viewKey keyA (startedSequenceWith model keyA)
-                    , instruction "then"
-                    , viewKey keyB False
+                    [ viewKey os keyA (startedSequenceWith model keyA)
+                    , viewThen
+                    , viewKey os keyB False
                     ]
 
                 Chord mod key ->
-                    [ viewKey mod False
-                    , instruction "plus"
-                    , viewKey key False
+                    [ viewKey os mod False
+                    , viewKey os key False
                     ]
     in
-    span [ class "keyboard-shortcut" ] content
+    viewBase content
+
+
+viewShortcuts : Model -> List KeyboardShortcut -> Html msg
+viewShortcuts model shortcuts =
+    let
+        or =
+            span [ class "separator" ] [ text "or" ]
+
+        instructions =
+            shortcuts
+                |> List.map (view model)
+                |> List.intersperse or
+    in
+    span [ class "keyboard-shortcuts" ] instructions
