@@ -1,16 +1,8 @@
-import "./css/fonts.css";
-import "./css/main.css";
+import "./init";
+import system from "./system";
 import { Elm } from "./Ucm.elm";
 
+const flags = { system: system() };
+
 // The main entry point for the `ucm` target of the Codebase UI.
-
-console.log(`
- _____     _
-|  |  |___|_|___ ___ ___
-|  |  |   | |_ -| . |   |
-|_____|_|_|_|___|___|_|_|
-
-
-`);
-
-Elm.Ucm.init();
+Elm.Ucm.init({ flags });
