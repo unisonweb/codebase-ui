@@ -2,5 +2,4 @@ elm-stuff
 .DS_Store
 public/bundle.js
 node_modules
-src/Env.elm
 dist

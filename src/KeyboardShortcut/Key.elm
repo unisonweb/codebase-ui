@@ -25,8 +25,8 @@ module KeyboardShortcut.Key exposing
     , view
     )
 
+import Env exposing (OperatingSystem(..))
 import Json.Decode as Decode
-import System exposing (OperatingSystem(..))
 
 
 type LetterCase

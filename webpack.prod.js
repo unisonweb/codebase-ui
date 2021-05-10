@@ -47,8 +47,9 @@ const hubCfg = {
       favicon: "./static/favicon.ico",
       template: "./src/hub.ejs",
       inject: "body",
-      filename: path.resolve(__dirname, "dist/hub/index.html"),
       publicPath: "/static/",
+      base: "/",
+      filename: path.resolve(__dirname, "dist/hub/index.html"),
     }),
 
     new FileManagerPlugin({
@@ -77,7 +78,8 @@ const ucmCfg = {
       favicon: "./static/favicon.ico",
       template: "./src/ucm.ejs",
       inject: "body",
-      publicPath: "/ui/static/",
+      publicPath: "/static/",
+      base: false, // set dynamically by grabbing the 2 first path segments in the url.
       filename: path.resolve(__dirname, "dist/ucm/index.html"),
     }),
 

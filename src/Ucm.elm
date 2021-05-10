@@ -2,9 +2,10 @@ module Ucm exposing (..)
 
 import App
 import Browser
+import Env exposing (Flags)
 
 
-main : Program App.Flags App.Model App.Msg
+main : Program Flags App.Model App.Msg
 main =
     Browser.application
         { init = App.init

@@ -45,6 +45,7 @@ module.exports = {
       template: "./src/ucm.ejs",
       inject: "body",
       publicPath: "/",
+      base: "/",
       filename: path.resolve(__dirname, "dist/dev/index.html"),
     }),
   ],
@@ -62,6 +63,7 @@ module.exports = {
     proxy: {
       "/api": {
         target: API_URL,
+        pathRewrite: { "^/api": "" },
         logLevel: "debug",
       },
     },

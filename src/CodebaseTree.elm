@@ -1,6 +1,6 @@
 module CodebaseTree exposing (Model, Msg, OutMsg(..), init, update, view)
 
-import Api
+import Api exposing (ApiRequest)
 import CodebaseTree.NamespaceListing as NamespaceListing
     exposing
         ( DefinitionListing(..)
@@ -9,6 +9,7 @@ import CodebaseTree.NamespaceListing as NamespaceListing
         )
 import Definition.Category as Category
 import Definition.Reference exposing (Reference(..))
+import Env exposing (Env)
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import HashQualified exposing (HashQualified(..))
@@ -31,13 +32,13 @@ type alias Model =
     }
 
 
-init : ( Model, Cmd Msg )
-init =
+init : Env -> ( Model, Cmd Msg )
+init env =
     let
         model =
             { rootNamespaceListing = Loading, expandedNamespaceListings = FQNSet.empty }
     in
-    ( model, fetchRootNamespaceListing )
+    ( model, Api.perform env.apiBasePath fetchRootNamespaceListing )
 
 
 
@@ -56,8 +57,8 @@ type OutMsg
     | OpenDefinition Reference
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update msg model =
+update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
+update env msg model =
     case msg of
         ToggleExpandedNamespaceListing fqn ->
             let
@@ -79,7 +80,7 @@ update msg model =
 
                 cmd =
                     if shouldExpand && not namespaceContentFetched then
-                        fetchSubNamespaceListing fqn
+                        Api.perform env.apiBasePath (fetchSubNamespaceListing fqn)
 
                     else
                         Cmd.none
@@ -124,24 +125,20 @@ update msg model =
 -- EFFECTS
 
 
-fetchRootNamespaceListing : Cmd Msg
+fetchRootNamespaceListing : ApiRequest NamespaceListing Msg
 fetchRootNamespaceListing =
     let
         rootFqn =
             FQN.fromString "."
     in
-    Http.get
-        { url = Api.list Nothing
-        , expect = Http.expectJson FetchRootNamespaceListingFinished (NamespaceListing.decode rootFqn)
-        }
+    Api.list Nothing
+        |> Api.toRequest (NamespaceListing.decode rootFqn) FetchRootNamespaceListingFinished
 
 
-fetchSubNamespaceListing : FQN -> Cmd Msg
+fetchSubNamespaceListing : FQN -> ApiRequest NamespaceListing Msg
 fetchSubNamespaceListing fqn =
-    Http.get
-        { url = Api.list (Just (FQN.toString fqn))
-        , expect = Http.expectJson (FetchSubNamespaceListingFinished fqn) (NamespaceListing.decode fqn)
-        }
+    Api.list (Just (FQN.toString fqn))
+        |> Api.toRequest (NamespaceListing.decode fqn) (FetchSubNamespaceListingFinished fqn)
 
 
 

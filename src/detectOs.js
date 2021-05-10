@@ -2,7 +2,7 @@ const macosPlatforms = ["Macintosh", "MacIntel", "MacPPC", "Mac68K"];
 const windowsPlatforms = ["Win32", "Win64", "Windows", "WinCE"];
 const iosPlatforms = ["iPhone", "iPad", "iPod"];
 
-function detectOs(nav) {
+export default function detectOs(nav) {
   const { userAgent, platform } = nav;
 
   if (macosPlatforms.includes(platform)) {
@@ -19,11 +19,3 @@ function detectOs(nav) {
     return "Unknown";
   }
 }
-
-function platform() {
-  return {
-    operatingSystem: detectOs(window.navigator),
-  };
-}
-
-export default platform;
