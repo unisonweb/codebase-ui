@@ -1,23 +1,45 @@
-module Api exposing (errorToString, find, getDefinition, list)
+module Api exposing
+    ( ApiBasePath(..)
+    , ApiRequest
+    , errorToString
+    , find
+    , getDefinition
+    , list
+    , perform
+    , toRequest
+    , toUrl
+    )
 
-import Env
 import Http
+import Json.Decode as Decode
 import Regex
 import Syntax
 import Url.Builder exposing (QueryParameter, absolute, int, string)
 
 
+type ApiBasePath
+    = ApiBasePath (List String)
+
+
+type Endpoint
+    = Endpoint (List String) (List QueryParameter)
+
+
+type ApiRequest a msg
+    = ApiRequest Endpoint (Decode.Decoder a) (Result Http.Error a -> msg)
+
+
 {-| TODO: Be more explicit about Root |
 -}
-list : Maybe String -> String
+list : Maybe String -> Endpoint
 list rawFQN =
     rawFQN
         |> Maybe.map (\n -> [ string "namespace" n ])
         |> Maybe.withDefault []
-        |> serverUrl [ "list" ]
+        |> Endpoint [ "list" ]
 
 
-getDefinition : List String -> String
+getDefinition : List String -> Endpoint
 getDefinition fqnsOrHashes =
     let
         re =
@@ -29,17 +51,35 @@ getDefinition fqnsOrHashes =
     fqnsOrHashes
         |> List.map stripConstructorPositionFromHash
         |> List.map (string "names")
-        |> serverUrl [ "getDefinition" ]
+        |> Endpoint [ "getDefinition" ]
 
 
-find : Int -> Syntax.Width -> String -> String
+find : Int -> Syntax.Width -> String -> Endpoint
 find limit (Syntax.Width sourceWidth) query =
-    serverUrl
+    Endpoint
         [ "find" ]
         [ int "limit" limit
         , int "renderWidth" sourceWidth
         , string "query" query
         ]
+
+
+toUrl : ApiBasePath -> Endpoint -> String
+toUrl (ApiBasePath basePath) (Endpoint paths queryParams) =
+    absolute (basePath ++ paths) queryParams
+
+
+toRequest : Decode.Decoder a -> (Result Http.Error a -> msg) -> Endpoint -> ApiRequest a msg
+toRequest decoder toMsg endpoint =
+    ApiRequest endpoint decoder toMsg
+
+
+perform : ApiBasePath -> ApiRequest a msg -> Cmd msg
+perform basePath (ApiRequest endpoint decoder toMsg) =
+    Http.get
+        { url = toUrl basePath endpoint
+        , expect = Http.expectJson toMsg decoder
+        }
 
 
 
@@ -63,20 +103,3 @@ errorToString err =
 
         Http.BadUrl url ->
             "Malformed url: " ++ url
-
-
-
--- PRIVATE URL HELPERS
-
-
-serverUrl : List String -> List QueryParameter -> String
-serverUrl path queryParams =
-    let
-        url =
-            absolute ("api" :: path) queryParams
-    in
-    if String.contains "?" url then
-        url ++ "&" ++ Env.apiToken
-
-    else
-        url ++ "?" ++ Env.apiToken

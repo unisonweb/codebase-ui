@@ -16,7 +16,7 @@ import HashQualified exposing (HashQualified(..))
 import List.Nonempty as NEL
 import RelativeTo exposing (RelativeTo)
 import Url exposing (Url)
-import Url.Builder exposing (absolute)
+import Url.Builder exposing (relative)
 import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
 
 
@@ -83,9 +83,9 @@ urlParser =
         ]
 
 
-fromUrl : Url -> Route
-fromUrl url =
-    url
+fromUrl : String -> Url -> Route
+fromUrl basePath url =
+    { url | path = String.replace basePath "" url.path }
         |> Parser.parse urlParser
         |> Maybe.withDefault (Namespace Latest)
 
@@ -175,7 +175,7 @@ toUrlString route =
                         DataConstructorReference hq ->
                             [ RelativeTo.toUrlPath relTo, "data-constructors" ] ++ hqToPath hq
     in
-    absolute path []
+    relative path []
 
 
 

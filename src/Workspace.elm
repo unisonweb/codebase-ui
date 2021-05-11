@@ -1,8 +1,9 @@
 module Workspace exposing (Model, Msg, OutMsg(..), init, open, subscriptions, update, view)
 
-import Api
+import Api exposing (ApiBasePath, ApiRequest)
 import Browser.Dom as Dom
 import Definition.Reference as Reference exposing (Reference)
+import Env exposing (Env)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, article, header, section)
 import Html.Attributes exposing (class, id)
@@ -25,8 +26,8 @@ type alias Model =
     WorkspaceItems
 
 
-init : Maybe Reference -> ( Model, Cmd Msg )
-init mRef =
+init : Env -> Maybe Reference -> ( Model, Cmd Msg )
+init env mRef =
     let
         model =
             WorkspaceItems.init Nothing
@@ -38,7 +39,7 @@ init mRef =
         Just ref ->
             let
                 ( m, c, _ ) =
-                    open model ref
+                    open env model ref
             in
             ( m, c )
 
@@ -63,8 +64,8 @@ type OutMsg
     | ShowFinderRequest
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update msg model =
+update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
+update env msg model =
     case msg of
         NoOp ->
             ( model, Cmd.none, None )
@@ -73,7 +74,7 @@ update msg model =
             ( model, Cmd.none, ShowFinderRequest )
 
         OpenDefinitionAfter afterRef ref ->
-            openItem model (Just afterRef) ref
+            openItem env.apiBasePath model (Just afterRef) ref
 
         CloseDefinition ref ->
             let
@@ -105,13 +106,13 @@ update msg model =
 -- UPDATE HELPERS
 
 
-open : Model -> Reference -> ( Model, Cmd Msg, OutMsg )
-open model ref =
-    openItem model Nothing ref
+open : { a | apiBasePath : ApiBasePath } -> Model -> Reference -> ( Model, Cmd Msg, OutMsg )
+open cfg model ref =
+    openItem cfg.apiBasePath model Nothing ref
 
 
-openItem : Model -> Maybe Reference -> Reference -> ( Model, Cmd Msg, OutMsg )
-openItem model afterRef ref =
+openItem : ApiBasePath -> Model -> Maybe Reference -> Reference -> ( Model, Cmd Msg, OutMsg )
+openItem apiBasePath model afterRef ref =
     -- We don't want to refetch or replace any already open definitions, but we
     -- do want to focus and scroll to it
     if WorkspaceItems.member model ref then
@@ -138,7 +139,7 @@ openItem model afterRef ref =
                         WorkspaceItems.insertWithFocusAfter model r toInsert
         in
         ( nextWorkspaceItems
-        , Cmd.batch [ fetchDefinition ref, scrollToDefinition ref ]
+        , Cmd.batch [ Api.perform apiBasePath (fetchDefinition ref), scrollToDefinition ref ]
         , openDefinitionsFocusToOutMsg nextWorkspaceItems
         )
 
@@ -214,15 +215,10 @@ keydown model keyboardEvent =
 -- EFFECTS
 
 
-fetchDefinition : Reference -> Cmd Msg
+fetchDefinition : Reference -> ApiRequest Item Msg
 fetchDefinition ref =
-    Http.get
-        { url = Api.getDefinition [ (Reference.hashQualified >> HashQualified.toString) ref ]
-        , expect =
-            Http.expectJson
-                (FetchItemFinished ref)
-                WorkspaceItem.decodeItem
-        }
+    Api.getDefinition [ (Reference.hashQualified >> HashQualified.toString) ref ]
+        |> Api.toRequest WorkspaceItem.decodeItem (FetchItemFinished ref)
 
 
 scrollToDefinition : Reference -> Cmd Msg

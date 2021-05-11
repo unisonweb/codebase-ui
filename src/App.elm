@@ -4,6 +4,7 @@ import Browser
 import Browser.Navigation as Nav
 import CodebaseTree
 import Definition.Reference exposing (Reference(..))
+import Env exposing (Env, Flags, OperatingSystem(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, aside, div, h1, h3, header, nav, section, span, text)
@@ -15,7 +16,6 @@ import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import RelativeTo exposing (RelativeTo(..))
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
-import System exposing (OperatingSystem(..), System)
 import UI
 import UI.Icon as Icon
 import UI.Modal as Modal
@@ -41,38 +41,34 @@ type alias Model =
     , workspace : Workspace.Model
     , modal : Modal
     , keyboardShortcut : KeyboardShortcut.Model
-    , system : System
+    , env : Env
     }
-
-
-type alias Flags =
-    { system : { operatingSystem : String } }
 
 
 init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
 init flags url navKey =
     let
+        env =
+            Env.fromFlags flags
+
         route =
-            Route.fromUrl url
+            Route.fromUrl env.basePath url
 
         ( workspace, workspaceCmd ) =
             case route of
                 Route.ByReference _ ref ->
-                    Workspace.init (Just ref)
+                    Workspace.init env (Just ref)
 
                 _ ->
-                    Workspace.init Nothing
+                    Workspace.init env Nothing
 
         ( codebaseTree, codebaseTreeCmd ) =
-            CodebaseTree.init
+            CodebaseTree.init env
 
         {--| TODO: When we can't get a relative to, we need to resolve the name
           in the url to a hash-}
         relativeTo =
             Maybe.withDefault Codebase (Route.relativeTo route)
-
-        system =
-            System.fromRecord flags.system
 
         model =
             { navKey = navKey
@@ -81,8 +77,8 @@ init flags url navKey =
             , workspace = workspace
             , codebaseTree = codebaseTree
             , modal = NoModal
-            , keyboardShortcut = KeyboardShortcut.init system.operatingSystem
-            , system = system
+            , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
+            , env = env
             }
     in
     ( model
@@ -109,7 +105,7 @@ type Msg
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update msg ({ env } as model) =
     case msg of
         LinkClicked _ ->
             ( model, Cmd.none )
@@ -118,7 +114,7 @@ update msg model =
             -- URL changes happen when setting focus on a definitions.
             -- Currently, the URL change is a result of that as oppose to focus
             -- being a result of a URL change
-            ( { model | route = Route.fromUrl url }, Cmd.none )
+            ( { model | route = Route.fromUrl env.basePath url }, Cmd.none )
 
         Keydown event ->
             keydown model event
@@ -136,7 +132,7 @@ update msg model =
         WorkspaceMsg wMsg ->
             let
                 ( workspace, wCmd, outMsg ) =
-                    Workspace.update wMsg model.workspace
+                    Workspace.update env wMsg model.workspace
 
                 model2 =
                     { model | workspace = workspace }
@@ -149,7 +145,7 @@ update msg model =
         CodebaseTreeMsg cMsg ->
             let
                 ( codebaseTree, cCmd, outMsg ) =
-                    CodebaseTree.update cMsg model.codebaseTree
+                    CodebaseTree.update env cMsg model.codebaseTree
 
                 model2 =
                     { model | codebaseTree = codebaseTree }
@@ -169,7 +165,7 @@ update msg model =
                 FinderModal fModel ->
                     let
                         ( fm, fc, out ) =
-                            Finder.update fMsg fModel
+                            Finder.update env fMsg fModel
                     in
                     case out of
                         Finder.Remain ->
@@ -200,7 +196,7 @@ openDefinition : Model -> Reference -> ( Model, Cmd Msg )
 openDefinition model ref =
     let
         ( workspace, wCmd, outMsg ) =
-            Workspace.open model.workspace ref
+            Workspace.open model.env model.workspace ref
 
         model2 =
             { model | workspace = workspace }
@@ -241,7 +237,7 @@ keydown model keyboardEvent =
             showFinder model
 
         KeyboardShortcut.Chord Meta (K _) ->
-            if model.system.operatingSystem == System.MacOS then
+            if model.env.operatingSystem == Env.MacOS then
                 showFinder model
 
             else
@@ -265,12 +261,12 @@ keydown model keyboardEvent =
 
 
 showFinder :
-    { m | system : System, modal : Modal }
-    -> ( { m | system : System, modal : Modal }, Cmd Msg )
+    { m | env : Env, modal : Modal }
+    -> ( { m | env : Env, modal : Modal }, Cmd Msg )
 showFinder model =
     let
         ( fm, fcmd ) =
-            Finder.init model.system
+            Finder.init model.env
     in
     ( { model | modal = FinderModal fm }, Cmd.map FinderMsg fcmd )
 
@@ -360,7 +356,7 @@ viewHelpModal os keyboardShortcut =
 
 
 viewModal :
-    { m | system : System, modal : Modal, keyboardShortcut : KeyboardShortcut.Model }
+    { m | env : Env, modal : Modal, keyboardShortcut : KeyboardShortcut.Model }
     -> Html Msg
 viewModal model =
     case model.modal of
@@ -371,7 +367,7 @@ viewModal model =
             Html.map FinderMsg (Finder.view m)
 
         HelpModal ->
-            viewHelpModal model.system.operatingSystem model.keyboardShortcut
+            viewHelpModal model.env.operatingSystem model.keyboardShortcut
 
 
 view : Model -> Browser.Document Msg

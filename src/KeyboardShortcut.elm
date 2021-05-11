@@ -37,13 +37,13 @@
 
 module KeyboardShortcut exposing (..)
 
+import Env exposing (OperatingSystem)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class, classList)
 import KeyboardShortcut.Key as Key exposing (Key)
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import List.Nonempty as NEL
 import Process
-import System exposing (OperatingSystem)
 import Task
 
 

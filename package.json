@@ -7,12 +7,10 @@
     "url": "git+https://github.com/unisonweb/codebase-ui.git"
   },
   "scripts": {
-    "build": "npm run makeElmEnv; webpack --mode production --config webpack.prod.js",
+    "build": "webpack --mode production --config webpack.prod.js",
     "clean": "rm -rf dist",
-    "watch": "npm run makeElmEnv; webpack --mode development --watch --config webpack.dev.js",
-    "start": "npm run makeElmEnv; webpack serve --mode development --port 1234 --config webpack.dev.js",
-    "test": "elm-test",
-    "makeElmEnv": "node ./scripts/makeElmEnv.mjs"
+    "start": "webpack serve --mode development --port 1234 --config webpack.dev.js",
+    "test": "elm-test"
   },
   "bugs": {
     "url": "https://github.com/unisonweb/codebase-ui/issues"

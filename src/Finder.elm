@@ -1,6 +1,6 @@
 module Finder exposing (Model, Msg, OutMsg(..), init, update, view)
 
-import Api
+import Api exposing (ApiRequest)
 import Browser.Dom as Dom
 import Definition.AbilityConstructor exposing (AbilityConstructor(..))
 import Definition.Category as Category
@@ -9,6 +9,7 @@ import Definition.Reference exposing (Reference(..))
 import Definition.Source as Source
 import Definition.Term exposing (Term(..))
 import Definition.Type exposing (Type(..))
+import Env exposing (Env)
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import HashQualified exposing (HashQualified(..))
 import Html
@@ -40,7 +41,6 @@ import Html.Attributes
         , value
         )
 import Html.Events exposing (onClick, onInput)
-import Http
 import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
@@ -48,7 +48,6 @@ import List.Nonempty as NEL
 import RemoteData exposing (RemoteData(..), WebData)
 import SearchResults exposing (SearchResults(..))
 import Syntax
-import System exposing (System)
 import Task
 import UI
 import UI.Icon as Icon
@@ -70,11 +69,11 @@ type alias Model =
     }
 
 
-init : System -> ( Model, Cmd Msg )
-init system =
+init : Env -> ( Model, Cmd Msg )
+init env =
     ( { query = ""
       , results = NotAsked
-      , keyboardShortcut = KeyboardShortcut.init system.operatingSystem
+      , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
       }
     , focusSearchInput
     )
@@ -101,8 +100,8 @@ type OutMsg
     | OpenDefinition Reference
 
 
-update : Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update msg model =
+update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
+update env msg model =
     let
         exit =
             ( model, Cmd.none, Exit )
@@ -130,7 +129,7 @@ update msg model =
                 ( { model | query = query, results = NotAsked }, Cmd.none, Remain )
 
             else if String.length query > 1 && not isSequenceShortcutInput then
-                ( { model | query = query }, fetchMatches query, Remain )
+                ( { model | query = query }, Api.perform env.apiBasePath (fetchMatches query), Remain )
 
             else if not isSequenceShortcutInput then
                 ( { model | query = query }, Cmd.none, Remain )
@@ -239,7 +238,7 @@ update msg model =
 -- EFFECTS
 
 
-fetchMatches : String -> Cmd Msg
+fetchMatches : String -> ApiRequest (List FinderMatch) Msg
 fetchMatches query =
     let
         limit =
@@ -248,13 +247,8 @@ fetchMatches query =
         sourceWidth =
             Syntax.Width 100
     in
-    Http.get
-        { url = Api.find limit sourceWidth query
-        , expect =
-            Http.expectJson
-                (RemoteData.fromResult >> FetchMatchesFinished query)
-                FinderMatch.decodeMatches
-        }
+    Api.find limit sourceWidth query
+        |> Api.toRequest FinderMatch.decodeMatches (RemoteData.fromResult >> FetchMatchesFinished query)
 
 
 focusSearchInput : Cmd Msg

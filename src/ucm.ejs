@@ -4,6 +4,18 @@
   <head>
     <meta charset="utf-8">
     <title>Unison Codebase</title>
+    <% if (webpackConfig.mode === "production") {%>
+      <script type="text/javascript">
+        const pathSegments = location.pathname.split("/").filter(p => p !== "");
+
+        if (pathSegments.length >= 2) {
+          const basePath = pathSegments.slice(0, 2).join("/")
+          const newBase = document.createElement("base");
+          newBase.setAttribute("href", "/" + basePath + "/")
+          document.getElementsByTagName("head")[0].appendChild(newBase);
+        }
+      </script>
+    <% } %>
     <link rel="icon" type="image/svg+xml" href="<%= require('./favicon.svg') %>">
   </head>
   <body></body>
