@@ -3,6 +3,11 @@ module Env exposing (..)
 import Api exposing (ApiBasePath(..))
 
 
+type AppContext
+    = UnisonShare
+    | Ucm
+
+
 type OperatingSystem
     = MacOS
     | Windows
@@ -16,6 +21,7 @@ type alias Env =
     { operatingSystem : OperatingSystem
     , basePath : String
     , apiBasePath : ApiBasePath
+    , appContext : AppContext
     }
 
 
@@ -23,12 +29,26 @@ type alias Flags =
     { operatingSystem : String
     , basePath : String
     , apiBasePath : List String
+    , appContext : String
     }
 
 
 fromFlags : Flags -> Env
 fromFlags flags =
-    Env (operatingSystemFromString flags.operatingSystem) flags.basePath (ApiBasePath flags.apiBasePath)
+    { operatingSystem = operatingSystemFromString flags.operatingSystem
+    , basePath = flags.basePath
+    , apiBasePath = ApiBasePath flags.apiBasePath
+    , appContext = appContextFromString flags.appContext
+    }
+
+
+appContextFromString : String -> AppContext
+appContextFromString rawContext =
+    if rawContext == "UnisonShare" then
+        UnisonShare
+
+    else
+        Ucm
 
 
 operatingSystemFromString : String -> OperatingSystem

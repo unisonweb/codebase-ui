@@ -99,7 +99,8 @@ table {
 
   --color-sidebar-fg: var(--color-gray-lighten-50);
   --color-sidebar-bg: var(--color-gray-darken-20);
-  --color-sidebar-context-fg: var(--color-brand-orange);
+  --color-sidebar-context-unison-share-fg: var(--color-purple-base);
+  --color-sidebar-context-ucm-fg: var(--color-blue-base);
   --color-sidebar-border: transparent;
   --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
   --color-sidebar-subtle-bg: transparent;
@@ -768,9 +769,34 @@ button.secondary:hover {
   margin-bottom: 2.5rem;
 }
 
-#main-sidebar h1 {
+#main-sidebar .app-context {
   font-size: var(--font-size-base);
-  color: var(--color-sidebar-context-fg);
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+#main-sidebar .app-context .logo-mark {
+  display: flex;
+  height: 1.3rem;
+  width: 1.3rem;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.5rem;
+}
+
+#main-sidebar .app-context .logo-mark .icon {
+  font-size: 0.875rem;
+  color: var(--color-sidebar-fg);
+  margin-bottom: 2px;
+}
+
+#main-sidebar .app-context .unison-share {
+  color: var(--color-sidebar-context-unison-share-fg);
+}
+
+#main-sidebar .app-context .ucm {
+  color: var(--color-sidebar-context-ucm-fg);
 }
 
 #main-sidebar h2 {
@@ -805,7 +831,7 @@ button.secondary:hover {
   font-size: 0.875rem;
   text-align: center;
   margin-right: 0.5rem;
-  transition: transform 0.2s ease-out;
+  transition: transform 0.1s ease-out;
 }
 
 #codebase-tree .namespace-tree .node .icon.expanded {

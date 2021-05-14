@@ -37,25 +37,27 @@ const shared = {
   },
 };
 
-const hubCfg = {
+const unisonShareCfg = {
   ...shared,
 
-  entry: "./src/hub.js",
+  entry: "./src/unisonShare.js",
 
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "./static/favicon.ico",
-      template: "./src/hub.ejs",
+      template: "./src/unisonShare.ejs",
       inject: "body",
       publicPath: "/static/",
       base: "/",
-      filename: path.resolve(__dirname, "dist/hub/index.html"),
+      filename: path.resolve(__dirname, "dist/unisonShare/index.html"),
     }),
 
     new FileManagerPlugin({
       events: {
         onEnd: {
-          archive: [{ source: "dist/hub", destination: "dist/hub.zip" }],
+          archive: [
+            { source: "dist/unisonShare", destination: "dist/unisonShare.zip" },
+          ],
         },
       },
     }),
@@ -63,7 +65,7 @@ const hubCfg = {
 
   output: {
     filename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "dist/hub/static"),
+    path: path.resolve(__dirname, "dist/unisonShare/static"),
     clean: true,
   },
 };
@@ -99,4 +101,4 @@ const ucmCfg = {
   },
 };
 
-module.exports = [hubCfg, ucmCfg];
+module.exports = [unisonShareCfg, ucmCfg];

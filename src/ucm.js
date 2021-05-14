@@ -19,6 +19,7 @@ const flags = {
   operatingSystem: detectOs(window.navigator),
   basePath,
   apiBasePath,
+  appContext: "Ucm",
 };
 
 // The main entry point for the `ucm` target of the Codebase UI.
