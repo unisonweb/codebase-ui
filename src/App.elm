@@ -4,7 +4,7 @@ import Browser
 import Browser.Navigation as Nav
 import CodebaseTree
 import Definition.Reference exposing (Reference(..))
-import Env exposing (Env, Flags, OperatingSystem(..))
+import Env as Env exposing (Env, Flags, OperatingSystem(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, aside, div, h1, h3, header, nav, section, span, text)
@@ -285,9 +285,18 @@ subscriptions model =
 
 viewMainSidebar : Model -> Html Msg
 viewMainSidebar model =
+    let
+        appContext =
+            case model.env.appContext of
+                Env.Ucm ->
+                    span [] [ text "Unison", span [ class "context ucm" ] [ text " Local" ] ]
+
+                Env.UnisonShare ->
+                    span [] [ text "Unison", span [ class "context unison-share" ] [ text " Share" ] ]
+    in
     aside
         [ id "main-sidebar" ]
-        [ header [] [ h1 [] [ text "~/.unison" ] ]
+        [ header [] [ h1 [ class "app-context" ] [ span [ class "logo-mark" ] [ Icon.view Icon.UnisonMark ], appContext ] ]
         , div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
         , nav []
             [ a [ href "https://unison-lang.org", target "_blank" ] [ Icon.view Icon.UnisonMark ]
