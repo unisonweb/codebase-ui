@@ -85,7 +85,16 @@ urlParser =
 
 fromUrl : String -> Url -> Route
 fromUrl basePath url =
-    { url | path = String.replace basePath "" url.path }
+    let
+        stripBasePath u =
+            if basePath == "/" then
+                u
+
+            else
+                { u | path = String.replace basePath "" u.path }
+    in
+    url
+        |> stripBasePath
         |> Parser.parse urlParser
         |> Maybe.withDefault (Namespace Latest)
 
