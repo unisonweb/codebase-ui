@@ -1,6 +1,7 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const FileManagerPlugin = require("filemanager-webpack-plugin");
+const CopyPlugin = require("copy-webpack-plugin");
 
 const shared = {
   module: {
@@ -50,6 +51,15 @@ const unisonShareCfg = {
       publicPath: "/static/",
       base: "/",
       filename: path.resolve(__dirname, "dist/unisonShare/index.html"),
+    }),
+
+    new CopyPlugin({
+      patterns: [
+        {
+          from: "src/img/unison-share-social.png",
+          to: "unison-share-social.png",
+        },
+      ],
     }),
 
     new FileManagerPlugin({

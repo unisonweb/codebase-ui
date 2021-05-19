@@ -18,6 +18,7 @@
   "homepage": "https://github.com/unisonweb/codebase-ui#readme",
   "devDependencies": {
     "archiver": "^5.3.0",
+    "copy-webpack-plugin": "^8.1.1",
     "css-loader": "^5.2.4",
     "elm": "^0.19.1-5",
     "elm-asset-webpack-loader": "^1.1.2",

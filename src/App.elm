@@ -8,7 +8,7 @@ import Env as Env exposing (Env, Flags, OperatingSystem(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, aside, div, h1, h3, header, nav, section, span, text)
-import Html.Attributes exposing (class, href, id, target)
+import Html.Attributes exposing (class, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import KeyboardShortcut
 import KeyboardShortcut.Key as Key exposing (Key(..))
@@ -299,10 +299,10 @@ viewMainSidebar model =
         [ header [] [ h1 [ class "app-context" ] [ span [ class "logo-mark" ] [ Icon.view Icon.UnisonMark ], appContext ] ]
         , div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
         , nav []
-            [ a [ href "https://unison-lang.org", target "_blank" ] [ Icon.view Icon.UnisonMark ]
-            , a [ href "https://unison-lang.org/docs", target "_blank" ] [ text "Docs" ]
-            , a [ href "https://unison-lang.org/docs/language-reference", target "_blank" ] [ text "Language Reference" ]
-            , a [ href "https://unison-lang.org/community", target "_blank" ] [ text "Community" ]
+            [ a [ href "https://unison-lang.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.UnisonMark ]
+            , a [ href "https://unison-lang.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
+            , a [ href "https://unison-lang.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
+            , a [ href "https://unison-lang.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
             , a [ class "show-help", onClick ShowHelpModal ] [ text "Keyboard Shortcuts", KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark) ]
             ]
         ]
