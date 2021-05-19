@@ -480,7 +480,7 @@ view model =
                             , id "search"
                             , autocomplete False
                             , spellcheck False
-                            , placeholder "Search by name, namespace, and/or type"
+                            , placeholder "Search by name and/or namespace"
                             , onInput UpdateQuery
                             , value model.query
                             ]
