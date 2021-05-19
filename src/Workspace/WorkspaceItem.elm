@@ -1,9 +1,9 @@
 module Workspace.WorkspaceItem exposing (..)
 
 import Api
-import Definition.AbilityConstructor as AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail, AbilityConstructorSource(..))
+import Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail, AbilityConstructorSource(..))
 import Definition.Category as Category exposing (Category)
-import Definition.DataConstructor as DataConstructor exposing (DataConstructor(..), DataConstructorDetail, DataConstructorSource(..))
+import Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail, DataConstructorSource(..))
 import Definition.Info as Info
 import Definition.Reference as Reference exposing (Reference(..))
 import Definition.Source as Source
@@ -11,9 +11,9 @@ import Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, Ter
 import Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash
-import HashQualified exposing (HashQualified(..))
+import HashQualified as HQ exposing (HashQualified(..))
 import Html exposing (Html, a, div, h3, header, section, span, strong, text)
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode as Decode exposing (at, field)
@@ -277,8 +277,21 @@ view closeMsg toOpenReferenceMsg workspaceItem isFocused =
                 closeMsg
                 ref
                 isFocused
-                (h3 [] [ text "Error" ])
-                [ ( UI.nothing, UI.errorMessage (Api.errorToString err) ) ]
+                (div [ class "error-header" ]
+                    [ Icon.view Icon.Warn
+                    , Icon.view (Reference.toIcon ref)
+                    , h3 [ title (Api.errorToString err) ] [ text (HQ.toString (Reference.hashQualified ref)) ]
+                    ]
+                )
+                [ ( UI.nothing
+                  , div
+                        [ class "error" ]
+                        [ text "Unable to load definition: "
+                        , span [ class "definition-with-error" ] [ text (Reference.toHumanString ref) ]
+                        , text " —  please try again."
+                        ]
+                  )
+                ]
 
         Success ref i ->
             viewItem closeMsg toOpenReferenceMsg ref i isFocused

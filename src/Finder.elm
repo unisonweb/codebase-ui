@@ -17,10 +17,12 @@ import Html
         ( Html
         , a
         , div
+        , h3
         , header
         , input
         , label
         , mark
+        , p
         , section
         , span
         , table
@@ -37,15 +39,16 @@ import Html.Attributes
         , id
         , placeholder
         , spellcheck
+        , title
         , type_
         , value
         )
 import Html.Events exposing (onClick, onInput)
+import Http
 import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import List.Nonempty as NEL
-import RemoteData exposing (RemoteData(..), WebData)
 import SearchResults exposing (SearchResults(..))
 import Syntax
 import Task
@@ -58,13 +61,20 @@ import UI.Modal as Modal
 -- MODEL
 
 
+type FinderSearch
+    = NotAsked
+    | Searching (Maybe FinderSearchResults)
+    | Success FinderSearchResults
+    | Failure Http.Error
+
+
 type alias FinderSearchResults =
     SearchResults FinderMatch
 
 
 type alias Model =
     { query : String
-    , results : WebData FinderSearchResults
+    , search : FinderSearch
     , keyboardShortcut : KeyboardShortcut.Model
     }
 
@@ -72,7 +82,7 @@ type alias Model =
 init : Env -> ( Model, Cmd Msg )
 init env =
     ( { query = ""
-      , results = NotAsked
+      , search = NotAsked
       , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
       }
     , focusSearchInput
@@ -90,7 +100,7 @@ type Msg
     | Close
     | Select Reference
     | Keydown KeyboardEvent
-    | FetchMatchesFinished String (WebData (List FinderMatch))
+    | FetchMatchesFinished String (Result Http.Error (List FinderMatch))
     | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
@@ -107,7 +117,7 @@ update env msg model =
             ( model, Cmd.none, Exit )
 
         reset =
-            ( { model | query = "", results = NotAsked }, focusSearchInput, Remain )
+            ( { model | query = "", search = NotAsked }, focusSearchInput, Remain )
 
         resetOrClose =
             if model.query == "" then
@@ -126,10 +136,22 @@ update env msg model =
                     String.contains ";" query
             in
             if String.isEmpty query then
-                ( { model | query = query, results = NotAsked }, Cmd.none, Remain )
+                ( { model | query = query, search = NotAsked }, Cmd.none, Remain )
 
             else if String.length query > 1 && not isSequenceShortcutInput then
-                ( { model | query = query }, Api.perform env.apiBasePath (fetchMatches query), Remain )
+                let
+                    search =
+                        case model.search of
+                            Success r ->
+                                Searching (Just r)
+
+                            Searching (Just r) ->
+                                Searching (Just r)
+
+                            _ ->
+                                Searching Nothing
+                in
+                ( { model | query = query, search = search }, Api.perform env.apiBasePath (fetchMatches query), Remain )
 
             else if not isSequenceShortcutInput then
                 ( { model | query = query }, Cmd.none, Remain )
@@ -142,11 +164,16 @@ update env msg model =
 
         FetchMatchesFinished query matches ->
             let
-                results =
-                    RemoteData.map SearchResults.fromList matches
+                search =
+                    case matches of
+                        Err e ->
+                            Failure e
+
+                        Ok ms ->
+                            Success (SearchResults.fromList ms)
             in
             if query == model.query then
-                ( { model | results = results }, Cmd.none, Remain )
+                ( { model | search = search }, Cmd.none, Remain )
 
             else
                 ( model, Cmd.none, Remain )
@@ -177,17 +204,17 @@ update env msg model =
 
                 Sequence _ ArrowUp ->
                     let
-                        newResults =
-                            RemoteData.map SearchResults.prev model.results
+                        newSearch =
+                            finderSearchMap SearchResults.prev model.search
                     in
-                    ( { newModel | results = newResults }, cmd, Remain )
+                    ( { newModel | search = newSearch }, cmd, Remain )
 
                 Sequence _ ArrowDown ->
                     let
-                        newResults =
-                            RemoteData.map SearchResults.next model.results
+                        newSearch =
+                            finderSearchMap SearchResults.next model.search
                     in
-                    ( { newModel | results = newResults }, cmd, Remain )
+                    ( { newModel | search = newSearch }, cmd, Remain )
 
                 Sequence _ Enter ->
                     let
@@ -200,9 +227,12 @@ update env msg model =
                                     OpenDefinition ((SearchResults.focus >> FinderMatch.reference) matches)
 
                         out =
-                            model.results
-                                |> RemoteData.map openFocused
-                                |> RemoteData.withDefault Remain
+                            case model.search of
+                                Success r ->
+                                    openFocused r
+
+                                _ ->
+                                    Remain
                     in
                     ( newModel, cmd, out )
 
@@ -211,8 +241,8 @@ update env msg model =
                         Just n ->
                             let
                                 out =
-                                    model.results
-                                        |> RemoteData.toMaybe
+                                    model.search
+                                        |> finderSearchToMaybe
                                         |> Maybe.andThen (SearchResults.getAt (n - 1))
                                         |> Maybe.map FinderMatch.reference
                                         |> Maybe.map OpenDefinition
@@ -235,6 +265,30 @@ update env msg model =
 
 
 
+-- Helpers
+
+
+finderSearchMap : (FinderSearchResults -> FinderSearchResults) -> FinderSearch -> FinderSearch
+finderSearchMap f finderSearch =
+    case finderSearch of
+        Success r ->
+            Success (f r)
+
+        _ ->
+            finderSearch
+
+
+finderSearchToMaybe : FinderSearch -> Maybe FinderSearchResults
+finderSearchToMaybe fs =
+    case fs of
+        Success r ->
+            Just r
+
+        _ ->
+            Nothing
+
+
+
 -- EFFECTS
 
 
@@ -248,7 +302,7 @@ fetchMatches query =
             Syntax.Width 100
     in
     Api.find limit sourceWidth query
-        |> Api.toRequest FinderMatch.decodeMatches (RemoteData.fromResult >> FetchMatchesFinished query)
+        |> Api.toRequest FinderMatch.decodeMatches (FetchMatchesFinished query)
 
 
 focusSearchInput : Cmd Msg
@@ -381,26 +435,44 @@ viewMatches keyboardShortcut matches =
 view : Model -> Html Msg
 view model =
     let
-        results =
-            case model.results of
-                Success res ->
-                    case res of
-                        Empty ->
-                            UI.emptyStateMessage ("No matching definitions found for '" ++ model.query ++ "'")
+        viewResults res =
+            case res of
+                Empty ->
+                    UI.emptyStateMessage ("No matching definitions found for \"" ++ model.query ++ "\"")
 
-                        SearchResults matches ->
-                            viewMatches model.keyboardShortcut matches
+                SearchResults matches ->
+                    viewMatches model.keyboardShortcut matches
+
+        results =
+            case model.search of
+                Success res ->
+                    viewResults res
+
+                Searching (Just res) ->
+                    viewResults res
 
                 Failure error ->
-                    div [] [ text (Api.errorToString error) ]
+                    div [ class "error" ]
+                        [ h3 [ title (Api.errorToString error) ] [ Icon.view Icon.Warn, text "Unable to search" ]
+                        , p [] [ text ("Something went wrong trying to find \"" ++ model.query ++ "\"") ]
+                        , p [] [ text "Please try again" ]
+                        ]
 
                 _ ->
                     UI.nothing
 
+        isSearching =
+            case model.search of
+                Searching _ ->
+                    True
+
+                _ ->
+                    False
+
         content =
             Modal.CustomContent
                 (div
-                    []
+                    [ classList [ ( "is-searching", isSearching ) ] ]
                     [ header []
                         [ Icon.view Icon.Search
                         , input
