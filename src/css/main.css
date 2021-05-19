@@ -75,6 +75,11 @@ table {
   --color-gray-lighten-60: #fafafb;
   --color-gray-lighten-100: #ffffff;
 
+  /* Reds */
+  --color-pink-base: #ff4756;
+  --color-pink-lighten-20: #ff6c78;
+  --color-pink-lighten-30: #ff9ba3;
+
   /* blues */
   --color-blue-base: #5695f4;
 
@@ -100,7 +105,7 @@ table {
   --color-sidebar-fg: var(--color-gray-lighten-50);
   --color-sidebar-bg: var(--color-gray-darken-20);
   --color-sidebar-context-unison-share-fg: var(--color-purple-base);
-  --color-sidebar-context-ucm-fg: var(--color-blue-base);
+  --color-sidebar-context-ucm-fg: var(--color-green-base);
   --color-sidebar-border: transparent;
   --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
   --color-sidebar-subtle-bg: transparent;
@@ -149,6 +154,7 @@ table {
   --color-modal-title-bg: transparent;
   --color-modal-mark-fg: var(--color-blue-base);
   --color-modal-mark-bg: transparent;
+  --color-modal-error-fg: var(--color-pink-base);
 
   /* Icons */
   --color-icon-type: var(--color-brand-orange);
@@ -226,6 +232,19 @@ table {
   100% {
     opacity: 1;
     transform: translateY(0);
+  }
+}
+
+/* scale3D instead of scale forces the animation onto the GPU, avoiding jank */
+@keyframes pulse-grow {
+  0% {
+    transform: scale3D(1, 1, 1);
+  }
+  50% {
+    transform: scale3D(1.25, 1.25, 1.25);
+  }
+  100% {
+    transform: scale3D(1, 1, 1);
   }
 }
 
@@ -454,7 +473,7 @@ code a:active {
 /* -- UI ------------------------------------------------------------------- */
 
 .error-message {
-  color: var(--color-brand-bright-red);
+  color: var(--color-pink-base);
 }
 
 .subtle {
@@ -782,7 +801,7 @@ button.secondary:hover {
   width: 1.3rem;
   align-items: center;
   justify-content: center;
-  margin-right: 0.5rem;
+  margin-right: 0.125rem;
 }
 
 #main-sidebar .app-context .logo-mark .icon {
@@ -808,11 +827,11 @@ button.secondary:hover {
 
 /* -- Codebase Tree -------------------------------------------------------- */
 
-#codebase-tree .namespace-tree {
+.codebase-tree .namespace-tree {
   margin-left: -0.5rem;
 }
 
-#codebase-tree .namespace-tree .node {
+.codebase-tree .namespace-tree .node {
   display: flex;
   user-select: none;
   align-items: center;
@@ -822,52 +841,67 @@ button.secondary:hover {
   height: 1.75rem;
 }
 
-#codebase-tree .namespace-tree .node:hover {
+.codebase-tree .error {
+  padding-left: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0.5rem 0;
+  color: var(--color-pink-lighten-30);
+}
+
+.codebase-tree .error .icon {
+  font-size: 1rem;
+  margin-right: 0.25rem;
+  color: var(--color-pink-base);
+}
+
+.codebase-tree .namespace-tree .node:hover {
   background: var(--color-sidebar-focus-bg);
   text-decoration: none;
 }
 
-#codebase-tree .namespace-tree .node .icon {
+.codebase-tree .namespace-tree .node .icon {
   font-size: 0.875rem;
   text-align: center;
   margin-right: 0.5rem;
   transition: transform 0.1s ease-out;
 }
 
-#codebase-tree .namespace-tree .node .icon.expanded {
+.codebase-tree .namespace-tree .node .icon.expanded {
   transform: rotate(90deg);
 }
 
-#codebase-tree .namespace-tree .node .icon:is(.caret-right, .caret-down) {
+.codebase-tree .namespace-tree .node .icon:is(.caret-right, .caret-down) {
   color: var(--color-sidebar-subtle-fg);
 }
 
-#codebase-tree .namespace-tree .node:hover .icon:is(.caret-right, .caret-down) {
+.codebase-tree .namespace-tree .node:hover .icon:is(.caret-right, .caret-down) {
   color: var(--color-sidebar-focus-fg);
 }
 
-#codebase-tree .namespace-tree .node label {
+.codebase-tree .namespace-tree .node label {
   color: var(--color-sidebar-fg);
   transition: all 0.2s;
   cursor: pointer;
 }
 
-#codebase-tree .namespace-tree .node .definition-category {
+.codebase-tree .namespace-tree .node .definition-category {
   font-family: var(--font-monospace);
   color: var(--color-sidebar-subtle-fg);
   margin-left: 0.375rem;
   font-size: 0.75rem;
 }
 
-#codebase-tree .namespace-tree .node:hover label {
+.codebase-tree .namespace-tree .node:hover label {
   color: var(--color-sidebar-focus-fg);
 }
 
-#codebase-tree .namespace-tree .node.open label {
+.codebase-tree .namespace-tree .node.open label {
   font-weight: bold;
 }
 
-#codebase-tree .namespace-tree .namespace-content {
+.codebase-tree .namespace-tree .namespace-content {
   margin-left: 1rem;
   transform-origin: left top;
   animation: slide-down 0.2s ease-out;
@@ -1082,8 +1116,37 @@ button.secondary:hover {
   color: var(--color-workspace-item-fg);
 }
 
+.definition-row header .error-header {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.definition-row header .error-header .icon {
+  margin-right: 0.375rem;
+}
+
+.definition-row header .error-header .icon.caret-down {
+  margin-right: 0.25rem;
+  color: var(--color-workspace-item-subtle-fg);
+}
+
+.definition-row header .error-header .icon.warn {
+  font-size: 1rem;
+  color: var(--color-pink-base);
+}
+
 .definition-row .content .gutter {
   margin-right: 1.5rem;
+}
+
+.definition-row .content .error {
+  padding-left: 1.5rem;
+  font-size: var(--font-size-medium);
+}
+
+.definition-row .content .definition-with-error {
+  font-weight: bold;
 }
 
 .definition-row .content .docs {
@@ -1151,11 +1214,8 @@ button.secondary:hover {
   background: var(--color-workspace-item-focus-mg);
 }
 
-.definition-row.focused header .name {
-  color: var(--color-workspace-item-focus-fg);
-}
-
-.definition-row.focused header .icon {
+.definition-row.focused header .name,
+.definition-row.focused header .error-header {
   color: var(--color-workspace-item-focus-fg);
 }
 
@@ -1211,15 +1271,24 @@ button.secondary:hover {
   background: var(--color-modal-mg);
   display: flex;
   align-items: center;
+  position: relative;
 }
 
 #finder header .icon.search {
-  width: 1.125rem;
-  height: 1.125rem;
   font-size: 1.125rem;
   margin-left: 1rem;
   margin-right: 1rem;
   color: var(--color-modal-subtle-fg);
+  transition: all 1s;
+  transition-delay: 0.3s;
+  will-change: transform;
+}
+
+#finder .is-searching .icon.search {
+  color: var(--color-blue-base);
+  animation: pulse-grow 1s ease-in-out infinite;
+  animation-delay: 0.3s;
+  stroke-width: 1.5;
 }
 
 #finder input {
@@ -1257,10 +1326,39 @@ button.secondary:hover {
 }
 
 #finder .empty-state {
+  position: relative;
   padding: 2rem;
   text-align: center;
   border-top: 1px solid var(--color-modal-inner-border);
   color: var(--color-modal-subtle-fg);
+}
+
+#finder .error {
+  position: relative;
+  padding: 2rem;
+  text-align: center;
+  border-top: 1px solid var(--color-modal-inner-border);
+  color: var(--color-modal-fg);
+}
+
+#finder .error p {
+  margin-bottom: 0.25rem;
+}
+
+#finder .error h3 {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  margin-bottom: 0.5rem;
+}
+
+#finder .error .icon {
+  font-size: 1.3rem;
+  margin-bottom: 0.15rem;
+  margin-right: 0.25rem;
+  color: var(--color-modal-error-fg);
 }
 
 /* results */
@@ -1269,6 +1367,29 @@ button.secondary:hover {
   position: relative;
   padding: 0.75rem;
   border-top: 1px solid var(--color-modal-inner-border);
+}
+
+#finder .results:after,
+#finder .empty-state:after,
+#finder .error:after {
+  content: " ";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: var(--color-modal-bg);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.4s;
+  transition-delay: 0.3s;
+}
+
+#finder .is-searching .results:after,
+#finder .is-searching .empty-state:after,
+#finder .is-searching .error:after {
+  opacity: 0.65;
+  pointer-events: auto;
 }
 
 #finder .results table {

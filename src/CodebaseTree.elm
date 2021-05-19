@@ -14,7 +14,7 @@ import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, h2, label, span, text)
-import Html.Attributes exposing (class, classList, id)
+import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
 import RemoteData exposing (RemoteData(..), WebData)
@@ -205,7 +205,7 @@ viewNamespaceListingContent expandedNamespaceListings content =
             viewLoadedNamespaceListingContent expandedNamespaceListings loadedContent
 
         Failure err ->
-            UI.errorMessage (Api.errorToString err)
+            viewError err
 
         NotAsked ->
             UI.nothing
@@ -242,6 +242,14 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) 
         ]
 
 
+viewError : Http.Error -> Html msg
+viewError err =
+    div [ class "error", title (Api.errorToString err) ]
+        [ Icon.view Icon.Warn
+        , text "Unable to load namespace"
+        ]
+
+
 view : Model -> Html Msg
 view model =
     let
@@ -253,7 +261,7 @@ view model =
                         content
 
                 Failure err ->
-                    UI.errorMessage (Api.errorToString err)
+                    viewError err
 
                 NotAsked ->
                     UI.spinner
@@ -261,7 +269,7 @@ view model =
                 Loading ->
                     UI.spinner
     in
-    div [ id "codebase-tree" ]
+    div [ class "codebase-tree" ]
         [ h2 [] [ text "All Namespaces" ]
         , div [ class "namespace-tree" ] [ listings ]
         ]

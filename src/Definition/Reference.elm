@@ -1,6 +1,7 @@
 module Definition.Reference exposing (..)
 
 import HashQualified as HQ exposing (HashQualified)
+import UI.Icon as Icon exposing (Icon(..))
 import Url.Parser
 
 
@@ -68,3 +69,35 @@ toString ref =
 
         DataConstructorReference hq ->
             "data_constructor__" ++ HQ.toString hq
+
+
+toHumanString : Reference -> String
+toHumanString ref =
+    case ref of
+        TermReference hq ->
+            "Term " ++ HQ.toString hq
+
+        TypeReference hq ->
+            "Type " ++ HQ.toString hq
+
+        AbilityConstructorReference hq ->
+            "Ability constructor " ++ HQ.toString hq
+
+        DataConstructorReference hq ->
+            "Data Constructor " ++ HQ.toString hq
+
+
+toIcon : Reference -> Icon
+toIcon ref =
+    case ref of
+        TermReference _ ->
+            Icon.Term
+
+        TypeReference _ ->
+            Icon.Type
+
+        AbilityConstructorReference _ ->
+            Icon.AbilityConstructor
+
+        DataConstructorReference _ ->
+            Icon.DataConstructor

@@ -21,7 +21,7 @@ badge content =
 
 spinner : Html msg
 spinner =
-    div [ class "spinner" ] [ text "Loading..." ]
+    div [ class "spinner" ] []
 
 
 subtle : String -> Html msg
