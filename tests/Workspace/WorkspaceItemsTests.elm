@@ -57,13 +57,65 @@ insertWithFocusAfter =
             getFocusedRef inserted
     in
     describe "WorkspaceItems.insertWithFocusAfter"
-        [ test "Inserts after the the 'after hash'" <|
+        [ test "Inserts after the 'after ref'" <|
             \_ ->
                 Expect.equal expected (WorkspaceItems.toList inserted)
         , test "When inserted, the new element has focus" <|
             \_ ->
                 Expect.true "Has focus" (Maybe.withDefault False <| Maybe.map (\r -> r == reference toInsert) currentFocusedRef)
-        , test "When the 'after hash' is not present, insert at the end" <|
+        , test "When the 'after ref' is not present, insert at the end" <|
+            \_ ->
+                let
+                    atEnd =
+                        [ Loading (termRefFromStr "#a")
+                        , Loading (termRefFromStr "#b")
+                        , Loading (termRefFromStr "#focus")
+                        , Loading (termRefFromStr "#c")
+                        , Loading (termRefFromStr "#d")
+                        , Loading (reference toInsert)
+                        ]
+
+                    result =
+                        toInsert
+                            |> WorkspaceItems.insertWithFocusAfter workspaceItems notFoundRef
+                            |> WorkspaceItems.toList
+                in
+                Expect.equal atEnd result
+        ]
+
+
+insertWithFocusBefore : Test
+insertWithFocusBefore =
+    let
+        beforeRef =
+            termRefFromStr "#b"
+
+        toInsert =
+            term
+
+        expected =
+            [ Loading (termRefFromStr "#a")
+            , Loading termRef
+            , Loading (termRefFromStr "#b")
+            , Loading (termRefFromStr "#focus")
+            , Loading (termRefFromStr "#c")
+            , Loading (termRefFromStr "#d")
+            ]
+
+        inserted =
+            WorkspaceItems.insertWithFocusBefore workspaceItems beforeRef toInsert
+
+        currentFocusedRef =
+            getFocusedRef inserted
+    in
+    describe "WorkspaceItems.insertWithFocusBefore"
+        [ test "Inserts before the 'before ref'" <|
+            \_ ->
+                Expect.equal expected (WorkspaceItems.toList inserted)
+        , test "When inserted, the new element has focus" <|
+            \_ ->
+                Expect.true "Has focus" (Maybe.withDefault False <| Maybe.map (\r -> r == reference toInsert) currentFocusedRef)
+        , test "When the 'before hash' is not present, insert at the end" <|
             \_ ->
                 let
                     atEnd =

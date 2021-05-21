@@ -83,6 +83,48 @@ insertWithFocus items item =
     WorkspaceItems { before = toList items, focus = item, after = [] }
 
 
+{-| Insert before a Hash. If the Hash is not in WorkspaceItems, insert with
+focus. If the element to insert already exists in WorkspaceItems, move it to
+after the provided Hash
+-}
+insertWithFocusBefore :
+    WorkspaceItems
+    -> Reference
+    -> WorkspaceItem
+    -> WorkspaceItems
+insertWithFocusBefore items beforeRef toInsert =
+    case items of
+        Empty ->
+            singleton toInsert
+
+        WorkspaceItems _ ->
+            if member items beforeRef then
+                let
+                    insertBefore item =
+                        if WorkspaceItem.isSameReference item beforeRef then
+                            [ toInsert, item ]
+
+                        else
+                            [ item ]
+
+                    make ( before, afterInclusive ) =
+                        WorkspaceItems
+                            { before = before
+                            , focus = toInsert
+                            , after = List.drop 1 afterInclusive
+                            }
+                in
+                items
+                    |> toList
+                    |> List.concatMap insertBefore
+                    |> ListE.splitWhen (WorkspaceItem.isSameByReference toInsert)
+                    |> Maybe.map make
+                    |> Maybe.withDefault (singleton toInsert)
+
+            else
+                insertWithFocus items toInsert
+
+
 {-| Insert after a Hash. If the Hash is not in WorkspaceItems, insert at the
 end. If the element to insert already exists in WorkspaceItems, move it to
 after the provided Hash
