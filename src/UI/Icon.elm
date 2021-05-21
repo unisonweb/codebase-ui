@@ -29,6 +29,8 @@ type Icon
     | Checkmark
     | X
     | Search
+    | Dot
+    | Dash
 
 
 custom : List (Attribute msg) -> Icon -> Html msg
@@ -133,3 +135,9 @@ toIdString icon =
 
         Search ->
             "search"
+
+        Dot ->
+            "dot"
+
+        Dash ->
+            "dash"
