@@ -12,7 +12,7 @@ import Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, Typ
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash
 import HashQualified as HQ exposing (HashQualified(..))
-import Html exposing (Html, a, div, h3, header, section, span, strong, text)
+import Html exposing (Attribute, Html, a, div, h3, header, section, span, strong, text)
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
@@ -25,12 +25,13 @@ import Syntax
 import UI
 import UI.Icon as Icon
 import Util
+import Workspace.Zoom exposing (Zoom(..))
 
 
 type WorkspaceItem
     = Loading Reference
     | Failure Reference Http.Error
-    | Success Reference Item
+    | Success Reference Item Zoom
 
 
 type Item
@@ -49,7 +50,7 @@ reference item =
         Failure r _ ->
             r
 
-        Success r _ ->
+        Success r _ _ ->
             r
 
 
@@ -125,10 +126,11 @@ viewBuiltin item =
 {-| TODO: Some of this that isn't Workspace specific might be moved into Definition.Info
 -}
 viewNames :
-    { a | name : String, namespace : Maybe String, otherNames : List FQN }
+    msg
+    -> { a | name : String, namespace : Maybe String, otherNames : List FQN }
     -> Category
     -> Html msg
-viewNames info category =
+viewNames onClick_ info category =
     let
         namespace =
             case info.namespace of
@@ -161,8 +163,8 @@ viewNames info category =
             else
                 UI.nothing
     in
-    div [ class "names" ]
-        [ Icon.view Icon.CaretDown
+    div [ class "names", onClick onClick_ ]
+        [ Icon.view Icon.CaretRight
         , Icon.view (Category.icon category)
         , h3 [ class "name" ] [ text info.name ]
         , div [ class "info" ] [ namespace, otherNames ]
@@ -186,10 +188,8 @@ viewSource toOpenReferenceMsg item =
         viewToggableSource icon disabled renderedSource =
             div [ class "source" ]
                 [ div
-                    [ classList
-                        [ ( "source-toggle", True )
-                        , ( "disabled", disabled )
-                        ]
+                    [ class "source-toggle"
+                    , classList [ ( "disabled", disabled ) ]
                     ]
                     [ Icon.view icon ]
                 , renderedSource
@@ -204,7 +204,7 @@ viewSource toOpenReferenceMsg item =
         TermItem (Term _ _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTermLines (Source.viewTermSource (Source.Rich (HashOnly >> TermReference >> toOpenReferenceMsg)) detail.info.name)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretDown False)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight False)
 
         TypeItem (Type _ _ detail) ->
             ( detail.source, detail.source )
@@ -222,15 +222,39 @@ viewSource toOpenReferenceMsg item =
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
 
 
-viewItem : msg -> (Reference -> msg) -> Reference -> Item -> Bool -> Html msg
-viewItem closeMsg toOpenReferenceMsg ref item isFocused =
+viewItem :
+    msg
+    -> (Reference -> msg)
+    -> (Zoom -> msg)
+    -> Reference
+    -> Item
+    -> Zoom
+    -> Bool
+    -> Html msg
+viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocused =
+    let
+        -- TODO: Support zoom level on the source
+        ( zoomClass, docZoomMsg, _ ) =
+            case zoomLevel of
+                Far ->
+                    ( "zoom-level-far", toUpdateZoomMsg Medium, toUpdateZoomMsg Near )
+
+                Medium ->
+                    ( "zoom-level-medium", toUpdateZoomMsg Far, toUpdateZoomMsg Near )
+
+                Near ->
+                    ( "zoom-level-near", toUpdateZoomMsg Far, toUpdateZoomMsg Near )
+
+        attrs =
+            [ class zoomClass, classList [ ( "focused", isFocused ) ] ]
+    in
     case item of
         TermItem (Term _ category detail) ->
             viewClosableRow
                 closeMsg
                 ref
-                isFocused
-                (viewNames detail.info (Category.Term category))
+                attrs
+                (viewNames docZoomMsg detail.info (Category.Term category))
                 [ ( UI.nothing, viewBuiltin item )
                 , viewSource toOpenReferenceMsg item
                 ]
@@ -239,8 +263,8 @@ viewItem closeMsg toOpenReferenceMsg ref item isFocused =
             viewClosableRow
                 closeMsg
                 ref
-                isFocused
-                (viewNames detail.info (Category.Type category))
+                attrs
+                (viewNames docZoomMsg detail.info (Category.Type category))
                 [ ( UI.nothing, viewBuiltin item )
                 , viewSource toOpenReferenceMsg item
                 ]
@@ -249,8 +273,8 @@ viewItem closeMsg toOpenReferenceMsg ref item isFocused =
             viewClosableRow
                 closeMsg
                 ref
-                isFocused
-                (viewNames detail.info (Category.Type Type.DataType))
+                attrs
+                (viewNames docZoomMsg detail.info (Category.Type Type.DataType))
                 [ ( UI.nothing, viewBuiltin item )
                 , viewSource toOpenReferenceMsg item
                 ]
@@ -259,24 +283,28 @@ viewItem closeMsg toOpenReferenceMsg ref item isFocused =
             viewClosableRow
                 closeMsg
                 ref
-                isFocused
-                (viewNames detail.info (Category.Type Type.AbilityType))
+                attrs
+                (viewNames docZoomMsg detail.info (Category.Type Type.AbilityType))
                 [ ( UI.nothing, viewBuiltin item )
                 , viewSource toOpenReferenceMsg item
                 ]
 
 
-view : msg -> (Reference -> msg) -> WorkspaceItem -> Bool -> Html msg
-view closeMsg toOpenReferenceMsg workspaceItem isFocused =
+view : msg -> (Reference -> msg) -> (Zoom -> msg) -> WorkspaceItem -> Bool -> Html msg
+view closeMsg toOpenReferenceMsg toUpdateZoomMsg workspaceItem isFocused =
+    let
+        focusedAttrs =
+            [ classList [ ( "focused", isFocused ) ] ]
+    in
     case workspaceItem of
         Loading ref ->
-            viewRow ref isFocused ( UI.nothing, UI.loadingPlaceholder ) [ ( UI.nothing, UI.loadingPlaceholder ) ]
+            viewRow ref focusedAttrs ( UI.nothing, UI.loadingPlaceholder ) [ ( UI.nothing, UI.loadingPlaceholder ) ]
 
         Failure ref err ->
             viewClosableRow
                 closeMsg
                 ref
-                isFocused
+                focusedAttrs
                 (div [ class "error-header" ]
                     [ Icon.view Icon.Warn
                     , Icon.view (Reference.toIcon ref)
@@ -293,8 +321,8 @@ view closeMsg toOpenReferenceMsg workspaceItem isFocused =
                   )
                 ]
 
-        Success ref i ->
-            viewItem closeMsg toOpenReferenceMsg ref i isFocused
+        Success ref item zoom ->
+            viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoom isFocused
 
 
 
@@ -308,11 +336,11 @@ viewGutter content =
 
 viewRow :
     Reference
-    -> Bool
+    -> List (Attribute msg)
     -> ( Html msg, Html msg )
     -> List ( Html msg, Html msg )
     -> Html msg
-viewRow ref isFocused ( headerGutter, headerContent ) content =
+viewRow ref attrs ( headerGutter, headerContent ) content =
     let
         headerItems =
             [ viewGutter headerGutter, headerContent ]
@@ -321,9 +349,7 @@ viewRow ref isFocused ( headerGutter, headerContent ) content =
             List.map (\( g, c ) -> div [ class "inner-row" ] [ viewGutter g, c ]) content
     in
     div
-        [ classList [ ( "focused", isFocused ), ( "definition-row", True ) ]
-        , id ("definition-" ++ Reference.toString ref)
-        ]
+        (class "definition-row" :: id ("definition-" ++ Reference.toString ref) :: attrs)
         [ header [ class "inner-row" ] headerItems
         , section [ class "content" ] contentRows
         ]
@@ -332,16 +358,16 @@ viewRow ref isFocused ( headerGutter, headerContent ) content =
 viewClosableRow :
     msg
     -> Reference
-    -> Bool
+    -> List (Attribute msg)
     -> Html msg
     -> List ( Html msg, Html msg )
     -> Html msg
-viewClosableRow closeMsg hash_ isFocused header contentItems =
+viewClosableRow closeMsg hash_ attrs header contentItems =
     let
         close =
             a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
     in
-    viewRow hash_ isFocused ( close, header ) contentItems
+    viewRow hash_ attrs ( close, header ) contentItems
 
 
 

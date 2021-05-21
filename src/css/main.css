@@ -1029,9 +1029,9 @@ button.secondary:hover {
   flex-direction: row;
 }
 
-.definition-row .icon.caret-right,
-.definition-row .icon.caret-down {
+.definition-row .icon.caret-right {
   color: var(--color-workspace-item-subtle-fg);
+  transition: color 0.2s, transform 0.1s ease-out;
 }
 
 .definition-row .gutter {
@@ -1078,14 +1078,19 @@ button.secondary:hover {
   display: flex;
   flex-direction: row;
   align-items: center;
+  cursor: pointer;
 }
 
 .definition-row header .names .icon {
   margin-right: 0.375rem;
 }
-.definition-row header .names .icon.caret-right,
-.definition-row header .names .icon.caret-down {
+
+.definition-row header .names .icon.caret-right {
   margin-right: 0.25rem;
+}
+
+.definition-row header .names:hover .icon {
+  color: var(--color-workspace-item-focus-fg);
 }
 
 .definition-row header .names .name {
@@ -1177,7 +1182,13 @@ button.secondary:hover {
   display: flex;
   align-items: center;
   margin-right: 0.375rem;
-  padding-top: 0.2rem;
+  padding-top: 0.1rem;
+  /* TODO: Renable source toggle */
+  display: none;
+}
+
+.definition-row .content .source .source-toggle .icon {
+  color: var(--color-workspace-item-subtle-fg);
 }
 
 .definition-row .content .source .source-toggle.disabled {
@@ -1199,6 +1210,29 @@ button.secondary:hover {
 .definition-row .content code .loading-placeholder {
   display: block;
   width: 40%;
+}
+
+/* Definition Row: Zoom level */
+.definition-row.zoom-level-far .inner-row {
+  margin-bottom: 0;
+}
+
+.definition-row.zoom-level-far .content {
+  opacity: 0;
+  height: 0;
+}
+
+.definition-row.zoom-level-medium .names .icon.caret-right {
+  transform: rotate(90deg);
+}
+
+.definition-row.zoom-level-medium .source-detail {
+  opacity: 0;
+  height: 0;
+}
+
+.definition-row.zoom-level-near .source .icon.caret-right {
+  transform: rotate(90deg);
 }
 
 /* Definition Row: Focused */
