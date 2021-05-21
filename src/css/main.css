@@ -498,6 +498,10 @@ code a:active {
   min-width: calc(var(--font-size-base) * 3);
 }
 
+.loading-placeholder-row {
+  margin-bottom: 0.5rem;
+}
+
 #modal-overlay {
   position: fixed;
   top: 0;
@@ -800,6 +804,7 @@ button.secondary:hover {
 
 #main-sidebar .loading-placeholder {
   background: var(--color-sidebar-subtle-fg);
+  opacity: 0.5;
 }
 
 #main-sidebar header {
@@ -872,6 +877,22 @@ button.secondary:hover {
   font-size: 1rem;
   margin-right: 0.25rem;
   color: var(--color-pink-1);
+}
+
+.codebase-tree .loading {
+  padding-left: 0.5rem;
+}
+
+.codebase-tree .loading .loading-placeholder {
+  width: 8rem;
+}
+
+.codebase-tree .namespace-content .loading {
+  padding-left: 0.875rem;
+}
+
+.codebase-tree .namespace-content .loading .loading-placeholder {
+  width: 6rem;
 }
 
 .codebase-tree .namespace-tree .node:hover {

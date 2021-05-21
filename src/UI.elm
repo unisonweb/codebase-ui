@@ -19,11 +19,6 @@ badge content =
     span [ class "badge" ] [ content ]
 
 
-spinner : Html msg
-spinner =
-    div [ class "spinner" ] []
-
-
 subtle : String -> Html msg
 subtle label =
     span [ class "subtle" ] [ text label ]
@@ -32,6 +27,13 @@ subtle label =
 loadingPlaceholder : Html msg
 loadingPlaceholder =
     div [ class "loading-placeholder" ] []
+
+
+loadingPlaceholderRow : Html msg
+loadingPlaceholderRow =
+    div [ class "loading-placeholder-row" ]
+        [ div [ class "loading-placeholder" ] []
+        ]
 
 
 errorMessage : String -> Html msg

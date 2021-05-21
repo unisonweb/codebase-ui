@@ -65,18 +65,31 @@ update env msg model =
                 shouldExpand =
                     not (FQNSet.member fqn model.expandedNamespaceListings)
 
-                newModel =
-                    -- TODO: Update to Loading
-                    { model
-                        | expandedNamespaceListings =
-                            FQNSet.toggle fqn
-                                model.expandedNamespaceListings
-                    }
+                setLoading ((NamespaceListing h f _) as namespaceListing) =
+                    if FQN.equals f fqn then
+                        NamespaceListing h f Loading
+
+                    else
+                        namespaceListing
+
+                nextNamespaceListing =
+                    if shouldExpand && not namespaceContentFetched then
+                        RemoteData.map (NamespaceListing.map setLoading) model.rootNamespaceListing
+
+                    else
+                        model.rootNamespaceListing
 
                 namespaceContentFetched =
                     model.rootNamespaceListing
                         |> RemoteData.map (\nl -> NamespaceListing.contentFetched nl fqn)
                         |> RemoteData.withDefault False
+
+                newModel =
+                    -- TODO: Update to Loading
+                    { model
+                        | expandedNamespaceListings = FQNSet.toggle fqn model.expandedNamespaceListings
+                        , rootNamespaceListing = nextNamespaceListing
+                    }
 
                 cmd =
                     if shouldExpand && not namespaceContentFetched then
@@ -211,7 +224,7 @@ viewNamespaceListingContent expandedNamespaceListings content =
             UI.nothing
 
         Loading ->
-            UI.loadingPlaceholder
+            viewLoading
 
 
 viewNamespaceListing : FQNSet -> NamespaceListing -> Html Msg
@@ -250,6 +263,15 @@ viewError err =
         ]
 
 
+viewLoading : Html msg
+viewLoading =
+    div [ class "loading" ]
+        [ UI.loadingPlaceholderRow
+        , UI.loadingPlaceholderRow
+        , UI.loadingPlaceholderRow
+        ]
+
+
 view : Model -> Html Msg
 view model =
     let
@@ -264,10 +286,10 @@ view model =
                     viewError err
 
                 NotAsked ->
-                    UI.spinner
+                    viewLoading
 
                 Loading ->
-                    UI.spinner
+                    viewLoading
     in
     div [ class "codebase-tree" ]
         [ h2 [] [ text "All Namespaces" ]
