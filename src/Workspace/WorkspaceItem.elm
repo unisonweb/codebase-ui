@@ -196,29 +196,24 @@ viewSource toOpenReferenceMsg item =
                 ]
     in
     case item of
-        -- TODO, this reference config created like so: (Source.Rich (HashOnly
-        -- >> TermReference >> toOpenReferenceMsg) is wrong. It creates a
-        -- TermReference for all things referenced from the source. The
-        -- Reference variant should be determined by the SyntaxSegment variant
-        -- and if the hash has a constructor suffix.
         TermItem (Term _ _ detail) ->
             ( detail.source, detail.source )
-                |> Tuple.mapBoth Source.numTermLines (Source.viewTermSource (Source.Rich (HashOnly >> TermReference >> toOpenReferenceMsg)) detail.info.name)
+                |> Tuple.mapBoth Source.numTermLines (Source.viewTermSource (Source.Rich toOpenReferenceMsg) detail.info.name)
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight False)
 
         TypeItem (Type _ _ detail) ->
             ( detail.source, detail.source )
-                |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich (HashOnly >> TypeReference >> toOpenReferenceMsg)))
+                |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich toOpenReferenceMsg))
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
 
         DataConstructorItem (DataConstructor _ detail) ->
             ( detail.source, detail.source )
-                |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich (HashOnly >> DataConstructorReference >> toOpenReferenceMsg)))
+                |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich toOpenReferenceMsg))
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
 
         AbilityConstructorItem (AbilityConstructor _ detail) ->
             ( detail.source, detail.source )
-                |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich (HashOnly >> AbilityConstructorReference >> toOpenReferenceMsg)))
+                |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich toOpenReferenceMsg))
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
 
 
