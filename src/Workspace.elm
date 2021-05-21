@@ -16,6 +16,7 @@ import UI
 import UI.Button as Button
 import Workspace.WorkspaceItem as WorkspaceItem exposing (Item(..), WorkspaceItem(..))
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
+import Workspace.Zoom as Zoom exposing (Zoom(..))
 
 
 
@@ -53,6 +54,7 @@ type Msg
     | Find
     | OpenDefinitionAfter Reference Reference
     | CloseDefinition Reference
+    | UpdateZoom Reference Zoom
     | FetchItemFinished Reference (Result Http.Error Item)
     | Keydown KeyboardEvent
 
@@ -83,6 +85,22 @@ update env msg model =
             in
             ( nextModel, Cmd.none, openDefinitionsFocusToOutMsg nextModel )
 
+        UpdateZoom ref zoom ->
+            let
+                updateMatching workspaceItem =
+                    case workspaceItem of
+                        Success r i _ ->
+                            if ref == r then
+                                Success r i zoom
+
+                            else
+                                workspaceItem
+
+                        _ ->
+                            workspaceItem
+            in
+            ( WorkspaceItems.map updateMatching model, Cmd.none, None )
+
         FetchItemFinished ref itemResult ->
             let
                 workspaceItem =
@@ -91,7 +109,7 @@ update env msg model =
                             WorkspaceItem.Failure ref e
 
                         Ok i ->
-                            WorkspaceItem.Success ref i
+                            WorkspaceItem.Success ref i Zoom.Medium
 
                 nextWorkspaceItems =
                     WorkspaceItems.replace model ref workspaceItem
@@ -149,7 +167,7 @@ openDefinitionsFocusToOutMsg openDefs =
     let
         toFocusedOut workspaceItem =
             case workspaceItem of
-                Success ref _ ->
+                Success ref _ _ ->
                     Focused ref
 
                 _ ->
@@ -196,6 +214,32 @@ keydown model keyboardEvent =
 
         K _ ->
             prevDefinitions
+
+        Space ->
+            let
+                cycleZoom items ref =
+                    let
+                        mapper item =
+                            case item of
+                                Success r i z ->
+                                    if r == ref then
+                                        Success r i (Zoom.cycle z)
+
+                                    else
+                                        item
+
+                                _ ->
+                                    item
+                    in
+                    WorkspaceItems.map mapper items
+
+                cycled =
+                    model
+                        |> WorkspaceItems.focus
+                        |> Maybe.map (WorkspaceItem.reference >> cycleZoom model)
+                        |> Maybe.withDefault model
+            in
+            ( cycled, Cmd.none, None )
 
         X _ ->
             let
@@ -279,6 +323,7 @@ viewItem workspaceItem isFocused =
     WorkspaceItem.view
         (CloseDefinition ref)
         (OpenDefinitionAfter ref)
+        (UpdateZoom ref)
         workspaceItem
         isFocused
 

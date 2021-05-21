@@ -340,6 +340,7 @@ viewHelpModal os keyboardShortcut =
                         , viewInstructions (text "Move focus up") [ KeyboardShortcut.single ArrowUp, KeyboardShortcut.single (K Key.Lower) ]
                         , viewInstructions (text "Move focus down") [ KeyboardShortcut.single ArrowDown, KeyboardShortcut.single (J Key.Lower) ]
                         , viewInstructions (text "Close focused definition") [ KeyboardShortcut.single (X Key.Lower) ]
+                        , viewInstructions (text "Expand/Collapse focused definition") [ KeyboardShortcut.single Space ]
                         ]
                     , div [ class "shortcut-group" ]
                         [ h3 [] [ text "Finder" ]
