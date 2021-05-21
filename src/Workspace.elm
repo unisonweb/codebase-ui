@@ -52,7 +52,7 @@ init env mRef =
 type Msg
     = NoOp
     | Find
-    | OpenDefinitionAfter Reference Reference
+    | OpenDefinitionRelativeTo Reference Reference
     | CloseDefinition Reference
     | UpdateZoom Reference Zoom
     | FetchItemFinished Reference (Result Http.Error Item)
@@ -75,8 +75,8 @@ update env msg model =
         Find ->
             ( model, Cmd.none, ShowFinderRequest )
 
-        OpenDefinitionAfter afterRef ref ->
-            openItem env.apiBasePath model (Just afterRef) ref
+        OpenDefinitionRelativeTo relativeToRef ref ->
+            openItem env.apiBasePath model (Just relativeToRef) ref
 
         CloseDefinition ref ->
             let
@@ -130,7 +130,7 @@ open cfg model ref =
 
 
 openItem : ApiBasePath -> Model -> Maybe Reference -> Reference -> ( Model, Cmd Msg, OutMsg )
-openItem apiBasePath model afterRef ref =
+openItem apiBasePath model relativeToRef ref =
     -- We don't want to refetch or replace any already open definitions, but we
     -- do want to focus and scroll to it
     if WorkspaceItems.member model ref then
@@ -149,12 +149,13 @@ openItem apiBasePath model afterRef ref =
                 WorkspaceItem.Loading ref
 
             nextWorkspaceItems =
-                case afterRef of
+                case relativeToRef of
                     Nothing ->
                         WorkspaceItems.insertWithFocus model toInsert
 
                     Just r ->
-                        WorkspaceItems.insertWithFocusAfter model r toInsert
+                        -- WorkspaceItems.insertWithFocusAfter model r toInsert
+                        WorkspaceItems.insertWithFocusBefore model r toInsert
         in
         ( nextWorkspaceItems
         , Cmd.batch [ Api.perform apiBasePath (fetchDefinition ref), scrollToDefinition ref ]
@@ -322,7 +323,7 @@ viewItem workspaceItem isFocused =
     in
     WorkspaceItem.view
         (CloseDefinition ref)
-        (OpenDefinitionAfter ref)
+        (OpenDefinitionRelativeTo ref)
         (UpdateZoom ref)
         workspaceItem
         isFocused
