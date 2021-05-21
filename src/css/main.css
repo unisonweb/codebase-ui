@@ -1199,7 +1199,8 @@ button.secondary:hover {
 
 .definition-row .content .built-in {
   margin-bottom: 1.5rem;
-  margin-left: 1.25rem;
+  /* TODO: Renable with source toggle */
+  /*margin-left: 1.25rem;*/
 }
 
 .definition-row .content .source {

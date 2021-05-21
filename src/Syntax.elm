@@ -9,7 +9,9 @@ module Syntax exposing
     , view
     )
 
+import Definition.Reference as Reference exposing (Reference)
 import Hash exposing (Hash)
+import HashQualified as HQ
 import Html exposing (Html, a, span, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
@@ -86,7 +88,7 @@ type SyntaxType
 
 
 type Linked msg
-    = Linked (Hash -> msg)
+    = Linked (Reference -> msg)
     | NotLinked
 
 
@@ -221,13 +223,13 @@ syntaxTypeToClassName sType =
 viewSegment : Linked msg -> SyntaxSegment -> Html msg
 viewSegment linked (SyntaxSegment sType sText) =
     let
-        hash =
+        ref =
             case sType of
                 TypeReference h ->
-                    Just h
+                    Just (Reference.TypeReference (HQ.HashOnly h))
 
                 TermReference h ->
-                    Just h
+                    Just (Reference.TermReference (HQ.HashOnly h))
 
                 _ ->
                     Nothing
@@ -235,9 +237,9 @@ viewSegment linked (SyntaxSegment sType sText) =
         className =
             syntaxTypeToClassName sType
     in
-    case ( linked, hash ) of
-        ( Linked toReferenceClickMsg, Just h ) ->
-            a [ class className, onClick (toReferenceClickMsg h) ] [ text sText ]
+    case ( linked, ref ) of
+        ( Linked toReferenceClickMsg, Just r ) ->
+            a [ class className, onClick (toReferenceClickMsg r) ] [ text sText ]
 
         _ ->
             span [ class className ] [ text sText ]

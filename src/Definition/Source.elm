@@ -7,9 +7,9 @@ module Definition.Source exposing
     , viewTypeSource
     )
 
+import Definition.Reference exposing (Reference)
 import Definition.Term as Term exposing (TermSignature(..), TermSource)
 import Definition.Type as Type exposing (TypeSource)
-import Hash exposing (Hash)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
 import Syntax
@@ -17,7 +17,7 @@ import UI
 
 
 type ViewConfig msg
-    = Rich (Hash -> msg)
+    = Rich (Reference -> msg)
     | Monochrome
     | Plain
 
