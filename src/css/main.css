@@ -724,7 +724,17 @@ button.secondary:hover {
 .keyboard-shortcut {
   display: flex;
   flex-direction: row;
-  gap: 0.25rem;
+  /* gap: 0.25rem; */
+}
+.keyboard-shortcut .key {
+  margin-right: 0.25rem;
+}
+.keyboard-shortcut:last-child .key {
+  margin-right: 0;
+}
+
+.keyboard-shortcut .key:last-child {
+  margin-right: 0;
 }
 
 .keyboard-shortcut .key {
@@ -747,7 +757,7 @@ button.secondary:hover {
   height: 1.5rem;
   font-size: 0.625rem;
   line-heigth: 1;
-  margin: 0 0.1rem;
+  margin: 0 0.35rem;
   color: var(--color-keyboard-shortcut-then);
   align-items: center;
 }
@@ -1232,14 +1242,29 @@ button.secondary:hover {
 #help-modal .shortcuts {
   display: flex;
   flex-direction: row;
-  gap: 2.625rem;
+  /* 
+  Alas - Safari does not support gap and we have to use margins 
+  It was added in Safari 14.1 that was since pulled for unrelated reasons
+
+  gap: 2.625rem; 
+  */
 }
 
 #help-modal .shortcuts .shortcut-group {
   width: 20rem;
   display: flex;
   flex-direction: column;
+  /*
+  Alas - Safari does not support gap and we have to use margins 
+  It was added in Safari 14.1 that was since pulled for unrelated reasons
+
   gap: 0.75rem;
+  */
+  margin-right: 2.625rem;
+}
+
+#help-modal .shortcuts .shortcut-group:last-child {
+  margin-right: 0;
 }
 
 #help-modal .shortcuts h3 {
@@ -1252,6 +1277,10 @@ button.secondary:hover {
   display: flex;
   height: 1.5rem;
   align-items: center;
+  margin-bottom: 0.75rem;
+}
+#help-modal .shortcuts .row:last-child {
+  margin-bottom: 0;
 }
 
 #help-modal .shortcuts .instructions {
