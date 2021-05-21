@@ -296,7 +296,7 @@ viewMainSidebar model =
     in
     aside
         [ id "main-sidebar" ]
-        [ header [] [ h1 [ class "app-context" ] [ span [ class "logo-mark" ] [ Icon.view Icon.UnisonMark ], appContext ] ]
+        [ header [] [ h1 [ class "app-context" ] [ appContext ] ]
         , div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
         , nav []
             [ a [ href "https://unison-lang.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.UnisonMark ]
