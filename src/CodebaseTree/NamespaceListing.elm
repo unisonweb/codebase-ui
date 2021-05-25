@@ -1,6 +1,7 @@
 module CodebaseTree.NamespaceListing exposing
     ( DefinitionListing(..)
     , NamespaceListing(..)
+    , NamespaceListingChild(..)
     , NamespaceListingContent
     , contentFetched
     , decode
@@ -28,7 +29,12 @@ type DefinitionListing
 
 
 type alias NamespaceListingContent =
-    { definitions : List DefinitionListing, namespaces : List NamespaceListing }
+    List NamespaceListingChild
+
+
+type NamespaceListingChild
+    = SubNamespace NamespaceListing
+    | SubDefinition DefinitionListing
 
 
 type NamespaceListing
@@ -41,17 +47,30 @@ map :
     -> NamespaceListing
 map f (NamespaceListing hash fqn content) =
     let
-        mapContent c =
-            { c | namespaces = List.map (map f) c.namespaces }
+        mapNamespaceListing c =
+            case c of
+                SubNamespace nl ->
+                    SubNamespace (map f nl)
+
+                _ ->
+                    c
     in
-    f (NamespaceListing hash fqn (RemoteData.map mapContent content))
+    f (NamespaceListing hash fqn (RemoteData.map (List.map mapNamespaceListing) content))
 
 
 contentFetched : NamespaceListing -> FQN -> Bool
 contentFetched (NamespaceListing _ fqn content) needleFqn =
     let
+        contentFetched_ child =
+            case child of
+                SubNamespace nl ->
+                    contentFetched nl needleFqn
+
+                _ ->
+                    False
+
         contentIncludes c =
-            List.any (\l -> contentFetched l needleFqn) c.namespaces
+            List.any contentFetched_ c
     in
     (FQN.equals fqn needleFqn && RemoteData.isSuccess content)
         || (content |> RemoteData.map contentIncludes |> RemoteData.withDefault False)
@@ -82,12 +101,7 @@ decode listingFqn =
 
 {-| Decoding specific intermediate type |
 -}
-type DecodedNamespaceChild
-    = SubNamespace NamespaceListing
-    | SubDefinition DefinitionListing
-
-
-decodeSubNamespace : FQN -> Decode.Decoder DecodedNamespaceChild
+decodeSubNamespace : FQN -> Decode.Decoder NamespaceListingChild
 decodeSubNamespace parentFqn =
     Decode.map SubNamespace
         (Decode.map3 NamespaceListing
@@ -115,9 +129,6 @@ decodeContent parentFqn =
 
         decodeConstructorSuffix =
             Decode.map termTypeByHash (at [ "contents", "termHash" ] Hash.decode)
-
-        emptyNamespaceContent =
-            { definitions = [], namespaces = [] }
 
         decodeAbilityConstructorListing =
             Decode.map SubDefinition
@@ -161,16 +172,5 @@ decodeContent parentFqn =
                 , when decodeTag ((==) "TermObject") (field "contents" decodeTermListing)
                 , when decodeTag ((==) "PatchObject") (field "contents" decodePatchListing)
                 ]
-
-        groupContent namespaceChild acc =
-            case namespaceChild of
-                SubNamespace namespace ->
-                    { acc | namespaces = acc.namespaces ++ [ namespace ] }
-
-                SubDefinition definition ->
-                    { acc | definitions = acc.definitions ++ [ definition ] }
-
-        childrenToContent children =
-            List.foldl groupContent emptyNamespaceContent children
     in
-    Decode.list decodeChild |> andThen (childrenToContent >> Decode.succeed)
+    Decode.list decodeChild
