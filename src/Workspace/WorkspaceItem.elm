@@ -164,7 +164,7 @@ viewNames onClick_ info category =
                 UI.nothing
     in
     div [ class "names", onClick onClick_ ]
-        [ Icon.view Icon.CaretRight
+        [ Icon.view Icon.caretRight
         , Icon.view (Category.icon category)
         , h3 [ class "name" ] [ text info.name ]
         , div [ class "info" ] [ namespace, otherNames ]
@@ -199,22 +199,22 @@ viewSource toOpenReferenceMsg item =
         TermItem (Term _ _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTermLines (Source.viewTermSource (Source.Rich toOpenReferenceMsg) detail.info.name)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight False)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.caretRight False)
 
         TypeItem (Type _ _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich toOpenReferenceMsg))
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.caretRight True)
 
         DataConstructorItem (DataConstructor _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich toOpenReferenceMsg))
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.caretRight True)
 
         AbilityConstructorItem (AbilityConstructor _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource (Source.Rich toOpenReferenceMsg))
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.CaretRight True)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.caretRight True)
 
 
 viewItem :
@@ -301,7 +301,7 @@ view closeMsg toOpenReferenceMsg toUpdateZoomMsg workspaceItem isFocused =
                 ref
                 focusedAttrs
                 (div [ class "error-header" ]
-                    [ Icon.view Icon.Warn
+                    [ Icon.view Icon.warn
                     , Icon.view (Reference.toIcon ref)
                     , h3 [ title (Api.errorToString err) ] [ text (HQ.toString (Reference.hashQualified ref)) ]
                     ]
@@ -360,7 +360,7 @@ viewClosableRow :
 viewClosableRow closeMsg hash_ attrs header contentItems =
     let
         close =
-            a [ class "close", onClick closeMsg ] [ Icon.view Icon.X ]
+            a [ class "close", onClick closeMsg ] [ Icon.view Icon.x ]
     in
     viewRow hash_ attrs ( close, header ) contentItems
 

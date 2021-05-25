@@ -14,12 +14,12 @@ import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, h2, label, span, text)
-import Html.Attributes exposing (class, classList, id, title)
+import Html.Attributes exposing (class, classList, title)
 import Html.Events exposing (onClick)
 import Http
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
-import UI.Icon as Icon
+import UI.Icon as Icon exposing (Icon)
 
 
 
@@ -158,7 +158,7 @@ fetchSubNamespaceListing fqn =
 -- VIEW
 
 
-viewListingRow : Maybe msg -> String -> String -> Icon.Icon -> Html msg
+viewListingRow : Maybe msg -> String -> String -> Icon msg -> Html msg
 viewListingRow clickMsg label_ category icon =
     let
         containerClass =
@@ -190,13 +190,13 @@ viewDefinitionListing listing =
             viewDefRow (TermReference (HashOnly hash)) fqn (Category.name category) (Category.icon category)
 
         DataConstructorListing hash fqn ->
-            viewDefRow (DataConstructorReference (HashOnly hash)) fqn "constructor" Icon.DataConstructor
+            viewDefRow (DataConstructorReference (HashOnly hash)) fqn "constructor" Icon.dataConstructor
 
         AbilityConstructorListing hash fqn ->
-            viewDefRow (AbilityConstructorReference (HashOnly hash)) fqn "constructor" Icon.AbilityConstructor
+            viewDefRow (AbilityConstructorReference (HashOnly hash)) fqn "constructor" Icon.abilityConstructor
 
         PatchListing _ ->
-            viewListingRow Nothing "Patch" "patch" Icon.Patch
+            viewListingRow Nothing "Patch" "patch" Icon.patch
 
 
 viewLoadedNamespaceListingContent : FQNSet -> NamespaceListingContent -> Html Msg
@@ -248,7 +248,7 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) 
             [ class "node namespace"
             , onClick (ToggleExpandedNamespaceListing fqn)
             ]
-            [ Icon.custom [ classList [ ( "expanded", isExpanded ) ] ] Icon.CaretRight
+            [ Icon.caretRight |> Icon.withClassList [ ( "expanded", isExpanded ) ] |> Icon.view
             , label [] [ text (unqualifiedName fqn) ]
             ]
         , namespaceContent
@@ -258,7 +258,7 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) 
 viewError : Http.Error -> Html msg
 viewError err =
     div [ class "error", title (Api.errorToString err) ]
-        [ Icon.view Icon.Warn
+        [ Icon.view Icon.warn
         , text "Unable to load namespace"
         ]
 

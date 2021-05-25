@@ -33,24 +33,24 @@ name category =
                     "doc"
 
 
-icon : Category -> Icon
+icon : Category -> Icon msg
 icon category =
     case category of
         Type c ->
             case c of
                 DataType ->
-                    Icon.Type
+                    Icon.type_
 
                 AbilityType ->
-                    Icon.Ability
+                    Icon.ability
 
         Term c ->
             case c of
                 PlainTerm ->
-                    Icon.Term
+                    Icon.term
 
                 TestTerm ->
-                    Icon.Test
+                    Icon.test
 
                 DocTerm ->
-                    Icon.Doc
+                    Icon.doc
