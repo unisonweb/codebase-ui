@@ -408,14 +408,14 @@ viewMatch keyboardShortcut match isFocused shortcut =
         FinderMatch.DataConstructorItem (DataConstructor hash { name, namespace, signature }) ->
             viewMatch_
                 (DataConstructorReference (HashOnly hash))
-                Icon.DataConstructor
+                Icon.dataConstructor
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
 
         FinderMatch.AbilityConstructorItem (AbilityConstructor hash { name, namespace, signature }) ->
             viewMatch_
                 (AbilityConstructorReference (HashOnly hash))
-                Icon.AbilityConstructor
+                Icon.abilityConstructor
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
 
@@ -453,7 +453,7 @@ view model =
 
                 Failure error ->
                     div [ class "error" ]
-                        [ h3 [ title (Api.errorToString error) ] [ Icon.view Icon.Warn, text "Unable to search" ]
+                        [ h3 [ title (Api.errorToString error) ] [ Icon.view Icon.warn, text "Unable to search" ]
                         , p [] [ text ("Something went wrong trying to find \"" ++ model.query ++ "\"") ]
                         , p [] [ text "Please try again" ]
                         ]
@@ -474,7 +474,7 @@ view model =
                 (div
                     [ classList [ ( "is-searching", isSearching ) ] ]
                     [ header []
-                        [ Icon.view Icon.Search
+                        [ Icon.search |> Icon.withToggleAnimation isSearching |> Icon.view
                         , input
                             [ type_ "text"
                             , id "search"
@@ -485,7 +485,7 @@ view model =
                             , value model.query
                             ]
                             []
-                        , a [ class "reset", onClick ResetOrClose ] [ Icon.view Icon.X ]
+                        , a [ class "reset", onClick ResetOrClose ] [ Icon.view Icon.x ]
                         ]
                     , results
                     ]

@@ -1,7 +1,7 @@
 module Definition.Reference exposing (..)
 
 import HashQualified as HQ exposing (HashQualified)
-import UI.Icon as Icon exposing (Icon(..))
+import UI.Icon as Icon exposing (Icon)
 import Url.Parser
 
 
@@ -87,17 +87,17 @@ toHumanString ref =
             "Data Constructor " ++ HQ.toString hq
 
 
-toIcon : Reference -> Icon
+toIcon : Reference -> Icon msg
 toIcon ref =
     case ref of
         TermReference _ ->
-            Icon.Term
+            Icon.term
 
         TypeReference _ ->
-            Icon.Type
+            Icon.type_
 
         AbilityConstructorReference _ ->
-            Icon.AbilityConstructor
+            Icon.abilityConstructor
 
         DataConstructorReference _ ->
-            Icon.DataConstructor
+            Icon.dataConstructor

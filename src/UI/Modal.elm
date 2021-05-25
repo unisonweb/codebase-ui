@@ -59,7 +59,7 @@ view modal_ =
                         header [ class "modal-header " ]
                             [ h2 [] [ title ]
                             , a [ class "close-modal", onClick modal_.closeMsg ]
-                                [ Icon.view Icon.X ]
+                                [ Icon.view Icon.x ]
                             ]
                     )
                 |> Maybe.withDefault UI.nothing

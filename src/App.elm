@@ -299,7 +299,7 @@ viewMainSidebar model =
         [ header [] [ h1 [ class "app-context" ] [ appContext ] ]
         , div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
         , nav []
-            [ a [ href "https://unison-lang.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.UnisonMark ]
+            [ a [ href "https://unison-lang.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
             , a [ href "https://unison-lang.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
             , a [ href "https://unison-lang.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
             , a [ href "https://unison-lang.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
