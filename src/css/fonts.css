@@ -16,20 +16,10 @@
 }
 
 @font-face {
-  font-family: "Roboto Mono var";
+  font-family: "Fira Code var";
   font-weight: 100 900;
   font-display: swap;
   font-style: normal;
   font-named-instance: "Regular";
-  src: url("../fonts/RobotoMono/RobotoMono-VariableFont_wght.ttf")
-    format("truetype");
-}
-@font-face {
-  font-family: "Roboto Mono var";
-  font-weight: 100 900;
-  font-display: swap;
-  font-style: italic;
-  font-named-instance: "Italic";
-  src: url("../fonts/RobotoMono/RobotoMono-Italic-VariableFont_wght.ttf")
-    format("truetype");
+  src: url("../fonts/FiraCode/FiraCode-VF.woff2") format("woff2");
 }
