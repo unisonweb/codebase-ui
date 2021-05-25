@@ -39,7 +39,7 @@ table {
   /* -- Font --------------------------------------------------------------- */
 
   --font-sans-serif: "Inter var", sans-serif;
-  --font-monospace: "Roboto Mono var", monospace;
+  --font-monospace: "Fira Code var", monospace;
 
   --font-size-base: 1rem;
   --font-size-large: 1.5rem;
@@ -279,6 +279,9 @@ table {
 html {
   font-size: var(--size-base);
   font-family: var(--font-sans-serif);
+  /* TODO: Make configurable by users */
+  /* https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures */
+  font-variant-ligatures: none; /* normal */
 }
 
 body {
