@@ -611,6 +611,7 @@ code a:active {
 /* Buttons */
 
 button {
+  font-family: var(--font-sans-serif);
   border: 0;
   border-radius: var(--border-radius-base);
   font-weight: bold;
