@@ -5,6 +5,7 @@ import CodebaseTree.NamespaceListing as NamespaceListing
     exposing
         ( DefinitionListing(..)
         , NamespaceListing(..)
+        , NamespaceListingChild(..)
         , NamespaceListingContent
         )
 import Definition.Category as Category
@@ -14,7 +15,7 @@ import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, h2, label, span, text)
-import Html.Attributes exposing (class, classList, title)
+import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Http
 import RemoteData exposing (RemoteData(..), WebData)
@@ -202,13 +203,15 @@ viewDefinitionListing listing =
 viewLoadedNamespaceListingContent : FQNSet -> NamespaceListingContent -> Html Msg
 viewLoadedNamespaceListingContent expandedNamespaceListings content =
     let
-        namespaces =
-            List.map (viewNamespaceListing expandedNamespaceListings) content.namespaces
+        viewChild c =
+            case c of
+                SubNamespace nl ->
+                    viewNamespaceListing expandedNamespaceListings nl
 
-        definitions =
-            List.map viewDefinitionListing content.definitions
+                SubDefinition dl ->
+                    viewDefinitionListing dl
     in
-    div [] (namespaces ++ definitions)
+    div [] (List.map viewChild content)
 
 
 viewNamespaceListingContent : FQNSet -> WebData NamespaceListingContent -> Html Msg
