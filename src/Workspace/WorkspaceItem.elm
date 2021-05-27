@@ -293,7 +293,7 @@ view closeMsg toOpenReferenceMsg toUpdateZoomMsg workspaceItem isFocused =
     in
     case workspaceItem of
         Loading ref ->
-            viewRow ref focusedAttrs ( UI.nothing, UI.loadingPlaceholder ) [ ( UI.nothing, UI.loadingPlaceholder ) ]
+            viewRow ref focusedAttrs [] ( UI.nothing, UI.loadingPlaceholder ) [ ( UI.nothing, UI.loadingPlaceholder ) ]
 
         Failure ref err ->
             viewClosableRow
@@ -332,20 +332,29 @@ viewGutter content =
 viewRow :
     Reference
     -> List (Attribute msg)
+    -> List (Html msg)
     -> ( Html msg, Html msg )
     -> List ( Html msg, Html msg )
     -> Html msg
-viewRow ref attrs ( headerGutter, headerContent ) content =
+viewRow ref attrs actionsContent ( headerGutter, headerContent ) content =
     let
         headerItems =
             [ viewGutter headerGutter, headerContent ]
 
         contentRows =
             List.map (\( g, c ) -> div [ class "inner-row" ] [ viewGutter g, c ]) content
+
+        actions =
+            if not (List.isEmpty actionsContent) then
+                div [ class "actions" ] actionsContent
+
+            else
+                UI.nothing
     in
     div
         (class "definition-row" :: id ("definition-" ++ Reference.toString ref) :: attrs)
-        [ header [ class "inner-row" ] headerItems
+        [ actions
+        , header [ class "inner-row" ] headerItems
         , section [ class "content" ] contentRows
         ]
 
@@ -362,7 +371,7 @@ viewClosableRow closeMsg hash_ attrs header contentItems =
         close =
             a [ class "close", onClick closeMsg ] [ Icon.view Icon.x ]
     in
-    viewRow hash_ attrs ( close, header ) contentItems
+    viewRow hash_ attrs [ close ] ( UI.nothing, header ) contentItems
 
 
 
