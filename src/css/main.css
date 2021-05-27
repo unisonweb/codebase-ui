@@ -27,11 +27,12 @@ table {
 
 :root {
   --size-base: 16px;
-  --main-sidebar-width: 18rem;
+  --main-sidebar-width: 17rem;
   --border-radius-base: 0.25rem;
 
   /* -- Layers ------------------------------------------------------------- */
   --layer-base: 1;
+  --layer-popover: 50;
   --layer-modal-overlay: 99;
   --layer-modal: 100;
   --layer-modal-above: 110;
@@ -130,17 +131,22 @@ table {
   --color-workspace-border: var(--color-gray-lighten-50);
 
   --color-workspace-item-fg: var(--color-gray-darken-30);
-  --color-workspace-item-mg: transparent;
+  --color-workspace-item-mg: var(-color-main-subtle-bg-color-gray-lighten-60);
+  --color-workspace-item-source-bg: transparent;
   --color-workspace-item-bg: transparent;
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-40);
   --color-workspace-item-subtle-fg-em: var(--color-gray-lighten-20);
   --color-workspace-item-subtle-bg: var(--color-main-subtle-bg);
+  --color-workspace-item-actions-bg: var(--color-gray-lighten-55);
   --color-workspace-item-border: transparent;
 
-  --color-workspace-item-focus-fg: var(--color-blue-2);
+  --color-workspace-item-focus-fg: var(--color-gray-darken-30);
   --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-20);
-  --color-workspace-item-focus-mg: transparent;
-  --color-workspace-item-focus-bg: transparent;
+  --color-workspace-item-focus-mg: var(--color-gray-lighten-55);
+  --color-workspace-item-focus-source-bg: transparent;
+  --color-workspace-item-focus-bg: var(--color-gray-lighten-60);
+  --color-workspace-item-focus-actions-bg: var(--color-gray-lighten-50);
+  --color-workspace-item-focus-border: var(--color-gray-lighten-50);
 
   --color-modal-fg: var(--color-main-fg);
   --color-modal-mg: var(--color-gray-lighten-60);
@@ -1082,6 +1088,7 @@ button.secondary:hover {
   scrollbar-width: auto;
   scrollbar-color: var(--color-workspace-item-subtle-fg)
     var(--color-workspace-item-bg);
+  /* gutter */
   box-shadow: inset 2rem 0 0 var(--color-workspace-subtle-bg);
 }
 
@@ -1105,8 +1112,12 @@ button.secondary:hover {
   color: var(--color-workspace-item-fg);
   background: var(--color-workspace-item-bg);
   padding: 1rem 0;
+  border-top: 1px solid var(--color-workspace-item-border);
   border-bottom: 1px solid var(--color-workspace-item-border);
   margin-bottom: 1.5rem;
+  font-size: var(--font-size-medium);
+  /* gutter */
+  box-shadow: inset 2rem 0 0 var(--color-workspace-item-mg);
 }
 
 .definition-row .inner-row {
@@ -1141,21 +1152,39 @@ button.secondary:hover {
   margin-bottom: 1.5rem;
 }
 
-.definition-row .close {
-  width: 2rem;
-  height: 1rem;
-  display: inline-flex;
+.definition-row .actions {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  height: 1.25rem;
+  background: var(--color-workspace-item-actions-bg);
+  border-radius: var(--border-radius-base);
+  display: flex;
+  flex-direction: row;
+  z-index: var(--layer-popover);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.definition-row:hover .actions {
+  opacity: 1;
+}
+
+.definition-row .actions .close {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
   align-items: center;
   justify-content: center;
+  cursor: pointer;
 }
 
-.definition-row .close .icon {
+.definition-row .actions .close .icon {
   color: var(--color-workspace-item-subtle-fg-em);
-  font-size: 0.5rem;
-  stroke-width: 2px;
+  font-size: 0.75rem;
 }
 
-.definition-row .close:hover .icon {
+.definition-row .actions .close:hover .icon {
   color: var(--color-workspace-item-fg);
 }
 
@@ -1174,8 +1203,8 @@ button.secondary:hover {
   margin-right: 0.25rem;
 }
 
-.definition-row header .names:hover .icon {
-  color: var(--color-workspace-item-focus-fg);
+.definition-row header .names:hover .icon.caret-right {
+  color: var(--color-workspace-item-focus-subtle-fg);
 }
 
 .definition-row header .names .name {
@@ -1215,7 +1244,6 @@ button.secondary:hover {
 }
 
 .definition-row header .error-header {
-  display: flex;
   flex-direction: row;
   align-items: center;
 }
@@ -1257,10 +1285,14 @@ button.secondary:hover {
   /*margin-left: 1.25rem;*/
 }
 
+.definition-row .content .badge {
+  background: var(--color-workspace-item-mg);
+}
+
 .definition-row .content .source {
   display: flex;
   flex-direction: row;
-  background: var(--color-workspace-item-mg);
+  background: var(--color-workspace-item-source-bg);
 }
 
 .definition-row .content .source .source-toggle {
@@ -1325,26 +1357,29 @@ button.secondary:hover {
 
 .definition-row.focused {
   background: var(--color-workspace-item-focus-bg);
+  border-top-color: var(--color-workspace-item-focus-border);
+  border-bottom-color: var(--color-workspace-item-focus-border);
+  /* gutter */
+  box-shadow: inset 2rem 0 0 var(--color-workspace-item-focus-mg);
 }
 
-.definition-row.focused:before {
-  position: absolute;
-  top: 0;
-  left: 2rem;
-  bottom: 0;
-  content: "";
-  background: var(--color-workspace-item-focus-fg);
-  width: 0.15rem;
-  transform: translateX(-50%);
+.definition-row.focused .actions {
+  background: var(--color-workspace-item-focus-actions-bg);
+  opacity: 1;
 }
 
 .definition-row.focused .content code {
-  background: var(--color-workspace-item-focus-mg);
+  background: var(--color-workspace-item-focus-source-bg);
 }
 
 .definition-row.focused header .name,
 .definition-row.focused header .error-header {
   color: var(--color-workspace-item-focus-fg);
+}
+
+.definition-row.focused .content .badge {
+  background: var(--color-workspace-item-focus-mg);
+  border-color: var(--color-workspace-item-focus-border);
 }
 
 /* -- HelpModal ------------------------------------------------------------ */
