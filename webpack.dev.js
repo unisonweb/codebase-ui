@@ -58,7 +58,6 @@ module.exports = {
 
   devServer: {
     contentBase: path.join(__dirname, "src"),
-    // historyApiFallback: true,
     historyApiFallback: {
       disableDotRule: true,
     },
