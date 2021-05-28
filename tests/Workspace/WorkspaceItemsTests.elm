@@ -340,6 +340,86 @@ prev =
 
 
 
+-- MOVE
+
+
+moveUp : Test
+moveUp =
+    describe "WorkspaceItems.moveUp"
+        [ test "moves the focused item up one position" <|
+            \_ ->
+                let
+                    result =
+                        workspaceItems
+                            |> WorkspaceItems.moveUp
+                            |> WorkspaceItems.toList
+
+                    expected =
+                        [ Loading (termRefFromStr "#a")
+                        , Loading (termRefFromStr "#focus")
+                        , Loading (termRefFromStr "#b")
+                        , Loading (termRefFromStr "#c")
+                        , Loading (termRefFromStr "#d")
+                        ]
+                in
+                Expect.equal expected result
+        , test "first item is first item" <|
+            \_ ->
+                let
+                    result =
+                        WorkspaceItems.fromItems [] focused after
+                            |> WorkspaceItems.moveUp
+                            |> WorkspaceItems.toList
+
+                    expected =
+                        [ Loading (termRefFromStr "#focus")
+                        , Loading (termRefFromStr "#c")
+                        , Loading (termRefFromStr "#d")
+                        ]
+                in
+                Expect.equal expected result
+        ]
+
+
+moveDown : Test
+moveDown =
+    describe "WorkspaceItems.moveDown"
+        [ test "moves the focused item down one position" <|
+            \_ ->
+                let
+                    result =
+                        workspaceItems
+                            |> WorkspaceItems.moveDown
+                            |> WorkspaceItems.toList
+
+                    expected =
+                        [ Loading (termRefFromStr "#a")
+                        , Loading (termRefFromStr "#b")
+                        , Loading (termRefFromStr "#c")
+                        , Loading (termRefFromStr "#focus")
+                        , Loading (termRefFromStr "#d")
+                        ]
+                in
+                Expect.equal expected result
+        , test "last item is last item" <|
+            \_ ->
+                let
+                    result =
+                        WorkspaceItems.fromItems before focused []
+                            |> WorkspaceItems.moveDown
+                            |> WorkspaceItems.toList
+
+                    expected =
+                        [ Loading (termRefFromStr "#a")
+                        , Loading (termRefFromStr "#b")
+                        , Loading (termRefFromStr "#focus")
+                        ]
+                in
+                Expect.equal expected result
+        ]
+
+
+
 -- MAP
 
 

@@ -8,6 +8,7 @@ import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, article, header, section)
 import Html.Attributes exposing (class, id)
 import Http
+import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Route exposing (Route(..))
@@ -24,14 +25,18 @@ import Workspace.Zoom as Zoom exposing (Zoom(..))
 
 
 type alias Model =
-    WorkspaceItems
+    { workspaceItems : WorkspaceItems
+    , keyboardShortcut : KeyboardShortcut.Model
+    }
 
 
 init : Env -> Maybe Reference -> ( Model, Cmd Msg )
 init env mRef =
     let
         model =
-            WorkspaceItems.init Nothing
+            { workspaceItems = WorkspaceItems.init Nothing
+            , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
+            }
     in
     case mRef of
         Nothing ->
@@ -57,6 +62,7 @@ type Msg
     | UpdateZoom Reference Zoom
     | FetchItemFinished Reference (Result Http.Error Item)
     | Keydown KeyboardEvent
+    | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
 type OutMsg
@@ -67,7 +73,7 @@ type OutMsg
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update env msg model =
+update env msg ({ workspaceItems } as model) =
     case msg of
         NoOp ->
             ( model, Cmd.none, None )
@@ -81,9 +87,9 @@ update env msg model =
         CloseDefinition ref ->
             let
                 nextModel =
-                    WorkspaceItems.remove model ref
+                    { model | workspaceItems = WorkspaceItems.remove workspaceItems ref }
             in
-            ( nextModel, Cmd.none, openDefinitionsFocusToOutMsg nextModel )
+            ( nextModel, Cmd.none, openDefinitionsFocusToOutMsg nextModel.workspaceItems )
 
         UpdateZoom ref zoom ->
             let
@@ -99,7 +105,10 @@ update env msg model =
                         _ ->
                             workspaceItem
             in
-            ( WorkspaceItems.map updateMatching model, Cmd.none, None )
+            ( { model | workspaceItems = WorkspaceItems.map updateMatching workspaceItems }
+            , Cmd.none
+            , None
+            )
 
         FetchItemFinished ref itemResult ->
             let
@@ -112,33 +121,57 @@ update env msg model =
                             WorkspaceItem.Success ref i Zoom.Medium
 
                 nextWorkspaceItems =
-                    WorkspaceItems.replace model ref workspaceItem
+                    WorkspaceItems.replace workspaceItems ref workspaceItem
             in
-            ( nextWorkspaceItems, Cmd.none, openDefinitionsFocusToOutMsg nextWorkspaceItems )
+            ( { model | workspaceItems = nextWorkspaceItems }
+            , Cmd.none
+            , openDefinitionsFocusToOutMsg nextWorkspaceItems
+            )
 
         Keydown event ->
-            keydown model event
+            let
+                ( keyboardShortcut, kCmd ) =
+                    KeyboardShortcut.collect model.keyboardShortcut event.key
+
+                shortcut =
+                    KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
+
+                ( nextModel, cmd, out ) =
+                    handleKeyboardShortcut { model | keyboardShortcut = keyboardShortcut } shortcut
+            in
+            ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ], out )
+
+        KeyboardShortcutMsg kMsg ->
+            let
+                ( keyboardShortcut, cmd ) =
+                    KeyboardShortcut.update kMsg model.keyboardShortcut
+            in
+            ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd, None )
 
 
 
 -- UPDATE HELPERS
 
 
-open : { a | apiBasePath : ApiBasePath } -> Model -> Reference -> ( Model, Cmd Msg, OutMsg )
+type alias WithWorkspaceItems m =
+    { m | workspaceItems : WorkspaceItems }
+
+
+open : { a | apiBasePath : ApiBasePath } -> WithWorkspaceItems m -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
 open cfg model ref =
     openItem cfg.apiBasePath model Nothing ref
 
 
-openItem : ApiBasePath -> Model -> Maybe Reference -> Reference -> ( Model, Cmd Msg, OutMsg )
-openItem apiBasePath model relativeToRef ref =
+openItem : ApiBasePath -> WithWorkspaceItems m -> Maybe Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
+openItem apiBasePath ({ workspaceItems } as model) relativeToRef ref =
     -- We don't want to refetch or replace any already open definitions, but we
     -- do want to focus and scroll to it
-    if WorkspaceItems.member model ref then
+    if WorkspaceItems.member workspaceItems ref then
         let
             nextWorkspaceItems =
-                WorkspaceItems.focusOn model ref
+                WorkspaceItems.focusOn workspaceItems ref
         in
-        ( nextWorkspaceItems
+        ( { model | workspaceItems = nextWorkspaceItems }
         , scrollToDefinition ref
         , openDefinitionsFocusToOutMsg nextWorkspaceItems
         )
@@ -151,13 +184,13 @@ openItem apiBasePath model relativeToRef ref =
             nextWorkspaceItems =
                 case relativeToRef of
                     Nothing ->
-                        WorkspaceItems.insertWithFocus model toInsert
+                        WorkspaceItems.insertWithFocus workspaceItems toInsert
 
                     Just r ->
                         -- WorkspaceItems.insertWithFocusAfter model r toInsert
-                        WorkspaceItems.insertWithFocusBefore model r toInsert
+                        WorkspaceItems.insertWithFocusBefore workspaceItems r toInsert
         in
-        ( nextWorkspaceItems
+        ( { model | workspaceItems = nextWorkspaceItems }
         , Cmd.batch [ Api.perform apiBasePath (fetchDefinition ref), scrollToDefinition ref ]
         , openDefinitionsFocusToOutMsg nextWorkspaceItems
         )
@@ -180,8 +213,8 @@ openDefinitionsFocusToOutMsg openDefs =
         |> Maybe.withDefault Emptied
 
 
-keydown : Model -> KeyboardEvent -> ( Model, Cmd Msg, OutMsg )
-keydown model keyboardEvent =
+handleKeyboardShortcut : Model -> KeyboardShortcut -> ( Model, Cmd Msg, OutMsg )
+handleKeyboardShortcut ({ workspaceItems } as model) shortcut =
     let
         scrollToCmd =
             WorkspaceItems.focus
@@ -192,31 +225,65 @@ keydown model keyboardEvent =
         nextDefinition =
             let
                 next =
-                    WorkspaceItems.next model
+                    WorkspaceItems.next model.workspaceItems
             in
-            ( next, scrollToCmd next, openDefinitionsFocusToOutMsg next )
+            ( { model | workspaceItems = next }, scrollToCmd next, openDefinitionsFocusToOutMsg next )
 
         prevDefinitions =
             let
                 prev =
-                    WorkspaceItems.prev model
+                    WorkspaceItems.prev model.workspaceItems
             in
-            ( prev, scrollToCmd prev, openDefinitionsFocusToOutMsg prev )
+            ( { model | workspaceItems = prev }, scrollToCmd prev, openDefinitionsFocusToOutMsg prev )
+
+        moveDown =
+            let
+                next =
+                    WorkspaceItems.moveDown model.workspaceItems
+            in
+            ( { model | workspaceItems = next }, scrollToCmd next, openDefinitionsFocusToOutMsg next )
+
+        moveUp =
+            let
+                next =
+                    WorkspaceItems.moveUp model.workspaceItems
+            in
+            ( { model | workspaceItems = next }, scrollToCmd next, openDefinitionsFocusToOutMsg next )
     in
-    case keyboardEvent.key of
-        ArrowDown ->
+    case shortcut of
+        Chord Alt ArrowDown ->
+            moveDown
+
+        Chord Alt ArrowUp ->
+            moveUp
+
+        {- TODO: Support vim keys for moving. The reason this isn't straight
+           forward is that Alt+j results in the "∆" character instead of a "j"
+           (k is "˚") on a Mac. We could add those characters as Chord Alt (Raw
+           "∆"), but is it uniform that Alt+j produces "∆" across all standard
+           international keyboard layouts? KeyboardEvent.code could be used
+           instead of KeyboardEvent.key as it will produce the physical key
+           pressed as opposed to the key produced —  this of course is strange
+           for things like question marks...
+
+              Chord Alt (J _) ->
+                  moveDown
+              Chord Alt (K _) ->
+                  moveUp
+        -}
+        Sequence _ ArrowDown ->
             nextDefinition
 
-        J _ ->
+        Sequence _ (J _) ->
             nextDefinition
 
-        ArrowUp ->
+        Sequence _ ArrowUp ->
             prevDefinitions
 
-        K _ ->
+        Sequence _ (K _) ->
             prevDefinitions
 
-        Space ->
+        Sequence _ Space ->
             let
                 cycleZoom items ref =
                     let
@@ -235,22 +302,25 @@ keydown model keyboardEvent =
                     WorkspaceItems.map mapper items
 
                 cycled =
-                    model
+                    model.workspaceItems
                         |> WorkspaceItems.focus
-                        |> Maybe.map (WorkspaceItem.reference >> cycleZoom model)
-                        |> Maybe.withDefault model
+                        |> Maybe.map (WorkspaceItem.reference >> cycleZoom model.workspaceItems)
+                        |> Maybe.withDefault model.workspaceItems
             in
-            ( cycled, Cmd.none, None )
+            ( { model | workspaceItems = cycled }, Cmd.none, None )
 
-        X _ ->
+        Sequence _ (X _) ->
             let
                 without =
-                    model
+                    workspaceItems
                         |> WorkspaceItems.focus
-                        |> Maybe.map (WorkspaceItem.reference >> WorkspaceItems.remove model)
-                        |> Maybe.withDefault model
+                        |> Maybe.map (WorkspaceItem.reference >> WorkspaceItems.remove workspaceItems)
+                        |> Maybe.withDefault workspaceItems
             in
-            ( without, Cmd.none, openDefinitionsFocusToOutMsg without )
+            ( { model | workspaceItems = without }
+            , Cmd.none
+            , openDefinitionsFocusToOutMsg without
+            )
 
         _ ->
             ( model, Cmd.none, None )
@@ -311,7 +381,7 @@ view model =
             [ Button.secondary Find "Find" ]
         , section
             [ id "workspace-content" ]
-            [ section [ class "definitions-pane" ] (viewWorkspaceItems model) ]
+            [ section [ class "definitions-pane" ] (viewWorkspaceItems model.workspaceItems) ]
         ]
 
 
