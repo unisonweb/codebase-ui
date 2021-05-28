@@ -134,7 +134,7 @@ update env msg ({ workspaceItems } as model) =
                     KeyboardShortcut.collect model.keyboardShortcut event.key
 
                 shortcut =
-                    KeyboardShortcut.fromKeyboardEvent keyboardShortcut event
+                    KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
 
                 ( nextModel, cmd, out ) =
                     handleKeyboardShortcut { model | keyboardShortcut = keyboardShortcut } shortcut
@@ -235,8 +235,42 @@ handleKeyboardShortcut ({ workspaceItems } as model) shortcut =
                     WorkspaceItems.prev model.workspaceItems
             in
             ( { model | workspaceItems = prev }, scrollToCmd prev, openDefinitionsFocusToOutMsg prev )
+
+        moveDown =
+            let
+                next =
+                    WorkspaceItems.moveDown model.workspaceItems
+            in
+            ( { model | workspaceItems = next }, scrollToCmd next, openDefinitionsFocusToOutMsg next )
+
+        moveUp =
+            let
+                next =
+                    WorkspaceItems.moveUp model.workspaceItems
+            in
+            ( { model | workspaceItems = next }, scrollToCmd next, openDefinitionsFocusToOutMsg next )
     in
     case shortcut of
+        Chord Alt ArrowDown ->
+            moveDown
+
+        Chord Alt ArrowUp ->
+            moveUp
+
+        {- TODO: Support vim keys for moving. The reason this isn't straight
+           forward is that Alt+j results in the "∆" character instead of a "j"
+           (k is "˚") on a Mac. We could add those characters as Chord Alt (Raw
+           "∆"), but is it uniform that Alt+j produces "∆" across all standard
+           international keyboard layouts? KeyboardEvent.code could be used
+           instead of KeyboardEvent.key as it will produce the physical key
+           pressed as opposed to the key produced —  this of course is strange
+           for things like question marks...
+
+              Chord Alt (J _) ->
+                  moveDown
+              Chord Alt (K _) ->
+                  moveUp
+        -}
         Sequence _ ArrowDown ->
             nextDefinition
 

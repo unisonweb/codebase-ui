@@ -286,6 +286,48 @@ isFocused workspaceItems ref =
         |> Maybe.withDefault False
 
 
+{-| Moves the focused item up before the previous item, keeps focus |
+-}
+moveUp : WorkspaceItems -> WorkspaceItems
+moveUp items =
+    case items of
+        Empty ->
+            Empty
+
+        WorkspaceItems data ->
+            case ListE.unconsLast data.before of
+                Nothing ->
+                    items
+
+                Just ( i, before ) ->
+                    WorkspaceItems
+                        { before = before
+                        , focus = data.focus
+                        , after = i :: data.after
+                        }
+
+
+{-| Moves the focused item down before the next item, keeps focus |
+-}
+moveDown : WorkspaceItems -> WorkspaceItems
+moveDown items =
+    case items of
+        Empty ->
+            Empty
+
+        WorkspaceItems data ->
+            case data.after of
+                [] ->
+                    items
+
+                i :: after ->
+                    WorkspaceItems
+                        { before = data.before ++ [ i ]
+                        , focus = data.focus
+                        , after = after
+                        }
+
+
 next : WorkspaceItems -> WorkspaceItems
 next items =
     case items of

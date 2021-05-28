@@ -1084,7 +1084,6 @@ button.secondary:hover {
   overflow: auto;
   height: calc(100vh - 3.5rem);
   padding-top: 2rem;
-  scroll-behavior: smooth;
   scrollbar-width: auto;
   scrollbar-color: var(--color-workspace-item-subtle-fg)
     var(--color-workspace-item-bg);
