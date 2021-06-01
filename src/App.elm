@@ -4,7 +4,7 @@ import Browser
 import Browser.Navigation as Nav
 import CodebaseTree
 import Definition.Reference exposing (Reference(..))
-import Env as Env exposing (Env, Flags, OperatingSystem(..))
+import Env as Env exposing (AppContext(..), Env, Flags, OperatingSystem(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, aside, div, h1, h3, header, nav, section, span, text)
@@ -382,7 +382,16 @@ viewModal model =
 
 view : Model -> Browser.Document Msg
 view model =
-    { title = "Unison Codebase"
+    let
+        title_ =
+            case model.env.appContext of
+                UnisonShare ->
+                    "Unison Share"
+
+                Ucm ->
+                    "Unison Local"
+    in
+    { title = title_
     , body =
         [ div [ id "app" ]
             [ viewMainSidebar model
