@@ -9,7 +9,7 @@ import Definition.Reference exposing (Reference(..))
 import Definition.Source as Source
 import Definition.Term exposing (Term(..))
 import Definition.Type exposing (Type(..))
-import Env exposing (Env)
+import Env exposing (AppContext(..), Env)
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import HashQualified exposing (HashQualified(..))
 import Html
@@ -55,6 +55,7 @@ import Task
 import UI
 import UI.Icon as Icon
 import UI.Modal as Modal
+import Util
 
 
 
@@ -63,9 +64,9 @@ import UI.Modal as Modal
 
 type FinderSearch
     = NotAsked
-    | Searching (Maybe FinderSearchResults)
-    | Success FinderSearchResults
-    | Failure Http.Error
+    | Searching String (Maybe FinderSearchResults)
+    | Success String FinderSearchResults
+    | Failure String Http.Error
 
 
 type alias FinderSearchResults =
@@ -73,7 +74,7 @@ type alias FinderSearchResults =
 
 
 type alias Model =
-    { query : String
+    { input : String
     , search : FinderSearch
     , keyboardShortcut : KeyboardShortcut.Model
     }
@@ -81,7 +82,7 @@ type alias Model =
 
 init : Env -> ( Model, Cmd Msg )
 init env =
-    ( { query = ""
+    ( { input = ""
       , search = NotAsked
       , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
       }
@@ -95,7 +96,8 @@ init env =
 
 type Msg
     = NoOp
-    | UpdateQuery String
+    | UpdateInput String
+    | PerformSearch String
     | ResetOrClose
     | Close
     | Select Reference
@@ -113,14 +115,22 @@ type OutMsg
 update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
 update env msg model =
     let
+        debounceDelay =
+            case env.appContext of
+                UnisonShare ->
+                    300
+
+                Ucm ->
+                    0
+
         exit =
             ( model, Cmd.none, Exit )
 
         reset =
-            ( { model | query = "", search = NotAsked }, focusSearchInput, Remain )
+            ( { model | input = "", search = NotAsked }, focusSearchInput, Remain )
 
         resetOrClose =
-            if model.query == "" then
+            if model.input == "" then
                 exit
 
             else
@@ -130,31 +140,38 @@ update env msg model =
         NoOp ->
             ( model, Cmd.none, Remain )
 
-        UpdateQuery query ->
+        UpdateInput input ->
             let
                 isSequenceShortcutInput =
-                    String.contains ";" query
+                    String.contains ";" input
             in
-            if String.isEmpty query then
-                ( { model | query = query, search = NotAsked }, Cmd.none, Remain )
+            if String.isEmpty input then
+                ( { model | input = input, search = NotAsked }, Cmd.none, Remain )
 
-            else if String.length query > 1 && not isSequenceShortcutInput then
+            else if String.length input > 1 && not isSequenceShortcutInput then
+                ( { model | input = input }, Util.delayMsg debounceDelay (PerformSearch input), Remain )
+
+            else if not isSequenceShortcutInput then
+                ( { model | input = input }, Cmd.none, Remain )
+
+            else
+                ( model, Cmd.none, Remain )
+
+        PerformSearch query ->
+            if query == model.input then
                 let
                     search =
                         case model.search of
-                            Success r ->
-                                Searching (Just r)
+                            Success _ r ->
+                                Searching query (Just r)
 
-                            Searching (Just r) ->
-                                Searching (Just r)
+                            Searching _ (Just r) ->
+                                Searching query (Just r)
 
                             _ ->
-                                Searching Nothing
+                                Searching query Nothing
                 in
-                ( { model | query = query, search = search }, Api.perform env.apiBasePath (fetchMatches query), Remain )
-
-            else if not isSequenceShortcutInput then
-                ( { model | query = query }, Cmd.none, Remain )
+                ( { model | search = search }, Api.perform env.apiBasePath (fetchMatches query), Remain )
 
             else
                 ( model, Cmd.none, Remain )
@@ -167,12 +184,12 @@ update env msg model =
                 search =
                     case matches of
                         Err e ->
-                            Failure e
+                            Failure query e
 
                         Ok ms ->
-                            Success (SearchResults.fromList ms)
+                            Success query (SearchResults.fromList ms)
             in
-            if query == model.query then
+            if query == model.input then
                 ( { model | search = search }, Cmd.none, Remain )
 
             else
@@ -228,7 +245,7 @@ update env msg model =
 
                         out =
                             case model.search of
-                                Success r ->
+                                Success _ r ->
                                     openFocused r
 
                                 _ ->
@@ -271,8 +288,8 @@ update env msg model =
 finderSearchMap : (FinderSearchResults -> FinderSearchResults) -> FinderSearch -> FinderSearch
 finderSearchMap f finderSearch =
     case finderSearch of
-        Success r ->
-            Success (f r)
+        Success q r ->
+            Success q (f r)
 
         _ ->
             finderSearch
@@ -281,7 +298,7 @@ finderSearchMap f finderSearch =
 finderSearchToMaybe : FinderSearch -> Maybe FinderSearchResults
 finderSearchToMaybe fs =
     case fs of
-        Success r ->
+        Success _ r ->
             Just r
 
         _ ->
@@ -435,26 +452,26 @@ viewMatches keyboardShortcut matches =
 view : Model -> Html Msg
 view model =
     let
-        viewResults res =
+        viewResults query res =
             case res of
                 Empty ->
-                    UI.emptyStateMessage ("No matching definitions found for \"" ++ model.query ++ "\"")
+                    UI.emptyStateMessage ("No matching definitions found for \"" ++ query ++ "\"")
 
                 SearchResults matches ->
                     viewMatches model.keyboardShortcut matches
 
         results =
             case model.search of
-                Success res ->
-                    viewResults res
+                Success q res ->
+                    viewResults q res
 
-                Searching (Just res) ->
-                    viewResults res
+                Searching q (Just res) ->
+                    viewResults q res
 
-                Failure error ->
+                Failure query error ->
                     div [ class "error" ]
                         [ h3 [ title (Api.errorToString error) ] [ Icon.view Icon.warn, text "Unable to search" ]
-                        , p [] [ text ("Something went wrong trying to find \"" ++ model.query ++ "\"") ]
+                        , p [] [ text ("Something went wrong trying to find \"" ++ query ++ "\"") ]
                         , p [] [ text "Please try again" ]
                         ]
 
@@ -463,7 +480,7 @@ view model =
 
         isSearching =
             case model.search of
-                Searching _ ->
+                Searching _ _ ->
                     True
 
                 _ ->
@@ -481,8 +498,8 @@ view model =
                             , autocomplete False
                             , spellcheck False
                             , placeholder "Search by name and/or namespace"
-                            , onInput UpdateQuery
-                            , value model.query
+                            , onInput UpdateInput
+                            , value model.input
                             ]
                             []
                         , a [ class "reset", onClick ResetOrClose ] [ Icon.view Icon.x ]
