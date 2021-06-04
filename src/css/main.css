@@ -181,6 +181,11 @@ table {
   --color-icon-patch: var(--color-blue-2);
 
   /* Buttons */
+  --color-button-call-to-action-fg: var(--color-purple-1);
+  --color-button-call-to-action-bg: var(--color-purple-4);
+  --color-button-call-to-action-hover-fg: var(--color-gray-lighten-100);
+  --color-button-call-to-action-hover-bg: var(--color-purple-1);
+
   --color-button-primary-fg: var(--color-gray-lighten-60);
   --color-button-primary-bg: var(--color-gray-darken-20);
   --color-button-primary-hover-fg: var(--color-gray-lighten-60);
@@ -637,6 +642,16 @@ button:active {
   transform: translate(0, 0.1rem);
 }
 
+button.call-to-action {
+  color: var(--color-button-call-to-action-fg);
+  background: var(--color-button-call-to-action-bg);
+}
+
+button.call-to-action:hover {
+  color: var(--color-button-call-to-action-hover-fg);
+  background: var(--color-button-call-to-action-hover-bg);
+}
+
 button.primary {
   color: var(--color-button-primary-fg);
   background: var(--color-button-primary-bg);
@@ -1078,6 +1093,13 @@ button.secondary:hover {
   font-size: var(--font-size-medium);
   background: var(--color-workspace-item-bg);
   border-bottom: 1px solid var(--color-workspace-border);
+  display: flex;
+  flex-direction: row;
+}
+
+#workspace-toolbar .right {
+  align-self: flex-end;
+  margin-left: auto;
 }
 
 #workspace-content {
@@ -1436,6 +1458,39 @@ button.secondary:hover {
 
 #help-modal .subtle {
   color: var(--color-modal-subtle-fg);
+}
+
+/* -- PublishModal --------------------------------------------------------- */
+
+#publish-modal {
+  width: 32.5rem;
+}
+
+#publish-modal .main {
+  font-size: var(--font-size-base);
+  line-height: 1.5em;
+}
+
+#publish-modal .main a {
+  color: var(--color-blue-2);
+  font-weight: bold;
+}
+
+#publish-modal .main a:hover {
+  color: var(--color-blue-1);
+  text-decoration: none;
+}
+
+#publish-modal .help {
+  display: inline-block;
+  margin-top: 1.5rem;
+  font-size: var(--font-size-small);
+  color: var(--color-modal-subtle-fg-em);
+  text-decoration: underline;
+}
+
+#publish-modal .help:hover {
+  color: var(--color-modal-fg);
 }
 
 /* -- Finder --------------------------------------------------------------- */

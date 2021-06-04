@@ -144,14 +144,20 @@ update env msg model =
             let
                 isSequenceShortcutInput =
                     String.contains ";" input
+
+                isShowFinderShortcut =
+                    input == "/"
+
+                isValidInput =
+                    not isSequenceShortcutInput && not isShowFinderShortcut
             in
             if String.isEmpty input then
                 ( { model | input = input, search = NotAsked }, Cmd.none, Remain )
 
-            else if String.length input > 1 && not isSequenceShortcutInput then
+            else if String.length input > 1 && isValidInput then
                 ( { model | input = input }, Util.delayMsg debounceDelay (PerformSearch input), Remain )
 
-            else if not isSequenceShortcutInput then
+            else if isValidInput then
                 ( { model | input = input }, Cmd.none, Remain )
 
             else
