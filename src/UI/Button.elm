@@ -1,4 +1,4 @@
-module UI.Button exposing (ButtonType(..), primary, secondary, view)
+module UI.Button exposing (ButtonType(..), callToAction, primary, secondary, view)
 
 import Html exposing (Html, button, text)
 import Html.Attributes exposing (class)
@@ -6,8 +6,14 @@ import Html.Events exposing (onClick)
 
 
 type ButtonType
-    = Primary
+    = CallToAction
+    | Primary
     | Secondary
+
+
+callToAction : msg -> String -> Html msg
+callToAction =
+    view CallToAction
 
 
 primary : msg -> String -> Html msg
@@ -34,6 +40,9 @@ view type_ clickMsg label =
 buttonTypeToClassName : ButtonType -> String
 buttonTypeToClassName type_ =
     case type_ of
+        CallToAction ->
+            "call-to-action"
+
         Primary ->
             "primary"
 

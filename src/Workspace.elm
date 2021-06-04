@@ -57,6 +57,7 @@ init env mRef =
 type Msg
     = NoOp
     | Find
+    | Publish
     | OpenDefinitionRelativeTo Reference Reference
     | CloseDefinition Reference
     | UpdateZoom Reference Zoom
@@ -70,6 +71,7 @@ type OutMsg
     | Focused Reference
     | Emptied
     | ShowFinderRequest
+    | ShowPublishRequest
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -80,6 +82,9 @@ update env msg ({ workspaceItems } as model) =
 
         Find ->
             ( model, Cmd.none, ShowFinderRequest )
+
+        Publish ->
+            ( model, Cmd.none, ShowPublishRequest )
 
         OpenDefinitionRelativeTo relativeToRef ref ->
             openItem env.apiBasePath model (Just relativeToRef) ref
@@ -378,7 +383,9 @@ view model =
     article [ id "workspace" ]
         [ header
             [ id "workspace-toolbar" ]
-            [ Button.secondary Find "Find" ]
+            [ Button.secondary Find "Find"
+            , section [ class "right" ] [ Button.callToAction Publish "Publish on Unison Share" ]
+            ]
         , section
             [ id "workspace-content" ]
             [ section [ class "definitions-pane" ] (viewWorkspaceItems model.workspaceItems) ]

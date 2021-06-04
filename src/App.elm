@@ -7,7 +7,7 @@ import Definition.Reference exposing (Reference(..))
 import Env as Env exposing (AppContext(..), Env, Flags, OperatingSystem(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, a, aside, div, h1, h3, header, nav, section, span, text)
+import Html exposing (Html, a, aside, div, h1, h3, header, nav, p, section, span, text)
 import Html.Attributes exposing (class, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import KeyboardShortcut
@@ -31,6 +31,7 @@ type Modal
     = NoModal
     | FinderModal Finder.Model
     | HelpModal
+    | PublishModal
 
 
 type alias Model =
@@ -216,6 +217,9 @@ handleWorkspaceOutMsg model out =
         Workspace.ShowFinderRequest ->
             showFinder model
 
+        Workspace.ShowPublishRequest ->
+            ( { model | modal = PublishModal }, Cmd.none )
+
         Workspace.Focused ref ->
             ( model, Route.navigateToByReference model.navKey model.route ref )
 
@@ -286,13 +290,17 @@ subscriptions model =
 viewMainSidebar : Model -> Html Msg
 viewMainSidebar model =
     let
-        appContext =
+        ( share, appContext ) =
             case model.env.appContext of
                 Env.Ucm ->
-                    span [] [ text "Unison", span [ class "context ucm" ] [ text " Local" ] ]
+                    ( a [ href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ text "Unison Share" ]
+                    , span [] [ text "Unison", span [ class "context ucm" ] [ text " Local" ] ]
+                    )
 
                 Env.UnisonShare ->
-                    span [] [ text "Unison", span [ class "context unison-share" ] [ text " Share" ] ]
+                    ( UI.nothing
+                    , span [] [ text "Unison", span [ class "context unison-share" ] [ text " Share" ] ]
+                    )
     in
     aside
         [ id "main-sidebar" ]
@@ -303,6 +311,7 @@ viewMainSidebar model =
             , a [ href "https://unison-lang.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
             , a [ href "https://unison-lang.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
             , a [ href "https://unison-lang.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
+            , share
             , a [ class "show-help", onClick ShowHelpModal ] [ text "Keyboard Shortcuts", KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark) ]
             ]
         ]
@@ -365,6 +374,27 @@ viewHelpModal os keyboardShortcut =
         |> Modal.view
 
 
+viewPublishModal : Html Msg
+viewPublishModal =
+    let
+        content =
+            Modal.Content
+                (section
+                    []
+                    [ p [ class "main" ]
+                        [ text "With your Unison codebase on Github, open a Pull Request against "
+                        , a [ href "https://github.com/unisonweb/shipwright/edit/trunk/files/initialize-codebase.sh", rel "noopener", target "_blank" ] [ text "this file" ]
+                        , text " to list (or unlist) your project on Unison Share."
+                        ]
+                    , a [ class "help", href "https://www.unisonweb.org/docs/codebase-organization/#day-to-day-development-creating-and-merging-pull-requests", rel "noopener", target "_blank" ] [ text "How do I get my code on Github?" ]
+                    ]
+                )
+    in
+    Modal.modal "publish-modal" CloseModal content
+        |> Modal.withHeader "Publish your project on Unison Share"
+        |> Modal.view
+
+
 viewModal :
     { m | env : Env, modal : Modal, keyboardShortcut : KeyboardShortcut.Model }
     -> Html Msg
@@ -378,6 +408,9 @@ viewModal model =
 
         HelpModal ->
             viewHelpModal model.env.operatingSystem model.keyboardShortcut
+
+        PublishModal ->
+            viewPublishModal
 
 
 view : Model -> Browser.Document Msg
