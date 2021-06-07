@@ -383,8 +383,8 @@ view model =
     article [ id "workspace" ]
         [ header
             [ id "workspace-toolbar" ]
-            [ Button.secondary Find "Find"
-            , section [ class "right" ] [ Button.callToAction Publish "Publish on Unison Share" ]
+            [ Button.button Find "Find" |> Button.view
+            , section [ class "right" ] [ Button.button Publish "Publish on Unison Share" |> Button.share |> Button.view ]
             ]
         , section
             [ id "workspace-content" ]

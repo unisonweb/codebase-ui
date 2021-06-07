@@ -181,20 +181,31 @@ table {
   --color-icon-patch: var(--color-blue-2);
 
   /* Buttons */
-  --color-button-call-to-action-fg: var(--color-purple-1);
-  --color-button-call-to-action-bg: var(--color-purple-4);
-  --color-button-call-to-action-hover-fg: var(--color-gray-lighten-100);
-  --color-button-call-to-action-hover-bg: var(--color-purple-1);
+
+  --color-button-default-fg: var(--color-main-fg);
+  --color-button-default-bg: var(--color-gray-lighten-50);
+  --color-button-default-hover-fg: var(--color-main-fg);
+  --color-button-default-hover-bg: var(--color-gray-lighten-40);
+
+  --color-button-primary-mono-fg: var(--color-gray-lighten-60);
+  --color-button-primary-mono-bg: var(--color-gray-darken-20);
+  --color-button-primary-mono-hover-fg: var(--color-gray-lighten-60);
+  --color-button-primary-mono-hover-bg: var(--color-gray-darken-5);
 
   --color-button-primary-fg: var(--color-gray-lighten-60);
-  --color-button-primary-bg: var(--color-gray-darken-20);
+  --color-button-primary-bg: var(--color-gray-blue-2);
   --color-button-primary-hover-fg: var(--color-gray-lighten-60);
-  --color-button-primary-hover-bg: var(--color-brand-bright-red);
+  --color-button-primary-hover-bg: var(--color-blue-2);
 
-  --color-button-secondary-fg: var(--color-main-fg);
-  --color-button-secondary-bg: var(--color-gray-lighten-50);
-  --color-button-secondary-hover-fg: var(--color-main-fg);
-  --color-button-secondary-hover-bg: var(--color-gray-lighten-40);
+  --color-button-share-fg: var(--color-purple-1);
+  --color-button-share-bg: var(--color-purple-4);
+  --color-button-share-hover-fg: var(--color-gray-lighten-60);
+  --color-button-share-hover-bg: var(--color-purple-3);
+
+  --color-button-danger-fg: var(--color-gray-lighten-100);
+  --color-button-danger-bg: var(--color-pink-1);
+  --color-button-danger-hover-fg: var(--color-gray-lighten-100);
+  --color-button-danger-hover-bg: var(--color-pink-2);
 
   /* Tooltips */
   --color-tooltip-fg: var(--color-gray-lighten-60);
@@ -627,8 +638,6 @@ button {
   border-radius: var(--border-radius-base);
   font-weight: bold;
   font-size: 1rem;
-  height: 2rem;
-  padding: 0 0.75rem;
   cursor: pointer;
   transition: all 0.1s ease-in;
 }
@@ -642,14 +651,42 @@ button:active {
   transform: translate(0, 0.1rem);
 }
 
-button.call-to-action {
-  color: var(--color-button-call-to-action-fg);
-  background: var(--color-button-call-to-action-bg);
+button.small {
+  height: 1.5rem;
+  padding: 0 0.5rem;
+  font-size: var(--font-size-small);
 }
 
-button.call-to-action:hover {
-  color: var(--color-button-call-to-action-hover-fg);
-  background: var(--color-button-call-to-action-hover-bg);
+button.medium {
+  height: 2rem;
+  padding: 0 0.75rem;
+  font-size: var(--font-size-medium);
+}
+
+button.large {
+  height: 2.5rem;
+  padding: 0 1rem;
+  font-size: 1.125rem;
+}
+
+button.default {
+  color: var(--color-button-default-fg);
+  background: var(--color-button-default-bg);
+}
+
+button.default:hover {
+  color: var(--color-button-default-hover-fg);
+  background: var(--color-button-default-hover-bg);
+}
+
+button.primary-mono {
+  color: var(--color-button-primary-mono-fg);
+  background: var(--color-button-mono-primary-bg);
+}
+
+button.primary-mono:hover {
+  color: var(--color-button-primary--mono-hover-fg);
+  background: var(--color-button-primary-mono-hover-bg);
 }
 
 button.primary {
@@ -662,14 +699,24 @@ button.primary:hover {
   background: var(--color-button-primary-hover-bg);
 }
 
-button.secondary {
-  color: var(--color-button-secondary-fg);
-  background: var(--color-button-secondary-bg);
+button.share {
+  color: var(--color-button-share-fg);
+  background: var(--color-button-share-bg);
 }
 
-button.secondary:hover {
-  color: var(--color-button-secondary-hover-fg);
-  background: var(--color-button-secondary-hover-bg);
+button.share:hover {
+  color: var(--color-button-share-hover-fg);
+  background: var(--color-button-share-hover-bg);
+}
+
+button.danger {
+  color: var(--color-button-danger-fg);
+  background: var(--color-button-danger-bg);
+}
+
+button.danger:hover {
+  color: var(--color-button-danger-fg);
+  background: var(--color-button-danger-bg);
 }
 
 /* Icons */
@@ -1092,10 +1139,10 @@ button.secondary:hover {
   border-bottom: 1px solid var(--color-workspace-border);
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 #workspace-toolbar .right {
-  align-self: flex-end;
   margin-left: auto;
 }
 
