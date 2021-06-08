@@ -57,11 +57,9 @@ module.exports = {
   },
 
   devServer: {
-    contentBase: path.join(__dirname, "src"),
     historyApiFallback: {
       disableDotRule: true,
     },
-    stats: "errors-only",
     proxy: {
       "/api": {
         target: API_URL,
