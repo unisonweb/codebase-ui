@@ -40,12 +40,16 @@
 module KeyboardShortcut.KeyboardEvent exposing
     ( KeyboardEvent
     , KeyboardEventType(..)
+    , attach
     , decode
     , decodeToMsg
     , isHoldingModifier
     , modifiersHeld
     , on
-    , stopPropagationOn
+    , preventDefault
+    , preventDefaultWhen
+    , stopPropagation
+    , stopPropagationWhen
     , subscribe
     )
 
@@ -116,26 +120,60 @@ modifiersHeld { altKey, ctrlKey, metaKey, shiftKey } =
 -- EVENTS
 
 
-stopPropagationOn : KeyboardEventType -> (KeyboardEvent -> msg) -> Html.Attribute msg
-stopPropagationOn keyboardEventType toMsg =
-    Html.Events.custom (keyboardEventTypeToEventString keyboardEventType)
-        (decodeToMsg toMsg
-            |> Decode.andThen
-                (\msg ->
-                    Decode.succeed
-                        { message = msg
-                        , stopPropagation = True
-                        , preventDefault = False
-                        }
-                )
-        )
+type alias KeyboardListener msg =
+    { keyboardEventType : KeyboardEventType
+    , toMsg : KeyboardEvent -> msg
+    , stopPropagation : KeyboardEvent -> Bool
+    , preventDefault : KeyboardEvent -> Bool
+    }
 
 
-on : KeyboardEventType -> (KeyboardEvent -> msg) -> Html.Attribute msg
-on eventType toMsg =
-    Html.Events.on
-        (keyboardEventTypeToEventString eventType)
-        (Decode.map toMsg decode)
+on : KeyboardEventType -> (KeyboardEvent -> msg) -> KeyboardListener msg
+on keyboardEventType toMsg =
+    { keyboardEventType = keyboardEventType
+    , toMsg = toMsg
+    , stopPropagation = always False
+    , preventDefault = always False
+    }
+
+
+stopPropagation : KeyboardListener msg -> KeyboardListener msg
+stopPropagation listener =
+    { listener | stopPropagation = always True }
+
+
+stopPropagationWhen : (KeyboardEvent -> Bool) -> KeyboardListener msg -> KeyboardListener msg
+stopPropagationWhen when listener =
+    { listener | stopPropagation = when }
+
+
+preventDefault : KeyboardListener msg -> KeyboardListener msg
+preventDefault listener =
+    { listener | preventDefault = always True }
+
+
+preventDefaultWhen : (KeyboardEvent -> Bool) -> KeyboardListener msg -> KeyboardListener msg
+preventDefaultWhen when listener =
+    { listener | preventDefault = when }
+
+
+attach : KeyboardListener msg -> Html.Attribute msg
+attach listener =
+    let
+        toEventConfig event =
+            { message = listener.toMsg event
+            , stopPropagation = listener.stopPropagation event
+            , preventDefault = listener.preventDefault event
+            }
+    in
+    Html.Events.custom (keyboardEventTypeToEventString listener.keyboardEventType)
+        (Decode.map toEventConfig decode)
+
+
+
+{--| Note that there's a limitation to Browser.Event in that it does not support
+stopPropagation and preventDefault: https://github.com/elm/browser/issues/77,
+https://github.com/elm/browser/issues/89 --}
 
 
 subscribe : KeyboardEventType -> (KeyboardEvent -> msg) -> Sub msg
