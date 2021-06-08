@@ -513,10 +513,16 @@ view model =
                     , results
                     ]
                 )
+
+        keyboardEvent =
+            KeyboardEvent.on KeyboardEvent.Keydown Keydown
+                |> KeyboardEvent.stopPropagation
+                |> KeyboardEvent.preventDefaultWhen (\evt -> evt.key == ArrowUp || evt.key == ArrowDown)
+                |> KeyboardEvent.attach
     in
     Modal.modal "finder" Close content
         -- We stopPropagation such that movement shortcuts, like J or K, for the
         -- workspace aren't triggered when in the modal when the use is trying to
         -- type those letters into the search field
-        |> Modal.withAttributes [ KeyboardEvent.stopPropagationOn KeyboardEvent.Keydown Keydown ]
+        |> Modal.withAttributes [ keyboardEvent ]
         |> Modal.view

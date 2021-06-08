@@ -1731,6 +1731,7 @@ button.danger:hover {
   text-overflow: ellipsis;
   max-width: 14rem;
   overflow: hidden;
+  cursor: pointer;
 }
 
 #finder .definition-match .namespace {
@@ -1739,6 +1740,7 @@ button.danger:hover {
   text-overflow: ellipsis;
   max-width: 14rem;
   overflow: hidden;
+  cursor: pointer;
 }
 
 #finder .definition-match .namespace .in {

@@ -115,7 +115,7 @@ collect model key =
 
 decay : Key -> Cmd Msg
 decay key =
-    Process.sleep 2000 |> Task.perform (always (Decay key))
+    Process.sleep 3000 |> Task.perform (always (Decay key))
 
 
 
