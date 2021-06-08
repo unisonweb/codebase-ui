@@ -1106,7 +1106,7 @@ button.danger:hover {
   align-items: center;
   font-weight: bold;
   color: var(--color-sidebar-fg);
-  cursor: help;
+  cursor: pointer;
 }
 
 #main-sidebar nav .show-help .keyboard-shortcut {
@@ -1301,7 +1301,7 @@ button.danger:hover {
   height: 1rem;
   color: var(--color-workspace-item-subtle-fg-em);
   transition: color 0.2s;
-  cursor: help;
+  cursor: pointer;
 }
 
 .definition-row header .names .other-names:hover {
