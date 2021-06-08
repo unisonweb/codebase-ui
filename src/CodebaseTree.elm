@@ -86,7 +86,6 @@ update env msg model =
                         |> RemoteData.withDefault False
 
                 newModel =
-                    -- TODO: Update to Loading
                     { model
                         | expandedNamespaceListings = FQNSet.toggle fqn model.expandedNamespaceListings
                         , rootNamespaceListing = nextNamespaceListing
