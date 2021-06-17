@@ -7,7 +7,7 @@ import Definition.Reference exposing (Reference(..))
 import Env as Env exposing (AppContext(..), Env, Flags, OperatingSystem(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, a, aside, div, h1, h3, header, nav, p, section, span, text)
+import Html exposing (Html, a, aside, div, h1, h3, header, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import KeyboardShortcut
@@ -17,6 +17,7 @@ import RelativeTo exposing (RelativeTo(..))
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import UI
+import UI.Button as Button
 import UI.Icon as Icon
 import UI.Modal as Modal
 import Url exposing (Url)
@@ -31,6 +32,7 @@ type Modal
     = NoModal
     | FinderModal Finder.Model
     | HelpModal
+    | ReportBugModal
     | PublishModal
 
 
@@ -96,7 +98,7 @@ type Msg
     | UrlChanged Url
     | Keydown KeyboardEvent
     | OpenDefinition Reference
-    | ShowHelpModal
+    | ShowModal Modal
     | CloseModal
       -- sub msgs
     | FinderMsg Finder.Msg
@@ -123,8 +125,8 @@ update msg ({ env } as model) =
         OpenDefinition ref ->
             openDefinition model ref
 
-        ShowHelpModal ->
-            ( { model | modal = HelpModal }, Cmd.none )
+        ShowModal modal ->
+            ( { model | modal = modal }, Cmd.none )
 
         CloseModal ->
             ( { model | modal = NoModal }, Cmd.none )
@@ -311,8 +313,9 @@ viewMainSidebar model =
             , a [ href "https://unison-lang.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
             , a [ href "https://unison-lang.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
             , a [ href "https://unison-lang.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
+            , a [ onClick (ShowModal ReportBugModal) ] [ text "Report a bug" ]
             , share
-            , a [ class "show-help", onClick ShowHelpModal ] [ text "Keyboard Shortcuts", KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark) ]
+            , a [ class "show-help", onClick (ShowModal HelpModal) ] [ text "Keyboard Shortcuts", KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark) ]
             ]
         ]
 
@@ -395,6 +398,43 @@ viewPublishModal =
         |> Modal.view
 
 
+viewReportBugModal : AppContext -> Html Msg
+viewReportBugModal appContext =
+    let
+        githubLinkButton repo =
+            Button.linkIconThenLabel ("https://github.com/" ++ repo) Icon.github repo |> Button.view
+
+        content =
+            Modal.Content
+                (div []
+                    [ section []
+                        [ p [] [ text "We try our best, but bugs unfortunately creep through :(" ]
+                        , p [] [ text "We greatly appreciate feedback and bug reports—its very helpful for providing the best developer experience when working with Unison." ]
+                        ]
+                    , UI.divider
+                    , section [ class "actions" ]
+                        [ p [] [ text "Visit our GitHub repositories to report bugs and provide feedback" ]
+                        , div [ class "action" ]
+                            [ githubLinkButton "unisonweb/codebase-ui"
+                            , text "for reports on"
+                            , strong [] [ text (Env.appContextToString appContext) ]
+                            , span [ class "subtle" ] [ text "(this UI)" ]
+                            ]
+                        , div [ class "action" ]
+                            [ githubLinkButton "unisonweb/unison"
+                            , text "for reports on the"
+                            , strong [] [ text "Unison Language" ]
+                            , span [ class "subtle" ] [ text "(UCM)" ]
+                            ]
+                        ]
+                    ]
+                )
+    in
+    Modal.modal "report-bug-modal" CloseModal content
+        |> Modal.withHeader "Report a Bug"
+        |> Modal.view
+
+
 viewModal :
     { m | env : Env, modal : Modal, keyboardShortcut : KeyboardShortcut.Model }
     -> Html Msg
@@ -411,6 +451,9 @@ viewModal model =
 
         PublishModal ->
             viewPublishModal
+
+        ReportBugModal ->
+            viewReportBugModal model.env.appContext
 
 
 view : Model -> Browser.Document Msg

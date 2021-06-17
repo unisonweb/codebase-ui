@@ -101,6 +101,7 @@ table {
   --color-main-subtle-bg: var(--color-gray-lighten-60);
   --color-main-border: var(--color-gray-lighten-40);
   --color-main-subtle-border: var(--color-gray-lighten-50);
+  --color-main-divider: var(--color-gray-lighten-55);
   --color-main-focus-fg: var(--color-blue-2);
   --color-main-focus-bg: var(--color-blue-2);
   --color-main-mark-fg: var(--color-blue-2);
@@ -346,6 +347,18 @@ h2 {
 
 h3 {
   font-size: var(--font-size-medium);
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+hr {
+  background: var(--color-main-divider);
+  border: 0;
+  margin: 1.5rem 0;
+  height: 2px;
+  border-radius: 1px;
 }
 
 /* -- Syntax --------------------------------------------------------------- */
@@ -632,89 +645,110 @@ code a:active {
 
 /* Buttons */
 
-button {
+.button {
+  display: inline-flex;
   font-family: var(--font-sans-serif);
   border: 0;
   border-radius: var(--border-radius-base);
   font-weight: bold;
   font-size: 1rem;
+  line-height: 1em;
   cursor: pointer;
   transition: all 0.1s ease-in;
+  justify-content: center;
+  align-items: center;
 }
 
-button:focus {
+a.button,
+a.button:hover {
+  text-decoration: none;
+}
+
+.button:focus {
   outline: none;
   will-change: transform;
 }
 
-button:active {
+.button:active {
   transform: translate(0, 0.1rem);
 }
 
-button.small {
+.button.small {
   height: 1.5rem;
   padding: 0 0.5rem;
   font-size: var(--font-size-small);
 }
 
-button.medium {
+.button.small .icon {
+  margin-right: 0.25rem;
+}
+
+.button.medium {
   height: 2rem;
   padding: 0 0.75rem;
   font-size: var(--font-size-medium);
 }
 
-button.large {
+.button.medium .icon {
+  margin-right: 0.375rem;
+}
+
+.button.large {
   height: 2.5rem;
   padding: 0 1rem;
   font-size: 1.125rem;
 }
 
-button.default {
+.button.large .icon {
+  margin-right: 0.5rem;
+}
+
+.button.default {
   color: var(--color-button-default-fg);
   background: var(--color-button-default-bg);
 }
 
-button.default:hover {
+.button.default:hover {
   color: var(--color-button-default-hover-fg);
   background: var(--color-button-default-hover-bg);
 }
 
-button.primary-mono {
+.button.primary-mono {
   color: var(--color-button-primary-mono-fg);
   background: var(--color-button-mono-primary-bg);
 }
 
-button.primary-mono:hover {
+.button.primary-mono:hover {
   color: var(--color-button-primary--mono-hover-fg);
   background: var(--color-button-primary-mono-hover-bg);
 }
 
-button.primary {
+.button.primary {
   color: var(--color-button-primary-fg);
   background: var(--color-button-primary-bg);
 }
 
-button.primary:hover {
+.button.primary:hover {
   color: var(--color-button-primary-hover-fg);
   background: var(--color-button-primary-hover-bg);
 }
 
-button.share {
+.button.share {
   color: var(--color-button-share-fg);
   background: var(--color-button-share-bg);
 }
 
-button.share:hover {
+.button.share:hover {
   color: var(--color-button-share-hover-fg);
   background: var(--color-button-share-hover-bg);
 }
 
-button.danger {
+.button.danger {
   color: var(--color-button-danger-fg);
   background: var(--color-button-danger-bg);
 }
 
-button.danger:hover {
+.button.danger:hover {
   color: var(--color-button-danger-fg);
   background: var(--color-button-danger-bg);
 }
@@ -1535,6 +1569,30 @@ button.danger:hover {
 
 #publish-modal .help:hover {
   color: var(--color-modal-fg);
+}
+
+/* -- ReportBugModal ------------------------------------------------------- */
+
+#report-bug-modal {
+  width: 32.5rem;
+}
+
+#report-bug-modal .actions .button {
+  margin-right: 0.5rem;
+}
+
+#report-bug-modal .actions .action {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+#report-bug-modal .actions .action strong {
+  margin: 0 0.25rem;
+}
+
+#report-bug-modal .actions .action:last-child {
+  margin-bottom: 0;
 }
 
 /* -- Finder --------------------------------------------------------------- */
