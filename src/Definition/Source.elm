@@ -1,7 +1,9 @@
 module Definition.Source exposing
-    ( ViewConfig(..)
+    ( Source(..)
+    , ViewConfig(..)
     , numTermLines
     , numTypeLines
+    , view
     , viewTermSignature
     , viewTermSource
     , viewTypeSource
@@ -20,6 +22,11 @@ type ViewConfig msg
     = Rich (Reference -> msg)
     | Monochrome
     | Plain
+
+
+type Source
+    = Term String TermSource
+    | Type TypeSource
 
 
 
@@ -48,6 +55,16 @@ numTermLines source =
 
 
 -- VIEW
+
+
+view : ViewConfig msg -> Source -> Html msg
+view viewConfig source =
+    case source of
+        Type typeSource ->
+            viewTypeSource viewConfig typeSource
+
+        Term termName termSource ->
+            viewTermSource viewConfig termName termSource
 
 
 viewTypeSource : ViewConfig msg -> TypeSource -> Html msg

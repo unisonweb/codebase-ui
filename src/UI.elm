@@ -9,6 +9,12 @@ codeBlock attrs code_ =
     pre attrs [ code [] [ code_ ] ]
 
 
+inlineCode : List (Attribute msg) -> Html msg -> Html msg
+inlineCode attrs code_ =
+    -- TODO: Make inline...
+    pre attrs [ code [] [ code_ ] ]
+
+
 nothing : Html msg
 nothing =
     text ""
