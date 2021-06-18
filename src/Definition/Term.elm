@@ -39,8 +39,12 @@ type TermSignature
     = TermSignature Syntax
 
 
-type alias TermDetail =
-    Term { info : Info, source : TermSource }
+type alias TermDetailFields d =
+    { d | info : Info, source : TermSource }
+
+
+type alias TermDetail d =
+    Term (TermDetailFields d)
 
 
 type alias TermSummary =

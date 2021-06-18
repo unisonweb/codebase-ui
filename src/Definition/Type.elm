@@ -33,8 +33,12 @@ type Type a
     = Type Hash TypeCategory a
 
 
-type alias TypeDetail =
-    Type { info : Info, source : TypeSource }
+type alias TypeDetailFields d =
+    { d | info : Info, source : TypeSource }
+
+
+type alias TypeDetail d =
+    Type (TypeDetailFields d)
 
 
 type alias TypeSummary =

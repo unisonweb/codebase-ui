@@ -4,6 +4,7 @@ import Api
 import Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail, AbilityConstructorSource(..))
 import Definition.Category as Category exposing (Category)
 import Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail, DataConstructorSource(..))
+import Definition.Doc as Doc exposing (Doc(..))
 import Definition.Info as Info
 import Definition.Reference as Reference exposing (Reference(..))
 import Definition.Source as Source
@@ -34,9 +35,17 @@ type WorkspaceItem
     | Success Reference Item Zoom
 
 
+type alias TermDetailWithDoc =
+    TermDetail { doc : Maybe Doc }
+
+
+type alias TypeDetailWithDoc =
+    TypeDetail { doc : Maybe Doc }
+
+
 type Item
-    = TermItem TermDetail
-    | TypeItem TypeDetail
+    = TermItem TermDetailWithDoc
+    | TypeItem TypeDetailWithDoc
     | DataConstructorItem DataConstructorDetail
     | AbilityConstructorItem AbilityConstructorDetail
 
@@ -171,6 +180,11 @@ viewNames onClick_ info category =
         ]
 
 
+viewDoc : (Reference -> msg) -> Doc -> Html msg
+viewDoc toOpenReferenceMsg doc =
+    div [ class "doc" ] [ Doc.view toOpenReferenceMsg doc ]
+
+
 {-| TODO: Yikes, this isn't great. Needs cleanup
 -}
 viewSource : (Reference -> msg) -> Item -> ( Html msg, Html msg )
@@ -242,6 +256,11 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocuse
 
         attrs =
             [ class zoomClass, classList [ ( "focused", isFocused ) ] ]
+
+        viewDoc_ doc =
+            doc
+                |> Maybe.map (viewDoc toOpenReferenceMsg)
+                |> Maybe.withDefault UI.nothing
     in
     case item of
         TermItem (Term _ category detail) ->
@@ -250,7 +269,8 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocuse
                 ref
                 attrs
                 (viewNames docZoomMsg detail.info (Category.Term category))
-                [ ( UI.nothing, viewBuiltin item )
+                [ ( UI.nothing, viewDoc_ detail.doc )
+                , ( UI.nothing, viewBuiltin item )
                 , viewSource toOpenReferenceMsg item
                 ]
 
@@ -407,13 +427,13 @@ decodeTypeDetails =
         )
 
 
-decodeTypes : Decode.Decoder (List TypeDetail)
+decodeTypes : Decode.Decoder (List TypeDetailWithDoc)
 decodeTypes =
     let
         makeType ( hash_, d ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Type h d.category { info = Info.makeInfo d.name d.otherNames, source = d.source })
+                |> Maybe.map (\h -> Type h d.category { doc = Nothing, info = Info.makeInfo d.name d.otherNames, source = d.source })
 
         buildTypes =
             List.map makeType >> MaybeE.values
@@ -459,13 +479,13 @@ decodeTermNamesAndSource =
         )
 
 
-decodeTerms : Decode.Decoder (List TermDetail)
+decodeTerms : Decode.Decoder (List TermDetailWithDoc)
 decodeTerms =
     let
         makeTerm ( hash_, d ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Term h d.category { info = Info.makeInfo d.name d.otherNames, source = d.source })
+                |> Maybe.map (\h -> Term h d.category { doc = Nothing, info = Info.makeInfo d.name d.otherNames, source = d.source })
 
         buildTerms =
             List.map makeTerm >> MaybeE.values
