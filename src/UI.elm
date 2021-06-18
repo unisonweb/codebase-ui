@@ -1,6 +1,6 @@
 module UI exposing (..)
 
-import Html exposing (Attribute, Html, code, div, pre, span, text)
+import Html exposing (Attribute, Html, code, div, hr, pre, span, text)
 import Html.Attributes exposing (class)
 
 
@@ -44,6 +44,11 @@ errorMessage message =
 emptyStateMessage : String -> Html msg
 emptyStateMessage message =
     div [ class "empty-state" ] [ text message ]
+
+
+divider : Html msg
+divider =
+    hr [] []
 
 
 charWidth : Int -> String

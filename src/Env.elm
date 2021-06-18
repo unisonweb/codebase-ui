@@ -51,6 +51,16 @@ appContextFromString rawContext =
         Ucm
 
 
+appContextToString : AppContext -> String
+appContextToString appContext =
+    case appContext of
+        UnisonShare ->
+            "Unison Share"
+
+        Ucm ->
+            "Unison Local"
+
+
 operatingSystemFromString : String -> OperatingSystem
 operatingSystemFromString rawOs =
     case rawOs of

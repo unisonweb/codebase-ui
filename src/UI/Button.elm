@@ -3,9 +3,14 @@ module UI.Button exposing
     , Size(..)
     , Type(..)
     , button
+    , buttonIcon
+    , buttonIconThenLabel
     , danger
     , default
     , large
+    , link
+    , linkIcon
+    , linkIconThenLabel
     , medium
     , primary
     , primaryMono
@@ -16,14 +21,26 @@ module UI.Button exposing
     , withType
     )
 
-import Html exposing (Html, text)
-import Html.Attributes exposing (class)
+import Html exposing (Html, a, text)
+import Html.Attributes exposing (class, href, rel, target)
 import Html.Events exposing (onClick)
+import UI.Icon as I
 
 
-type alias Button clickMsg =
-    { clickMsg : clickMsg
-    , label : String
+type Action clickMsg
+    = OnClick clickMsg
+    | Href String
+
+
+type Content msg
+    = Icon (I.Icon msg)
+    | IconThenLabel (I.Icon msg) String
+    | Label String
+
+
+type alias Button msg =
+    { action : Action msg
+    , content : Content msg
     , type_ : Type
     , size : Size
     }
@@ -35,21 +52,95 @@ type alias Button clickMsg =
 
 button : clickMsg -> String -> Button clickMsg
 button clickMsg label =
-    { clickMsg = clickMsg
-    , label = label
+    { action = OnClick clickMsg
+    , content = Label label
+    , type_ = Default
+    , size = Medium
+    }
+
+
+buttonIcon : msg -> I.Icon msg -> Button msg
+buttonIcon msg icon_ =
+    { action = OnClick msg
+    , content = Icon icon_
+    , type_ = Default
+    , size = Medium
+    }
+
+
+buttonIconThenLabel : msg -> I.Icon msg -> String -> Button msg
+buttonIconThenLabel msg icon_ label =
+    { action = OnClick msg
+    , content = IconThenLabel icon_ label
+    , type_ = Default
+    , size = Medium
+    }
+
+
+{-| Generally avoid using Button links as it is not semantically correct, but
+useful in some cases for external links
+-}
+link : String -> String -> Button clickMsg
+link url label =
+    { action = Href url
+    , content = Label label
+    , type_ = Default
+    , size = Medium
+    }
+
+
+linkIcon : String -> I.Icon msg -> Button msg
+linkIcon url icon_ =
+    { action = Href url
+    , content = Icon icon_
+    , type_ = Default
+    , size = Medium
+    }
+
+
+linkIconThenLabel : String -> I.Icon msg -> String -> Button msg
+linkIconThenLabel url icon_ label =
+    { action = Href url
+    , content = IconThenLabel icon_ label
     , type_ = Default
     , size = Medium
     }
 
 
 view : Button clickMsg -> Html clickMsg
-view { label, type_, clickMsg, size } =
-    Html.button
-        [ class (typeToClassName type_)
-        , class (sizeToClassName size)
-        , onClick clickMsg
-        ]
-        [ text label ]
+view { content, type_, action, size } =
+    let
+        content_ =
+            case content of
+                Icon i ->
+                    [ I.view i ]
+
+                IconThenLabel i l ->
+                    [ I.view i, text l ]
+
+                Label l ->
+                    [ text l ]
+    in
+    case action of
+        OnClick clickMsg ->
+            Html.button
+                [ class "button"
+                , class (typeToClassName type_)
+                , class (sizeToClassName size)
+                , onClick clickMsg
+                ]
+                content_
+
+        Href url ->
+            a
+                [ class "button"
+                , class (typeToClassName type_)
+                , class (sizeToClassName size)
+                , href url
+                , rel "noopener"
+                , target "_blank"
+                ]
+                content_
 
 
 
