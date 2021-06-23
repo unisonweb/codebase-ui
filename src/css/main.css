@@ -33,6 +33,7 @@ table {
   /* -- Layers ------------------------------------------------------------- */
   --layer-base: 1;
   --layer-popover: 50;
+  --layer-tooltip: 75;
   --layer-modal-overlay: 99;
   --layer-modal: 100;
   --layer-modal-above: 110;
@@ -132,21 +133,28 @@ table {
   --color-workspace-border: var(--color-gray-lighten-50);
 
   --color-workspace-item-fg: var(--color-gray-darken-30);
-  --color-workspace-item-mg: var(-color-main-subtle-bg-color-gray-lighten-60);
+  --color-workspace-item-mg: var(--color-gray-lighten-60);
   --color-workspace-item-source-bg: transparent;
+  --color-workspace-item-doc-source-bg: var(--color-gray-lighten-60);
   --color-workspace-item-bg: transparent;
+  --color-workspace-item-link: var(--color-blue-1);
+  --color-workspace-item-link-active: var(--color-blue-2);
+  --color-workspace-item-link-hover: var(--color-blue-2);
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-40);
   --color-workspace-item-subtle-fg-em: var(--color-gray-lighten-20);
   --color-workspace-item-subtle-bg: var(--color-main-subtle-bg);
-  --color-workspace-item-actions-bg: var(--color-gray-lighten-55);
+  --color-workspace-item-em-bg: var(--color-gray-lighten-55);
+  --color-workspace-item-content-border: var(--color-gray-lighten-55);
   --color-workspace-item-border: transparent;
 
   --color-workspace-item-focus-fg: var(--color-gray-darken-30);
-  --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-20);
+  --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-30);
   --color-workspace-item-focus-mg: var(--color-gray-lighten-55);
   --color-workspace-item-focus-source-bg: transparent;
+  --color-workspace-item-focus-doc-source-bg: var(--color-gray-lighten-55);
   --color-workspace-item-focus-bg: var(--color-gray-lighten-60);
-  --color-workspace-item-focus-actions-bg: var(--color-gray-lighten-50);
+  --color-workspace-item-focus-em-bg: var(--color-gray-lighten-50);
+  --color-workspace-item-focus-content-border: var(--color-gray-lighten-50);
   --color-workspace-item-focus-border: var(--color-gray-lighten-50);
 
   --color-modal-fg: var(--color-main-fg);
@@ -831,10 +839,12 @@ a.button:hover {
   font-size: var(--font-size-medium);
   color: var(--color-tooltip-fg);
   background: var(--color-tooltip-bg);
-  padding: 0.25rem 0.75rem;
+  padding: 0.5rem 0.75rem;
   border-radius: var(--border-radius-base);
+  min-width: 10rem;
   opacity: 0;
   pointer-events: none;
+  z-index: var(--layer-tooltip);
 }
 
 .tooltip:after {
@@ -1256,7 +1266,7 @@ a.button:hover {
   top: 0.75rem;
   right: 1rem;
   height: 1.25rem;
-  background: var(--color-workspace-item-actions-bg);
+  background: var(--color-workspace-item-em-bg);
   border-radius: var(--border-radius-base);
   display: flex;
   flex-direction: row;
@@ -1374,8 +1384,9 @@ a.button:hover {
   font-weight: bold;
 }
 
-.definition-row .content .docs {
+.definition-row .content .definition-doc {
   margin-bottom: 1.5rem;
+  margin-left: 1.25rem;
 }
 
 .definition-row .content .built-in {
@@ -1455,30 +1466,19 @@ a.button:hover {
 /* Definition Row: Focused */
 
 .definition-row.focused {
-  background: var(--color-workspace-item-focus-bg);
-  border-top-color: var(--color-workspace-item-focus-border);
-  border-bottom-color: var(--color-workspace-item-focus-border);
-  /* gutter */
-  box-shadow: inset 2rem 0 0 var(--color-workspace-item-focus-mg);
-}
-
-.definition-row.focused .actions {
-  background: var(--color-workspace-item-focus-actions-bg);
-  opacity: 1;
-}
-
-.definition-row.focused .content code {
-  background: var(--color-workspace-item-focus-source-bg);
-}
-
-.definition-row.focused header .name,
-.definition-row.focused header .error-header {
-  color: var(--color-workspace-item-focus-fg);
-}
-
-.definition-row.focused .content .badge {
-  background: var(--color-workspace-item-focus-mg);
-  border-color: var(--color-workspace-item-focus-border);
+  --color-workspace-item-fg: var(--color-workspace-item-focus-fg);
+  --color-workspace-item-bg: var(--color-workspace-item-focus-bg);
+  --color-workspace-item-subtle-fg: var(--color-workspace-item-focus-subtle-fg);
+  --color-workspace-item-content-border: var(
+    --color-workspace-item-focus-content-border
+  );
+  --color-workspace-item-border: var(--color-workspace-item-focus-border);
+  --color-workspace-item-mg: var(--color-workspace-item-focus-mg);
+  --color-workspace-item-em-bg: var(--color-workspace-item-focus-em-bg);
+  --color-workspace-item-source-bg: var(--color-workspace-item-focus-source-bg);
+  --color-workspace-item-doc-source-bg: var(
+    --color-workspace-item-focus-doc-source-bg
+  );
 }
 
 /* -- HelpModal ------------------------------------------------------------ */
@@ -1876,3 +1876,5 @@ a.button:hover {
 #finder .definition-match:not(.focused):hover .keyboard-shortcut .key {
   background: var(--color-modal-subtle-mg);
 }
+
+@import "./doc.css";
