@@ -7,6 +7,7 @@ import Html
     exposing
         ( Html
         , a
+        , article
         , aside
         , blockquote
         , br
@@ -205,27 +206,29 @@ view refToMsg document =
                 SectionBreak ->
                     hr [] []
 
-                Tooltip inner tooltipContent ->
-                    div []
-                        [ div [ class "tooltip-inner" ] [ viewAtCurrentSectionLevel inner ]
-                        , div [ class "tooltip" ] [ viewAtCurrentSectionLevel tooltipContent ]
-                        ]
+                Tooltip triggerContent tooltipContent ->
+                    UI.withTooltip
+                        (viewAtCurrentSectionLevel tooltipContent)
+                        (viewAtCurrentSectionLevel triggerContent)
 
                 Aside d ->
                     aside [] [ viewAtCurrentSectionLevel d ]
 
                 Callout icon content ->
                     let
-                        ico =
+                        ( cls, ico ) =
                             case icon of
                                 Just (Word emoji) ->
-                                    div [ class "callout-icon" ] [ text emoji ]
+                                    ( class "callout callout-with-icon", div [ class "callout-icon" ] [ text emoji ] )
 
                                 _ ->
-                                    UI.nothing
+                                    ( class "callout", UI.nothing )
                     in
-                    div [ class "callout" ]
-                        [ ico, viewAtCurrentSectionLevel content ]
+                    div [ cls ]
+                        [ ico
+                        , div [ class "callout-content" ]
+                            [ viewAtCurrentSectionLevel content ]
+                        ]
 
                 Table rows ->
                     let
@@ -242,7 +245,13 @@ view refToMsg document =
                         div [ class "folded", class "is-folded" ] [ Icon.view Icon.caretRight, viewAtCurrentSectionLevel summary ]
 
                     else
-                        div [ class "folded" ] [ Icon.view Icon.caretRight, viewAtCurrentSectionLevel details ]
+                        div [ class "folded" ]
+                            [ Icon.view Icon.caretDown
+                            , div []
+                                [ div [] [ viewAtCurrentSectionLevel summary ]
+                                , viewAtCurrentSectionLevel details
+                                ]
+                            ]
 
                 Paragraph content ->
                     p [] (List.map viewAtCurrentSectionLevel content)
@@ -327,13 +336,13 @@ view refToMsg document =
                             let
                                 viewFoldedSource { isFolded, summary, details } =
                                     if isFolded then
-                                        div [ class "is-folded" ]
+                                        div [ class "folded", class "is-folded" ]
                                             [ Icon.view Icon.caretRight
                                             , UI.inlineCode [] (viewSyntax summary)
                                             ]
 
                                     else
-                                        div []
+                                        div [ class "folded" ]
                                             [ Icon.view Icon.caretDown
                                             , viewSource details
                                             ]
@@ -351,7 +360,7 @@ view refToMsg document =
                             a [ onClick (refToMsg ref) ] [ text (Reference.toHumanString ref) ]
 
                         Signature signatures ->
-                            div [ class "signatures" ] (List.map (\( _, s ) -> viewSignature s) signatures)
+                            div [ class "signatures" ] (List.map (\( _, s ) -> div [ class "signature" ] [ viewSignature s ]) signatures)
 
                         SignatureInline ( _, signature ) ->
                             span [ class "signature-inline" ] [ viewSignature signature ]
@@ -378,12 +387,16 @@ view refToMsg document =
                     section [] (List.map viewAtCurrentSectionLevel content)
 
                 Column content ->
-                    div [ class "column" ] (List.map viewAtCurrentSectionLevel content)
+                    ul [ class "column" ]
+                        (List.map
+                            (\c -> li [] [ viewAtCurrentSectionLevel c ])
+                            content
+                        )
 
                 Group content ->
                     span [ class "group" ] [ viewAtCurrentSectionLevel content ]
     in
-    div [ class "doc" ] [ view_ 1 document ]
+    article [ class "doc" ] [ view_ 1 document ]
 
 
 

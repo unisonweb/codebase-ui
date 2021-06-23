@@ -1,0 +1,215 @@
+.doc {
+  display: flex;
+  flex-direction: row;
+  font-size: var(--font-size-medium);
+  max-width: 40rem;
+}
+
+.doc .word {
+  margin-right: 0.5ch;
+}
+
+.doc .code,
+.doc .sources,
+.doc .folded-sources,
+.doc .example,
+.doc .eval,
+.doc .signatures .signature {
+  display: flex;
+  padding: 0.5rem 1rem;
+  background: var(--color-workspace-item-doc-source-bg);
+  border-radius: var(--border-radius-base);
+  margin-bottom: 1rem;
+}
+
+.doc .inline-code,
+.doc .example-inline,
+.doc .eval-inline,
+.doc .signature-inline {
+  display: inline-block;
+  padding: 1px 0.5rem;
+  background: var(--color-workspace-item-doc-source-bg);
+  border-radius: var(--border-radius-base);
+}
+
+.doc strong {
+  font-weight: bold;
+}
+
+.doc .italic {
+  font-style: italic;
+}
+
+.doc .strikethrough {
+  text-decoration: line-through;
+}
+
+.doc a,
+.doc a:visited {
+  color: var(--color-workspace-item-link-fg);
+}
+.doc a:active {
+  color: var(--color-workspace-item-link-active);
+}
+.doc a:hover {
+  color: var(--color-workspace-item-link-hover);
+}
+
+.doc blockquote {
+  position: relative;
+  padding: 0.5rem 1.25rem;
+  margin-left: 0rem;
+  margin-bottom: 1rem;
+}
+.doc blockquote:before {
+  position: absolute;
+  content: " ";
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: var(--color-workspace-item-content-border);
+  width: 4px;
+  border-radius: 2px;
+}
+
+.doc hr {
+  background: var(--color-workspace-item-content-border);
+  margin: 1.5rem 0;
+}
+
+.doc .with-tooltip {
+  text-decoration: underline dotted var(--color-workspace-item-subtle-fg);
+  text-underline-offset: 2px;
+  /* Other tooltip styling is handled by UI.tooltip */
+}
+
+.doc aside {
+  width: 33%;
+  font-size: var(--font-size-small);
+  background: var(--color-workspace-item-mg);
+  padding: 0.5rem 0.75rem;
+  margin-left: 1rem;
+  float: right;
+  border-radius: var(--border-radius-base);
+}
+
+.doc aside p:last-child {
+  margin-bottom: 0;
+}
+
+.doc .callout {
+  background: var(--color-workspace-item-em-bg);
+  padding: 0.5rem 0.75rem;
+  margin-bottom: 1rem;
+  border-radius: var(--border-radius-base);
+  display: flex;
+  flex-direction: row;
+}
+
+.doc .callout.callout-with-icon .callout-content {
+  padding-top: 1px;
+}
+
+.doc .callout p:last-child {
+  margin-bottom: 0;
+}
+
+.doc .callout .callout-icon {
+  margin-right: 0.5rem;
+  font-size: 1rem;
+}
+
+.doc table {
+  margin-bottom: 1rem;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+.doc table td {
+  border: 1px solid var(--color-workspace-item-content-border);
+  padding: 0.5rem;
+}
+
+.doc .folded {
+  margin-bottom: 1rem;
+  display: flex;
+  flex-direction: row;
+}
+
+.doc .folded .icon {
+  margin-right: 0.25rem;
+  color: var(--color-workspace-item-subtle-fg);
+  font-size: 1rem;
+  padding-top: 1px;
+  cursor: pointer;
+}
+
+.doc .folded .icon:hover {
+  color: var(--color-workspace-item-subtle-fg-em);
+}
+
+.doc p {
+  margin-bottom: 1em;
+}
+
+.doc ol,
+.doc ul {
+  margin-left: 2rem;
+  margin-bottom: 1em;
+}
+
+.doc section {
+  margin-bottom: 1rem;
+  margin-top: 1rem;
+}
+
+.doc h1 {
+  font-size: 1.5rem;
+}
+
+.doc h2 {
+  font-size: 1.25rem;
+}
+
+.doc h3 {
+  font-size: 1rem;
+}
+
+.doc h4 {
+  font-size: 0.875rem;
+}
+
+.doc h5 {
+  font-size: 0.875rem;
+}
+
+.doc h6 {
+  font-size: 0.875rem;
+}
+
+.doc img {
+  margin-bottom: 1rem;
+}
+
+.doc .image-with-caption {
+  width: min-content;
+}
+
+.doc .image-with-caption .caption {
+  text-align: center;
+  font-style: italic;
+}
+
+.doc .embed {
+}
+
+.doc .embed-inline {
+}
+
+.doc .column {
+  margin: none;
+  list-style-type: none;
+}
+
+.doc .group {
+}

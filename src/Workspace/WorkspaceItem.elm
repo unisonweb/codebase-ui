@@ -182,7 +182,7 @@ viewNames onClick_ info category =
 
 viewDoc : (Reference -> msg) -> Doc -> Html msg
 viewDoc toOpenReferenceMsg doc =
-    div [ class "doc" ] [ Doc.view toOpenReferenceMsg doc ]
+    div [ class "definition-doc" ] [ Doc.view toOpenReferenceMsg doc ]
 
 
 {-| TODO: Yikes, this isn't great. Needs cleanup
