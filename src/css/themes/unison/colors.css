@@ -1,0 +1,46 @@
+:root {
+  /* Brand colors */
+  --color-brand-bright-red: #ff4756;
+  --color-brand-orange: #ff8800;
+  --color-brand-yellow: #ffc41f;
+  --color-brand-purple: #8f228f;
+  --color-brand-dark-purple: #520066;
+
+  /* Grays */
+  --color-gray-darken-5: #3d3e43;
+  --color-gray-darken-20: #2d2e35;
+  --color-gray-darken-25: #22232a;
+  --color-gray-darken-30: #18181c;
+
+  --color-gray-base: #515258;
+
+  --color-gray-lighten-20: #818286;
+  --color-gray-lighten-30: #bdbfc6;
+  --color-gray-lighten-40: #d1d5dc;
+  --color-gray-lighten-50: #e6ebf0;
+  --color-gray-lighten-55: #f1f3f5;
+  --color-gray-lighten-60: #fafafb;
+  --color-gray-lighten-100: #ffffff;
+
+  /* Pinks */
+  --color-pink-1: #ff4756;
+  --color-pink-2: #ff6c78;
+  --color-pink-3: #ff9ba3;
+
+  /* Greens */
+  --color-green-1: #27ae60;
+
+  /* Blues */
+  --color-blue-1: #225ebe;
+  --color-blue-2: #5695f4;
+
+  /* Oranges */
+  --color-orange-1: #ff8800;
+  --color-orange-2: #ffc41f;
+
+  /* Purples */
+  --color-purple-1: #55377b;
+  --color-purple-2: #734da3;
+  --color-purple-3: #9a76c8;
+  --color-purple-4: #c6a8ec;
+}
