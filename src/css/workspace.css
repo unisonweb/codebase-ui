@@ -1,0 +1,312 @@
+/* -- Workspace ------------------------------------------------------------ */
+
+#workspace {
+  background: var(--color-workspace-bg);
+  color: var(--color-workspace-fg);
+}
+
+#workspace-toolbar {
+  height: 3.5rem;
+  padding: 0.75rem 1rem;
+  font-size: var(--font-size-medium);
+  background: var(--color-workspace-item-bg);
+  border-bottom: 1px solid var(--color-workspace-border);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+#workspace-toolbar .right {
+  margin-left: auto;
+}
+
+#workspace-content {
+  overflow: auto;
+  height: calc(100vh - 3.5rem);
+  padding-top: 2rem;
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-workspace-item-subtle-fg)
+    var(--color-workspace-item-bg);
+  /* gutter */
+  box-shadow: inset 2rem 0 0 var(--color-workspace-subtle-bg);
+}
+
+#workspace-content::-webkit-scrollbar {
+  width: 0.5rem;
+}
+
+#workspace-content::-webkit-scrollbar-track {
+  background: var(--color-workspace-item-bg);
+}
+
+#workspace-content::-webkit-scrollbar-thumb {
+  background-color: var(--color-workspace-item-subtle-fg);
+  border-radius: var(--border-radius-base);
+}
+
+/* -- Definitions ---------------------------------------------------------- */
+
+.definition-row {
+  position: relative;
+  color: var(--color-workspace-item-fg);
+  background: var(--color-workspace-item-bg);
+  padding: 1rem 0;
+  border-top: 1px solid var(--color-workspace-item-border);
+  border-bottom: 1px solid var(--color-workspace-item-border);
+  margin-bottom: 1.5rem;
+  font-size: var(--font-size-medium);
+  /* gutter */
+  box-shadow: inset 2rem 0 0 var(--color-workspace-item-mg);
+}
+
+.definition-row .inner-row {
+  display: flex;
+  flex-direction: row;
+}
+
+.definition-row .icon.caret-right {
+  color: var(--color-workspace-item-subtle-fg);
+  transition: color 0.2s, transform 0.1s ease-out;
+}
+
+.definition-row .gutter {
+  display: flex;
+  justify-content: center;
+  width: 2rem;
+  margin-right: 0.375rem;
+  color: var(--color-workspace-item-subtle-fg);
+}
+
+.definition-row .loading-placeholder {
+  background: var(--color-workspace-item-subtle-fg);
+}
+
+.definition-row header {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  flex: 1;
+  align-items: center;
+  height: 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.definition-row .actions {
+  position: absolute;
+  top: 0.75rem;
+  right: 1rem;
+  height: 1.25rem;
+  background: var(--color-workspace-item-em-bg);
+  border-radius: var(--border-radius-base);
+  display: flex;
+  flex-direction: row;
+  z-index: var(--layer-popover);
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.definition-row:hover .actions {
+  opacity: 1;
+}
+
+.definition-row .actions .close {
+  width: 1.25rem;
+  height: 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.definition-row .actions .close .icon {
+  color: var(--color-workspace-item-subtle-fg-em);
+  font-size: 0.75rem;
+}
+
+.definition-row .actions .close:hover .icon {
+  color: var(--color-workspace-item-fg);
+}
+
+.definition-row header .names {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  cursor: pointer;
+}
+
+.definition-row header .names .icon {
+  margin-right: 0.375rem;
+}
+
+.definition-row header .names .icon.caret-right {
+  margin-right: 0.25rem;
+}
+
+.definition-row header .names:hover .icon.caret-right {
+  color: var(--color-workspace-item-focus-subtle-fg);
+}
+
+.definition-row header .names .name {
+  color: var(--color-workspace-item-fg);
+  font-size: var(--font-size-base);
+  transition: color 0.2s;
+  font-weight: bold;
+}
+
+.definition-row header .names .separator {
+  color: var(--color-workspace-item-subtle-fg);
+  margin: 0 0.375rem;
+  cursor: default;
+}
+
+.definition-row header .names .info {
+  font-size: var(--font-size-small);
+  display: flex;
+  flex-direction: row;
+  align-self: flex-end;
+  margin-bottom: 0.1rem;
+}
+
+.definition-row header .names .namespace .in {
+  color: var(--color-workspace-item-subtle-fg-em);
+}
+
+.definition-row header .names .other-names {
+  height: 1rem;
+  color: var(--color-workspace-item-subtle-fg-em);
+  transition: color 0.2s;
+  cursor: pointer;
+}
+
+.definition-row header .names .other-names:hover {
+  color: var(--color-workspace-item-fg);
+}
+
+.definition-row header .error-header {
+  flex-direction: row;
+  align-items: center;
+}
+
+.definition-row header .error-header .icon {
+  margin-right: 0.375rem;
+}
+
+.definition-row header .error-header .icon.caret-down {
+  margin-right: 0.25rem;
+  color: var(--color-workspace-item-subtle-fg);
+}
+
+.definition-row header .error-header .icon.warn {
+  font-size: 1rem;
+  color: var(--color-pink-1);
+}
+
+.definition-row .content .gutter {
+  margin-right: 1.5rem;
+}
+
+.definition-row .content .error {
+  padding-left: 1.5rem;
+  font-size: var(--font-size-medium);
+}
+
+.definition-row .content .definition-with-error {
+  font-weight: bold;
+}
+
+.definition-row .content .definition-doc {
+  margin-bottom: 1.5rem;
+  margin-left: 1.25rem;
+}
+
+.definition-row .content .built-in {
+  margin-bottom: 1.5rem;
+  /* TODO: Renable with source toggle */
+  /*margin-left: 1.25rem;*/
+}
+
+.definition-row .content .badge {
+  background: var(--color-workspace-item-mg);
+}
+
+.definition-row .content .source {
+  display: flex;
+  flex-direction: row;
+  background: var(--color-workspace-item-source-bg);
+}
+
+.definition-row .content .source .source-toggle {
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  margin-right: 0.375rem;
+  padding-top: 0.1rem;
+  /* TODO: Renable source toggle */
+  display: none;
+}
+
+.definition-row .content .source .source-toggle .icon {
+  color: var(--color-workspace-item-subtle-fg);
+}
+
+.definition-row .content .source .source-toggle.disabled {
+  opacity: 0.5;
+}
+
+/* Definition Row: Loading */
+
+.definition-row header .loading-placeholder {
+  width: 10%;
+}
+
+.definition-row .content .loading-placeholder {
+  display: block;
+  width: 40%;
+  margin-bottom: 0.3rem;
+}
+
+.definition-row .content code .loading-placeholder {
+  display: block;
+  width: 40%;
+}
+
+/* Definition Row: Zoom level */
+.definition-row.zoom-level-far .inner-row {
+  margin-bottom: 0;
+}
+
+.definition-row.zoom-level-far .content {
+  opacity: 0;
+  height: 0;
+}
+
+.definition-row.zoom-level-medium .names .icon.caret-right {
+  transform: rotate(90deg);
+}
+
+.definition-row.zoom-level-medium .source-detail {
+  opacity: 0;
+  height: 0;
+}
+
+.definition-row.zoom-level-near .source .icon.caret-right {
+  transform: rotate(90deg);
+}
+
+/* Definition Row: Focused */
+
+.definition-row.focused {
+  --color-workspace-item-fg: var(--color-workspace-item-focus-fg);
+  --color-workspace-item-bg: var(--color-workspace-item-focus-bg);
+  --color-workspace-item-subtle-fg: var(--color-workspace-item-focus-subtle-fg);
+  --color-workspace-item-content-border: var(
+    --color-workspace-item-focus-content-border
+  );
+  --color-workspace-item-border: var(--color-workspace-item-focus-border);
+  --color-workspace-item-mg: var(--color-workspace-item-focus-mg);
+  --color-workspace-item-em-bg: var(--color-workspace-item-focus-em-bg);
+  --color-workspace-item-source-bg: var(--color-workspace-item-focus-source-bg);
+  --color-workspace-item-doc-source-bg: var(
+    --color-workspace-item-focus-doc-source-bg
+  );
+}

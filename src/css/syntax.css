@@ -1,0 +1,170 @@
+pre {
+  margin: 0;
+}
+
+code {
+  display: inline-block;
+  font-family: var(--font-monospace);
+  line-height: 1.6;
+}
+
+code a {
+  display: inline-block;
+  padding: 0 0.375rem;
+  margin: 0 -0.25rem;
+  border-radius: var(--border-radius-base);
+  line-height: 1.4;
+  will-change: transform;
+}
+
+code a:hover {
+  background: var(--color-gray-lighten-50);
+  text-decoration: none;
+}
+
+code a:active {
+  transform: translate(0, 0.1rem);
+}
+
+.rich .text-literal,
+.rich .bytes-literal,
+.rich .char-literal {
+  color: var(--color-syntax-text);
+}
+
+.rich .boolean-literal,
+.rich .constructor {
+  color: var(--color-syntax-variant);
+}
+
+.rich .blank,
+.rich .var,
+.rich .data-type-params {
+  color: var(--color-syntax-base);
+}
+
+.rich .numberic-literal,
+.rich .term-reference,
+.rich .type-reference,
+.rich .data-type-modifier,
+.rich .hash-qualifier,
+.rich .request {
+  color: var(--color-syntax-name);
+}
+
+.rich .op.cons,
+.rich .op.snoc,
+.rich .op.concat,
+.rich .type-operator,
+.rich .type-ascription-colon {
+  color: var(--color-syntax-operator);
+}
+
+.rich .delay-force-char {
+  color: var(--color-syntax-operator);
+  font-weight: bold;
+}
+
+.rich .control-keyword,
+.rich .data-type-keyword,
+.rich .link-keyword,
+.rich .doc-keyword {
+  color: var(--color-syntax-keyword);
+}
+
+.rich .comment,
+.rich .ability-braces,
+.rich .binding-equals,
+.rich .unit,
+.rich .use-keyword,
+.rich .use-prefix,
+.rich .use-suffix,
+.rich .delimeter-char,
+.rich .parenthesis,
+.rich .doc-delimeter {
+  color: var(--color-syntax-subtle);
+}
+
+.monochrome .text-literal,
+.monochrome .bytes-literal,
+.monochrome .char-literal,
+.monochrome .blank,
+.monochrome .var,
+.monochrome .data-type-params {
+  color: var(--color-syntax-monochrome-base);
+}
+
+.monochrome .type-reference,
+.monochrome .boolean-literal,
+.monochrome .constructor,
+.monochrome .numberic-literal,
+.monochrome .term-reference,
+.monochrome .data-type-modifier,
+.monochrome .hash-qualifier,
+.monochrome .request {
+  color: var(--color-syntax-monochrome-em);
+}
+
+.monochrome .delay-force-char {
+  color: var(--color-syntax-monochrome-em);
+  font-weight: bold;
+}
+
+.monochrome .op.cons,
+.monochrome .op.snoc,
+.monochrome .op.concat,
+.monochrome .type-operator,
+.monochrome .type-ascription-colon,
+.monochrome .control-keyword,
+.monochrome .data-type-keyword,
+.monochrome .link-keyword,
+.monochrome .doc-keyword,
+.monochrome .comment,
+.monochrome .ability-braces,
+.monochrome .binding-equals,
+.monochrome .unit,
+.monochrome .use-keyword,
+.monochrome .use-prefix,
+.monochrome .use-suffix,
+.monochrome .delimeter-char,
+.monochrome .parenthesis,
+.monochrome .doc-delimeter {
+  color: var(--color-syntax-monochrome-subtle);
+}
+
+.plain .text-literal,
+.plain .bytes-literal,
+.plain .char-literal,
+.plain .boolean-literal,
+.plain .constructor,
+.plain .blank,
+.plain .var,
+.plain .data-type-params,
+.plain .numberic-literal,
+.plain .term-reference,
+.plain .data-type-modifier,
+.plain .hash-qualifier,
+.plain .request,
+.plain .type-reference,
+.plain .op.cons,
+.plain .op.snoc,
+.plain .op.concat,
+.plain .type-operator,
+.plain .type-ascription-colon,
+.plain .delay-force-char,
+.plain .control-keyword,
+.plain .data-type-keyword,
+.plain .link-keyword,
+.plain .doc-keyword,
+.plain .comment,
+.plain .ability-braces,
+.plain .binding-equals,
+.plain .unit,
+.plain .use-keyword,
+.plain .use-prefix,
+.plain .use-suffix,
+.plain .delimeter-char,
+.plain .parenthesis,
+.plain .doc-delimeter {
+  color: var(--color-syntax-plain);
+}

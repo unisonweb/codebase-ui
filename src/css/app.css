@@ -1,0 +1,243 @@
+/* -- Application ---------------------------------------------------------- */
+
+#app {
+  display: grid;
+  grid-template-columns: var(--main-sidebar-width) 1fr;
+}
+
+/* -- Main Sidebar --------------------------------------------------------- */
+
+#main-sidebar {
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+  height: 100vh;
+  background: var(--color-sidebar-bg);
+  color: var(--color-sidebar-fg);
+  border-right: 1px solid var(--color-sidebar-border);
+  font-size: var(--font-size-medium);
+  padding: 1rem 1rem 1rem 1.5rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-sidebar-subtle-fg) var(--color-sidebar-bg);
+}
+
+#main-sidebar::-webkit-scrollbar {
+  width: 0.4rem;
+}
+#main-sidebar::-webkit-scrollbar-track {
+  background: var(--color-sidebar-bg);
+}
+#main-sidebar::-webkit-scrollbar-thumb {
+  background-color: var(--color-sidebar-subtle-fg);
+  border-radius: 0.2rem;
+}
+
+#main-sidebar .loading-placeholder {
+  background: var(--color-sidebar-subtle-fg);
+  opacity: 0.5;
+}
+
+#main-sidebar header {
+  margin-bottom: 2.5rem;
+}
+
+#main-sidebar .app-context {
+  font-size: var(--font-size-base);
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+}
+
+#main-sidebar .app-context .logo-mark {
+  display: flex;
+  height: 1.3rem;
+  width: 1.3rem;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.125rem;
+}
+
+#main-sidebar .app-context .logo-mark .icon {
+  font-size: 0.875rem;
+  color: var(--color-sidebar-fg);
+  margin-bottom: 2px;
+}
+
+#main-sidebar .app-context .unison-share {
+  color: var(--color-sidebar-context-unison-share-fg);
+}
+
+#main-sidebar .app-context .ucm {
+  color: var(--color-sidebar-context-ucm-fg);
+}
+
+#main-sidebar h2 {
+  font-size: var(--font-size-medium);
+  font-weight: normal;
+  color: var(--color-sidebar-subtle-fg);
+  margin-bottom: 0.125rem;
+}
+
+/* -- Codebase Tree -------------------------------------------------------- */
+
+.codebase-tree .namespace-tree {
+  margin-left: -0.5rem;
+}
+
+.codebase-tree .namespace-tree .node {
+  display: flex;
+  user-select: none;
+  align-items: center;
+  border-radius: var(--border-radius-base);
+  padding-left: 0.5rem;
+  margin-bottom: 0.125rem;
+  height: 1.75rem;
+}
+
+.codebase-tree .error {
+  padding-left: 0.5rem;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  margin: 0.5rem 0;
+  color: var(--color-pink-3);
+}
+
+.codebase-tree .error .icon {
+  font-size: 1rem;
+  margin-right: 0.25rem;
+  color: var(--color-pink-1);
+}
+
+.codebase-tree .loading {
+  padding-left: 0.5rem;
+}
+
+.codebase-tree .loading .loading-placeholder {
+  width: 8rem;
+}
+
+.codebase-tree .namespace-content .loading {
+  padding-left: 0.875rem;
+}
+
+.codebase-tree .namespace-content .loading .loading-placeholder {
+  width: 6rem;
+}
+
+.codebase-tree .namespace-tree .node:hover {
+  background: var(--color-sidebar-focus-bg);
+  text-decoration: none;
+}
+
+.codebase-tree .namespace-tree .node .icon {
+  font-size: 0.875rem;
+  text-align: center;
+  margin-right: 0.5rem;
+  transition: transform 0.1s ease-out;
+}
+
+.codebase-tree .namespace-tree .node .icon.expanded {
+  transform: rotate(90deg);
+}
+
+.codebase-tree .namespace-tree .node .icon:is(.caret-right, .caret-down) {
+  color: var(--color-sidebar-subtle-fg);
+}
+
+.codebase-tree .namespace-tree .node:hover .icon:is(.caret-right, .caret-down) {
+  color: var(--color-sidebar-focus-fg);
+}
+
+.codebase-tree .namespace-tree .node label {
+  color: var(--color-sidebar-fg);
+  transition: all 0.2s;
+  cursor: pointer;
+}
+
+.codebase-tree .namespace-tree .node .definition-category {
+  font-family: var(--font-monospace);
+  color: var(--color-sidebar-subtle-fg);
+  margin-left: 0.375rem;
+  font-size: 0.75rem;
+}
+
+.codebase-tree .namespace-tree .node:hover label {
+  color: var(--color-sidebar-focus-fg);
+}
+
+.codebase-tree .namespace-tree .node.open label {
+  font-weight: bold;
+}
+
+.codebase-tree .namespace-tree .namespace-content {
+  margin-left: 1rem;
+  transform-origin: left top;
+  animation: slide-down 0.2s ease-out;
+}
+
+/* -- Main Sidebar Nav ----------------------------------------------------- */
+
+#main-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  justify-self: flex-end;
+  margin-top: auto;
+  padding-top: 2rem;
+}
+
+#main-sidebar nav a {
+  height: 1.5rem;
+  display: flex;
+  align-items: center;
+  transition: all 0.2s;
+  padding-left: 0.5rem;
+  margin-left: -0.5rem;
+  border-radius: var(--border-radius-base);
+}
+
+#main-sidebar nav a,
+#main-sidebar nav .icon {
+  color: var(--color-sidebar-subtle-fg);
+}
+
+#main-sidebar nav a:hover,
+#main-sidebar nav a:hover .icon {
+  color: var(--color-sidebar-fg);
+  text-decoration: none;
+}
+
+#main-sidebar nav .show-help {
+  margin-top: 2rem;
+  padding-right: 0.25rem;
+  line-height: 1;
+  display: flex;
+  height: 2rem;
+  align-items: center;
+  font-weight: bold;
+  color: var(--color-sidebar-fg);
+  cursor: pointer;
+}
+
+#main-sidebar nav .show-help .keyboard-shortcut {
+  justify-self: flex-end;
+  margin-left: auto;
+}
+
+#main-sidebar .keyboard-shortcut .key {
+  color: var(--color-sidebar-keyboard-shortcut-key-fg);
+  background: var(--color-sidebar-keyboard-shortcut-key-bg);
+  font-weight: normal;
+}
+
+#main-sidebar nav .show-help:hover {
+  background: var(--color-sidebar-focus-bg);
+}
+
+@import "./help-modal.css";
+@import "./publish-modal.css";
+@import "./report-bug-modal.css";
+@import "./finder.css";
+
+@import "./workspace.css";
+@import "./doc.css";
