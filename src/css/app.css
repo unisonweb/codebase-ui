@@ -172,8 +172,6 @@
 
 .codebase-tree .namespace-tree .namespace-content {
   margin-left: 1rem;
-  transform-origin: left top;
-  animation: slide-down 0.2s ease-out;
 }
 
 /* -- Main Sidebar Nav ----------------------------------------------------- */

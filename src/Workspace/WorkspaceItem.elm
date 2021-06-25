@@ -4,7 +4,7 @@ import Api
 import Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail, AbilityConstructorSource(..))
 import Definition.Category as Category exposing (Category)
 import Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail, DataConstructorSource(..))
-import Definition.Doc as Doc exposing (Doc(..))
+import Definition.Doc as Doc exposing (Doc(..), DocFoldToggles)
 import Definition.Info as Info
 import Definition.Reference as Reference exposing (Reference(..))
 import Definition.Source as Source
@@ -17,6 +17,7 @@ import Html exposing (Attribute, Html, a, div, h3, header, section, span, strong
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
+import Id exposing (Id)
 import Json.Decode as Decode exposing (at, field)
 import Json.Decode.Extra exposing (when)
 import List.Nonempty as NEL
@@ -32,7 +33,12 @@ import Workspace.Zoom exposing (Zoom(..))
 type WorkspaceItem
     = Loading Reference
     | Failure Reference Http.Error
-    | Success Reference Item Zoom
+    | Success
+        Reference
+        { item : Item
+        , zoom : Zoom
+        , docFoldToggles : DocFoldToggles
+        }
 
 
 type alias TermDetailWithDoc =
@@ -59,7 +65,7 @@ reference item =
         Failure r _ ->
             r
 
-        Success r _ _ ->
+        Success r _ ->
             r
 
 
@@ -180,9 +186,9 @@ viewNames onClick_ info category =
         ]
 
 
-viewDoc : (Reference -> msg) -> Doc -> Html msg
-viewDoc toOpenReferenceMsg doc =
-    div [ class "definition-doc" ] [ Doc.view toOpenReferenceMsg doc ]
+viewDoc : (Reference -> msg) -> (Id Doc -> msg) -> DocFoldToggles -> Doc -> Html msg
+viewDoc toOpenReferenceMsg toggleFoldMsg docFoldToggles doc =
+    div [ class "definition-doc" ] [ Doc.view toOpenReferenceMsg toggleFoldMsg docFoldToggles doc ]
 
 
 {-| TODO: Yikes, this isn't great. Needs cleanup
@@ -235,16 +241,16 @@ viewItem :
     msg
     -> (Reference -> msg)
     -> (Zoom -> msg)
+    -> (Id Doc -> msg)
     -> Reference
-    -> Item
-    -> Zoom
+    -> { item : Item, zoom : Zoom, docFoldToggles : DocFoldToggles }
     -> Bool
     -> Html msg
-viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocused =
+viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg toggleFoldMsg ref data isFocused =
     let
         -- TODO: Support zoom level on the source
         ( zoomClass, docZoomMsg, _ ) =
-            case zoomLevel of
+            case data.zoom of
                 Far ->
                     ( "zoom-level-far", toUpdateZoomMsg Medium, toUpdateZoomMsg Near )
 
@@ -259,10 +265,10 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocuse
 
         viewDoc_ doc =
             doc
-                |> Maybe.map (viewDoc toOpenReferenceMsg)
+                |> Maybe.map (viewDoc toOpenReferenceMsg toggleFoldMsg data.docFoldToggles)
                 |> Maybe.withDefault UI.nothing
     in
-    case item of
+    case data.item of
         TermItem (Term _ category detail) ->
             viewClosableRow
                 closeMsg
@@ -270,8 +276,8 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocuse
                 attrs
                 (viewNames docZoomMsg detail.info (Category.Term category))
                 [ ( UI.nothing, viewDoc_ detail.doc )
-                , ( UI.nothing, viewBuiltin item )
-                , viewSource toOpenReferenceMsg item
+                , ( UI.nothing, viewBuiltin data.item )
+                , viewSource toOpenReferenceMsg data.item
                 ]
 
         TypeItem (Type _ category detail) ->
@@ -280,8 +286,8 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocuse
                 ref
                 attrs
                 (viewNames docZoomMsg detail.info (Category.Type category))
-                [ ( UI.nothing, viewBuiltin item )
-                , viewSource toOpenReferenceMsg item
+                [ ( UI.nothing, viewBuiltin data.item )
+                , viewSource toOpenReferenceMsg data.item
                 ]
 
         DataConstructorItem (DataConstructor _ detail) ->
@@ -290,8 +296,8 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocuse
                 ref
                 attrs
                 (viewNames docZoomMsg detail.info (Category.Type Type.DataType))
-                [ ( UI.nothing, viewBuiltin item )
-                , viewSource toOpenReferenceMsg item
+                [ ( UI.nothing, viewBuiltin data.item )
+                , viewSource toOpenReferenceMsg data.item
                 ]
 
         AbilityConstructorItem (AbilityConstructor _ detail) ->
@@ -300,13 +306,20 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoomLevel isFocuse
                 ref
                 attrs
                 (viewNames docZoomMsg detail.info (Category.Type Type.AbilityType))
-                [ ( UI.nothing, viewBuiltin item )
-                , viewSource toOpenReferenceMsg item
+                [ ( UI.nothing, viewBuiltin data.item )
+                , viewSource toOpenReferenceMsg data.item
                 ]
 
 
-view : msg -> (Reference -> msg) -> (Zoom -> msg) -> WorkspaceItem -> Bool -> Html msg
-view closeMsg toOpenReferenceMsg toUpdateZoomMsg workspaceItem isFocused =
+view :
+    msg
+    -> (Reference -> msg)
+    -> (Zoom -> msg)
+    -> (Id Doc -> msg)
+    -> WorkspaceItem
+    -> Bool
+    -> Html msg
+view closeMsg toOpenReferenceMsg toUpdateZoomMsg toggleFoldMsg workspaceItem isFocused =
     let
         focusedAttrs =
             [ classList [ ( "focused", isFocused ) ] ]
@@ -336,8 +349,8 @@ view closeMsg toOpenReferenceMsg toUpdateZoomMsg workspaceItem isFocused =
                   )
                 ]
 
-        Success ref item zoom ->
-            viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg ref item zoom isFocused
+        Success ref data ->
+            viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg toggleFoldMsg ref data isFocused
 
 
 

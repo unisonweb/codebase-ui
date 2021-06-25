@@ -2,12 +2,14 @@ module Workspace exposing (Model, Msg, OutMsg(..), init, open, subscriptions, up
 
 import Api exposing (ApiBasePath, ApiRequest)
 import Browser.Dom as Dom
+import Definition.Doc as Doc exposing (Doc)
 import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, article, header, section)
 import Html.Attributes exposing (class, id)
 import Http
+import Id exposing (Id)
 import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
@@ -61,6 +63,7 @@ type Msg
     | OpenDefinitionRelativeTo Reference Reference
     | CloseDefinition Reference
     | UpdateZoom Reference Zoom
+    | ToggleDocFold Reference (Id Doc)
     | FetchItemFinished Reference (Result Http.Error Item)
     | Keydown KeyboardEvent
     | KeyboardShortcutMsg KeyboardShortcut.Msg
@@ -100,9 +103,28 @@ update env msg ({ workspaceItems } as model) =
             let
                 updateMatching workspaceItem =
                     case workspaceItem of
-                        Success r i _ ->
+                        Success r d ->
                             if ref == r then
-                                Success r i zoom
+                                Success r { d | zoom = zoom }
+
+                            else
+                                workspaceItem
+
+                        _ ->
+                            workspaceItem
+            in
+            ( { model | workspaceItems = WorkspaceItems.map updateMatching workspaceItems }
+            , Cmd.none
+            , None
+            )
+
+        ToggleDocFold ref docId ->
+            let
+                updateMatching workspaceItem =
+                    case workspaceItem of
+                        Success r d ->
+                            if ref == r then
+                                Success r { d | docFoldToggles = Doc.toggleFold d.docFoldToggles docId }
 
                             else
                                 workspaceItem
@@ -123,7 +145,11 @@ update env msg ({ workspaceItems } as model) =
                             WorkspaceItem.Failure ref e
 
                         Ok i ->
-                            WorkspaceItem.Success ref i Zoom.Medium
+                            WorkspaceItem.Success ref
+                                { item = i
+                                , zoom = Zoom.Medium
+                                , docFoldToggles = Doc.emptyDocFoldToggles
+                                }
 
                 nextWorkspaceItems =
                     WorkspaceItems.replace workspaceItems ref workspaceItem
@@ -206,7 +232,7 @@ openDefinitionsFocusToOutMsg openDefs =
     let
         toFocusedOut workspaceItem =
             case workspaceItem of
-                Success ref _ _ ->
+                Success ref _ ->
                     Focused ref
 
                 _ ->
@@ -294,9 +320,9 @@ handleKeyboardShortcut ({ workspaceItems } as model) shortcut =
                     let
                         mapper item =
                             case item of
-                                Success r i z ->
+                                Success r data ->
                                     if r == ref then
-                                        Success r i (Zoom.cycle z)
+                                        Success r { data | zoom = Zoom.cycle data.zoom }
 
                                     else
                                         item
@@ -402,6 +428,7 @@ viewItem workspaceItem isFocused =
         (CloseDefinition ref)
         (OpenDefinitionRelativeTo ref)
         (UpdateZoom ref)
+        (ToggleDocFold ref)
         workspaceItem
         isFocused
 

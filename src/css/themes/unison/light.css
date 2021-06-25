@@ -48,13 +48,14 @@
   --color-workspace-item-link-hover: var(--color-blue-2);
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-40);
   --color-workspace-item-subtle-fg-em: var(--color-gray-lighten-20);
-  --color-workspace-item-subtle-bg: var(--color-main-subtle-bg);
+  --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
   --color-workspace-item-em-bg: var(--color-gray-lighten-55);
   --color-workspace-item-content-border: var(--color-gray-lighten-55);
   --color-workspace-item-border: transparent;
 
   --color-workspace-item-focus-fg: var(--color-gray-darken-30);
   --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-focus-subtle-bg: var(--color-gray-lighten-50);
   --color-workspace-item-focus-mg: var(--color-gray-lighten-55);
   --color-workspace-item-focus-source-bg: transparent;
   --color-workspace-item-focus-doc-source-bg: var(--color-gray-lighten-55);

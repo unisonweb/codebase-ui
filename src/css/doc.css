@@ -136,16 +136,36 @@
   flex-direction: row;
 }
 
-.doc .folded .icon {
+.doc .folded a {
   margin-right: 0.25rem;
+  width: 1.2rem;
+  height: 1.2rem;
+  line-height: 1rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--border-radius-base);
+  transition: all 0.2s;
+}
+.doc .folded a .icon {
   color: var(--color-workspace-item-subtle-fg);
-  font-size: 1rem;
-  padding-top: 1px;
-  cursor: pointer;
 }
 
-.doc .folded .icon:hover {
+.doc .folded a:hover {
+  background: var(--color-workspace-item-subtle-bg);
+}
+.doc .folded a:hover .icon {
   color: var(--color-workspace-item-subtle-fg-em);
+}
+
+.doc .folded .icon {
+  font-size: 1rem;
+  cursor: pointer;
+  transition: transform 0.1s ease-out;
+}
+
+.doc .folded.is-folded .icon {
+  transform: rotate(-90deg);
 }
 
 .doc p {

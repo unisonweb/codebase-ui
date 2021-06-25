@@ -299,6 +299,7 @@
   --color-workspace-item-fg: var(--color-workspace-item-focus-fg);
   --color-workspace-item-bg: var(--color-workspace-item-focus-bg);
   --color-workspace-item-subtle-fg: var(--color-workspace-item-focus-subtle-fg);
+  --color-workspace-item-subtle-bg: var(--color-workspace-item-focus-subtle-bg);
   --color-workspace-item-content-border: var(
     --color-workspace-item-focus-content-border
   );
