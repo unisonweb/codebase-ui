@@ -155,12 +155,12 @@ decodeTypeItem =
     in
     Decode.map TypeItem
         (Decode.map3 Type
-            (field "namedType" Type.decodeHash)
-            (field "namedType" (Type.decodeTypeCategory "typeTag"))
+            (field "namedType" Hash.decode)
+            (Type.decodeTypeCategory [ "namedType", "typeTag" ])
             (Decode.map3 makeSummary
-                (field "namedType" Type.decodeFQN)
+                (field "namedType" FQN.decode)
                 (field "bestFoundTypeName" string)
-                (field "typeDef" Type.decodeSource)
+                (Type.decodeTypeSource [ "tag" ] [ "typeDef", "contents" ])
             )
         )
 
@@ -177,12 +177,12 @@ decodeTermItem =
     in
     Decode.map TermItem
         (Decode.map3 Term
-            (field "namedTerm" Term.decodeHash)
-            (field "namedTerm" (Term.decodeTermCategory "termTag"))
+            (at [ "namedTerm", "termHash" ] Hash.decode)
+            (Term.decodeTermCategory [ "namedTerm", "termTag" ])
             (Decode.map3 makeSummary
-                (field "namedTerm" Term.decodeFQN)
+                (at [ "namedTerm", "termName" ] FQN.decode)
                 (field "bestFoundTermName" string)
-                (field "namedTerm" Term.decodeSignature)
+                (Term.decodeSignature [ "namedTerm", "termType" ])
             )
         )
 
@@ -203,7 +203,7 @@ decodeAbilityConstructorItem =
             (Decode.map3 makeSummary
                 (at [ "namedTerm", "termName" ] FQN.decode)
                 (field "bestFoundTermName" string)
-                (field "namedTerm" AbilityConstructor.decodeSignature)
+                (AbilityConstructor.decodeSignature [ "namedTerm", "termType" ])
             )
         )
 
@@ -224,7 +224,7 @@ decodeDataConstructorItem =
             (Decode.map3 makeSummary
                 (at [ "namedTerm", "termName" ] FQN.decode)
                 (field "bestFoundTermName" string)
-                (field "namedTerm" DataConstructor.decodeSignature)
+                (DataConstructor.decodeSignature [ "namedTerm", "termType" ])
             )
         )
 

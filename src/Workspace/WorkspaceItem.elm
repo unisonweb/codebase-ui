@@ -19,11 +19,9 @@ import Html.Events exposing (onClick)
 import Http
 import Id exposing (Id)
 import Json.Decode as Decode exposing (at, field)
-import Json.Decode.Extra exposing (when)
 import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
 import String.Extra exposing (pluralize)
-import Syntax
 import UI
 import UI.Icon as Icon
 import Util
@@ -422,22 +420,12 @@ decodeTypeDetails =
     let
         make cat name otherNames source =
             { category = cat, name = name, otherNames = otherNames, source = source }
-
-        decodeTypeDefTag =
-            at [ "typeDefinition", "tag" ] Decode.string
-
-        decodeUserObject =
-            Decode.map Type.Source (at [ "typeDefinition", "contents" ] Syntax.decode)
     in
     Decode.map4 make
-        (Type.decodeTypeCategory "defnTypeTag")
+        (Type.decodeTypeCategory [ "defnTypeTag" ])
         (field "bestTypeName" Decode.string)
         (field "typeNames" (Util.decodeNonEmptyList FQN.decode))
-        (Decode.oneOf
-            [ when decodeTypeDefTag ((==) "UserObject") decodeUserObject
-            , when decodeTypeDefTag ((==) "BuiltinObject") (Decode.succeed Type.Builtin)
-            ]
-        )
+        (Type.decodeTypeSource [ "typeDefinition", "tag" ] [ "typeDefinition", "contents" ])
 
 
 decodeTypes : Decode.Decoder (List TypeDetailWithDoc)
@@ -469,26 +457,15 @@ decodeTermNamesAndSource =
             , otherNames = otherNames
             , source = source
             }
-
-        decodeTermDefTag =
-            at [ "termDefinition", "tag" ] Decode.string
-
-        decodeUserObject =
-            Decode.map2 Term.Source
-                (Decode.map TermSignature (field "signature" Syntax.decode))
-                (at [ "termDefinition", "contents" ] Syntax.decode)
-
-        decodeBuiltin =
-            Decode.map (TermSignature >> Term.Builtin) (field "signature" Syntax.decode)
     in
     Decode.map4 make
-        (Term.decodeTermCategory "defnTermTag")
+        (Term.decodeTermCategory [ "defnTermTag" ])
         (field "bestTermName" Decode.string)
         (field "termNames" (Util.decodeNonEmptyList FQN.decode))
-        (Decode.oneOf
-            [ when decodeTermDefTag ((==) "UserObject") decodeUserObject
-            , when decodeTermDefTag ((==) "BuiltinObject") decodeBuiltin
-            ]
+        (Term.decodeTermSource
+            [ "termDefinition", "tag" ]
+            [ "signature" ]
+            [ "termDefinition", "contents" ]
         )
 
 
