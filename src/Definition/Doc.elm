@@ -1,4 +1,12 @@
-module Definition.Doc exposing (Doc(..), SpecialForm(..), view)
+module Definition.Doc exposing
+    ( Doc(..)
+    , DocFoldToggles
+    , SpecialForm(..)
+    , emptyDocFoldToggles
+    , isDocFoldToggled
+    , toggleFold
+    , view
+    )
 
 import Definition.Reference as Reference exposing (Reference)
 import Definition.Source as Source exposing (Source)
@@ -29,6 +37,8 @@ import Html
         )
 import Html.Attributes exposing (alt, class, href, id, rel, src, start, target, title)
 import Html.Events exposing (onClick)
+import Id exposing (Id)
+import Set exposing (Set)
 import Syntax exposing (Syntax)
 import UI
 import UI.Icon as Icon
@@ -65,11 +75,10 @@ type
     | Callout (Maybe Doc) Doc
       -- Table rows
     | Table (List (List Doc))
-      -- Folded isFolded summary details
       -- If folded, only summary is shown, otherwise
       -- summary is followed by details. Some renderers
       -- will present this as a toggle or clickable elipses
-    | Folded Bool Doc Doc
+    | Folded { id : Id Doc, isFolded : Bool, summary : Doc, details : Doc }
       -- Documents separated by spaces and wrapped to available width
     | Paragraph (List Doc)
     | BulletedList (List Doc)
@@ -110,7 +119,7 @@ type
     -- rich annotated source code with tooltips, highlights and whatnot.
     = Source (List ( Reference, Source ))
       -- like Source, but the code starts out folded
-    | FoldedSource (List { ref : Reference, isFolded : Bool, summary : Syntax, details : Source })
+    | FoldedSource (List { id : Id Doc, ref : Reference, isFolded : Bool, summary : Syntax, details : Source })
       -- In `Example n expr`, `n` is the number of lambda parameters
       -- that should be elided during display.
       -- Ex: `Example 2 '(x y -> foo x y)` should render as `foo x y`.
@@ -140,11 +149,54 @@ type
 
 
 
+-- FOLD STATE
+
+
+{-| An Id present in DocFoldToggles means that the Bool on a Folded or
+FoldedSource
+should be negated.
+
+This type is meant to track state on an adjacent level to Doc, for instance on
+the WorkspaceItem level.
+
+-}
+type DocFoldToggles
+    = DocFoldToggles (Set String)
+
+
+emptyDocFoldToggles : DocFoldToggles
+emptyDocFoldToggles =
+    DocFoldToggles Set.empty
+
+
+toggleFold : DocFoldToggles -> Id Doc -> DocFoldToggles
+toggleFold (DocFoldToggles toggles) id =
+    let
+        rawId =
+            Id.toString id
+    in
+    if Set.member rawId toggles then
+        DocFoldToggles (Set.remove rawId toggles)
+
+    else
+        DocFoldToggles (Set.insert rawId toggles)
+
+
+isDocFoldToggled : DocFoldToggles -> Id Doc -> Bool
+isDocFoldToggled (DocFoldToggles toggles) id =
+    let
+        rawId =
+            Id.toString id
+    in
+    Set.member rawId toggles
+
+
+
 -- VIEW
 
 
-view : (Reference -> msg) -> Doc -> Html msg
-view refToMsg document =
+view : (Reference -> msg) -> (Id Doc -> msg) -> DocFoldToggles -> Doc -> Html msg
+view refToMsg toggleFoldMsg docFoldToggles document =
     let
         viewConfig =
             Source.Rich refToMsg
@@ -240,13 +292,26 @@ view refToMsg document =
                     in
                     table [] [ tbody [] (List.map viewRow rows) ]
 
-                Folded isFolded summary details ->
-                    if isFolded then
-                        div [ class "folded", class "is-folded" ] [ Icon.view Icon.caretRight, viewAtCurrentSectionLevel summary ]
+                Folded { id, isFolded, summary, details } ->
+                    let
+                        isFolded_ =
+                            if isDocFoldToggled docFoldToggles id then
+                                not isFolded
+
+                            else
+                                isFolded
+                    in
+                    if isFolded_ then
+                        div [ class "folded", class "is-folded" ]
+                            -- Caret orientation for folded/unfolded is rotated
+                            -- by CSS such that it can be animated
+                            [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretDown ]
+                            , viewAtCurrentSectionLevel summary
+                            ]
 
                     else
                         div [ class "folded" ]
-                            [ Icon.view Icon.caretDown
+                            [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretDown ]
                             , div []
                                 [ div [] [ viewAtCurrentSectionLevel summary ]
                                 , viewAtCurrentSectionLevel details
@@ -334,16 +399,26 @@ view refToMsg document =
 
                         FoldedSource sources ->
                             let
-                                viewFoldedSource { isFolded, summary, details } =
-                                    if isFolded then
+                                viewFoldedSource { id, isFolded, summary, details } =
+                                    let
+                                        isFolded_ =
+                                            if isDocFoldToggled docFoldToggles id then
+                                                not isFolded
+
+                                            else
+                                                isFolded
+                                    in
+                                    if isFolded_ then
                                         div [ class "folded", class "is-folded" ]
-                                            [ Icon.view Icon.caretRight
+                                            -- Caret orientation for folded/unfolded is rotated
+                                            -- by CSS such that it can be animated
+                                            [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretRight ]
                                             , UI.inlineCode [] (viewSyntax summary)
                                             ]
 
                                     else
                                         div [ class "folded" ]
-                                            [ Icon.view Icon.caretDown
+                                            [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretRight ]
                                             , viewSource details
                                             ]
                             in
