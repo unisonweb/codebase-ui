@@ -129,13 +129,18 @@
 
   /* Syntax */
   --color-syntax-base: var(--color-main-fg);
-  --color-syntax-subtle: var(--color-main-subtle-fg);
-  --color-syntax-keyword: #225ebe;
-  --color-syntax-operator: #c7474e;
-  --color-syntax-name: #6848ba;
-  --color-syntax-type: #225ebe;
-  --color-syntax-variant: #438443;
-  --color-syntax-text: #438443;
+  --color-syntax-subtle: var(--color-gray-lighten-20);
+  --color-syntax-subtle-em: var(--color-gray-base);
+  --color-syntax-keyword: var(--color-pink-2);
+  --color-syntax-operator: var(--color-gray-lighten-30);
+  --color-syntax-term: var(--color-purple-2);
+  --color-syntax-term-namespace: var(--color-purple-3);
+  --color-syntax-ability: var(--color-pink-1);
+  --color-syntax-type: var(--color-blue-1);
+  --color-syntax-type-namespace: var(--color-blue-2);
+  --color-syntax-constructor: var(--color-blue-1);
+  --color-syntax-constructor-namespace: var(--color-blue-2);
+  --color-syntax-text: var(--color-green-1);
 
   --color-syntax-monochrome-subtle: var(--color-main-subtle-fg);
   --color-syntax-monochrome-base: var(--color-gray-base);
