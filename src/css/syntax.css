@@ -30,6 +30,7 @@ code a:active {
   color: var(--color-syntax-subtle-em);
 }
 .rich .text-literal,
+.rich .text-literal .fqn .sep,
 .rich .bytes-literal,
 .rich .char-literal {
   color: var(--color-syntax-text);
