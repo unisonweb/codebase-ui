@@ -10,6 +10,7 @@ module Syntax exposing
     )
 
 import Definition.Reference as Reference exposing (Reference)
+import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import HashQualified as HQ
 import Html exposing (Html, a, span, text)
@@ -220,6 +221,16 @@ syntaxTypeToClassName sType =
             "doc-keyword"
 
 
+viewFQN : FQN -> Html msg
+viewFQN fqn =
+    fqn
+        |> FQN.segments
+        |> NEL.map (\s -> span [ class "segment" ] [ text s ])
+        |> NEL.toList
+        |> List.intersperse (span [ class "sep" ] [ text "." ])
+        |> span [ class "fqn" ]
+
+
 viewSegment : Linked msg -> SyntaxSegment -> Html msg
 viewSegment linked (SyntaxSegment sType sText) =
     let
@@ -236,13 +247,23 @@ viewSegment linked (SyntaxSegment sType sText) =
 
         className =
             syntaxTypeToClassName sType
+
+        content =
+            if String.contains "->" sText then
+                span [ class "arrow" ] [ text sText ]
+
+            else if String.contains "." sText then
+                viewFQN (FQN.fromString sText)
+
+            else
+                text sText
     in
     case ( linked, ref ) of
         ( Linked toReferenceClickMsg, Just r ) ->
-            a [ class className, onClick (toReferenceClickMsg r) ] [ text sText ]
+            a [ class className, onClick (toReferenceClickMsg r) ] [ content ]
 
         _ ->
-            span [ class className ] [ text sText ]
+            span [ class className ] [ content ]
 
 
 view : Linked msg -> Syntax -> Html msg

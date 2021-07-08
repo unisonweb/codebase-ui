@@ -26,6 +26,9 @@ code a:active {
   transform: translate(0, 0.1rem);
 }
 
+.rich .fqn .sep {
+  color: var(--color-syntax-subtle-em);
+}
 .rich .text-literal,
 .rich .bytes-literal,
 .rich .char-literal {
@@ -34,34 +37,63 @@ code a:active {
 
 .rich .boolean-literal,
 .rich .constructor {
-  color: var(--color-syntax-variant);
+  color: var(--color-syntax-constructor);
 }
 
-.rich .blank,
+.rich .constructor .segment {
+  color: var(--color-syntax-constructor-namespace);
+}
+
+.rich .constructor .segment:last-child {
+  color: var(--color-syntax-constructor);
+}
+
 .rich .var,
 .rich .data-type-params {
   color: var(--color-syntax-base);
 }
 
-.rich .numberic-literal,
-.rich .term-reference,
+.rich .numeric-literal,
 .rich .type-reference,
-.rich .data-type-modifier,
-.rich .hash-qualifier,
-.rich .request {
-  color: var(--color-syntax-name);
+.rich .data-type-modifier {
+  color: var(--color-syntax-type);
+}
+
+.rich .type-reference .fqn .segment {
+  color: var(--color-syntax-type-namespace);
+}
+
+.rich .type-reference .fqn .segment:last-child {
+  color: var(--color-syntax-type);
+}
+
+.rich .term-reference,
+.rich .request,
+.rich .hash-qualifier {
+  color: var(--color-syntax-term);
+}
+
+.rich .term-reference .fqn .segment,
+.rich .hash-qualifier .fqn .segment {
+  color: var(--color-syntax-term-namespace);
+}
+
+.rich .term-reference .fqn .segment:last-child,
+.rich .hash-qualifier .fqn .segment:last-child {
+  color: var(--color-syntax-term);
 }
 
 .rich .op.cons,
 .rich .op.snoc,
 .rich .op.concat,
 .rich .type-operator,
+.rich .binding-equals,
 .rich .type-ascription-colon {
   color: var(--color-syntax-operator);
 }
 
 .rich .delay-force-char {
-  color: var(--color-syntax-operator);
+  color: var(--color-syntax-ability);
   font-weight: bold;
 }
 
@@ -72,15 +104,19 @@ code a:active {
   color: var(--color-syntax-keyword);
 }
 
+.rich .delimeter-char {
+  color: var(--color-syntax-subtle-em);
+}
+
 .rich .comment,
 .rich .ability-braces,
-.rich .binding-equals,
 .rich .unit,
 .rich .use-keyword,
 .rich .use-prefix,
 .rich .use-suffix,
-.rich .delimeter-char,
+.rich .blank,
 .rich .parenthesis,
+.rich .arrow,
 .rich .doc-delimeter {
   color: var(--color-syntax-subtle);
 }
