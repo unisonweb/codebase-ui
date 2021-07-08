@@ -245,6 +245,27 @@ viewSegment linked (SyntaxSegment sType sText) =
                 _ ->
                     Nothing
 
+        isFQN =
+            let
+                isFQN_ =
+                    String.contains "." sText
+            in
+            case sType of
+                TypeReference _ ->
+                    isFQN_
+
+                TermReference _ ->
+                    isFQN_
+
+                HashQualifier _ ->
+                    isFQN_
+
+                Constructor ->
+                    isFQN_
+
+                _ ->
+                    False
+
         className =
             syntaxTypeToClassName sType
 
@@ -252,7 +273,7 @@ viewSegment linked (SyntaxSegment sType sText) =
             if String.contains "->" sText then
                 span [ class "arrow" ] [ text sText ]
 
-            else if String.contains "." sText then
+            else if isFQN then
                 viewFQN (FQN.fromString sText)
 
             else
