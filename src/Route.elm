@@ -4,7 +4,6 @@ module Route exposing
     , navigate
     , navigateToByReference
     , navigateToLatest
-    , relativeTo
     , toUrlString
     )
 
@@ -14,7 +13,6 @@ import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import HashQualified exposing (HashQualified(..))
 import List.Nonempty as NEL
-import RelativeTo exposing (RelativeTo)
 import Url exposing (Url)
 import Url.Builder exposing (relative)
 import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
@@ -62,7 +60,7 @@ type NamespaceReference
 
 type Route
     = Namespace NamespaceReference
-    | ByReference RelativeTo Reference
+    | ByReference NamespaceReference Reference
 
 
 
@@ -76,10 +74,10 @@ urlParser =
         , Parser.map (Namespace Latest) (s "latest")
         , Parser.map Namespace (s "latest" </> s "namespaces" </> Hash.urlParser |> Parser.map HashReference)
         , Parser.map Namespace (s "latest" </> s "namespaces" </> FQN.urlParser |> Parser.map NameReference)
-        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "types" </> Reference.urlParser TypeReference)
-        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "terms" </> Reference.urlParser TermReference)
-        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
-        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
+        , Parser.map (ByReference Latest) (s "latest" </> s "types" </> Reference.urlParser TypeReference)
+        , Parser.map (ByReference Latest) (s "latest" </> s "terms" </> Reference.urlParser TermReference)
+        , Parser.map (ByReference Latest) (s "latest" </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
+        , Parser.map (ByReference Latest) (s "latest" </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
         ]
 
 
@@ -100,28 +98,6 @@ fromUrl basePath url =
 
 
 
--- HELPERS
-
-
-relativeTo : Route -> Maybe RelativeTo
-relativeTo route =
-    case route of
-        Namespace ref ->
-            case ref of
-                Latest ->
-                    Just RelativeTo.Codebase
-
-                NameReference _ ->
-                    Nothing
-
-                HashReference h ->
-                    Just (RelativeTo.Namespace h)
-
-        ByReference relTo _ ->
-            Just relTo
-
-
-
 -- TRANSFORM
 
 
@@ -131,13 +107,13 @@ toReference oldRoute ref =
         Namespace nsRef ->
             case nsRef of
                 Latest ->
-                    ByReference RelativeTo.Codebase ref
+                    ByReference Latest ref
 
                 NameReference _ ->
-                    ByReference RelativeTo.Codebase ref
+                    ByReference Latest ref
 
                 HashReference hash ->
-                    ByReference (RelativeTo.Namespace hash) ref
+                    ByReference (HashReference hash) ref
 
         ByReference within _ ->
             ByReference within ref
@@ -157,32 +133,35 @@ toUrlString route =
                 HashQualified fqn h ->
                     String.split "/" (FQN.toUrlString fqn ++ Hash.toUrlString h)
 
+        namespaceReferenceToPath nsRef =
+            case nsRef of
+                Latest ->
+                    [ "latest" ]
+
+                NameReference fqn ->
+                    "latest" :: NEL.toList (FQN.segments fqn)
+
+                HashReference hash ->
+                    [ "@" ++ Hash.toString hash ]
+
         path =
             case route of
-                Namespace ref ->
-                    case ref of
-                        Latest ->
-                            [ "latest" ]
+                Namespace nsRef ->
+                    namespaceReferenceToPath nsRef
 
-                        NameReference fqn ->
-                            "latest" :: NEL.toList (FQN.segments fqn)
-
-                        HashReference hash ->
-                            [ "@" ++ Hash.toString hash ]
-
-                ByReference relTo ref ->
+                ByReference nsRef ref ->
                     case ref of
                         TypeReference hq ->
-                            [ RelativeTo.toUrlPath relTo, "types" ] ++ hqToPath hq
+                            namespaceReferenceToPath nsRef ++ ("types" :: hqToPath hq)
 
                         TermReference hq ->
-                            [ RelativeTo.toUrlPath relTo, "terms" ] ++ hqToPath hq
+                            namespaceReferenceToPath nsRef ++ ("terms" :: hqToPath hq)
 
                         AbilityConstructorReference hq ->
-                            [ RelativeTo.toUrlPath relTo, "ability-constructors" ] ++ hqToPath hq
+                            namespaceReferenceToPath nsRef ++ ("ability-constructors" :: hqToPath hq)
 
                         DataConstructorReference hq ->
-                            [ RelativeTo.toUrlPath relTo, "data-constructors" ] ++ hqToPath hq
+                            namespaceReferenceToPath nsRef ++ ("data-constructors" :: hqToPath hq)
     in
     relative path []
 

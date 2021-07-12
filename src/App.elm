@@ -13,7 +13,6 @@ import Html.Events exposing (onClick)
 import KeyboardShortcut
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
-import RelativeTo exposing (RelativeTo(..))
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import UI
@@ -39,7 +38,6 @@ type Modal
 type alias Model =
     { navKey : Nav.Key
     , route : Route
-    , relativeTo : RelativeTo
     , codebaseTree : CodebaseTree.Model
     , workspace : Workspace.Model
     , modal : Modal
@@ -71,15 +69,9 @@ init flags url navKey =
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init env
 
-        {--| TODO: When we can't get a relative to, we need to resolve the name
-          in the url to a hash-}
-        relativeTo =
-            Maybe.withDefault Codebase (Route.relativeTo route)
-
         model =
             { navKey = navKey
             , route = route
-            , relativeTo = relativeTo
             , workspace = workspace
             , codebaseTree = codebaseTree
             , modal = NoModal
