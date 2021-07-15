@@ -155,12 +155,12 @@ decodeTypeItem =
     in
     Decode.map TypeItem
         (Decode.map3 Type
-            (field "namedType" Hash.decode)
+            (at [ "namedType", "typeHash" ] Hash.decode)
             (Type.decodeTypeCategory [ "namedType", "typeTag" ])
             (Decode.map3 makeSummary
-                (field "namedType" FQN.decode)
+                (at [ "namedType", "typeName" ] FQN.decode)
                 (field "bestFoundTypeName" string)
-                (Type.decodeTypeSource [ "tag" ] [ "typeDef", "contents" ])
+                (Type.decodeTypeSource [ "typeDef", "tag" ] [ "typeDef", "contents" ])
             )
         )
 
