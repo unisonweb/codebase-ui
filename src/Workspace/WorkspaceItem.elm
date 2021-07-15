@@ -18,7 +18,7 @@ import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
 import Id exposing (Id)
-import Json.Decode as Decode exposing (at, field)
+import Json.Decode as Decode exposing (field, index)
 import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
 import String.Extra exposing (pluralize)
@@ -409,23 +409,38 @@ viewClosableRow closeMsg hash_ attrs header contentItems =
 -- JSON DECODERS
 
 
+decodeDocs : String -> Decode.Decoder (Maybe Doc)
+decodeDocs fieldName =
+    Decode.oneOf
+        [ Decode.map Just (field fieldName (index 0 (index 2 Doc.decode)))
+        , Decode.succeed Nothing
+        ]
+
+
 decodeTypeDetails :
     Decode.Decoder
         { category : TypeCategory
         , name : String
         , otherNames : NEL.Nonempty FQN
         , source : TypeSource
+        , doc : Maybe Doc
         }
 decodeTypeDetails =
     let
-        make cat name otherNames source =
-            { category = cat, name = name, otherNames = otherNames, source = source }
+        make cat name otherNames source doc =
+            { category = cat
+            , doc = doc
+            , name = name
+            , otherNames = otherNames
+            , source = source
+            }
     in
-    Decode.map4 make
+    Decode.map5 make
         (Type.decodeTypeCategory [ "defnTypeTag" ])
         (field "bestTypeName" Decode.string)
         (field "typeNames" (Util.decodeNonEmptyList FQN.decode))
         (Type.decodeTypeSource [ "typeDefinition", "tag" ] [ "typeDefinition", "contents" ])
+        (decodeDocs "typeDocs")
 
 
 decodeTypes : Decode.Decoder (List TypeDetailWithDoc)
@@ -434,7 +449,7 @@ decodeTypes =
         makeType ( hash_, d ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Type h d.category { doc = Nothing, info = Info.makeInfo d.name d.otherNames, source = d.source })
+                |> Maybe.map (\h -> Type h d.category { doc = d.doc, info = Info.makeInfo d.name d.otherNames, source = d.source })
 
         buildTypes =
             List.map makeType >> MaybeE.values
@@ -442,23 +457,25 @@ decodeTypes =
     Decode.keyValuePairs decodeTypeDetails |> Decode.map buildTypes
 
 
-decodeTermNamesAndSource :
+decodeTermDetails :
     Decode.Decoder
         { category : TermCategory
         , name : String
         , otherNames : NEL.Nonempty FQN
         , source : TermSource
+        , doc : Maybe Doc
         }
-decodeTermNamesAndSource =
+decodeTermDetails =
     let
-        make cat name otherNames source =
+        make cat name otherNames source doc =
             { category = cat
             , name = name
             , otherNames = otherNames
             , source = source
+            , doc = doc
             }
     in
-    Decode.map4 make
+    Decode.map5 make
         (Term.decodeTermCategory [ "defnTermTag" ])
         (field "bestTermName" Decode.string)
         (field "termNames" (Util.decodeNonEmptyList FQN.decode))
@@ -467,6 +484,7 @@ decodeTermNamesAndSource =
             [ "signature" ]
             [ "termDefinition", "contents" ]
         )
+        (decodeDocs "termDocs")
 
 
 decodeTerms : Decode.Decoder (List TermDetailWithDoc)
@@ -475,12 +493,12 @@ decodeTerms =
         makeTerm ( hash_, d ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Term h d.category { doc = Nothing, info = Info.makeInfo d.name d.otherNames, source = d.source })
+                |> Maybe.map (\h -> Term h d.category { doc = d.doc, info = Info.makeInfo d.name d.otherNames, source = d.source })
 
         buildTerms =
             List.map makeTerm >> MaybeE.values
     in
-    Decode.keyValuePairs decodeTermNamesAndSource |> Decode.map buildTerms
+    Decode.keyValuePairs decodeTermDetails |> Decode.map buildTerms
 
 
 decodeList : Decode.Decoder (List Item)
