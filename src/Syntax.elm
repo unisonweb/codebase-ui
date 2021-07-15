@@ -5,6 +5,7 @@ module Syntax exposing
     , SyntaxType(..)
     , Width(..)
     , decode
+    , decodeSingleton
     , numLines
     , view
     )
@@ -436,6 +437,11 @@ decodeSyntaxSegment =
             ]
         )
         (field "segment" Decode.string)
+
+
+decodeSingleton : Decode.Decoder Syntax
+decodeSingleton =
+    Decode.map Syntax (Decode.map NEL.fromElement decodeSyntaxSegment)
 
 
 decode : Decode.Decoder Syntax

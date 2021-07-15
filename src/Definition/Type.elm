@@ -5,16 +5,14 @@ module Definition.Type exposing
     , TypeListing
     , TypeSource(..)
     , TypeSummary
-    , decodeFQN
-    , decodeHash
-    , decodeSource
     , decodeTypeCategory
+    , decodeTypeSource
     )
 
 import Definition.Info exposing (Info)
-import FullyQualifiedName as FQN exposing (FQN)
+import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
-import Json.Decode as Decode exposing (field, string)
+import Json.Decode as Decode exposing (at, string)
 import Json.Decode.Extra exposing (when)
 import Syntax exposing (Syntax)
 
@@ -58,31 +56,28 @@ type alias TypeListing =
 -- JSON DECODERS
 
 
-decodeTypeCategory : String -> Decode.Decoder TypeCategory
-decodeTypeCategory tagFieldName =
-    Decode.oneOf
-        [ when (field tagFieldName string) ((==) "Data") (Decode.succeed DataType)
-        , when (field tagFieldName string) ((==) "Ability") (Decode.succeed AbilityType)
-        ]
-
-
-decodeSource : Decode.Decoder TypeSource
-decodeSource =
+decodeTypeCategory : List String -> Decode.Decoder TypeCategory
+decodeTypeCategory tagPath =
     let
-        decodeUserObject =
-            Decode.map Source (field "contents" Syntax.decode)
+        tag =
+            at tagPath string
     in
     Decode.oneOf
-        [ when (field "tag" string) ((==) "UserObject") decodeUserObject
-        , when (field "tag" string) ((==) "BuiltinObject") (Decode.succeed Builtin)
+        [ when tag ((==) "Data") (Decode.succeed DataType)
+        , when tag ((==) "Ability") (Decode.succeed AbilityType)
         ]
 
 
-decodeHash : Decode.Decoder Hash
-decodeHash =
-    field "typeHash" Hash.decode
+decodeTypeSource : List String -> List String -> Decode.Decoder TypeSource
+decodeTypeSource tagPath sourcePath =
+    let
+        tag =
+            at tagPath string
 
-
-decodeFQN : Decode.Decoder FQN
-decodeFQN =
-    field "typeName" FQN.decode
+        decodeUserObject =
+            Decode.map Source (at sourcePath Syntax.decode)
+    in
+    Decode.oneOf
+        [ when tag ((==) "UserObject") decodeUserObject
+        , when tag ((==) "BuiltinObject") (Decode.succeed Builtin)
+        ]

@@ -6,16 +6,15 @@ module Definition.Term exposing
     , TermSignature(..)
     , TermSource(..)
     , TermSummary
-    , decodeFQN
-    , decodeHash
     , decodeSignature
     , decodeTermCategory
+    , decodeTermSource
     )
 
 import Definition.Info exposing (Info)
-import FullyQualifiedName as FQN exposing (FQN)
+import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
-import Json.Decode as Decode exposing (field, string)
+import Json.Decode as Decode exposing (at, string)
 import Json.Decode.Extra exposing (when)
 import Syntax exposing (Syntax)
 
@@ -64,25 +63,39 @@ type alias TermListing =
 -- JSON DECODERS
 
 
-decodeTermCategory : String -> Decode.Decoder TermCategory
-decodeTermCategory tagFieldName =
+decodeTermCategory : List String -> Decode.Decoder TermCategory
+decodeTermCategory tagPath =
+    let
+        tag =
+            at tagPath string
+    in
     Decode.oneOf
-        [ when (field tagFieldName string) ((==) "Test") (Decode.succeed TestTerm)
-        , when (field tagFieldName string) ((==) "Doc") (Decode.succeed DocTerm)
+        [ when tag ((==) "Test") (Decode.succeed TestTerm)
+        , when tag ((==) "Doc") (Decode.succeed DocTerm)
         , Decode.succeed PlainTerm
         ]
 
 
-decodeSignature : Decode.Decoder TermSignature
-decodeSignature =
-    Decode.map TermSignature (field "termType" Syntax.decode)
+decodeSignature : List String -> Decode.Decoder TermSignature
+decodeSignature signaturePath =
+    Decode.map TermSignature (at signaturePath Syntax.decode)
 
 
-decodeHash : Decode.Decoder Hash
-decodeHash =
-    field "termHash" Hash.decode
+decodeTermSource : List String -> List String -> List String -> Decode.Decoder TermSource
+decodeTermSource tagPath signaturePath sourcePath =
+    let
+        tag =
+            at tagPath string
 
+        decodeUserObject =
+            Decode.map2 Source
+                (decodeSignature signaturePath)
+                (at sourcePath Syntax.decode)
 
-decodeFQN : Decode.Decoder FQN
-decodeFQN =
-    field "termName" FQN.decode
+        decodeBuiltin =
+            Decode.map Builtin (decodeSignature signaturePath)
+    in
+    Decode.oneOf
+        [ when tag ((==) "UserObject") decodeUserObject
+        , when tag ((==) "BuiltinObject") decodeBuiltin
+        ]

@@ -62,11 +62,11 @@ isAbilityConstructorHash hash =
 -- JSON DECODERS
 
 
-decodeSource : Decode.Decoder TypeSource
+decodeSource : List String -> List String -> Decode.Decoder TypeSource
 decodeSource =
-    Type.decodeSource
+    Type.decodeTypeSource
 
 
-decodeSignature : Decode.Decoder TermSignature
+decodeSignature : List String -> Decode.Decoder TermSignature
 decodeSignature =
     Term.decodeSignature
