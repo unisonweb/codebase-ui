@@ -1,9 +1,25 @@
 module Definition.DocTests exposing (..)
 
-import Definition.Doc as Doc exposing (Doc)
+import Definition.Doc as Doc exposing (Doc(..))
 import Expect
 import Id exposing (Id)
 import Test exposing (..)
+
+
+mergeWords : Test
+mergeWords =
+    describe "Doc.mergeWords"
+        [ test "merges adjacent Word elements with a space" <|
+            \_ ->
+                let
+                    before =
+                        [ Word "Hello", Word "World", Blankline, Word "After", Word "non", Word "word" ]
+
+                    expected =
+                        [ Word "Hello World", Blankline, Word "After non word" ]
+                in
+                Expect.equal expected (Doc.mergeWords before)
+        ]
 
 
 isDocFoldToggled : Test

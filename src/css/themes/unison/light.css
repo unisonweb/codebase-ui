@@ -44,8 +44,8 @@
   --color-workspace-item-doc-source-bg: var(--color-gray-lighten-60);
   --color-workspace-item-bg: transparent;
   --color-workspace-item-link: var(--color-blue-1);
-  --color-workspace-item-link-active: var(--color-blue-2);
-  --color-workspace-item-link-hover: var(--color-blue-2);
+  --color-workspace-item-link-active: var(--color-pink-1);
+  --color-workspace-item-link-hover: var(--color-pink-2);
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-40);
   --color-workspace-item-subtle-fg-em: var(--color-gray-lighten-20);
   --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);

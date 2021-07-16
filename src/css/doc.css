@@ -9,27 +9,38 @@
   margin-right: 0.5ch;
 }
 
-.doc .code,
-.doc .sources,
-.doc .folded-sources,
-.doc .example,
-.doc .eval,
-.doc .signatures .signature {
+.doc .source.code,
+.doc .source.sources,
+.doc .source.folded-sources,
+.doc .source.example,
+.doc .source.eval,
+.doc .source.signatures .signature {
   display: flex;
-  padding: 0.5rem 1rem;
+  padding: 0.5rem;
   background: var(--color-workspace-item-doc-source-bg);
   border-radius: var(--border-radius-base);
   margin-bottom: 1rem;
 }
 
-.doc .inline-code,
-.doc .example-inline,
-.doc .eval-inline,
-.doc .signature-inline {
+.doc .source.inline-code,
+.doc .source.example-inline,
+.doc .source.eval-inline,
+.doc .source.signature-inline {
   display: inline-block;
-  padding: 1px 0.5rem;
+  padding: 0 0.25rem;
+  margin-right: 0.5ch;
   background: var(--color-workspace-item-doc-source-bg);
   border-radius: var(--border-radius-base);
+}
+
+/* code and inline-code render sub docs, not syntax */
+:is(.doc .source.code, .doc .source.inline-code) .word:last-child {
+  margin-right: 0;
+}
+
+.doc .eval .result .icon,
+.doc .eval-inline .result .icon {
+  color: var(--color-workspace-item-subtle-fg-em);
 }
 
 .doc strong {
@@ -44,15 +55,16 @@
   text-decoration: line-through;
 }
 
-.doc a,
-.doc a:visited {
-  color: var(--color-workspace-item-link-fg);
+.doc .named-link:not(.invalid-href),
+.doc .named-link:not(.invalid-href):visited {
+  color: var(--color-workspace-item-link);
 }
-.doc a:active {
+.doc .named-link:not(.invalid-href):active {
   color: var(--color-workspace-item-link-active);
 }
-.doc a:hover {
+.doc .named-link:not(.invalid-href):hover {
   color: var(--color-workspace-item-link-hover);
+  text-decoration: none;
 }
 
 .doc blockquote {
@@ -183,29 +195,56 @@
   margin-top: 1rem;
 }
 
+:is(.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6) p {
+  margin: 0;
+}
+
 .doc h1 {
-  font-size: 1.5rem;
+  font-size: 1.25rem;
+  margin-top: 2rem;
+  margin-bottom: 0.75rem;
 }
 
 .doc h2 {
-  font-size: 1.25rem;
+  font-size: 1rem;
+  margin-top: 1.5rem;
+  margin-bottom: 0.5rem;
 }
 
 .doc h3 {
-  font-size: 1rem;
+  font-size: 0.875rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .doc h4 {
   font-size: 0.875rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .doc h5 {
   font-size: 0.875rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .doc h6 {
   font-size: 0.875rem;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
 }
+
+/*
+.doc h1:first-child,
+.doc h2:first-child,
+.doc h3:first-child,
+.doc h4:first-child,
+.doc h5:first-child,
+.doc h6:first-child {
+  margin-top: 0;
+}
+*/
 
 .doc img {
   margin-bottom: 1rem;

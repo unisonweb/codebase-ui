@@ -5,6 +5,7 @@ module Definition.Doc exposing
     , decode
     , emptyDocFoldToggles
     , isDocFoldToggled
+    , mergeWords
     , toggleFold
     , view
     )
@@ -41,6 +42,7 @@ import Html.Events exposing (onClick)
 import Id exposing (Id)
 import Json.Decode as Decode exposing (bool, field, index, int, string)
 import Json.Decode.Extra exposing (when)
+import List.Extra as ListE
 import Set exposing (Set)
 import Syntax exposing (Syntax)
 import UI
@@ -83,7 +85,7 @@ type
       -- will present this as a toggle or clickable elipses
     | Folded { id : Id Doc, isFolded : Bool, summary : Doc, details : Doc }
       -- Documents separated by spaces and wrapped to available width
-    | Paragraph (List Doc)
+    | Span (List Doc)
     | BulletedList (List Doc)
       -- NumberedList startingNumber listElements
     | NumberedList Int (List Doc)
@@ -203,6 +205,74 @@ isDocFoldToggled (DocFoldToggles toggles) id =
 -- VIEW
 
 
+type NamedLinkHref
+    = Href String
+    | ReferenceHref Reference
+    | InvalidHref
+
+
+normalizeHref : NamedLinkHref -> Doc -> NamedLinkHref
+normalizeHref href doc =
+    case doc of
+        Word w ->
+            case href of
+                InvalidHref ->
+                    Href w
+
+                Href h ->
+                    Href (h ++ w)
+
+                ReferenceHref _ ->
+                    href
+
+        Group d_ ->
+            normalizeHref href d_
+
+        Join ds ->
+            List.foldl (\d acc -> normalizeHref acc d) href ds
+
+        Special (Link syntax) ->
+            let
+                folder seg acc =
+                    case acc of
+                        Nothing ->
+                            Syntax.reference seg
+
+                        _ ->
+                            acc
+            in
+            syntax
+                |> Syntax.foldl folder Nothing
+                |> Maybe.map ReferenceHref
+                |> Maybe.withDefault InvalidHref
+
+        _ ->
+            href
+
+
+{-| Merge adjacent Word elements in a list to 1 element with a string of words
+separated by space— useful for rendering to the dom without creating dom
+elements for each and every word in the doc, but instead rely on textNodes
+-}
+mergeWords : List Doc -> List Doc
+mergeWords docs =
+    let
+        merge_ d acc =
+            case d of
+                Word w ->
+                    case ListE.unconsLast acc of
+                        Just ( Word w_, before ) ->
+                            before ++ [ Word (w_ ++ " " ++ w) ]
+
+                        _ ->
+                            acc ++ [ d ]
+
+                _ ->
+                    acc ++ [ d ]
+    in
+    List.foldl merge_ [] docs
+
+
 view : (Reference -> msg) -> (Id Doc -> msg) -> DocFoldToggles -> Doc -> Html msg
 view refToMsg toggleFoldMsg docFoldToggles document =
     let
@@ -227,6 +297,14 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                 -- the Section variant increments it locally
                 viewAtCurrentSectionLevel =
                     view_ sectionLevel
+
+                viewSectionContent renderer doc_ =
+                    case doc_ of
+                        Span _ ->
+                            p [] [ renderer doc_ ]
+
+                        _ ->
+                            renderer doc_
             in
             case doc of
                 Word word ->
@@ -296,7 +374,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                             td [] [ viewAtCurrentSectionLevel d ]
 
                         viewRow cells =
-                            tr [] (List.map viewCell cells)
+                            tr [] (List.map viewCell (mergeWords cells))
                     in
                     table [] [ tbody [] (List.map viewRow rows) ]
 
@@ -326,24 +404,24 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                                 ]
                             ]
 
-                Paragraph content ->
-                    p [] (List.map viewAtCurrentSectionLevel content)
+                Span docs ->
+                    span [] (List.map viewAtCurrentSectionLevel (mergeWords docs))
 
                 BulletedList items ->
                     let
                         viewItem d =
                             li [] [ viewAtCurrentSectionLevel d ]
                     in
-                    ul [] (List.map viewItem items)
+                    ul [] (List.map viewItem (mergeWords items))
 
                 NumberedList startNum items ->
                     let
                         viewItem d =
                             li [] [ viewAtCurrentSectionLevel d ]
                     in
-                    ol [ start startNum ] (List.map viewItem items)
+                    ol [ start startNum ] (List.map viewItem (mergeWords items))
 
-                Section title content ->
+                Section title docs ->
                     let
                         -- Unison Doc allows endlessly deep section nesting with
                         -- titles, but HTML only supports to h1-h6, so we clamp
@@ -354,15 +432,18 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                         titleEl =
                             Html.node ("h" ++ String.fromInt level) [] [ viewAtCurrentSectionLevel title ]
                     in
-                    section [] (titleEl :: List.map (view_ (sectionLevel + 1)) content)
+                    section [] (titleEl :: List.map (viewSectionContent (view_ (sectionLevel + 1))) docs)
 
                 NamedLink label href_ ->
-                    case href_ of
-                        Word h ->
-                            a [ href h, rel "noopener", target "_blank" ] [ viewAtCurrentSectionLevel label ]
+                    case normalizeHref InvalidHref href_ of
+                        Href h ->
+                            a [ class "named-link", href h, rel "noopener", target "_blank" ] [ viewAtCurrentSectionLevel label ]
 
-                        _ ->
-                            span [] [ viewAtCurrentSectionLevel label ]
+                        ReferenceHref ref ->
+                            a [ class "named-link", onClick (refToMsg ref) ] [ viewAtCurrentSectionLevel label ]
+
+                        InvalidHref ->
+                            span [ class "named-link invalid-href" ] [ viewAtCurrentSectionLevel label ]
 
                 Image altText src_ caption ->
                     let
@@ -410,7 +491,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                                             -- Caret orientation for folded/unfolded is rotated
                                             -- by CSS such that it can be animated
                                             [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretRight ]
-                                            , UI.inlineCode [] (viewSyntax summary)
+                                            , UI.inlineCode [ class "rich source" ] (viewSyntax summary)
                                             ]
 
                                     else
@@ -423,50 +504,50 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                                 (List.map viewFoldedSource sources)
 
                         Example syntax ->
-                            span [ class "example-inline" ] [ UI.inlineCode [] (viewSyntax syntax) ]
+                            span [ class "source rich example-inline" ] [ UI.inlineCode [] (viewSyntax syntax) ]
 
                         ExampleBlock syntax ->
-                            div [ class "example" ] [ UI.codeBlock [] (viewSyntax syntax) ]
+                            div [ class "source rich example" ] [ UI.codeBlock [] (viewSyntax syntax) ]
 
                         Link syntax ->
-                            UI.inlineCode [] (viewSyntax syntax)
+                            UI.inlineCode [ class "rich source" ] (viewSyntax syntax)
 
                         Signature signatures ->
-                            div [ class "signatures" ]
+                            div [ class "rich source signatures" ]
                                 (List.map
                                     (\signature -> div [ class "signature" ] [ viewSignature signature ])
                                     signatures
                                 )
 
                         SignatureInline signature ->
-                            span [ class "signature-inline" ] [ viewSignature signature ]
+                            span [ class "rich source signature-inline" ] [ viewSignature signature ]
 
                         Eval source result ->
                             div
-                                [ class "eval" ]
-                                [ UI.codeBlock [] (div [] [ viewSyntax source, div [ class "result" ] [ viewSyntax result ] ]) ]
+                                [ class "source rich eval" ]
+                                [ UI.codeBlock [] (div [] [ viewSyntax source, div [ class "result" ] [ Icon.view Icon.arrowDown, div [] [ viewSyntax result ] ] ]) ]
 
                         EvalInline source result ->
-                            span [ class "eval-inline" ]
-                                [ UI.inlineCode [] (span [] [ viewSyntax source, span [ class "result" ] [ viewSyntax result ] ]) ]
+                            span [ class "source rich eval-inline" ]
+                                [ UI.inlineCode [] (span [] [ viewSyntax source, span [ class "result" ] [ Icon.view Icon.arrowRight, viewSyntax result ] ]) ]
 
                         Embed syntax ->
-                            div [ class "embed" ] [ UI.codeBlock [] (viewSyntax syntax) ]
+                            div [ class "source rich embed" ] [ UI.codeBlock [] (viewSyntax syntax) ]
 
                         EmbedInline syntax ->
-                            span [ class "embed-inline" ] [ UI.inlineCode [] (viewSyntax syntax) ]
+                            span [ class "source rich embed-inline" ] [ UI.inlineCode [] (viewSyntax syntax) ]
 
                 Join docs ->
-                    div [] (List.map viewAtCurrentSectionLevel docs)
+                    span [] (List.map viewAtCurrentSectionLevel (mergeWords docs))
 
-                UntitledSection content ->
-                    section [] (List.map viewAtCurrentSectionLevel content)
+                UntitledSection docs ->
+                    section [] (List.map (viewSectionContent viewAtCurrentSectionLevel) docs)
 
-                Column content ->
+                Column docs ->
                     ul [ class "column" ]
                         (List.map
                             (\c -> li [] [ viewAtCurrentSectionLevel c ])
-                            content
+                            (mergeWords docs)
                         )
 
                 Group content ->
@@ -592,7 +673,9 @@ decode =
                     (field "contents" (index 3 nested))
                 )
             )
-        , when tag ((==) "Paragraph") (Decode.map Paragraph (field "contents" (Decode.list nested)))
+
+        -- Unison Doc Paragraph are not like a paragraph in the typesetting or html way; it's more like a bag of words
+        , when tag ((==) "Paragraph") (Decode.map Span (field "contents" (Decode.list nested)))
         , when tag ((==) "BulletedList") (Decode.map BulletedList (field "contents" (Decode.list nested)))
         , when tag
             ((==) "NumberedList")
