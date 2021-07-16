@@ -24,7 +24,9 @@ type ViewConfig msg
     | Plain
 
 
-type Source
+type
+    Source
+    -- Term name source
     = Term String TermSource
     | Type TypeSource
 

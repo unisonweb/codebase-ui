@@ -149,7 +149,7 @@ decodeContent parentFqn =
                 (Decode.map3 TypeListing
                     (field "typeHash" Hash.decode)
                     (field "typeName" (FQN.decodeFromParent parentFqn))
-                    (Decode.map Category.Type (Type.decodeTypeCategory "typeTag"))
+                    (Decode.map Category.Type (Type.decodeTypeCategory [ "typeTag" ]))
                 )
 
         decodeTermListing =
@@ -157,7 +157,7 @@ decodeContent parentFqn =
                 (Decode.map3 TermListing
                     (field "termHash" Hash.decode)
                     (field "termName" (FQN.decodeFromParent parentFqn))
-                    (Decode.map Category.Term (Term.decodeTermCategory "termTag"))
+                    (Decode.map Category.Term (Term.decodeTermCategory [ "termTag" ]))
                 )
 
         decodePatchListing =

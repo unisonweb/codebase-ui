@@ -2,15 +2,16 @@ module Definition.Doc exposing
     ( Doc(..)
     , DocFoldToggles
     , SpecialForm(..)
+    , decode
     , emptyDocFoldToggles
     , isDocFoldToggled
     , toggleFold
     , view
     )
 
-import Definition.Reference as Reference exposing (Reference)
-import Definition.Source as Source exposing (Source)
-import Definition.Term exposing (TermSignature)
+import Definition.Reference exposing (Reference(..))
+import Definition.Source as Source exposing (Source(..))
+import Definition.Term as Term exposing (TermSignature(..))
 import Html
     exposing
         ( Html
@@ -38,6 +39,8 @@ import Html
 import Html.Attributes exposing (alt, class, href, id, rel, src, start, target, title)
 import Html.Events exposing (onClick)
 import Id exposing (Id)
+import Json.Decode as Decode exposing (bool, field, index, int, string)
+import Json.Decode.Extra exposing (when)
 import Set exposing (Set)
 import Syntax exposing (Syntax)
 import UI
@@ -114,12 +117,13 @@ type
 
 type
     SpecialForm
-    -- @source{type Maybe, List.map @ note1 note2} OR
+    -- @source{type Maybe, List.map @ note1 note2} or @foldedSource{type Maybe, List.map}
     -- The notes are ignored currently, but will later be used to produce
     -- rich annotated source code with tooltips, highlights and whatnot.
-    = Source (List ( Reference, Source ))
-      -- like Source, but the code starts out folded
-    | FoldedSource (List { id : Id Doc, ref : Reference, isFolded : Bool, summary : Syntax, details : Source })
+    --
+    -- The backend has both Source and FoldedSource, but here on the Front-End,
+    -- we merge the two with a Bool
+    = Source (List { id : Id Doc, isFolded : Bool, summary : Syntax, details : Source })
       -- In `Example n expr`, `n` is the number of lambda parameters
       -- that should be elided during display.
       -- Ex: `Example 2 '(x y -> foo x y)` should render as `foo x y`.
@@ -129,11 +133,11 @@ type
       -- Same as `Example`, but as a block rather than inline element
     | ExampleBlock Syntax
       -- {type Maybe} or {List.map}
-    | Link Reference
+    | Link Syntax
       -- @signatures{List.map, List.filter, List.foldLeft}
-    | Signature (List ( Reference, TermSignature )) --div
+    | Signature (List TermSignature)
       -- @signature{List.map}
-    | SignatureInline ( Reference, TermSignature ) -- span
+    | SignatureInline TermSignature
       -- ```
       -- id x = x
       -- id 42 + 1
@@ -153,13 +157,17 @@ type
 
 
 {-| An Id present in DocFoldToggles means that the Bool on a Folded or
-FoldedSource
-should be negated.
+Source should be negated.
 
 This type is meant to track state on an adjacent level to Doc, for instance on
 the WorkspaceItem level.
 
 -}
+docId : String -> Id Doc
+docId raw =
+    Id.fromString raw
+
+
 type DocFoldToggles
     = DocFoldToggles (Set String)
 
@@ -224,11 +232,11 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                 Word word ->
                     span [ class "word" ] [ text word ]
 
-                Code d ->
-                    span [ class "inline-code" ] [ viewAtCurrentSectionLevel d ]
+                Code code ->
+                    span [ class "rich source inline-code" ] [ UI.inlineCode [] (viewAtCurrentSectionLevel code) ]
 
-                CodeBlock lang d ->
-                    div [ class "code", lang |> stringToClass |> class ] [ viewAtCurrentSectionLevel d ]
+                CodeBlock lang code ->
+                    div [ class "rich source code", lang |> stringToClass |> class ] [ UI.codeBlock [] (viewAtCurrentSectionLevel code) ]
 
                 Bold d ->
                     strong [] [ viewAtCurrentSectionLevel d ]
@@ -353,14 +361,6 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                         Word h ->
                             a [ href h, rel "noopener", target "_blank" ] [ viewAtCurrentSectionLevel label ]
 
-                        Special s ->
-                            case s of
-                                Link ref ->
-                                    a [ onClick (refToMsg ref) ] [ viewAtCurrentSectionLevel label ]
-
-                                _ ->
-                                    span [] [ viewAtCurrentSectionLevel label ]
-
                         _ ->
                             span [] [ viewAtCurrentSectionLevel label ]
 
@@ -395,9 +395,6 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                 Special specialForm ->
                     case specialForm of
                         Source sources ->
-                            div [ class "sources" ] (List.map (\( _, s ) -> viewSource s) sources)
-
-                        FoldedSource sources ->
                             let
                                 viewFoldedSource { id, isFolded, summary, details } =
                                     let
@@ -431,13 +428,17 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                         ExampleBlock syntax ->
                             div [ class "example" ] [ UI.codeBlock [] (viewSyntax syntax) ]
 
-                        Link ref ->
-                            a [ onClick (refToMsg ref) ] [ text (Reference.toHumanString ref) ]
+                        Link syntax ->
+                            UI.inlineCode [] (viewSyntax syntax)
 
                         Signature signatures ->
-                            div [ class "signatures" ] (List.map (\( _, s ) -> div [ class "signature" ] [ viewSignature s ]) signatures)
+                            div [ class "signatures" ]
+                                (List.map
+                                    (\signature -> div [ class "signature" ] [ viewSignature signature ])
+                                    signatures
+                                )
 
-                        SignatureInline ( _, signature ) ->
+                        SignatureInline signature ->
                             span [ class "signature-inline" ] [ viewSignature signature ]
 
                         Eval source result ->
@@ -472,6 +473,158 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     span [ class "group" ] [ viewAtCurrentSectionLevel content ]
     in
     article [ class "doc" ] [ view_ 1 document ]
+
+
+
+-- DECODE
+
+
+decodeSpecialForm : Decode.Decoder SpecialForm
+decodeSpecialForm =
+    let
+        tag =
+            field "tag" string
+
+        decodeSignature =
+            Decode.map TermSignature Syntax.decode
+
+        decodeSource isFolded =
+            Decode.map2
+                (\summary source ->
+                    { id = docId "TODO"
+                    , isFolded = isFolded
+                    , summary = summary
+                    , details = source
+                    }
+                )
+                (field "summary" Syntax.decode)
+                (Decode.map (Source.Term "TODO")
+                    (Term.decodeTermSource
+                        [ "termDefiniton", "tag" ]
+                        [ "signature" ]
+                        [ "termDefinition", "contents" ]
+                    )
+                )
+    in
+    Decode.oneOf
+        [ when tag ((==) "Source") (Decode.map Source (field "contents" (Decode.list (decodeSource False))))
+        , when tag ((==) "FoldedSource") (Decode.map Source (field "contents" (Decode.list (decodeSource True))))
+        , when tag ((==) "Example") (Decode.map Example (field "contents" Syntax.decode))
+        , when tag ((==) "ExampleBlock") (Decode.map ExampleBlock (field "contents" Syntax.decode))
+        , when tag ((==) "Link") (Decode.map Link (field "contents" Syntax.decode))
+        , when tag ((==) "Signature") (Decode.map Signature (field "contents" (Decode.list decodeSignature)))
+        , when tag ((==) "SignatureInline") (Decode.map SignatureInline (field "contents" decodeSignature))
+        , when tag
+            ((==) "Eval")
+            (Decode.map2 Eval
+                (field "contents" (index 0 Syntax.decode))
+                (field "contents" (index 1 Syntax.decode))
+            )
+        , when tag
+            ((==) "EvalInline")
+            (Decode.map2 EvalInline
+                (field "contents" (index 0 Syntax.decode))
+                (field "contents" (index 1 Syntax.decode))
+            )
+        , when tag ((==) "Embed") (Decode.map Embed (field "contents" Syntax.decode))
+        , when tag ((==) "EmbedInline") (Decode.map EmbedInline (field "contents" Syntax.decode))
+        ]
+
+
+decode : Decode.Decoder Doc
+decode =
+    let
+        tag =
+            field "tag" string
+
+        nested =
+            Decode.lazy (\_ -> decode)
+    in
+    Decode.oneOf
+        [ when tag ((==) "Word") (Decode.map Word (field "contents" string))
+        , when tag ((==) "Code") (Decode.map Code (field "contents" nested))
+        , when tag
+            ((==) "CodeBlock")
+            (Decode.map2 CodeBlock
+                (field "contents" (index 0 string))
+                (field "contents" (index 1 nested))
+            )
+        , when tag ((==) "Bold") (Decode.map Bold (field "contents" nested))
+        , when tag ((==) "Italic") (Decode.map Italic (field "contents" nested))
+        , when tag ((==) "Strikethrough") (Decode.map Strikethrough (field "contents" nested))
+        , when tag
+            ((==) "Style")
+            (Decode.map2 Style
+                (field "contents" (index 0 string))
+                (field "contents" (index 1 nested))
+            )
+        , when tag
+            ((==) "Anchor")
+            (Decode.map2 Anchor
+                (field "contents" (index 0 string))
+                (field "contents" (index 1 nested))
+            )
+        , when tag ((==) "Blockquote") (Decode.map Blockquote (field "contents" nested))
+        , when tag ((==) "Blankline") (Decode.succeed Blankline)
+        , when tag ((==) "Linebreak") (Decode.succeed Linebreak)
+        , when tag ((==) "SectionBreak") (Decode.succeed SectionBreak)
+        , when tag
+            ((==) "Tooltip")
+            (Decode.map2 Tooltip
+                (field "contents" (index 0 nested))
+                (field "contents" (index 1 nested))
+            )
+        , when tag ((==) "Aside") (Decode.map Aside (field "contents" nested))
+        , when tag
+            ((==) "Callout")
+            (Decode.map2 Callout
+                (Decode.maybe (field "contents" (index 0 nested)))
+                (field "contents" (index 1 nested))
+            )
+        , when tag ((==) "Table") (Decode.map Table (field "contents" (Decode.list (Decode.list nested))))
+        , when tag
+            ((==) "Folded")
+            (Decode.map Folded
+                (Decode.map3
+                    (\isFolded summary details -> { id = docId "TODO", isFolded = isFolded, summary = summary, details = details })
+                    (field "contents" (index 0 bool))
+                    (field "contents" (index 1 nested))
+                    (field "contents" (index 3 nested))
+                )
+            )
+        , when tag ((==) "Paragraph") (Decode.map Paragraph (field "contents" (Decode.list nested)))
+        , when tag ((==) "BulletedList") (Decode.map BulletedList (field "contents" (Decode.list nested)))
+        , when tag
+            ((==) "NumberedList")
+            (Decode.map2 NumberedList
+                (field "contents" (index 0 int))
+                (field "contents" (index 1 (Decode.list nested)))
+            )
+        , when tag
+            ((==) "Section")
+            (Decode.map2 Section
+                (field "contents" (index 0 nested))
+                (field "contents" (index 1 (Decode.list nested)))
+            )
+        , when tag
+            ((==) "NamedLink")
+            (Decode.map2 NamedLink
+                (field "contents" (index 0 nested))
+                (field "contents" (index 1 nested))
+            )
+        , when tag
+            ((==) "Image")
+            (Decode.map3 Image
+                (field "contents" (index 0 nested))
+                (field "contents" (index 1 nested))
+                (Decode.maybe (field "contents" (index 2 nested)))
+            )
+        , when tag ((==) "Special") (Decode.map Special (field "contents" decodeSpecialForm))
+        , when tag ((==) "Join") (Decode.map Join (field "contents" (Decode.list nested)))
+        , when tag ((==) "UntitledSection") (Decode.map UntitledSection (field "contents" (Decode.list nested)))
+        , when tag ((==) "Column") (Decode.map Column (field "contents" (Decode.list nested)))
+        , when tag ((==) "Group") (Decode.map Group (field "contents" nested))
+        ]
 
 
 
