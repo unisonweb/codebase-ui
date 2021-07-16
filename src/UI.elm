@@ -11,8 +11,7 @@ codeBlock attrs code_ =
 
 inlineCode : List (Attribute msg) -> Html msg -> Html msg
 inlineCode attrs code_ =
-    -- TODO: Make inline...
-    pre attrs [ code [] [ code_ ] ]
+    pre (class "inline-code" :: attrs) [ code [] [ code_ ] ]
 
 
 nothing : Html msg

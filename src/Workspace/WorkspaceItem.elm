@@ -284,7 +284,8 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg toggleFoldMsg ref data isFo
                 ref
                 attrs
                 (viewNames docZoomMsg detail.info (Category.Type category))
-                [ ( UI.nothing, viewBuiltin data.item )
+                [ ( UI.nothing, viewDoc_ detail.doc )
+                , ( UI.nothing, viewBuiltin data.item )
                 , viewSource toOpenReferenceMsg data.item
                 ]
 

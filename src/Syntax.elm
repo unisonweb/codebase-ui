@@ -6,7 +6,9 @@ module Syntax exposing
     , Width(..)
     , decode
     , decodeSingleton
+    , foldl
     , numLines
+    , reference
     , view
     )
 
@@ -113,6 +115,24 @@ numLines (Syntax segments) =
     NEL.foldl count 1 segments
 
 
+reference : SyntaxSegment -> Maybe Reference
+reference (SyntaxSegment syntaxType _) =
+    case syntaxType of
+        TypeReference h ->
+            Just (Reference.TypeReference (HQ.HashOnly h))
+
+        TermReference h ->
+            Just (Reference.TermReference (HQ.HashOnly h))
+
+        _ ->
+            Nothing
+
+
+foldl : (SyntaxSegment -> b -> b) -> b -> Syntax -> b
+foldl f init (Syntax segments) =
+    NEL.foldl f init segments
+
+
 
 -- VIEW
 
@@ -121,7 +141,7 @@ syntaxTypeToClassName : SyntaxType -> String
 syntaxTypeToClassName sType =
     case sType of
         NumericLiteral ->
-            "numberic-literal"
+            "numeric-literal"
 
         TextLiteral ->
             "text-literal"

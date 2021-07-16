@@ -2,10 +2,18 @@ pre {
   margin: 0;
 }
 
+pre.inline-code {
+  display: inline-block;
+}
+
 code {
   display: inline-block;
   font-family: var(--font-monospace);
   line-height: 1.6;
+}
+
+pre.inline-code code {
+  line-height: 1.4;
 }
 
 code a {
@@ -133,7 +141,7 @@ code a:active {
 .monochrome .type-reference,
 .monochrome .boolean-literal,
 .monochrome .constructor,
-.monochrome .numberic-literal,
+.monochrome .numeric-literal,
 .monochrome .term-reference,
 .monochrome .data-type-modifier,
 .monochrome .hash-qualifier,
@@ -176,7 +184,7 @@ code a:active {
 .plain .blank,
 .plain .var,
 .plain .data-type-params,
-.plain .numberic-literal,
+.plain .numeric-literal,
 .plain .term-reference,
 .plain .data-type-modifier,
 .plain .hash-qualifier,
