@@ -311,3 +311,7 @@
     --color-workspace-item-focus-doc-source-bg
   );
 }
+
+.definition-row.focused .actions {
+  opacity: 1;
+}

@@ -1,6 +1,7 @@
 module Definition.Doc exposing
     ( Doc(..)
     , DocFoldToggles
+    , FoldId(..)
     , SpecialForm(..)
     , decode
     , emptyDocFoldToggles
@@ -11,11 +12,12 @@ module Definition.Doc exposing
     )
 
 import Definition.Reference exposing (Reference(..))
-import Definition.Source as Source exposing (Source(..))
-import Definition.Term as Term exposing (TermSignature(..))
+import Definition.Source as Source
+import Definition.Term exposing (TermSignature(..))
 import Html
     exposing
-        ( Html
+        ( Attribute
+        , Html
         , a
         , article
         , aside
@@ -39,14 +41,19 @@ import Html
         )
 import Html.Attributes exposing (alt, class, href, id, rel, src, start, target, title)
 import Html.Events exposing (onClick)
-import Id exposing (Id)
 import Json.Decode as Decode exposing (bool, field, index, int, string)
-import Json.Decode.Extra exposing (when)
+import Json.Decode.Extra as DecodeE exposing (when)
 import List.Extra as ListE
 import Set exposing (Set)
 import Syntax exposing (Syntax)
+import TreePath exposing (TreePath)
 import UI
 import UI.Icon as Icon
+
+
+type EmbeddedSource
+    = EmbeddedSource Syntax Syntax
+    | Builtin Syntax
 
 
 type
@@ -83,7 +90,7 @@ type
       -- If folded, only summary is shown, otherwise
       -- summary is followed by details. Some renderers
       -- will present this as a toggle or clickable elipses
-    | Folded { id : Id Doc, isFolded : Bool, summary : Doc, details : Doc }
+    | Folded { foldId : FoldId, isFolded : Bool, summary : Doc, details : Doc }
       -- Documents separated by spaces and wrapped to available width
     | Span (List Doc)
     | BulletedList (List Doc)
@@ -125,7 +132,7 @@ type
     --
     -- The backend has both Source and FoldedSource, but here on the Front-End,
     -- we merge the two with a Bool
-    = Source (List { id : Id Doc, isFolded : Bool, summary : Syntax, details : Source })
+    = Source (List { foldId : FoldId, isFolded : Bool, source : EmbeddedSource })
       -- In `Example n expr`, `n` is the number of lambda parameters
       -- that should be elided during display.
       -- Ex: `Example 2 '(x y -> foo x y)` should render as `foo x y`.
@@ -155,50 +162,95 @@ type
 
 
 
--- FOLD STATE
-
-
-{-| An Id present in DocFoldToggles means that the Bool on a Folded or
-Source should be negated.
-
-This type is meant to track state on an adjacent level to Doc, for instance on
-the WorkspaceItem level.
-
--}
-docId : String -> Id Doc
-docId raw =
-    Id.fromString raw
+-- FOLDING
 
 
 type DocFoldToggles
     = DocFoldToggles (Set String)
 
 
+type FoldId
+    = FoldId TreePath
+
+
+{-| A FoldId present in DocFoldToggles means that the Bool on a Folded or
+Source should be negated.
+
+This type is meant to track state on an adjacent level to Doc, for instance on
+the WorkspaceItem level.
+
+-}
 emptyDocFoldToggles : DocFoldToggles
 emptyDocFoldToggles =
     DocFoldToggles Set.empty
 
 
-toggleFold : DocFoldToggles -> Id Doc -> DocFoldToggles
-toggleFold (DocFoldToggles toggles) id =
+toggleFold : DocFoldToggles -> FoldId -> DocFoldToggles
+toggleFold (DocFoldToggles toggles) (FoldId path) =
     let
-        rawId =
-            Id.toString id
+        rawPath =
+            TreePath.toString path
     in
-    if Set.member rawId toggles then
-        DocFoldToggles (Set.remove rawId toggles)
+    if Set.member rawPath toggles then
+        DocFoldToggles (Set.remove rawPath toggles)
 
     else
-        DocFoldToggles (Set.insert rawId toggles)
+        DocFoldToggles (Set.insert rawPath toggles)
 
 
-isDocFoldToggled : DocFoldToggles -> Id Doc -> Bool
-isDocFoldToggled (DocFoldToggles toggles) id =
+isDocFoldToggled : DocFoldToggles -> FoldId -> Bool
+isDocFoldToggled (DocFoldToggles toggles) (FoldId path) =
     let
-        rawId =
-            Id.toString id
+        rawPath =
+            TreePath.toString path
     in
-    Set.member rawId toggles
+    Set.member rawPath toggles
+
+
+type IsFolded msg
+    = IsFolded
+        { toggleFoldMsg : FoldId -> msg
+        , summary : Html msg
+        , details : Html msg
+        , foldId : FoldId
+        , isFolded : Bool
+        }
+    | Disabled (Html msg)
+
+
+viewFolded : List (Attribute msg) -> IsFolded msg -> Html msg
+viewFolded attrs isFolded_ =
+    case isFolded_ of
+        Disabled summary ->
+            div (class "folded is-folded disabled" :: attrs)
+                [ div
+                    [ class "fold-toggle" ]
+                    [ div [ class "fold-toggle-indicator" ] [ Icon.view Icon.caretDown ]
+                    , summary
+                    ]
+                ]
+
+        IsFolded { toggleFoldMsg, summary, details, foldId, isFolded } ->
+            if isFolded then
+                div (class "folded is-folded" :: attrs)
+                    -- Caret orientation for folded/unfolded is rotated
+                    -- by CSS such that it can be animated
+                    [ a
+                        [ class "fold-toggle", onClick (toggleFoldMsg foldId) ]
+                        [ div [ class "fold-toggle-indicator" ] [ Icon.view Icon.caretDown ]
+                        , summary
+                        ]
+                    ]
+
+            else
+                div (class "folded" :: attrs)
+                    [ a
+                        [ class "fold-toggle", onClick (toggleFoldMsg foldId) ]
+                        [ div [ class "fold-toggle-indicator" ] [ Icon.view Icon.caretDown ]
+                        , summary
+                        ]
+                    , div [ class "details" ] [ details ]
+                    ]
 
 
 
@@ -273,17 +325,11 @@ mergeWords docs =
     List.foldl merge_ [] docs
 
 
-view : (Reference -> msg) -> (Id Doc -> msg) -> DocFoldToggles -> Doc -> Html msg
+view : (Reference -> msg) -> (FoldId -> msg) -> DocFoldToggles -> Doc -> Html msg
 view refToMsg toggleFoldMsg docFoldToggles document =
     let
-        viewConfig =
-            Source.Rich refToMsg
-
-        viewSource =
-            Source.view viewConfig
-
         viewSignature =
-            Source.viewTermSignature viewConfig
+            Source.viewTermSignature (Source.Rich refToMsg)
 
         linked =
             Syntax.Linked refToMsg
@@ -325,7 +371,6 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                 Strikethrough d ->
                     span [ class "strikethrough" ] [ viewAtCurrentSectionLevel d ]
 
-                -- TODO: Should this be a style string instead of a class?
                 Style cssClass d ->
                     span [ cssClass |> stringToClass |> class ] [ viewAtCurrentSectionLevel d ]
 
@@ -378,31 +423,25 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     in
                     table [] [ tbody [] (List.map viewRow rows) ]
 
-                Folded { id, isFolded, summary, details } ->
+                Folded { foldId, isFolded, summary, details } ->
                     let
                         isFolded_ =
-                            if isDocFoldToggled docFoldToggles id then
+                            if isDocFoldToggled docFoldToggles foldId then
                                 not isFolded
 
                             else
                                 isFolded
                     in
-                    if isFolded_ then
-                        div [ class "folded", class "is-folded" ]
-                            -- Caret orientation for folded/unfolded is rotated
-                            -- by CSS such that it can be animated
-                            [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretDown ]
-                            , viewAtCurrentSectionLevel summary
-                            ]
-
-                    else
-                        div [ class "folded" ]
-                            [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretDown ]
-                            , div []
-                                [ div [] [ viewAtCurrentSectionLevel summary ]
-                                , viewAtCurrentSectionLevel details
-                                ]
-                            ]
+                    viewFolded
+                        []
+                        (IsFolded
+                            { toggleFoldMsg = toggleFoldMsg
+                            , summary = viewAtCurrentSectionLevel summary
+                            , details = viewAtCurrentSectionLevel details
+                            , foldId = foldId
+                            , isFolded = isFolded_
+                            }
+                        )
 
                 Span docs ->
                     span [] (List.map viewAtCurrentSectionLevel (mergeWords docs))
@@ -477,28 +516,39 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     case specialForm of
                         Source sources ->
                             let
-                                viewFoldedSource { id, isFolded, summary, details } =
+                                viewFoldedSource { foldId, isFolded, source } =
                                     let
                                         isFolded_ =
-                                            if isDocFoldToggled docFoldToggles id then
+                                            if isDocFoldToggled docFoldToggles foldId then
                                                 not isFolded
 
                                             else
                                                 isFolded
                                     in
-                                    if isFolded_ then
-                                        div [ class "folded", class "is-folded" ]
-                                            -- Caret orientation for folded/unfolded is rotated
-                                            -- by CSS such that it can be animated
-                                            [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretRight ]
-                                            , UI.inlineCode [ class "rich source" ] (viewSyntax summary)
-                                            ]
+                                    case source of
+                                        Builtin summary ->
+                                            viewFolded
+                                                [ class "rich source" ]
+                                                (Disabled
+                                                    (div
+                                                        [ class "builtin-summary" ]
+                                                        [ UI.inlineCode [] (viewSyntax summary)
+                                                        , UI.badge (span [] [ strong [] [ text "Built-in " ], span [] [ text "provided by the Unison runtime" ] ])
+                                                        ]
+                                                    )
+                                                )
 
-                                    else
-                                        div [ class "folded" ]
-                                            [ a [ onClick (toggleFoldMsg id) ] [ Icon.view Icon.caretRight ]
-                                            , viewSource details
-                                            ]
+                                        EmbeddedSource summary details ->
+                                            viewFolded
+                                                [ class "rich source" ]
+                                                (IsFolded
+                                                    { toggleFoldMsg = toggleFoldMsg
+                                                    , summary = UI.inlineCode [] (viewSyntax summary)
+                                                    , details = UI.codeBlock [] (viewSyntax details)
+                                                    , foldId = foldId
+                                                    , isFolded = isFolded_
+                                                    }
+                                                )
                             in
                             div [ class "folded-sources" ]
                                 (List.map viewFoldedSource sources)
@@ -560,8 +610,8 @@ view refToMsg toggleFoldMsg docFoldToggles document =
 -- DECODE
 
 
-decodeSpecialForm : Decode.Decoder SpecialForm
-decodeSpecialForm =
+decodeSpecialForm : TreePath -> Decode.Decoder SpecialForm
+decodeSpecialForm path =
     let
         tag =
             field "tag" string
@@ -569,23 +619,33 @@ decodeSpecialForm =
         decodeSignature =
             Decode.map TermSignature Syntax.decode
 
-        decodeSource isFolded =
-            Decode.map2
-                (\summary source ->
-                    { id = docId "TODO"
+        decodeUserObject =
+            Decode.map2 EmbeddedSource
+                (index 0 Syntax.decode)
+                (index 1 Syntax.decode)
+
+        decodeBuiltinObject =
+            Decode.map Builtin Syntax.decode
+
+        decodeSource_ isFolded =
+            Decode.map
+                (\source ->
+                    { foldId = FoldId path
                     , isFolded = isFolded
-                    , summary = summary
-                    , details = source
+                    , source = source
                     }
                 )
-                (field "summary" Syntax.decode)
-                (Decode.map (Source.Term "TODO")
-                    (Term.decodeTermSource
-                        [ "termDefiniton", "tag" ]
-                        [ "signature" ]
-                        [ "termDefinition", "contents" ]
-                    )
+                (Decode.oneOf
+                    [ when tag ((==) "UserObject") (field "contents" decodeUserObject)
+                    , when tag ((==) "BuiltinObject") (field "contents" decodeBuiltinObject)
+                    ]
                 )
+
+        decodeSource isFolded =
+            Decode.oneOf
+                [ when tag ((==) "Term") (field "contents" (index 1 (decodeSource_ isFolded)))
+                , when tag ((==) "Type") (field "contents" (index 1 (decodeSource_ isFolded)))
+                ]
     in
     Decode.oneOf
         [ when tag ((==) "Source") (Decode.map Source (field "contents" (Decode.list (decodeSource False))))
@@ -612,102 +672,125 @@ decodeSpecialForm =
         ]
 
 
-decode : Decode.Decoder Doc
-decode =
+decode_ : TreePath -> Decode.Decoder Doc
+decode_ path =
     let
         tag =
             field "tag" string
 
-        nested =
-            Decode.lazy (\_ -> decode)
+        nested_ next =
+            Decode.lazy (\_ -> decode_ (path ++ next))
+
+        nested0 =
+            nested_ [ TreePath.VariantIndex 0 ]
+
+        nested1 =
+            nested_ [ TreePath.VariantIndex 1 ]
+
+        nested2 =
+            nested_ [ TreePath.VariantIndex 2 ]
+
+        listWithPath_ next =
+            DecodeE.indexedList (\i -> nested_ (next ++ [ TreePath.ListIndex i ]))
+
+        listWithPath0 =
+            listWithPath_ [ TreePath.VariantIndex 0 ]
+
+        listWithPath1 =
+            listWithPath_ [ TreePath.VariantIndex 1 ]
     in
     Decode.oneOf
         [ when tag ((==) "Word") (Decode.map Word (field "contents" string))
-        , when tag ((==) "Code") (Decode.map Code (field "contents" nested))
+        , when tag ((==) "Code") (Decode.map Code (field "contents" nested0))
         , when tag
             ((==) "CodeBlock")
             (Decode.map2 CodeBlock
                 (field "contents" (index 0 string))
-                (field "contents" (index 1 nested))
+                (field "contents" (index 1 nested1))
             )
-        , when tag ((==) "Bold") (Decode.map Bold (field "contents" nested))
-        , when tag ((==) "Italic") (Decode.map Italic (field "contents" nested))
-        , when tag ((==) "Strikethrough") (Decode.map Strikethrough (field "contents" nested))
+        , when tag ((==) "Bold") (Decode.map Bold (field "contents" nested0))
+        , when tag ((==) "Italic") (Decode.map Italic (field "contents" nested0))
+        , when tag ((==) "Strikethrough") (Decode.map Strikethrough (field "contents" nested0))
         , when tag
             ((==) "Style")
             (Decode.map2 Style
                 (field "contents" (index 0 string))
-                (field "contents" (index 1 nested))
+                (field "contents" (index 1 nested1))
             )
         , when tag
             ((==) "Anchor")
             (Decode.map2 Anchor
                 (field "contents" (index 0 string))
-                (field "contents" (index 1 nested))
+                (field "contents" (index 1 nested1))
             )
-        , when tag ((==) "Blockquote") (Decode.map Blockquote (field "contents" nested))
+        , when tag ((==) "Blockquote") (Decode.map Blockquote (field "contents" nested0))
         , when tag ((==) "Blankline") (Decode.succeed Blankline)
         , when tag ((==) "Linebreak") (Decode.succeed Linebreak)
         , when tag ((==) "SectionBreak") (Decode.succeed SectionBreak)
         , when tag
             ((==) "Tooltip")
             (Decode.map2 Tooltip
-                (field "contents" (index 0 nested))
-                (field "contents" (index 1 nested))
+                (field "contents" (index 0 nested0))
+                (field "contents" (index 1 nested1))
             )
-        , when tag ((==) "Aside") (Decode.map Aside (field "contents" nested))
+        , when tag ((==) "Aside") (Decode.map Aside (field "contents" nested0))
         , when tag
             ((==) "Callout")
             (Decode.map2 Callout
-                (Decode.maybe (field "contents" (index 0 nested)))
-                (field "contents" (index 1 nested))
+                (Decode.maybe (field "contents" (index 0 nested0)))
+                (field "contents" (index 1 nested1))
             )
-        , when tag ((==) "Table") (Decode.map Table (field "contents" (Decode.list (Decode.list nested))))
+        , when tag ((==) "Table") (Decode.map Table (field "contents" (Decode.list listWithPath0)))
         , when tag
             ((==) "Folded")
             (Decode.map Folded
                 (Decode.map3
-                    (\isFolded summary details -> { id = docId "TODO", isFolded = isFolded, summary = summary, details = details })
+                    (\isFolded summary details -> { isFolded = isFolded, summary = summary, details = details, foldId = FoldId path })
                     (field "contents" (index 0 bool))
-                    (field "contents" (index 1 nested))
-                    (field "contents" (index 3 nested))
+                    (field "contents" (index 1 nested1))
+                    (field "contents" (index 2 nested2))
                 )
             )
 
         -- Unison Doc Paragraph are not like a paragraph in the typesetting or html way; it's more like a bag of words
-        , when tag ((==) "Paragraph") (Decode.map Span (field "contents" (Decode.list nested)))
-        , when tag ((==) "BulletedList") (Decode.map BulletedList (field "contents" (Decode.list nested)))
+        , when tag ((==) "Paragraph") (Decode.map Span (field "contents" listWithPath0))
+        , when tag ((==) "BulletedList") (Decode.map BulletedList (field "contents" listWithPath0))
         , when tag
             ((==) "NumberedList")
             (Decode.map2 NumberedList
                 (field "contents" (index 0 int))
-                (field "contents" (index 1 (Decode.list nested)))
+                (field "contents" (index 1 listWithPath1))
             )
         , when tag
             ((==) "Section")
             (Decode.map2 Section
-                (field "contents" (index 0 nested))
-                (field "contents" (index 1 (Decode.list nested)))
+                (field "contents" (index 0 nested0))
+                (field "contents" (index 1 listWithPath1))
             )
         , when tag
             ((==) "NamedLink")
             (Decode.map2 NamedLink
-                (field "contents" (index 0 nested))
-                (field "contents" (index 1 nested))
+                (field "contents" (index 0 nested0))
+                (field "contents" (index 1 nested1))
             )
         , when tag
             ((==) "Image")
             (Decode.map3 Image
-                (field "contents" (index 0 nested))
-                (field "contents" (index 1 nested))
-                (Decode.maybe (field "contents" (index 2 nested)))
+                (field "contents" (index 0 nested0))
+                (field "contents" (index 1 nested1))
+                (Decode.maybe (field "contents" (index 2 nested2)))
             )
-        , when tag ((==) "Special") (Decode.map Special (field "contents" decodeSpecialForm))
-        , when tag ((==) "Join") (Decode.map Join (field "contents" (Decode.list nested)))
-        , when tag ((==) "UntitledSection") (Decode.map UntitledSection (field "contents" (Decode.list nested)))
-        , when tag ((==) "Column") (Decode.map Column (field "contents" (Decode.list nested)))
-        , when tag ((==) "Group") (Decode.map Group (field "contents" nested))
+        , when tag ((==) "Special") (Decode.map Special (field "contents" (decodeSpecialForm (path ++ [ TreePath.VariantIndex 0 ]))))
+        , when tag ((==) "Join") (Decode.map Join (field "contents" listWithPath0))
+        , when tag ((==) "UntitledSection") (Decode.map UntitledSection (field "contents" listWithPath0))
+        , when tag ((==) "Column") (Decode.map Column (field "contents" listWithPath0))
+        , when tag ((==) "Group") (Decode.map Group (field "contents" nested1))
         ]
+
+
+decode : Decode.Decoder Doc
+decode =
+    decode_ []
 
 
 

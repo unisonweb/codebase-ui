@@ -184,7 +184,7 @@ viewNames onClick_ info category =
         ]
 
 
-viewDoc : (Reference -> msg) -> (Id Doc -> msg) -> DocFoldToggles -> Doc -> Html msg
+viewDoc : (Reference -> msg) -> (Doc.FoldId -> msg) -> DocFoldToggles -> Doc -> Html msg
 viewDoc toOpenReferenceMsg toggleFoldMsg docFoldToggles doc =
     div [ class "definition-doc" ] [ Doc.view toOpenReferenceMsg toggleFoldMsg docFoldToggles doc ]
 
@@ -239,7 +239,7 @@ viewItem :
     msg
     -> (Reference -> msg)
     -> (Zoom -> msg)
-    -> (Id Doc -> msg)
+    -> (Doc.FoldId -> msg)
     -> Reference
     -> { item : Item, zoom : Zoom, docFoldToggles : DocFoldToggles }
     -> Bool
@@ -314,7 +314,7 @@ view :
     msg
     -> (Reference -> msg)
     -> (Zoom -> msg)
-    -> (Id Doc -> msg)
+    -> (Doc.FoldId -> msg)
     -> WorkspaceItem
     -> Bool
     -> Html msg
