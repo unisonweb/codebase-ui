@@ -3,10 +3,12 @@
 #workspace {
   background: var(--color-workspace-bg);
   color: var(--color-workspace-fg);
+
+  --toolbar-height: 3.5rem;
 }
 
 #workspace-toolbar {
-  height: 3.5rem;
+  height: var(--toolbar-height);
   padding: 0.75rem 1rem;
   font-size: var(--font-size-medium);
   background: var(--color-workspace-item-bg);
@@ -22,7 +24,7 @@
 
 #workspace-content {
   overflow: auto;
-  height: calc(100vh - 3.5rem);
+  height: calc(100vh - var(--toolbar-height));
   padding-top: 2rem;
   scrollbar-width: auto;
   scrollbar-color: var(--color-workspace-item-subtle-fg)
@@ -314,4 +316,27 @@
 
 .definition-row.focused .actions {
   opacity: 1;
+}
+
+@media only screen and (max-width: 1024px) {
+  #workspace-content {
+    box-shadow: none;
+    height: auto;
+  }
+
+  .definition-row {
+    box-shadow: none;
+    padding: 1rem;
+  }
+
+  .definition-row .content,
+  .definition-row .content .definition-doc,
+  .definition-row .content .error {
+    padding-left: 0;
+    margin-left: 0;
+  }
+
+  .definition-row .gutter {
+    display: none;
+  }
 }
