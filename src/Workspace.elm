@@ -2,14 +2,13 @@ module Workspace exposing (Model, Msg, OutMsg(..), init, open, subscriptions, up
 
 import Api exposing (ApiBasePath, ApiRequest)
 import Browser.Dom as Dom
-import Definition.Doc as Doc exposing (Doc)
+import Definition.Doc as Doc
 import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, article, header, section)
 import Html.Attributes exposing (class, id)
 import Http
-import Id exposing (Id)
 import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
@@ -59,7 +58,6 @@ init env mRef =
 type Msg
     = NoOp
     | Find
-    | Publish
     | OpenDefinitionRelativeTo Reference Reference
     | CloseDefinition Reference
     | UpdateZoom Reference Zoom
@@ -74,7 +72,6 @@ type OutMsg
     | Focused Reference
     | Emptied
     | ShowFinderRequest
-    | ShowPublishRequest
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -85,9 +82,6 @@ update env msg ({ workspaceItems } as model) =
 
         Find ->
             ( model, Cmd.none, ShowFinderRequest )
-
-        Publish ->
-            ( model, Cmd.none, ShowPublishRequest )
 
         OpenDefinitionRelativeTo relativeToRef ref ->
             openItem env.apiBasePath model (Just relativeToRef) ref
@@ -410,7 +404,6 @@ view model =
         [ header
             [ id "workspace-toolbar" ]
             [ Button.button Find "Find" |> Button.view
-            , section [ class "right" ] [ Button.button Publish "Publish on Unison Share" |> Button.share |> Button.view ]
             ]
         , section
             [ id "workspace-content" ]
