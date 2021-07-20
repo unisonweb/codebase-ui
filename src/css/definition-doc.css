@@ -1,24 +1,24 @@
-.doc {
+.definition-doc {
   display: flex;
   flex-direction: column;
   font-size: var(--font-size-medium);
   width: 40rem;
 }
 
-.doc .word {
+.definition-doc .word {
   margin-right: 0.5ch;
 }
 
-.doc .source.code,
-.doc .sources .source,
-.doc .folded-sources .source,
-.doc .source.example,
-.doc .source.eval,
-.doc .source.signatures .signature {
+.definition-doc .source.code,
+.definition-doc .sources .source,
+.definition-doc .folded-sources .source,
+.definition-doc .source.example,
+.definition-doc .source.eval,
+.definition-doc .source.signatures .signature {
   display: flex;
   flex: 1;
   padding: 0.5rem;
-  background: var(--color-workspace-item-doc-source-bg);
+  background: var(--color-workspace-item-definition-doc-source-bg);
   border-radius: var(--border-radius-base);
   margin-bottom: 1rem;
   flex-direction: column;
@@ -27,63 +27,64 @@
   overflow: scroll;
 }
 
-.doc .source.inline-code,
-.doc .source.example-inline,
-.doc .source.eval-inline,
-.doc .source.signature-inline {
+.definition-doc .source.inline-code,
+.definition-doc .source.example-inline,
+.definition-doc .source.eval-inline,
+.definition-doc .source.signature-inline {
   display: inline-block;
   padding: 0 0.25rem;
   margin-right: 0.5ch;
-  background: var(--color-workspace-item-doc-source-bg);
+  background: var(--color-workspace-item-definition-doc-source-bg);
   border-radius: var(--border-radius-base);
 }
 
-.doc .sources .source .details,
-.doc .folded-sources .source .details {
+.definition-doc .sources .source .details,
+.definition-doc .folded-sources .source .details {
   margin-left: 1.5rem;
 }
 
-/* code and inline-code render sub docs, not syntax */
-:is(.doc .source.code, .doc .source.inline-code) .word:last-child {
+/* code and inline-code render sub definition-docs, not syntax */
+:is(.definition-doc .source.code, .definition-doc .source.inline-code)
+  .word:last-child {
   margin-right: 0;
 }
 
-.doc .eval .result .icon,
-.doc .eval-inline .result .icon {
+.definition-doc .eval .result .icon,
+.definition-doc .eval-inline .result .icon {
   color: var(--color-workspace-item-subtle-fg-em);
 }
 
-.doc strong {
+.definition-doc strong {
   font-weight: bold;
 }
 
-.doc .italic {
+.definition-doc .italic {
   font-style: italic;
 }
 
-.doc .strikethrough {
+.definition-doc .strikethrough {
   text-decoration: line-through;
 }
 
-.doc .named-link:not(.invalid-href),
-.doc .named-link:not(.invalid-href):visited {
+.definition-doc .named-link:not(.invalid-href),
+.definition-doc .named-link:not(.invalid-href):visited {
   color: var(--color-workspace-item-link);
 }
-.doc .named-link:not(.invalid-href):active {
+.definition-doc .named-link:not(.invalid-href):active {
   color: var(--color-workspace-item-link-active);
 }
-.doc .named-link:not(.invalid-href):hover {
+.definition-doc .named-link:not(.invalid-href):hover {
   color: var(--color-workspace-item-link-hover);
   text-decoration: none;
 }
 
-.doc blockquote {
+.definition-doc blockquote {
   position: relative;
   padding: 0.5rem 1.25rem;
   margin-left: 0rem;
   margin-bottom: 1rem;
 }
-.doc blockquote:before {
+.definition-doc blockquote:before {
   position: absolute;
   content: " ";
   top: 0;
@@ -94,18 +95,18 @@
   border-radius: var(--border-radius-base);
 }
 
-.doc hr {
+.definition-doc hr {
   background: var(--color-workspace-item-content-border);
   margin: 1.5rem 0;
 }
 
-.doc .with-tooltip {
+.definition-doc .with-tooltip {
   text-decoration: underline dotted var(--color-workspace-item-subtle-fg);
   text-underline-offset: 2px;
   /* Other tooltip styling is handled by UI.tooltip */
 }
 
-.doc aside {
+.definition-doc aside {
   width: 33%;
   font-size: var(--font-size-small);
   background: var(--color-workspace-item-mg);
@@ -115,11 +116,11 @@
   border-radius: var(--border-radius-base);
 }
 
-.doc aside p:last-child {
+.definition-doc aside p:last-child {
   margin-bottom: 0;
 }
 
-.doc .callout {
+.definition-doc .callout {
   background: var(--color-workspace-item-em-bg);
   padding: 0.5rem 0.75rem;
   margin-bottom: 1rem;
@@ -128,61 +129,61 @@
   flex-direction: row;
 }
 
-.doc .callout.callout-with-icon .callout-content {
+.definition-doc .callout.callout-with-icon .callout-content {
   padding-top: 1px;
 }
 
-.doc .callout p:last-child {
+.definition-doc .callout p:last-child {
   margin-bottom: 0;
 }
 
-.doc .callout .callout-icon {
+.definition-doc .callout .callout-icon {
   margin-right: 0.5rem;
   font-size: 1rem;
 }
 
-.doc table {
+.definition-doc table {
   margin-bottom: 1rem;
   table-layout: fixed;
   border-collapse: collapse;
 }
 
-.doc table td {
+.definition-doc table td {
   border: 1px solid var(--color-workspace-item-content-border);
   padding: 0.5rem;
 }
 
-.doc .folded {
+.definition-doc .folded {
   margin-bottom: 1rem;
   display: flex;
   flex-direction: column;
 }
 
-.doc .folded .fold-toggle {
+.definition-doc .folded .fold-toggle {
   display: flex;
   flex-direction: row;
   align-items: center;
 }
 
-.doc .folded .builtin-summary {
+.definition-doc .folded .builtin-summary {
   display: flex;
   flex: 1;
   flex-direction: row;
   align-items: center;
 }
 
-.doc .source.folded .fold-toggle .badge {
+.definition-doc .source.folded .fold-toggle .badge {
   margin-left: auto;
   justify-self: flex-end;
-  background: var(--color-workspace-item-doc-source-mg);
+  background: var(--color-workspace-item-definition-doc-source-mg);
   border: 0;
 }
 
-.doc .folded .fold-toggle:hover {
+.definition-doc .folded .fold-toggle:hover {
   text-decoration: none;
 }
 
-.doc .folded .fold-toggle-indicator {
+.definition-doc .folded .fold-toggle-indicator {
   margin-right: 0.25rem;
   width: 1.2rem;
   height: 1.2rem;
@@ -193,145 +194,153 @@
   border-radius: var(--border-radius-base);
   transition: all 0.2s;
 }
-.doc .folded .fold-toggle-indicator .icon {
+.definition-doc .folded .fold-toggle-indicator .icon {
   color: var(--color-workspace-item-subtle-fg);
 }
 
-.doc .folded:not(.disabled) .fold-toggle:hover .fold-toggle-indicator {
+.definition-doc
+  .folded:not(.disabled)
+  .fold-toggle:hover
+  .fold-toggle-indicator {
   background: var(--color-workspace-item-subtle-bg);
 }
-.doc .folded:not(.disabled) .fold-toggle:hover .icon {
+.definition-doc .folded:not(.disabled) .fold-toggle:hover .icon {
   color: var(--color-workspace-item-subtle-fg-em);
 }
 
-.doc .source.folded:not(.disabled) .fold-toggle:hover .fold-toggle-indicator {
-  background: var(--color-workspace-item-doc-source-mg);
+.definition-doc
+  .source.folded:not(.disabled)
+  .fold-toggle:hover
+  .fold-toggle-indicator {
+  background: var(--color-workspace-item-definition-doc-source-mg);
 }
 
-.doc .folded .icon {
+.definition-doc .folded .icon {
   font-size: 1rem;
   cursor: pointer;
   transition: transform 0.1s ease-out;
 }
 
-.doc .folded.disabled .icon {
+.definition-doc .folded.disabled .icon {
   cursor: inherit;
   opacity: 0.5;
 }
 
-.doc .folded.is-folded .icon {
+.definition-doc .folded.is-folded .icon {
   transform: rotate(-90deg);
 }
 
-.doc .folded .details {
+.definition-doc .folded .details {
   margin-left: 1.5rem;
 }
 
-.doc p {
+.definition-doc p {
   margin-bottom: 1em;
 }
 
-.doc ol,
-.doc ul {
+.definition-doc ol,
+.definition-doc ul {
   margin-left: 2rem;
   margin-bottom: 1em;
 }
 
-.doc section {
+.definition-doc section {
   margin-bottom: 1rem;
   margin-top: 1rem;
 }
 
-:is(.doc h1, .doc h2, .doc h3, .doc h4, .doc h5, .doc h6) p {
+:is(.definition-doc h1, .definition-doc h2, .definition-doc h3, .definition-doc
+    h4, .definition-doc h5, .definition-doc h6)
+  p {
   margin: 0;
 }
 
-.doc h1 {
+.definition-doc h1 {
   font-size: 1.25rem;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
 }
 
-.doc h2 {
+.definition-doc h2 {
   font-size: 1rem;
   margin-top: 1.5rem;
   margin-bottom: 0.5rem;
 }
 
-.doc h3 {
+.definition-doc h3 {
   font-size: 0.875rem;
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
-.doc h4 {
+.definition-doc h4 {
   font-size: 0.875rem;
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
-.doc h5 {
+.definition-doc h5 {
   font-size: 0.875rem;
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
-.doc h6 {
+.definition-doc h6 {
   font-size: 0.875rem;
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
 }
 
-.doc > section:first-child > h1:first-child,
-.doc > section:first-child > h2:first-child,
-.doc > section:first-child > h3:first-child,
-.doc > section:first-child > h4:first-child,
-.doc > section:first-child > h5:first-child,
-.doc > section:first-child > h6:first-child {
+.definition-doc > section:first-child > h1:first-child,
+.definition-doc > section:first-child > h2:first-child,
+.definition-doc > section:first-child > h3:first-child,
+.definition-doc > section:first-child > h4:first-child,
+.definition-doc > section:first-child > h5:first-child,
+.definition-doc > section:first-child > h6:first-child {
   margin: 0;
 }
 
-.doc img {
+.definition-doc img {
   margin-bottom: 1rem;
 }
 
-.doc .image-with-caption {
+.definition-doc .image-with-caption {
   width: min-content;
 }
 
-.doc .image-with-caption .caption {
+.definition-doc .image-with-caption .caption {
   text-align: center;
   font-style: italic;
 }
 
-.doc .embed {
+.definition-doc .embed {
 }
 
-.doc .embed-inline {
+.definition-doc .embed-inline {
 }
 
-.doc .column {
+.definition-doc .column {
   margin: none;
   list-style-type: none;
 }
 
-.doc .group {
+.definition-doc .group {
 }
 
 @media only screen and (max-width: 1024px) {
-  .doc,
-  .doc .source.code,
-  .doc .sources .source,
-  .doc .folded-sources .source,
-  .doc .source.example,
-  .doc .source.eval,
-  .doc .source.signatures .signature {
+  .definition-doc,
+  .definition-doc .source.code,
+  .definition-doc .sources .source,
+  .definition-doc .folded-sources .source,
+  .definition-doc .source.example,
+  .definition-doc .source.eval,
+  .definition-doc .source.signatures .signature {
     width: calc(100vw - 2rem);
   }
 }
 
 @media only screen and (max-width: 414px) {
-  .doc aside {
+  .definition-doc aside {
     width: auto;
     float: none;
     margin: 0 1rem;

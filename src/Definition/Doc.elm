@@ -603,7 +603,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                 Group content ->
                     span [ class "group" ] [ viewAtCurrentSectionLevel content ]
     in
-    article [ class "doc" ] [ view_ 1 document ]
+    article [ class "definition-doc" ] [ view_ 1 document ]
 
 
 
