@@ -471,7 +471,7 @@ view model =
     , body =
         [ div [ id "app" ]
             [ viewMainSidebar model
-            , Html.map WorkspaceMsg (Workspace.view model.workspace)
+            , div [ id "main-content" ] [ Html.map WorkspaceMsg (Workspace.view model.workspace) ]
             , viewModal model
             ]
         ]

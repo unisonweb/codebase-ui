@@ -2,12 +2,14 @@
 
 #app {
   display: grid;
-  grid-template-columns: var(--main-sidebar-width) 1fr;
+  grid-template-columns: var(--main-sidebar-width) auto;
+  grid-template-areas: "main-sidebar main-content";
 }
 
 /* -- Main Sidebar --------------------------------------------------------- */
 
 #main-sidebar {
+  grid-area: main-sidebar;
   display: flex;
   flex-direction: column;
   overflow: auto;
@@ -230,6 +232,23 @@
 
 #main-sidebar nav .show-help:hover {
   background: var(--color-sidebar-focus-bg);
+}
+
+/* -- Main Content --------------------------------------------------------- */
+
+#main-content {
+  grid-area: main-content;
+}
+
+@media only screen and (max-width: 1024px) {
+  #app {
+    grid-template-columns: auto auto;
+    grid-template-areas: "main-content main-content";
+  }
+
+  #main-sidebar {
+    display: none;
+  }
 }
 
 @import "./help-modal.css";
