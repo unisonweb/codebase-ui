@@ -329,3 +329,11 @@
     width: calc(100vw - 2rem);
   }
 }
+
+@media only screen and (max-width: 414px) {
+  .doc aside {
+    width: auto;
+    float: none;
+    margin: 0 1rem;
+  }
+}
