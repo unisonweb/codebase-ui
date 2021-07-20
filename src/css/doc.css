@@ -10,8 +10,8 @@
 }
 
 .doc .source.code,
-.doc .source.sources,
-.doc .source.folded-sources,
+.doc .sources .source,
+.doc .folded-sources .source,
 .doc .source.example,
 .doc .source.eval,
 .doc .source.signatures .signature {
@@ -20,6 +20,7 @@
   background: var(--color-workspace-item-doc-source-bg);
   border-radius: var(--border-radius-base);
   margin-bottom: 1rem;
+  flex-direction: column;
 }
 
 .doc .source.inline-code,
@@ -31,6 +32,11 @@
   margin-right: 0.5ch;
   background: var(--color-workspace-item-doc-source-bg);
   border-radius: var(--border-radius-base);
+}
+
+.doc .sources .source .details,
+.doc .folded-sources .source .details {
+  margin-left: 1.5rem;
 }
 
 /* code and inline-code render sub docs, not syntax */
@@ -145,10 +151,34 @@
 .doc .folded {
   margin-bottom: 1rem;
   display: flex;
-  flex-direction: row;
+  flex-direction: column;
 }
 
-.doc .folded a {
+.doc .folded .fold-toggle {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.doc .folded .builtin-summary {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+}
+
+.doc .source.folded .fold-toggle .badge {
+  margin-left: auto;
+  justify-self: flex-end;
+  background: var(--color-workspace-item-doc-source-mg);
+  border: 0;
+}
+
+.doc .folded .fold-toggle:hover {
+  text-decoration: none;
+}
+
+.doc .folded .fold-toggle-indicator {
   margin-right: 0.25rem;
   width: 1.2rem;
   height: 1.2rem;
@@ -159,15 +189,19 @@
   border-radius: var(--border-radius-base);
   transition: all 0.2s;
 }
-.doc .folded a .icon {
+.doc .folded .fold-toggle-indicator .icon {
   color: var(--color-workspace-item-subtle-fg);
 }
 
-.doc .folded a:hover {
+.doc .folded:not(.disabled) .fold-toggle:hover .fold-toggle-indicator {
   background: var(--color-workspace-item-subtle-bg);
 }
-.doc .folded a:hover .icon {
+.doc .folded:not(.disabled) .fold-toggle:hover .icon {
   color: var(--color-workspace-item-subtle-fg-em);
+}
+
+.doc .source.folded:not(.disabled) .fold-toggle:hover .fold-toggle-indicator {
+  background: var(--color-workspace-item-doc-source-mg);
 }
 
 .doc .folded .icon {
@@ -176,8 +210,17 @@
   transition: transform 0.1s ease-out;
 }
 
+.doc .folded.disabled .icon {
+  cursor: inherit;
+  opacity: 0.5;
+}
+
 .doc .folded.is-folded .icon {
   transform: rotate(-90deg);
+}
+
+.doc .folded .details {
+  margin-left: 1.5rem;
 }
 
 .doc p {

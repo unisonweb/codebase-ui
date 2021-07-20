@@ -63,7 +63,7 @@ type Msg
     | OpenDefinitionRelativeTo Reference Reference
     | CloseDefinition Reference
     | UpdateZoom Reference Zoom
-    | ToggleDocFold Reference (Id Doc)
+    | ToggleDocFold Reference Doc.FoldId
     | FetchItemFinished Reference (Result Http.Error Item)
     | Keydown KeyboardEvent
     | KeyboardShortcutMsg KeyboardShortcut.Msg

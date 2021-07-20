@@ -2,8 +2,8 @@ module Definition.DocTests exposing (..)
 
 import Definition.Doc as Doc exposing (Doc(..))
 import Expect
-import Id exposing (Id)
 import Test exposing (..)
+import TreePath
 
 
 mergeWords : Test
@@ -69,6 +69,6 @@ toggleFold =
 -- Helpers
 
 
-id : Id Doc
+id : Doc.FoldId
 id =
-    Id.fromString "abcdef"
+    Doc.FoldId [ TreePath.VariantIndex 0, TreePath.ListIndex 3 ]
