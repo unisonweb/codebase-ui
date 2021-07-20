@@ -245,7 +245,7 @@
 
 .doc h1 {
   font-size: 1.25rem;
-  margin-top: 2rem;
+  margin-top: 1.5rem;
   margin-bottom: 0.75rem;
 }
 
@@ -279,16 +279,14 @@
   margin-bottom: 0.5rem;
 }
 
-/*
-.doc h1:first-child,
-.doc h2:first-child,
-.doc h3:first-child,
-.doc h4:first-child,
-.doc h5:first-child,
-.doc h6:first-child {
-  margin-top: 0;
+.doc > section:first-child > h1:first-child,
+.doc > section:first-child > h2:first-child,
+.doc > section:first-child > h3:first-child,
+.doc > section:first-child > h4:first-child,
+.doc > section:first-child > h5:first-child,
+.doc > section:first-child > h6:first-child {
+  margin: 0;
 }
-*/
 
 .doc img {
   margin-bottom: 1rem;
