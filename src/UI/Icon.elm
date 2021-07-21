@@ -3,7 +3,22 @@ module UI.Icon exposing (..)
 import Html exposing (Html, div)
 import Html.Attributes exposing (class, classList)
 import Svg exposing (Svg, circle, path, rect, svg)
-import Svg.Attributes as Attrs exposing (cx, cy, d, fill, fillRule, height, r, rx, stroke, strokeWidth, viewBox, width, y)
+import Svg.Attributes as Attrs
+    exposing
+        ( cx
+        , cy
+        , d
+        , fill
+        , fillRule
+        , height
+        , r
+        , rx
+        , stroke
+        , strokeWidth
+        , viewBox
+        , width
+        , y
+        )
 
 
 type Icon msg
@@ -256,3 +271,13 @@ dash =
 github : Icon msg
 github =
     Icon "github" [] [ path [ fill "currentColor", fillRule "evenodd", d "M6.99945 1C3.68664 1 1 3.68627 1 7.00019C1 9.6511 2.71902 11.8998 5.10326 12.6932C5.40345 12.7484 5.51285 12.5632 5.51285 12.404C5.51285 12.2619 5.50769 11.8843 5.50474 11.3837C3.83581 11.7462 3.48368 10.5793 3.48368 10.5793C3.21075 9.88609 2.81736 9.70156 2.81736 9.70156C2.2726 9.32954 2.85862 9.3369 2.85862 9.3369C3.46085 9.37926 3.77761 9.95534 3.77761 9.95534C4.3128 10.8721 5.18208 10.6073 5.5239 10.4537C5.57841 10.0662 5.73348 9.80174 5.90475 9.65183C4.57248 9.50045 3.1717 8.98551 3.1717 6.68636C3.1717 6.03146 3.4056 5.49553 3.7894 5.07637C3.72752 4.92462 3.52162 4.31428 3.84833 3.48847C3.84833 3.48847 4.35185 3.32714 5.49811 4.10359C5.97658 3.97026 6.49004 3.90396 7.00018 3.90138C7.50996 3.90396 8.02305 3.97026 8.50226 4.10359C9.64778 3.32714 10.1506 3.48847 10.1506 3.48847C10.478 4.31428 10.2721 4.92462 10.2106 5.07637C10.5951 5.49553 10.8272 6.03146 10.8272 6.68636C10.8272 8.99141 9.4242 9.4986 8.08788 9.64704C8.30299 9.83232 8.49489 10.1984 8.49489 10.7583C8.49489 11.5602 8.48752 12.2073 8.48752 12.404C8.48752 12.5646 8.59581 12.7514 8.90006 12.6928C11.2825 11.8976 13 9.65036 13 7.00019C13 3.68627 10.3134 1 6.99945 1Z" ] [] ]
+
+
+list : Icon msg
+list =
+    Icon "list"
+        []
+        [ rect [ Attrs.x "3", y "9.5", width "8", height "1", rx "0.5", fill "currentColor" ] []
+        , rect [ Attrs.x "3", y "6.5", width "8", height "1", rx "0.5", fill "currentColor" ] []
+        , rect [ Attrs.x "3", y "3.5", width "8", height "1", rx "0.5", fill "currentColor" ] []
+        ]

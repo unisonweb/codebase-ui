@@ -8,7 +8,7 @@ import Env as Env exposing (AppContext(..), Env, Flags, OperatingSystem(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, aside, div, h1, h3, header, nav, p, section, span, strong, text)
-import Html.Attributes exposing (class, href, id, rel, target, title)
+import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import KeyboardShortcut
 import KeyboardShortcut.Key as Key exposing (Key(..))
@@ -45,6 +45,9 @@ type alias Model =
     , modal : Modal
     , keyboardShortcut : KeyboardShortcut.Model
     , env : Env
+
+    -- This is called "toggled" and not "hidden" because the behavior if toggling the sidebar on/off is inverse on mobile vs desktop
+    , sidebarToggled : Bool
     }
 
 
@@ -82,6 +85,7 @@ init flags url navKey =
             , modal = NoModal
             , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
             , env = env
+            , sidebarToggled = False
             }
     in
     ( model
@@ -100,6 +104,7 @@ type Msg
     | OpenDefinition Reference
     | ShowModal Modal
     | CloseModal
+    | ToggleSidebar
       -- sub msgs
     | FinderMsg Finder.Msg
     | WorkspaceMsg Workspace.Msg
@@ -130,6 +135,9 @@ update msg ({ env } as model) =
 
         CloseModal ->
             ( { model | modal = NoModal }, Cmd.none )
+
+        ToggleSidebar ->
+            ( { model | sidebarToggled = not model.sidebarToggled }, Cmd.none )
 
         -- Sub msgs
         WorkspaceMsg wMsg ->
@@ -296,10 +304,14 @@ viewMainHeader model =
 
                 Env.UnisonShare ->
                     h1 [ class "app-context" ] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ]
+
+        sidebarToggle =
+            a [ class "sidebar-toggle", onClick ToggleSidebar ] [ Icon.view Icon.list ]
     in
     header
         [ id "main-header" ]
-        [ appContext
+        [ sidebarToggle
+        , appContext
         , section [ class "right" ]
             [ Button.button (ShowModal PublishModal)
                 "Publish on Unison Share"
@@ -484,7 +496,7 @@ view model =
     in
     { title = title_
     , body =
-        [ div [ id "app" ]
+        [ div [ id "app", classList [ ( "sidebar-toggled", model.sidebarToggled ) ] ]
             [ viewMainHeader model
             , viewMainSidebar model
             , div [ id "main-content" ] [ Html.map WorkspaceMsg (Workspace.view model.workspace) ]

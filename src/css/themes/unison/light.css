@@ -16,6 +16,8 @@
 
   --color-main-header-fg: var(--color-gray-lighten-100);
   --color-main-header-bg: var(--color-gray-darken-10);
+  --color-main-header-subtle-fg: var(--color-gray-lighten-20);
+  --color-main-header-subtle-fg-em: var(--color-gray-lighten-50);
   --color-main-header-context-unison-share-fg: var(--color-purple-4);
   --color-main-header-context-ucm-fg: var(--color-pink-3);
   --color-main-header-border: var(--color-gray-base);
