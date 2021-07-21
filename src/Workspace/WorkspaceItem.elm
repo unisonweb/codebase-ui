@@ -203,7 +203,7 @@ viewSource toOpenReferenceMsg item =
             UI.codeBlock [] (div [] lines)
 
         viewToggableSource icon disabled renderedSource =
-            div [ class "source" ]
+            div [ class "definition-source" ]
                 [ div
                     [ class "source-toggle"
                     , classList [ ( "disabled", disabled ) ]

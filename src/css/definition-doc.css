@@ -2,7 +2,6 @@
   display: flex;
   flex-direction: column;
   font-size: var(--font-size-medium);
-  width: 40rem;
 }
 
 .definition-doc .word {
@@ -23,9 +22,6 @@
   border-radius: var(--border-radius-base);
   margin-bottom: 1rem;
   flex-direction: column;
-  /*width: 100%; ??*/
-  width: 40rem;
-  overflow: scroll;
 }
 
 .definition-doc .source.inline-code,
@@ -330,14 +326,17 @@
 }
 
 @media only screen and (max-width: 1024px) {
-  .definition-doc,
-  .definition-doc .source.code,
-  .definition-doc .sources .source,
-  .definition-doc .folded-sources .source,
-  .definition-doc .source.example,
-  .definition-doc .source.eval,
-  .definition-doc .source.signatures .signature {
+  .definition-doc .source {
     width: calc(100vw - 2rem);
+    overflow: scroll;
+  }
+
+  .definition-doc .source.inline-code,
+  .definition-doc .source.example-inline,
+  .definition-doc .source.eval-inline,
+  .definition-doc .source.signature-inline {
+    width: auto;
+    overflow: inherit;
   }
 }
 

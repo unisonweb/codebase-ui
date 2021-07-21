@@ -2,7 +2,7 @@
 
 #app {
   display: grid;
-  grid-template-rows: 3.5rem auto;
+  grid-template-rows: var(--main-header-height) auto;
   grid-template-columns: var(--main-sidebar-width) auto;
   grid-template-areas:
     "main-header main-header"
@@ -69,7 +69,7 @@
   display: flex;
   flex-direction: column;
   overflow: auto;
-  height: 100vh;
+  height: calc(100vh - var(--main-header-height));
   background: var(--color-sidebar-bg);
   color: var(--color-sidebar-fg);
   border-right: 1px solid var(--color-sidebar-border);

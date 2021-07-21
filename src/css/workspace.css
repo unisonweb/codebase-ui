@@ -4,11 +4,12 @@
   background: var(--color-workspace-bg);
   color: var(--color-workspace-fg);
 
-  --toolbar-height: 3.5rem;
+  --workspace-toolbar-height: 3.5rem;
+  --workspace-content-width: 43rem;
 }
 
 #workspace-toolbar {
-  height: var(--toolbar-height);
+  height: var(--workspace-toolbar-height);
   padding: 0.75rem 1rem;
   font-size: var(--font-size-medium);
   background: var(--color-workspace-item-bg);
@@ -24,7 +25,9 @@
 
 #workspace-content {
   overflow: auto;
-  height: calc(100vh - var(--toolbar-height));
+  height: calc(
+    calc(100vh - var(--workspace-toolbar-height)) - var(--main-header-height)
+  );
   padding-top: 2rem;
   scrollbar-width: auto;
   scrollbar-color: var(--color-workspace-item-subtle-fg)
@@ -219,6 +222,7 @@
 .definition-row .content .workspace-item-definition-doc {
   margin-bottom: 1.5rem;
   margin-left: 1.25rem;
+  width: calc(var(--workspace-content-width) - 1.25rem);
 }
 
 .definition-row .content .built-in {
@@ -231,13 +235,14 @@
   background: var(--color-workspace-item-mg);
 }
 
-.definition-row .content .source {
+.definition-row .content .definition-source {
   display: flex;
   flex-direction: row;
   background: var(--color-workspace-item-source-bg);
+  width: var(--workspace-content-width);
 }
 
-.definition-row .content .source .source-toggle {
+.definition-row .content .definition-source .source-toggle {
   height: 1.5rem;
   display: flex;
   align-items: center;
@@ -247,11 +252,11 @@
   display: none;
 }
 
-.definition-row .content .source .source-toggle .icon {
+.definition-row .content .definition-source .source-toggle .icon {
   color: var(--color-workspace-item-subtle-fg);
 }
 
-.definition-row .content .source .source-toggle.disabled {
+.definition-row .content .definition-source .source-toggle.disabled {
   opacity: 0.5;
 }
 
@@ -338,5 +343,10 @@
 
   .definition-row .gutter {
     display: none;
+  }
+
+  .definition-row .content .definition-source {
+    width: calc(100vw - 2rem);
+    overflow: scroll;
   }
 }
