@@ -17,7 +17,6 @@ import Html exposing (Attribute, Html, a, div, h3, header, section, span, strong
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
-import Id exposing (Id)
 import Json.Decode as Decode exposing (field, index)
 import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
@@ -186,7 +185,7 @@ viewNames onClick_ info category =
 
 viewDoc : (Reference -> msg) -> (Doc.FoldId -> msg) -> DocFoldToggles -> Doc -> Html msg
 viewDoc toOpenReferenceMsg toggleFoldMsg docFoldToggles doc =
-    div [ class "definition-doc" ] [ Doc.view toOpenReferenceMsg toggleFoldMsg docFoldToggles doc ]
+    div [ class "workspace-item-definition-doc" ] [ Doc.view toOpenReferenceMsg toggleFoldMsg docFoldToggles doc ]
 
 
 {-| TODO: Yikes, this isn't great. Needs cleanup
