@@ -219,9 +219,6 @@ handleWorkspaceOutMsg model out =
         Workspace.ShowFinderRequest ->
             showFinder model
 
-        Workspace.ShowPublishRequest ->
-            ( { model | modal = PublishModal }, Cmd.none )
-
         Workspace.Focused ref ->
             ( model, Route.navigateToByReference model.navKey model.route ref )
 
@@ -289,25 +286,43 @@ subscriptions model =
 -- VIEW
 
 
+viewMainHeader : Model -> Html Msg
+viewMainHeader model =
+    let
+        appContext =
+            case model.env.appContext of
+                Env.Ucm ->
+                    h1 [ class "app-context" ] [ text "Unison", span [ class "context ucm" ] [ text "Local" ] ]
+
+                Env.UnisonShare ->
+                    h1 [ class "app-context" ] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ]
+    in
+    header
+        [ id "main-header" ]
+        [ appContext
+        , section [ class "right" ]
+            [ Button.button (ShowModal PublishModal)
+                "Publish on Unison Share"
+                |> Button.share
+                |> Button.view
+            ]
+        ]
+
+
 viewMainSidebar : Model -> Html Msg
 viewMainSidebar model =
     let
-        ( share, appContext ) =
+        share =
             case model.env.appContext of
                 Env.Ucm ->
-                    ( a [ href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ text "Unison Share" ]
-                    , span [] [ text "Unison", span [ class "context ucm" ] [ text " Local" ] ]
-                    )
+                    a [ href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ text "Unison Share" ]
 
                 Env.UnisonShare ->
-                    ( UI.nothing
-                    , span [] [ text "Unison", span [ class "context unison-share" ] [ text " Share" ] ]
-                    )
+                    UI.nothing
     in
     aside
         [ id "main-sidebar" ]
-        [ header [] [ h1 [ class "app-context" ] [ appContext ] ]
-        , div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
+        [ div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
         , nav []
             [ a [ href "https://unison-lang.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
             , a [ href "https://unison-lang.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
@@ -470,7 +485,8 @@ view model =
     { title = title_
     , body =
         [ div [ id "app" ]
-            [ viewMainSidebar model
+            [ viewMainHeader model
+            , viewMainSidebar model
             , div [ id "main-content" ] [ Html.map WorkspaceMsg (Workspace.view model.workspace) ]
             , viewModal model
             ]

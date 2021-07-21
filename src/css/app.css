@@ -2,8 +2,50 @@
 
 #app {
   display: grid;
+  grid-template-rows: 3.5rem auto;
   grid-template-columns: var(--main-sidebar-width) auto;
-  grid-template-areas: "main-sidebar main-content";
+  grid-template-areas:
+    "main-header main-header"
+    "main-sidebar main-content";
+}
+
+/* -- Main Header ---------------------------------------------------------- */
+
+#main-header {
+  grid-area: main-header;
+  padding: 0 1rem 0 1.5rem;
+  background: var(--color-main-header-bg);
+  color: var(--color-main-header-fg);
+  border-bottom: 1px solid var(--color-main-header-border);
+  display: flex;
+  align-items: center;
+  font-size: 1rem;
+}
+
+#main-header .app-context {
+  font-size: var(--font-size-base);
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+  font-weight: bold;
+}
+
+#main-header .app-context .context {
+  margin-left: 0.375rem;
+}
+
+#main-header .app-context .unison-share {
+  color: var(--color-main-header-context-unison-share-fg);
+}
+
+#main-header .app-context .ucm {
+  color: var(--color-main-header-context-ucm-fg);
+}
+
+#main-header .right {
+  margin-left: auto;
+  justify-self: flex-end;
 }
 
 /* -- Main Sidebar --------------------------------------------------------- */
@@ -37,40 +79,6 @@
 #main-sidebar .loading-placeholder {
   background: var(--color-sidebar-subtle-fg);
   opacity: 0.5;
-}
-
-#main-sidebar header {
-  margin-bottom: 2.5rem;
-}
-
-#main-sidebar .app-context {
-  font-size: var(--font-size-base);
-  height: 1.5rem;
-  display: flex;
-  align-items: center;
-}
-
-#main-sidebar .app-context .logo-mark {
-  display: flex;
-  height: 1.3rem;
-  width: 1.3rem;
-  align-items: center;
-  justify-content: center;
-  margin-right: 0.125rem;
-}
-
-#main-sidebar .app-context .logo-mark .icon {
-  font-size: 0.875rem;
-  color: var(--color-sidebar-fg);
-  margin-bottom: 2px;
-}
-
-#main-sidebar .app-context .unison-share {
-  color: var(--color-sidebar-context-unison-share-fg);
-}
-
-#main-sidebar .app-context .ucm {
-  color: var(--color-sidebar-context-ucm-fg);
 }
 
 #main-sidebar h2 {
@@ -240,10 +248,15 @@
   grid-area: main-content;
 }
 
+/* -- Responsive ----------------------------------------------------------- */
+
 @media only screen and (max-width: 1024px) {
   #app {
+    grid-template-rows: 3.5rem auto;
     grid-template-columns: auto auto;
-    grid-template-areas: "main-content main-content";
+    grid-template-areas:
+      "main-header main-header"
+      "main-content main-content";
   }
 
   #main-sidebar {
