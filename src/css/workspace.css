@@ -330,7 +330,7 @@
   }
 
   .definition-row .content,
-  .definition-row .content .definition-doc,
+  .definition-row .content .workspace-item-definition-doc,
   .definition-row .content .error {
     padding-left: 0;
     margin-left: 0;
