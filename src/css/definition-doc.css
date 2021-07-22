@@ -326,17 +326,14 @@
 }
 
 @media only screen and (max-width: 1024px) {
-  .definition-doc .source {
+  .definition-doc .source.code,
+  .definition-doc .sources .source,
+  .definition-doc .folded-sources .source,
+  .definition-doc .source.example,
+  .definition-doc .source.eval,
+  .definition-doc .source.signatures .signature {
     width: calc(100vw - 2rem);
     overflow: scroll;
-  }
-
-  .definition-doc .source.inline-code,
-  .definition-doc .source.example-inline,
-  .definition-doc .source.eval-inline,
-  .definition-doc .source.signature-inline {
-    width: auto;
-    overflow: inherit;
   }
 }
 

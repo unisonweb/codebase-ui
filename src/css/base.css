@@ -37,4 +37,5 @@ body {
   line-height: 1.4;
   background: var(--color-main-bg);
   color: var(--color-main-fg);
+  -webkit-text-size-adjust: 100%;
 }
