@@ -13,19 +13,38 @@ import Workspace.WorkspaceItems as WorkspaceItems exposing (..)
 -- MODIFY
 
 
-insertWithFocus : Test
-insertWithFocus =
+appendWithFocus : Test
+appendWithFocus =
     let
         result =
-            WorkspaceItems.insertWithFocus WorkspaceItems.empty term
+            WorkspaceItems.appendWithFocus WorkspaceItems.empty term
 
         currentFocusedRef =
             getFocusedRef result
     in
-    describe "WorkspaceItems.insertWithFocus"
-        [ test "Inserts the term" <|
+    describe "WorkspaceItems.appendWithFocus"
+        [ test "Appends the term" <|
             \_ ->
-                Expect.true "term is a member" (WorkspaceItems.member result termRef)
+                Expect.equal (Just term) (WorkspaceItems.last result)
+        , test "Sets focus" <|
+            \_ ->
+                Expect.true "Has focus" (Maybe.withDefault False <| Maybe.map (\r -> r == termRef) currentFocusedRef)
+        ]
+
+
+prependWithFocus : Test
+prependWithFocus =
+    let
+        result =
+            WorkspaceItems.prependWithFocus WorkspaceItems.empty term
+
+        currentFocusedRef =
+            getFocusedRef result
+    in
+    describe "WorkspaceItems.prependWithFocus"
+        [ test "Prepends the term" <|
+            \_ ->
+                Expect.equal (Just term) (WorkspaceItems.head result)
         , test "Sets focus" <|
             \_ ->
                 Expect.true "Has focus" (Maybe.withDefault False <| Maybe.map (\r -> r == termRef) currentFocusedRef)
