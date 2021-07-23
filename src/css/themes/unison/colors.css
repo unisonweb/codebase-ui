@@ -30,6 +30,8 @@
 
   /* Greens */
   --color-green-1: #27ae60;
+  --color-green-2: #52d188;
+  --color-green-3: #88f3b5;
 
   /* Blues */
   --color-blue-1: #225ebe;
@@ -39,6 +41,7 @@
   /* Oranges */
   --color-orange-1: #ff8800;
   --color-orange-2: #ffc41f;
+  --color-orange-3: #ffe08b;
 
   /* Purples */
   --color-purple-1: #55377b;
