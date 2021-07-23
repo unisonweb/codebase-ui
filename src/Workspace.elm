@@ -209,10 +209,9 @@ openItem apiBasePath ({ workspaceItems } as model) relativeToRef ref =
             nextWorkspaceItems =
                 case relativeToRef of
                     Nothing ->
-                        WorkspaceItems.insertWithFocus workspaceItems toInsert
+                        WorkspaceItems.prependWithFocus workspaceItems toInsert
 
                     Just r ->
-                        -- WorkspaceItems.insertWithFocusAfter model r toInsert
                         WorkspaceItems.insertWithFocusBefore workspaceItems r toInsert
         in
         ( { model | workspaceItems = nextWorkspaceItems }

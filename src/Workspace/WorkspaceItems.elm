@@ -78,9 +78,24 @@ singleton item =
 -- MODIFY
 
 
-insertWithFocus : WorkspaceItems -> WorkspaceItem -> WorkspaceItems
-insertWithFocus items item =
+appendWithFocus : WorkspaceItems -> WorkspaceItem -> WorkspaceItems
+appendWithFocus items item =
     WorkspaceItems { before = toList items, focus = item, after = [] }
+
+
+prependWithFocus : WorkspaceItems -> WorkspaceItem -> WorkspaceItems
+prependWithFocus workspaceItems item =
+    case workspaceItems of
+        Empty ->
+            singleton item
+
+        WorkspaceItems items ->
+            WorkspaceItems
+                { before = []
+                , focus = item
+                , after =
+                    items.before ++ (items.focus :: items.after)
+                }
 
 
 {-| Insert before a Hash. If the Hash is not in WorkspaceItems, insert with
@@ -122,7 +137,7 @@ insertWithFocusBefore items beforeRef toInsert =
                     |> Maybe.withDefault (singleton toInsert)
 
             else
-                insertWithFocus items toInsert
+                prependWithFocus items toInsert
 
 
 {-| Insert after a Hash. If the Hash is not in WorkspaceItems, insert at the
@@ -164,7 +179,7 @@ insertWithFocusAfter items afterRef toInsert =
                     |> Maybe.withDefault (singleton toInsert)
 
             else
-                insertWithFocus items toInsert
+                appendWithFocus items toInsert
 
 
 replace : WorkspaceItems -> Reference -> WorkspaceItem -> WorkspaceItems
@@ -243,6 +258,20 @@ references items =
     items
         |> toList
         |> List.map WorkspaceItem.reference
+
+
+head : WorkspaceItems -> Maybe WorkspaceItem
+head items =
+    items
+        |> toList
+        |> List.head
+
+
+last : WorkspaceItems -> Maybe WorkspaceItem
+last items =
+    items
+        |> toList
+        |> ListE.last
 
 
 

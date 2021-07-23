@@ -29,6 +29,7 @@
     calc(100vh - var(--workspace-toolbar-height)) - var(--main-header-height)
   );
   padding-top: 2rem;
+  scroll-behavior: smooth;
   scrollbar-width: auto;
   scrollbar-color: var(--color-workspace-item-subtle-fg)
     var(--color-workspace-item-bg);
