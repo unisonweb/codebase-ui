@@ -218,6 +218,16 @@
   position: relative;
 }
 
+#finder .definition-match .source:after {
+  position: absolute;
+  content: " ";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: 2rem;
+  background: linear-gradient(90deg, transparent, var(--color-modal-bg));
+}
+
 #finder .definition-match .source code {
   line-height: inherit;
 }
@@ -268,6 +278,10 @@
   background: var(--color-modal-focus-subtle-bg);
 }
 
+#finder .definition-match.focused .source:after {
+  background: linear-gradient(90deg, transparent, var(--color-modal-focus-bg));
+}
+
 /* hover */
 
 #finder .definition-match:not(.focused):hover td {
@@ -276,4 +290,8 @@
 
 #finder .definition-match:not(.focused):hover .keyboard-shortcut .key {
   background: var(--color-modal-subtle-mg);
+}
+
+#finder .definition-match:not(.focused):hover .source:after {
+  background: linear-gradient(90deg, transparent, var(--color-modal-mg));
 }
