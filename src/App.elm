@@ -336,10 +336,10 @@ viewMainSidebar model =
         [ id "main-sidebar" ]
         [ div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
         , nav []
-            [ a [ href "https://unison-lang.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
-            , a [ href "https://unison-lang.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
-            , a [ href "https://unison-lang.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
-            , a [ href "https://unison-lang.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
+            [ a [ href "https://unisonweb.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
+            , a [ href "https://unisonweb.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
+            , a [ href "https://unisonweb.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
+            , a [ href "https://unisonweb.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
             , a [ onClick (ShowModal ReportBugModal) ] [ text "Report a bug" ]
             , share
             , a [ class "show-help", onClick (ShowModal HelpModal) ] [ text "Keyboard Shortcuts", KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark) ]
@@ -499,7 +499,7 @@ view model =
         [ div [ id "app", classList [ ( "sidebar-toggled", model.sidebarToggled ) ] ]
             [ viewMainHeader model
             , viewMainSidebar model
-            , div [ id "main-content" ] [ Html.map WorkspaceMsg (Workspace.view model.workspace) ]
+            , div [ id "main-content" ] [ Html.map WorkspaceMsg (Workspace.view model.env model.workspace) ]
             , viewModal model
             ]
         ]

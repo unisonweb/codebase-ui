@@ -229,7 +229,7 @@ sizeToClassName size =
             "medium"
 
         Large ->
-            "secondary"
+            "large"
 
 
 typeToClassName : Type -> String
