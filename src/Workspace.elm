@@ -1,4 +1,13 @@
-module Workspace exposing (Model, Msg, OutMsg(..), init, open, subscriptions, update, view)
+module Workspace exposing
+    ( Model
+    , Msg
+    , OutMsg(..)
+    , init
+    , open
+    , subscriptions
+    , update
+    , view
+    )
 
 import Api exposing (ApiBasePath, ApiRequest)
 import Browser.Dom as Dom
@@ -6,8 +15,8 @@ import Definition.Doc as Doc
 import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, article, header, section)
-import Html.Attributes exposing (class, id)
+import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
+import Html.Attributes exposing (class, href, id, rel, target)
 import Http
 import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key exposing (Key(..))
@@ -16,6 +25,7 @@ import Route exposing (Route(..))
 import Task
 import UI
 import UI.Button as Button
+import UI.Icon as Icon
 import Workspace.WorkspaceItem as WorkspaceItem exposing (Item(..), WorkspaceItem(..))
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 import Workspace.Zoom as Zoom exposing (Zoom(..))
@@ -397,17 +407,78 @@ subscriptions _ =
 -- VIEW
 
 
-view : Model -> Html Msg
-view model =
-    article [ id "workspace" ]
-        [ header
-            [ id "workspace-toolbar" ]
-            [ Button.button Find "Find" |> Button.view
-            ]
-        , section
-            [ id "workspace-content" ]
-            [ section [ class "definitions-pane" ] (viewWorkspaceItems model.workspaceItems) ]
-        ]
+viewEmptyState : Env.AppContext -> Html Msg
+viewEmptyState appContext =
+    let
+        fauxDefinition =
+            div [ class "faux-definition" ]
+                [ UI.loadingPlaceholderRow
+                , UI.loadingPlaceholderRow
+                ]
+    in
+    case appContext of
+        Env.Ucm ->
+            article
+                [ id "workspace" ]
+                [ section [ class "workspace-empty-state ucm" ]
+                    [ section
+                        [ class "content" ]
+                        [ h2 [] [ text "Your ", span [ class "context" ] [ text "Local" ], text " Unison Codebase" ]
+                        , p [] [ text "Browse, search, read docs, open definition and explore explore your local codebase." ]
+                        , p []
+                            [ text "Check out "
+                            , a [ href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ strong [] [ text "Unison Share" ] ]
+                            , text " for community projects."
+                            ]
+                        , fauxDefinition
+                        , fauxDefinition
+                        , section [ class "actions" ]
+                            [ Button.buttonIconThenLabel Find Icon.search "Find Definitions"
+                                |> Button.primaryMono
+                                |> Button.medium
+                                |> Button.view
+                            ]
+                        ]
+                    ]
+                ]
+
+        Env.UnisonShare ->
+            article
+                [ id "workspace" ]
+                [ section [ class "workspace-empty-state unison-share" ]
+                    [ section
+                        [ class "content" ]
+                        [ h2 [] [ text "Unison ", span [ class "context" ] [ text "Share" ] ]
+                        , p [] [ text "Explore to discover and share Unison libraries, documentation, types, and terms." ]
+                        , fauxDefinition
+                        , fauxDefinition
+                        , section [ class "actions" ]
+                            [ Button.buttonIconThenLabel Find Icon.search "Find Definitions"
+                                |> Button.primaryMono
+                                |> Button.medium
+                                |> Button.view
+                            ]
+                        ]
+                    ]
+                ]
+
+
+view : Env -> Model -> Html Msg
+view env model =
+    case model.workspaceItems of
+        WorkspaceItems.Empty ->
+            viewEmptyState env.appContext
+
+        WorkspaceItems.WorkspaceItems _ ->
+            article [ id "workspace" ]
+                [ header
+                    [ id "workspace-toolbar" ]
+                    [ Button.button Find "Find" |> Button.view
+                    ]
+                , section
+                    [ id "workspace-content" ]
+                    [ section [ class "definitions-pane" ] (viewWorkspaceItems model.workspaceItems) ]
+                ]
 
 
 viewItem : WorkspaceItem -> Bool -> Html Msg

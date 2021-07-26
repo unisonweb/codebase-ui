@@ -1,6 +1,8 @@
 /* -- Workspace ------------------------------------------------------------ */
 
 #workspace {
+  display: flex;
+  flex-direction: column;
   background: var(--color-workspace-bg);
   color: var(--color-workspace-fg);
 
@@ -324,6 +326,76 @@
   opacity: 1;
 }
 
+/* Empty state */
+.workspace-empty-state {
+  margin: 4rem 2rem;
+  font-size: 1rem;
+  background: url(../img/workspace-empty-state-bg.svg);
+  background-position: center bottom;
+  background-repeat: no-repeat;
+  width: 38rem;
+  padding-bottom: 4rem;
+  display: flex;
+  justify-content: center;
+  color: var(--color-workspace-item-subtle-fg-em);
+}
+
+.workspace-empty-state h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1.5rem;
+  color: var(--color-workspace-item-fg);
+}
+
+.workspace-empty-state .content {
+  width: 28rem;
+}
+
+.workspace-empty-state.ucm .context {
+  color: var(--color-pink-2);
+}
+
+.workspace-empty-state.ucm a {
+  color: var(--color-purple-2);
+}
+
+.workspace-empty-state.unison-share .context {
+  color: var(--color-purple-3);
+}
+
+.workspace-empty-state .faux-definition {
+  width: 28rem;
+  border: 1px solid var(--color-workspace-item-subtle-fg);
+  border-radius: var(--border-radius-base);
+  background: var(--color-workspace-item-bg);
+  padding: 1rem 0.75rem;
+}
+.workspace-empty-state .faux-definition {
+  margin-top: 1.5rem;
+}
+
+.workspace-empty-state .faux-definition .loading-placeholder {
+  background: var(--color-workspace-item-subtle-fg);
+  height: 1rem;
+  width: 5rem;
+}
+.workspace-empty-state .faux-definition .loading-placeholder-row:last-child {
+  margin-bottom: 0;
+}
+
+.workspace-empty-state
+  .faux-definition
+  .loading-placeholder-row:last-child
+  .loading-placeholder {
+  background: var(--color-workspace-item-em-bg);
+  width: 12rem;
+}
+
+.workspace-empty-state .actions {
+  margin-top: 2rem;
+  display: flex;
+  justify-content: flex-end;
+}
+
 @media only screen and (max-width: 1024px) {
   #workspace-content {
     box-shadow: none;
@@ -349,5 +421,13 @@
   .definition-row .content .definition-source {
     width: calc(100vw - 2rem);
     overflow: scroll;
+  }
+
+  .workspace-empty-state {
+    align-self: center;
+    width: calc(100vw - 4rem);
+  }
+  .workspace-empty-state .faux-definition {
+    width: calc(100vw - 4rem);
   }
 }

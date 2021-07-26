@@ -109,30 +109,50 @@ a.button:hover {
   color: var(--color-button-default-fg);
   background: var(--color-button-default-bg);
 }
+.button.default .icon {
+  color: var(--color-button-default-fg);
+}
 
 .button.default:hover {
   color: var(--color-button-default-hover-fg);
   background: var(--color-button-default-hover-bg);
 }
 
+.button.default:hover .icon {
+  color: var(--color-button-default-fg);
+}
+
 .button.primary-mono {
   color: var(--color-button-primary-mono-fg);
-  background: var(--color-button-mono-primary-bg);
+  background: var(--color-button-primary-mono-bg);
+}
+
+.button.primary-mono .icon {
+  color: var(--color-button-primary-mono-fg);
 }
 
 .button.primary-mono:hover {
-  color: var(--color-button-primary--mono-hover-fg);
+  color: var(--color-button-primary-mono-hover-fg);
   background: var(--color-button-primary-mono-hover-bg);
+}
+.button.primary-mono:hover .icon {
+  color: var(--color-button-primary-mono-hover-fg);
 }
 
 .button.primary {
   color: var(--color-button-primary-fg);
   background: var(--color-button-primary-bg);
 }
+.button.primary .icon {
+  color: var(--color-button-primary-fg);
+}
 
 .button.primary:hover {
   color: var(--color-button-primary-hover-fg);
   background: var(--color-button-primary-hover-bg);
+}
+.button.primary:hover .icon {
+  color: var(--color-button-primary-hover-fg);
 }
 
 .button.share {
@@ -140,19 +160,33 @@ a.button:hover {
   background: var(--color-button-share-bg);
 }
 
+.button.share .icon {
+  color: var(--color-button-share-fg);
+}
+
 .button.share:hover {
   color: var(--color-button-share-hover-fg);
   background: var(--color-button-share-hover-bg);
+}
+
+.button.share:hover .icon {
+  color: var(--color-button-share-hover-fg);
 }
 
 .button.danger {
   color: var(--color-button-danger-fg);
   background: var(--color-button-danger-bg);
 }
+.button.danger .icon {
+  color: var(--color-button-danger-fg);
+}
 
 .button.danger:hover {
   color: var(--color-button-danger-fg);
   background: var(--color-button-danger-bg);
+}
+.button.danger:hover .icon {
+  color: var(--color-button-danger-fg);
 }
 
 /* Icons */
