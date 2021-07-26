@@ -3,23 +3,12 @@
 }
 
 #publish-modal .main {
-  font-size: var(--font-size-base);
-  line-height: 1.5em;
-}
-
-#publish-modal .main a {
-  color: var(--color-blue-2);
-  font-weight: bold;
-}
-
-#publish-modal .main a:hover {
-  color: var(--color-blue-1);
-  text-decoration: none;
+  font-size: var(--font-size-medium);
 }
 
 #publish-modal .help {
   display: inline-block;
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   font-size: var(--font-size-small);
   color: var(--color-modal-subtle-fg-em);
   text-decoration: underline;
