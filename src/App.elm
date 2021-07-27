@@ -404,6 +404,11 @@ viewHelpModal os keyboardShortcut =
         |> Modal.view
 
 
+githubLinkButton : String -> Html msg
+githubLinkButton repo =
+    Button.linkIconThenLabel ("https://github.com/" ++ repo) Icon.github repo |> Button.small |> Button.view
+
+
 viewPublishModal : Html Msg
 viewPublishModal =
     let
@@ -413,7 +418,7 @@ viewPublishModal =
                     []
                     [ p [ class "main" ]
                         [ text "With your Unison codebase on GitHub, open a Pull Request against "
-                        , a [ href "https://github.com/unisonweb/shipwright/edit/trunk/files/initialize-codebase.sh", rel "noopener", target "_blank" ] [ text "this file" ]
+                        , githubLinkButton "unisonweb/share"
                         , text " to list (or unlist) your project on Unison Share."
                         ]
                     , a [ class "help", href "https://www.unisonweb.org/docs/codebase-organization/#day-to-day-development-creating-and-merging-pull-requests", rel "noopener", target "_blank" ] [ text "How do I get my code on GitHub?" ]
@@ -428,9 +433,6 @@ viewPublishModal =
 viewReportBugModal : AppContext -> Html Msg
 viewReportBugModal appContext =
     let
-        githubLinkButton repo =
-            Button.linkIconThenLabel ("https://github.com/" ++ repo) Icon.github repo |> Button.view
-
         content =
             Modal.Content
                 (div []
