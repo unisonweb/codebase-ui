@@ -39,7 +39,7 @@ import Html
         , tr
         , ul
         )
-import Html.Attributes exposing (alt, class, href, id, rel, src, start, target, title)
+import Html.Attributes exposing (alt, class, classList, href, id, rel, src, start, target, title)
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (bool, field, index, int, string)
 import Json.Decode.Extra as DecodeE exposing (when)
@@ -210,8 +210,7 @@ isDocFoldToggled (DocFoldToggles toggles) (FoldId path) =
 type IsFolded msg
     = IsFolded
         { toggleFoldMsg : FoldId -> msg
-        , summary : Html msg
-        , details : Html msg
+        , content : List (Html msg)
         , foldId : FoldId
         , isFolded : Bool
         }
@@ -223,34 +222,19 @@ viewFolded attrs isFolded_ =
     case isFolded_ of
         Disabled summary ->
             div (class "folded is-folded disabled" :: attrs)
-                [ div
-                    [ class "fold-toggle" ]
-                    [ div [ class "fold-toggle-indicator" ] [ Icon.view Icon.caretDown ]
-                    , summary
-                    ]
+                [ a [ class "fold-toggle" ] [ Icon.view Icon.caretDown ]
+                , div [ class "folded-content" ] [ summary ]
                 ]
 
-        IsFolded { toggleFoldMsg, summary, details, foldId, isFolded } ->
-            if isFolded then
-                div (class "folded is-folded" :: attrs)
-                    -- Caret orientation for folded/unfolded is rotated
-                    -- by CSS such that it can be animated
-                    [ a
-                        [ class "fold-toggle", onClick (toggleFoldMsg foldId) ]
-                        [ div [ class "fold-toggle-indicator" ] [ Icon.view Icon.caretDown ]
-                        , summary
-                        ]
-                    ]
-
-            else
-                div (class "folded" :: attrs)
-                    [ a
-                        [ class "fold-toggle", onClick (toggleFoldMsg foldId) ]
-                        [ div [ class "fold-toggle-indicator" ] [ Icon.view Icon.caretDown ]
-                        , summary
-                        ]
-                    , div [ class "details" ] [ details ]
-                    ]
+        IsFolded { toggleFoldMsg, content, foldId, isFolded } ->
+            div (classList [ ( "folded", True ), ( "is-folded", isFolded ) ] :: attrs)
+                -- Caret orientation for folded/unfolded is rotated
+                -- by CSS such that it can be animated
+                [ a
+                    [ class "fold-toggle", onClick (toggleFoldMsg foldId) ]
+                    [ Icon.view Icon.caretDown ]
+                , div [ class "folded-content" ] content
+                ]
 
 
 
@@ -431,13 +415,21 @@ view refToMsg toggleFoldMsg docFoldToggles document =
 
                             else
                                 isFolded
+
+                        content =
+                            if isFolded_ then
+                                [ viewAtCurrentSectionLevel summary ]
+
+                            else
+                                [ viewAtCurrentSectionLevel summary
+                                , viewAtCurrentSectionLevel details
+                                ]
                     in
                     viewFolded
                         []
                         (IsFolded
                             { toggleFoldMsg = toggleFoldMsg
-                            , summary = viewAtCurrentSectionLevel summary
-                            , details = viewAtCurrentSectionLevel details
+                            , content = content
                             , foldId = foldId
                             , isFolded = isFolded_
                             }
@@ -524,6 +516,13 @@ view refToMsg toggleFoldMsg docFoldToggles document =
 
                                             else
                                                 isFolded
+
+                                        content summary details =
+                                            if isFolded_ then
+                                                [ UI.codeBlock [] (viewSyntax summary) ]
+
+                                            else
+                                                [ UI.codeBlock [] (viewSyntax details) ]
                                     in
                                     case source of
                                         Builtin summary ->
@@ -532,7 +531,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                                                 (Disabled
                                                     (div
                                                         [ class "builtin-summary" ]
-                                                        [ UI.inlineCode [] (viewSyntax summary)
+                                                        [ UI.codeBlock [] (viewSyntax summary)
                                                         , UI.badge (span [] [ strong [] [ text "Built-in " ], span [] [ text "provided by the Unison runtime" ] ])
                                                         ]
                                                     )
@@ -543,8 +542,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                                                 [ class "rich source" ]
                                                 (IsFolded
                                                     { toggleFoldMsg = toggleFoldMsg
-                                                    , summary = UI.inlineCode [] (viewSyntax summary)
-                                                    , details = UI.codeBlock [] (viewSyntax details)
+                                                    , content = content summary details
                                                     , foldId = foldId
                                                     , isFolded = isFolded_
                                                     }
