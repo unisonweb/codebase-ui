@@ -14,14 +14,16 @@
 .definition-doc .source.example,
 .definition-doc .source.eval,
 .definition-doc .source.signatures .signature {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
   padding: 0.5rem;
   background: var(--color-workspace-item-doc-source-bg);
   border-radius: var(--border-radius-base);
   margin-bottom: 1rem;
+}
+
+.definition-doc .source code {
+  display: flex;
   flex-direction: column;
+  flex: 1;
 }
 
 .definition-doc .source.inline-code,
@@ -33,11 +35,6 @@
   margin-right: 0.5ch;
   background: var(--color-workspace-item-doc-source-bg);
   border-radius: var(--border-radius-base);
-}
-
-.definition-doc .sources .source .details,
-.definition-doc .folded-sources .source .details {
-  margin-left: 1.5rem;
 }
 
 /* code and inline-code render sub definition-docs, not syntax */
@@ -154,34 +151,13 @@
 .definition-doc .folded {
   margin-bottom: 1rem;
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
 }
 
 .definition-doc .folded .fold-toggle {
   display: flex;
   flex-direction: row;
   align-items: center;
-}
-
-.definition-doc .folded .builtin-summary {
-  display: flex;
-  flex: 1;
-  flex-direction: row;
-  align-items: center;
-}
-
-.definition-doc .source.folded .fold-toggle .badge {
-  margin-left: auto;
-  justify-self: flex-end;
-  background: var(--color-workspace-item-doc-source-mg);
-  border: 0;
-}
-
-.definition-doc .folded .fold-toggle:hover {
-  text-decoration: none;
-}
-
-.definition-doc .folded .fold-toggle-indicator {
   margin-right: 0.25rem;
   width: 1.2rem;
   height: 1.2rem;
@@ -192,14 +168,16 @@
   border-radius: var(--border-radius-base);
   transition: all 0.2s;
 }
-.definition-doc .folded .fold-toggle-indicator .icon {
+
+.definition-doc .folded .icon {
   color: var(--color-workspace-item-subtle-fg);
 }
 
-.definition-doc
-  .folded:not(.disabled)
-  .fold-toggle:hover
-  .fold-toggle-indicator {
+.definition-doc .folded .fold-toggle:hover {
+  text-decoration: none;
+}
+
+.definition-doc .folded:not(.disabled) .fold-toggle:hover {
   background: var(--color-workspace-item-subtle-bg);
 }
 .definition-doc .folded:not(.disabled) .fold-toggle:hover .icon {
@@ -228,8 +206,25 @@
   transform: rotate(-90deg);
 }
 
-.definition-doc .folded .details {
-  margin-left: 1.5rem;
+.definition-doc .folded .folded-content {
+  flex: 1;
+}
+
+.definition-doc .folded .builtin-summary {
+  display: flex;
+  flex: 1;
+  flex-direction: row;
+  align-items: center;
+}
+
+.definition-doc .source.folded .badge {
+  margin-left: auto;
+  justify-self: flex-end;
+  background: var(--color-workspace-item-doc-source-mg);
+  border: 0;
+  font-size: 0.75rem;
+  height: 1.25rem;
+  padding: 0 0.25rem;
 }
 
 .definition-doc p {
