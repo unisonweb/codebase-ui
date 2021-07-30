@@ -82,11 +82,13 @@ code a:active {
 }
 
 .rich .term-reference .fqn .segment,
+.rich .ability-constructor-reference .fqn .segment,
 .rich .hash-qualifier .fqn .segment {
   color: var(--color-syntax-term-namespace);
 }
 
 .rich .term-reference .fqn .segment:last-child,
+.rich .ability-constructor-reference .fqn .segment:last-child,
 .rich .hash-qualifier .fqn .segment:last-child {
   color: var(--color-syntax-term);
 }
