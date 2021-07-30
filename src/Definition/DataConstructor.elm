@@ -6,7 +6,6 @@ module Definition.DataConstructor exposing
     , DataConstructorSummary
     , decodeSignature
     , decodeSource
-    , isDataConstructorHash
     )
 
 import Definition.Info exposing (Info)
@@ -15,7 +14,6 @@ import Definition.Type as Type exposing (TypeSource)
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode
-import Regex
 import Syntax exposing (Syntax)
 
 
@@ -43,19 +41,6 @@ type alias DataConstructorSummary =
 
 type alias DataConstructorListing =
     DataConstructor FQN
-
-
-
--- HELPERS
-
-
-isDataConstructorHash : Hash -> Bool
-isDataConstructorHash hash =
-    let
-        dataConstructorSuffix =
-            Maybe.withDefault Regex.never (Regex.fromString "#d(\\d+)$")
-    in
-    hash |> Hash.toString |> Regex.contains dataConstructorSuffix
 
 
 
