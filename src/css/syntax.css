@@ -44,15 +44,15 @@ code a:active {
 }
 
 .rich .boolean-literal,
-.rich .constructor {
+.rich .data-constructor-reference {
   color: var(--color-syntax-constructor);
 }
 
-.rich .constructor .segment {
+.rich .data-constructor-reference .segment {
   color: var(--color-syntax-constructor-namespace);
 }
 
-.rich .constructor .segment:last-child {
+.rich .data-constructor-reference .segment:last-child {
   color: var(--color-syntax-constructor);
 }
 
@@ -76,7 +76,7 @@ code a:active {
 }
 
 .rich .term-reference,
-.rich .request,
+.rich .ability-constructor-reference,
 .rich .hash-qualifier {
   color: var(--color-syntax-term);
 }
@@ -140,12 +140,12 @@ code a:active {
 
 .monochrome .type-reference,
 .monochrome .boolean-literal,
-.monochrome .constructor,
+.monochrome .data-constructor-reference,
 .monochrome .numeric-literal,
 .monochrome .term-reference,
 .monochrome .data-type-modifier,
 .monochrome .hash-qualifier,
-.monochrome .request {
+.monochrome .ability-constructor-reference {
   color: var(--color-syntax-monochrome-em);
 }
 
@@ -180,7 +180,7 @@ code a:active {
 .plain .bytes-literal,
 .plain .char-literal,
 .plain .boolean-literal,
-.plain .constructor,
+.plain .data-constructor-reference,
 .plain .blank,
 .plain .var,
 .plain .data-type-params,
@@ -188,7 +188,7 @@ code a:active {
 .plain .term-reference,
 .plain .data-type-modifier,
 .plain .hash-qualifier,
-.plain .request,
+.plain .ability-constructor-reference,
 .plain .type-reference,
 .plain .op.cons,
 .plain .op.snoc,

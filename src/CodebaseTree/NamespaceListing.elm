@@ -118,10 +118,10 @@ decodeContent parentFqn =
             field "tag" Decode.string
 
         termTypeByHash hash =
-            if AbilityConstructor.isAbilityConstructorHash hash then
+            if Hash.isAbilityConstructorHash hash then
                 "AbilityConstructor"
 
-            else if DataConstructor.isDataConstructorHash hash then
+            else if Hash.isDataConstructorHash hash then
                 "DataConstructor"
 
             else

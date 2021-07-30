@@ -4,6 +4,8 @@ module Hash exposing
     , equals
     , fromString
     , fromUrlString
+    , isAbilityConstructorHash
+    , isDataConstructorHash
     , isRawHash
     , prefix
     , toString
@@ -13,6 +15,7 @@ module Hash exposing
     )
 
 import Json.Decode as Decode
+import Regex
 import Url.Parser
 import Util
 
@@ -71,6 +74,28 @@ prefix =
 urlPrefix : String
 urlPrefix =
     "@"
+
+
+
+-- HELPERS
+
+
+isDataConstructorHash : Hash -> Bool
+isDataConstructorHash hash =
+    let
+        dataConstructorSuffix =
+            Maybe.withDefault Regex.never (Regex.fromString "#d(\\d+)$")
+    in
+    hash |> toString |> Regex.contains dataConstructorSuffix
+
+
+isAbilityConstructorHash : Hash -> Bool
+isAbilityConstructorHash hash =
+    let
+        abilityConstructorSuffix =
+            Maybe.withDefault Regex.never (Regex.fromString "#a(\\d+)$")
+    in
+    hash |> toString |> Regex.contains abilityConstructorSuffix
 
 
 

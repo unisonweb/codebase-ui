@@ -6,7 +6,6 @@ module Definition.AbilityConstructor exposing
     , AbilityConstructorSummary
     , decodeSignature
     , decodeSource
-    , isAbilityConstructorHash
     )
 
 import Definition.Info exposing (Info)
@@ -15,7 +14,6 @@ import Definition.Type as Type exposing (TypeSource)
 import FullyQualifiedName exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode
-import Regex
 import Syntax exposing (Syntax)
 
 
@@ -43,19 +41,6 @@ type alias AbilityConstructorSummary =
 
 type alias AbilityConstructorListing =
     AbilityConstructor FQN
-
-
-
--- HELPERS
-
-
-isAbilityConstructorHash : Hash -> Bool
-isAbilityConstructorHash hash =
-    let
-        abilityConstructorSuffix =
-            Maybe.withDefault Regex.never (Regex.fromString "#a(\\d+)$")
-    in
-    hash |> Hash.toString |> Regex.contains abilityConstructorSuffix
 
 
 

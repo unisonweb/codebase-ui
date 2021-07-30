@@ -55,9 +55,8 @@ type SyntaxType
     | TermReference Hash
       -- +:|:+|++
     | Op SeqOp
-    | Constructor
-      -- Ability constructor
-    | Request
+    | DataConstructorReference Hash
+    | AbilityConstructorReference Hash
     | AbilityBraces
       -- let|handle|in|where|match|with|cases|->|if|then|else|and|or
     | ControlKeyword
@@ -124,6 +123,12 @@ reference (SyntaxSegment syntaxType _) =
         TermReference h ->
             Just (Reference.TermReference (HQ.HashOnly h))
 
+        AbilityConstructorReference h ->
+            Just (Reference.AbilityConstructorReference (HQ.HashOnly h))
+
+        DataConstructorReference h ->
+            Just (Reference.DataConstructorReference (HQ.HashOnly h))
+
         _ ->
             Nothing
 
@@ -167,6 +172,12 @@ syntaxTypeToClassName sType =
         TermReference _ ->
             "term-reference"
 
+        DataConstructorReference _ ->
+            "data-constructor-reference"
+
+        AbilityConstructorReference _ ->
+            "ability-constructor-reference"
+
         Op seqOp ->
             case seqOp of
                 Cons ->
@@ -177,12 +188,6 @@ syntaxTypeToClassName sType =
 
                 Concat ->
                     "op concat"
-
-        Constructor ->
-            "constructor"
-
-        Request ->
-            "request"
 
         AbilityBraces ->
             "ability-braces"
@@ -263,6 +268,12 @@ viewSegment linked (SyntaxSegment sType sText) =
                 TermReference h ->
                     Just (Reference.TermReference (HQ.HashOnly h))
 
+                AbilityConstructorReference h ->
+                    Just (Reference.AbilityConstructorReference (HQ.HashOnly h))
+
+                DataConstructorReference h ->
+                    Just (Reference.DataConstructorReference (HQ.HashOnly h))
+
                 _ ->
                     Nothing
 
@@ -281,7 +292,10 @@ viewSegment linked (SyntaxSegment sType sText) =
                 HashQualifier _ ->
                     isFQN_
 
-                Constructor ->
+                DataConstructorReference _ ->
+                    isFQN_
+
+                AbilityConstructorReference _ ->
                     isFQN_
 
                 _ ->
@@ -346,12 +360,6 @@ simpleSyntaxTypeFromString rawType =
 
         "Var" ->
             Var
-
-        "Constructor" ->
-            Constructor
-
-        "Request" ->
-            Request
 
         "AbilityBraces" ->
             AbilityBraces
@@ -438,8 +446,18 @@ decodeTag =
 decodeSyntaxSegment : Decode.Decoder SyntaxSegment
 decodeSyntaxSegment =
     let
-        decodeTermReference =
-            Decode.map TermReference (at [ "annotation", "contents" ] Hash.decode)
+        hashToReference hash =
+            if Hash.isDataConstructorHash hash then
+                DataConstructorReference hash
+
+            else if Hash.isAbilityConstructorHash hash then
+                AbilityConstructorReference hash
+
+            else
+                TermReference hash
+
+        decodeReference =
+            Decode.map hashToReference (at [ "annotation", "contents" ] Hash.decode)
 
         decodeTypeReference =
             Decode.map TypeReference (at [ "annotation", "contents" ] Hash.decode)
@@ -449,7 +467,7 @@ decodeSyntaxSegment =
     in
     Decode.map2 SyntaxSegment
         (Decode.oneOf
-            [ when decodeTag ((==) "TermReference") decodeTermReference
+            [ when decodeTag ((==) "TermReference") decodeReference
             , when decodeTag ((==) "TypeReference") decodeTypeReference
             , when decodeTag ((==) "Op") decodeOp
             , when decodeTag ((==) "HashQualifier") decodeHashQualifier
