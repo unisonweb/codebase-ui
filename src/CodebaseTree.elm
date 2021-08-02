@@ -13,11 +13,13 @@ import Definition.Reference exposing (Reference(..))
 import Env exposing (Env)
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
+import Hash
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, h2, label, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Http
+import Perspective exposing (Perspective(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Icon as Icon exposing (Icon)
@@ -39,7 +41,7 @@ init env =
         model =
             { rootNamespaceListing = Loading, expandedNamespaceListings = FQNSet.empty }
     in
-    ( model, Api.perform env.apiBasePath fetchRootNamespaceListing )
+    ( model, Api.perform env.apiBasePath (fetchRootNamespaceListing env.perspective) )
 
 
 
@@ -93,7 +95,7 @@ update env msg model =
 
                 cmd =
                     if shouldExpand && not namespaceContentFetched then
-                        Api.perform env.apiBasePath (fetchSubNamespaceListing fqn)
+                        Api.perform env.apiBasePath (fetchSubNamespaceListing env.perspective fqn)
 
                     else
                         Cmd.none
@@ -138,20 +140,24 @@ update env msg model =
 -- EFFECTS
 
 
-fetchRootNamespaceListing : ApiRequest NamespaceListing Msg
-fetchRootNamespaceListing =
+fetchRootNamespaceListing : Perspective -> ApiRequest NamespaceListing Msg
+fetchRootNamespaceListing perspective =
     let
         rootFqn =
             FQN.fromString "."
     in
-    Api.list Nothing
-        |> Api.toRequest (NamespaceListing.decode rootFqn) FetchRootNamespaceListingFinished
+    fetchNamespaceListing perspective rootFqn FetchRootNamespaceListingFinished
 
 
-fetchSubNamespaceListing : FQN -> ApiRequest NamespaceListing Msg
-fetchSubNamespaceListing fqn =
-    Api.list (Just (FQN.toString fqn))
-        |> Api.toRequest (NamespaceListing.decode fqn) (FetchSubNamespaceListingFinished fqn)
+fetchSubNamespaceListing : Perspective -> FQN -> ApiRequest NamespaceListing Msg
+fetchSubNamespaceListing perspective fqn =
+    fetchNamespaceListing perspective fqn (FetchSubNamespaceListingFinished fqn)
+
+
+fetchNamespaceListing : Perspective -> FQN -> (Result Http.Error NamespaceListing -> msg) -> ApiRequest NamespaceListing msg
+fetchNamespaceListing perspective fqn toMsg =
+    Api.list (Perspective.toParams perspective) (FQN.toString fqn)
+        |> Api.toRequest (NamespaceListing.decode fqn) toMsg
 
 
 

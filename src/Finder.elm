@@ -11,6 +11,7 @@ import Definition.Term exposing (Term(..))
 import Definition.Type exposing (Type(..))
 import Env exposing (AppContext(..), Env)
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
+import Hash
 import HashQualified exposing (HashQualified(..))
 import Html
     exposing
@@ -49,6 +50,7 @@ import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import List.Nonempty as NEL
+import Perspective exposing (Perspective)
 import SearchResults exposing (SearchResults(..))
 import Syntax
 import Task
@@ -177,7 +179,7 @@ update env msg model =
                             _ ->
                                 Searching query Nothing
                 in
-                ( { model | search = search }, Api.perform env.apiBasePath (fetchMatches query), Remain )
+                ( { model | search = search }, Api.perform env.apiBasePath (fetchMatches env.perspective query), Remain )
 
             else
                 ( model, Cmd.none, Remain )
@@ -315,8 +317,8 @@ finderSearchToMaybe fs =
 -- EFFECTS
 
 
-fetchMatches : String -> ApiRequest (List FinderMatch) Msg
-fetchMatches query =
+fetchMatches : Perspective -> String -> ApiRequest (List FinderMatch) Msg
+fetchMatches perspective query =
     let
         limit =
             9
@@ -324,7 +326,7 @@ fetchMatches query =
         sourceWidth =
             Syntax.Width 100
     in
-    Api.find limit sourceWidth query
+    Api.find perspective limit sourceWidth query
         |> Api.toRequest FinderMatch.decodeMatches (FetchMatchesFinished query)
 
 

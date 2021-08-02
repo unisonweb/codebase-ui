@@ -1,6 +1,7 @@
 module Env exposing (..)
 
 import Api exposing (ApiBasePath(..))
+import Perspective exposing (Perspective(..))
 
 
 type AppContext
@@ -22,6 +23,7 @@ type alias Env =
     , basePath : String
     , apiBasePath : ApiBasePath
     , appContext : AppContext
+    , perspective : Perspective
     }
 
 
@@ -33,12 +35,13 @@ type alias Flags =
     }
 
 
-fromFlags : Flags -> Env
-fromFlags flags =
+init : Flags -> Perspective -> Env
+init flags perspective =
     { operatingSystem = operatingSystemFromString flags.operatingSystem
     , basePath = flags.basePath
     , apiBasePath = ApiBasePath flags.apiBasePath
     , appContext = appContextFromString flags.appContext
+    , perspective = perspective
     }
 
 
