@@ -3,18 +3,19 @@ module Route exposing
     , fromUrl
     , navigate
     , navigateToByReference
-    , navigateToLatest
-    , relativeTo
+    , navigateToLatestCodebase
+    , navigateToPerspective
+    , perspectiveParams
     , toUrlString
     )
 
 import Browser.Navigation as Nav
 import Definition.Reference as Reference exposing (Reference(..))
-import FullyQualifiedName as FQN exposing (FQN)
-import Hash exposing (Hash)
+import FullyQualifiedName as FQN
+import Hash
 import HashQualified exposing (HashQualified(..))
 import List.Nonempty as NEL
-import RelativeTo exposing (RelativeTo)
+import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
 import Url exposing (Url)
 import Url.Builder exposing (relative)
 import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
@@ -29,40 +30,44 @@ import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
    URL Scheme
    ----------
 
-   /[latest|:namespace-hash]/[namespaces|types|terms]/[:definition-name|:definition-hash]
+   Directly on the codebase
+   /[latest|:codebase-hash]/[namespaces|types|terms]/[:namespace-name|:definition-name|:definition-hash]
+
+
+   Within a namespace
+   /[latest|:codebase-hash]/[namespaces]/[:namespace-name]/-/[types|terms]/[:definition-name|:definition-hash]
 
 
    Relative examples
    -----------------
 
-   Top level of a Codebase:          /
-   Top level of a Codebase:          /latest
-   Namespace as Workspace:           /latest/namespaces/base/List
-   Definitions:                      /latest/[types|terms]/base/List
-   Ambiguous definitions:            /latest/[types|terms]/base/List@je2wR6
+   Top level of a Codebase:                       /
+   Top level of a Codebase:                     /latest
+   With namespace context:                      /latest/namespaces/base/List
+   Definitions:                                 /latest/[types|terms]/base/List/map
+   Disambiguated definitions:                   /latest/[types|terms]/base/List@je2wR6
+   Definitions within namespace:                /latest/namespaces/base/List/-/[types|terms]/map
+   Disambiguated definitions within namespace:  /latest/namespaces/base/List/-/[types|terms]/map@je2wR6
 
 
    Absolute examples
    -----------------
 
-   Namespace as Workspace:           /latest/namespaces/@785shikvuihsdfd
-   Namespace as Workspace:           /@785shikvuihsdfd
-   Definitions:                      /@785shikvuihsdfd/[types|terms]/base/List
-   Ambiguous definitions:            /@785shikvuihsdfd/[types|terms]/Nonempty/map@dkqA42
-   Definitions outside of Workspace: /@785shikvuihsdfd/[types|terms]/@jf615sgdkvuihskrt
+   Definitions:                                 /@785shikvuihsdfd/[types|terms]/@jf615sgdkvuihskrt
+   Disambiguated definitions:                   /@785shikvuihsdfd/[types|terms]/Nonempty/map@dkqA42
+   With namespace context:                      /@785shikvuihsdfd/namespaces/base/List
+   Definitions within namespace:                /@785shikvuihsdfd/namespaces/base/List/-/[types|terms]/base/List/map
+   Disambiguated definitions within namespace:  /@785shikvuihsdfd/namespaces/base/List/-/[types|terms]/Nonempty/map@dkqA42
+
+
+   Note: @785shikvuihsdfd here refers to the hash of the codebase
 
 -}
 
 
-type NamespaceReference
-    = Latest
-    | NameReference FQN
-    | HashReference Hash
-
-
 type Route
-    = Namespace NamespaceReference
-    | ByReference RelativeTo Reference
+    = Perspective PerspectiveParams
+    | ByReference PerspectiveParams Reference
 
 
 
@@ -71,15 +76,49 @@ type Route
 
 urlParser : Parser (Route -> a) a
 urlParser =
+    let
+        relativeCodebase =
+            Perspective (ByCodebase Relative)
+
+        relativePerspective =
+            ByNamespace Relative >> Perspective
+
+        relativeByReference =
+            ByReference (ByCodebase Relative)
+
+        absoluteCodebase =
+            Absolute >> ByCodebase >> Perspective
+
+        absolutePerspective codebaseHash namespaceFqn =
+            Perspective (ByNamespace (Absolute codebaseHash) namespaceFqn)
+
+        absoluteByReference codebaseHash definitionRef =
+            ByReference (ByCodebase (Absolute codebaseHash)) definitionRef
+
+        absoluteByReferenceAndNamespace codebaseHash namespaceFqn definitionRef =
+            ByReference (ByNamespace (Absolute codebaseHash) namespaceFqn) definitionRef
+    in
     oneOf
-        [ Parser.map (Namespace Latest) Parser.top
-        , Parser.map (Namespace Latest) (s "latest")
-        , Parser.map Namespace (s "latest" </> s "namespaces" </> Hash.urlParser |> Parser.map HashReference)
-        , Parser.map Namespace (s "latest" </> s "namespaces" </> FQN.urlParser |> Parser.map NameReference)
-        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "types" </> Reference.urlParser TypeReference)
-        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "terms" </> Reference.urlParser TermReference)
-        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
-        , Parser.map (ByReference RelativeTo.Codebase) (s "latest" </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
+        [ -- Relative Routes
+          Parser.map relativeCodebase Parser.top
+        , Parser.map relativeCodebase (s "latest")
+        , Parser.map relativePerspective (s "latest" </> s "namespaces" </> FQN.urlParser)
+        , Parser.map relativeByReference (s "latest" </> s "types" </> Reference.urlParser TypeReference)
+        , Parser.map relativeByReference (s "latest" </> s "terms" </> Reference.urlParser TermReference)
+        , Parser.map relativeByReference (s "latest" </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
+        , Parser.map relativeByReference (s "latest" </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
+
+        -- Absolute Routes
+        , Parser.map absoluteCodebase Hash.urlParser
+        , Parser.map absolutePerspective (Hash.urlParser </> s "namespaces" </> FQN.urlParser)
+        , Parser.map absoluteByReferenceAndNamespace (Hash.urlParser </> s "namespaces" </> FQN.urlParser </> s "-" </> s "types" </> Reference.urlParser TypeReference)
+        , Parser.map absoluteByReferenceAndNamespace (Hash.urlParser </> s "namespaces" </> FQN.urlParser </> s "-" </> s "terms" </> Reference.urlParser TermReference)
+        , Parser.map absoluteByReferenceAndNamespace (Hash.urlParser </> s "namespaces" </> FQN.urlParser </> s "-" </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
+        , Parser.map absoluteByReferenceAndNamespace (Hash.urlParser </> s "namespaces" </> FQN.urlParser </> s "-" </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
+        , Parser.map absoluteByReference (Hash.urlParser </> s "types" </> Reference.urlParser TypeReference)
+        , Parser.map absoluteByReference (Hash.urlParser </> s "terms" </> Reference.urlParser TermReference)
+        , Parser.map absoluteByReference (Hash.urlParser </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
+        , Parser.map absoluteByReference (Hash.urlParser </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
         ]
 
 
@@ -96,51 +135,30 @@ fromUrl basePath url =
     url
         |> stripBasePath
         |> Parser.parse urlParser
-        |> Maybe.withDefault (Namespace Latest)
+        |> Maybe.withDefault (Perspective (ByCodebase Relative))
 
 
 
 -- HELPERS
 
 
-relativeTo : Route -> Maybe RelativeTo
-relativeTo route =
+perspectiveParams : Route -> PerspectiveParams
+perspectiveParams route =
     case route of
-        Namespace ref ->
-            case ref of
-                Latest ->
-                    Just RelativeTo.Codebase
+        Perspective nsRef ->
+            nsRef
 
-                NameReference _ ->
-                    Nothing
-
-                HashReference h ->
-                    Just (RelativeTo.Namespace h)
-
-        ByReference relTo _ ->
-            Just relTo
+        ByReference nsRef _ ->
+            nsRef
 
 
 
 -- TRANSFORM
 
 
-toReference : Route -> Reference -> Route
-toReference oldRoute ref =
-    case oldRoute of
-        Namespace nsRef ->
-            case nsRef of
-                Latest ->
-                    ByReference RelativeTo.Codebase ref
-
-                NameReference _ ->
-                    ByReference RelativeTo.Codebase ref
-
-                HashReference hash ->
-                    ByReference (RelativeTo.Namespace hash) ref
-
-        ByReference within _ ->
-            ByReference within ref
+toByReference : Route -> Reference -> Route
+toByReference oldRoute ref =
+    ByReference (perspectiveParams oldRoute) ref
 
 
 toUrlString : Route -> String
@@ -157,32 +175,38 @@ toUrlString route =
                 HashQualified fqn h ->
                     String.split "/" (FQN.toUrlString fqn ++ Hash.toUrlString h)
 
+        perspectiveParamsToPath pp =
+            case pp of
+                ByCodebase Relative ->
+                    [ "latest" ]
+
+                ByCodebase (Absolute hash) ->
+                    [ Hash.toUrlString hash ]
+
+                ByNamespace Relative fqn ->
+                    "latest" :: NEL.toList (FQN.segments fqn)
+
+                ByNamespace (Absolute hash) fqn ->
+                    [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn)
+
         path =
             case route of
-                Namespace ref ->
-                    case ref of
-                        Latest ->
-                            [ "latest" ]
+                Perspective pp ->
+                    perspectiveParamsToPath pp
 
-                        NameReference fqn ->
-                            "latest" :: NEL.toList (FQN.segments fqn)
-
-                        HashReference hash ->
-                            [ "@" ++ Hash.toString hash ]
-
-                ByReference relTo ref ->
+                ByReference pp ref ->
                     case ref of
                         TypeReference hq ->
-                            [ RelativeTo.toUrlPath relTo, "types" ] ++ hqToPath hq
+                            perspectiveParamsToPath pp ++ ("types" :: hqToPath hq)
 
                         TermReference hq ->
-                            [ RelativeTo.toUrlPath relTo, "terms" ] ++ hqToPath hq
+                            perspectiveParamsToPath pp ++ ("terms" :: hqToPath hq)
 
                         AbilityConstructorReference hq ->
-                            [ RelativeTo.toUrlPath relTo, "ability-constructors" ] ++ hqToPath hq
+                            perspectiveParamsToPath pp ++ ("ability-constructors" :: hqToPath hq)
 
                         DataConstructorReference hq ->
-                            [ RelativeTo.toUrlPath relTo, "data-constructors" ] ++ hqToPath hq
+                            perspectiveParamsToPath pp ++ ("data-constructors" :: hqToPath hq)
     in
     relative path []
 
@@ -198,11 +222,16 @@ navigate navKey route =
         |> Nav.pushUrl navKey
 
 
-navigateToLatest : Nav.Key -> Cmd msg
-navigateToLatest navKey =
-    navigate navKey (Namespace Latest)
+navigateToPerspective : Nav.Key -> PerspectiveParams -> Cmd msg
+navigateToPerspective navKey pp =
+    navigate navKey (Perspective pp)
+
+
+navigateToLatestCodebase : Nav.Key -> Cmd msg
+navigateToLatestCodebase navKey =
+    navigateToPerspective navKey (ByCodebase Relative)
 
 
 navigateToByReference : Nav.Key -> Route -> Reference -> Cmd msg
 navigateToByReference navKey currentRoute reference =
-    navigate navKey (toReference currentRoute reference)
+    navigate navKey (toByReference currentRoute reference)

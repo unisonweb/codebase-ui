@@ -9,11 +9,12 @@ module Workspace exposing
     , view
     )
 
-import Api exposing (ApiBasePath, ApiRequest)
+import Api exposing (ApiRequest)
 import Browser.Dom as Dom
 import Definition.Doc as Doc
 import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
+import Hash
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, id, rel, target)
@@ -21,6 +22,7 @@ import Http
 import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
+import Perspective exposing (Perspective)
 import Route exposing (Route(..))
 import Task
 import UI
@@ -94,7 +96,7 @@ update env msg ({ workspaceItems } as model) =
             ( model, Cmd.none, ShowFinderRequest )
 
         OpenDefinitionRelativeTo relativeToRef ref ->
-            openItem env.apiBasePath model (Just relativeToRef) ref
+            openItem env model (Just relativeToRef) ref
 
         CloseDefinition ref ->
             let
@@ -192,13 +194,13 @@ type alias WithWorkspaceItems m =
     { m | workspaceItems : WorkspaceItems }
 
 
-open : { a | apiBasePath : ApiBasePath } -> WithWorkspaceItems m -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
-open cfg model ref =
-    openItem cfg.apiBasePath model Nothing ref
+open : Env -> WithWorkspaceItems m -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
+open env model ref =
+    openItem env model Nothing ref
 
 
-openItem : ApiBasePath -> WithWorkspaceItems m -> Maybe Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
-openItem apiBasePath ({ workspaceItems } as model) relativeToRef ref =
+openItem : Env -> WithWorkspaceItems m -> Maybe Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
+openItem env ({ workspaceItems } as model) relativeToRef ref =
     -- We don't want to refetch or replace any already open definitions, but we
     -- do want to focus and scroll to it
     if WorkspaceItems.member workspaceItems ref then
@@ -225,7 +227,7 @@ openItem apiBasePath ({ workspaceItems } as model) relativeToRef ref =
                         WorkspaceItems.insertWithFocusBefore workspaceItems r toInsert
         in
         ( { model | workspaceItems = nextWorkspaceItems }
-        , Cmd.batch [ Api.perform apiBasePath (fetchDefinition ref), scrollToDefinition ref ]
+        , Cmd.batch [ Api.perform env.apiBasePath (fetchDefinition env.perspective ref), scrollToDefinition ref ]
         , openDefinitionsFocusToOutMsg nextWorkspaceItems
         )
 
@@ -364,9 +366,14 @@ handleKeyboardShortcut ({ workspaceItems } as model) shortcut =
 -- EFFECTS
 
 
-fetchDefinition : Reference -> ApiRequest Item Msg
-fetchDefinition ref =
-    Api.getDefinition [ (Reference.hashQualified >> HashQualified.toString) ref ]
+fetchDefinition : Perspective -> Reference -> ApiRequest Item Msg
+fetchDefinition perspective ref =
+    let
+        definitionHash =
+            (Reference.hashQualified >> HashQualified.toString) ref
+    in
+    [ definitionHash ]
+        |> Api.getDefinition perspective
         |> Api.toRequest WorkspaceItem.decodeItem (FetchItemFinished ref)
 
 

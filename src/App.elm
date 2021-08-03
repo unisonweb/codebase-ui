@@ -4,7 +4,7 @@ import Browser
 import Browser.Navigation as Nav
 import CodebaseTree
 import Definition.Reference exposing (Reference(..))
-import Env as Env exposing (AppContext(..), Env, Flags, OperatingSystem(..))
+import Env as Env exposing (AppContext(..), Env, OperatingSystem(..))
 import Finder
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, aside, div, h1, h3, header, nav, p, section, span, strong, text)
@@ -13,7 +13,7 @@ import Html.Events exposing (onClick)
 import KeyboardShortcut
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
-import RelativeTo exposing (RelativeTo(..))
+import Perspective exposing (Perspective(..))
 import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import UI
@@ -39,7 +39,6 @@ type Modal
 type alias Model =
     { navKey : Nav.Key
     , route : Route
-    , relativeTo : RelativeTo
     , codebaseTree : CodebaseTree.Model
     , workspace : Workspace.Model
     , modal : Modal
@@ -51,15 +50,9 @@ type alias Model =
     }
 
 
-init : Flags -> Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url navKey =
+init : Env -> Route -> Nav.Key -> ( Model, Cmd Msg )
+init env route navKey =
     let
-        env =
-            Env.fromFlags flags
-
-        route =
-            Route.fromUrl env.basePath url
-
         ( workspace, workspaceCmd ) =
             case route of
                 Route.ByReference _ ref ->
@@ -71,15 +64,9 @@ init flags url navKey =
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init env
 
-        {--| TODO: When we can't get a relative to, we need to resolve the name
-          in the url to a hash-}
-        relativeTo =
-            Maybe.withDefault Codebase (Route.relativeTo route)
-
         model =
             { navKey = navKey
             , route = route
-            , relativeTo = relativeTo
             , workspace = workspace
             , codebaseTree = codebaseTree
             , modal = NoModal
@@ -89,7 +76,10 @@ init flags url navKey =
             }
     in
     ( model
-    , Cmd.batch [ Cmd.map CodebaseTreeMsg codebaseTreeCmd, Cmd.map WorkspaceMsg workspaceCmd ]
+    , Cmd.batch
+        [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
+        , Cmd.map WorkspaceMsg workspaceCmd
+        ]
     )
 
 
@@ -231,7 +221,7 @@ handleWorkspaceOutMsg model out =
             ( model, Route.navigateToByReference model.navKey model.route ref )
 
         Workspace.Emptied ->
-            ( model, Route.navigateToLatest model.navKey )
+            ( model, Route.navigateToLatestCodebase model.navKey )
 
 
 keydown : Model -> KeyboardEvent -> ( Model, Cmd Msg )

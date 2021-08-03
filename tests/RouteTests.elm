@@ -2,7 +2,7 @@ module RouteTests exposing (..)
 
 import Definition.Reference as Reference exposing (Reference(..))
 import Expect
-import RelativeTo
+import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
 import Route
 import Test exposing (..)
 import Url exposing (Url)
@@ -21,7 +21,7 @@ fromUrl =
                         "/some-token/ui/"
 
                     expected =
-                        Route.ByReference RelativeTo.Codebase (Reference.fromString TermReference "#abc123")
+                        Route.ByReference (ByCodebase Relative) (Reference.fromString TermReference "#abc123")
                 in
                 Expect.equal expected (Route.fromUrl basePath url)
         , test "Matches with a root basePath prefix" <|
@@ -34,7 +34,7 @@ fromUrl =
                         "/"
 
                     expected =
-                        Route.ByReference RelativeTo.Codebase (Reference.fromString TermReference "#abc123")
+                        Route.ByReference (ByCodebase Relative) (Reference.fromString TermReference "#abc123")
                 in
                 Expect.equal expected (Route.fromUrl basePath url)
         ]
