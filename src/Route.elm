@@ -3,22 +3,26 @@ module Route exposing
     , fromUrl
     , navigate
     , navigateToByReference
+    , navigateToCurrentPerspective
     , navigateToLatestCodebase
     , navigateToPerspective
     , perspectiveParams
+    , toRoute
     , toUrlString
+    , updatePerspectiveParams
     )
 
 import Browser.Navigation as Nav
-import Definition.Reference as Reference exposing (Reference(..))
+import Definition.Reference exposing (Reference(..))
 import FullyQualifiedName as FQN
 import Hash
 import HashQualified exposing (HashQualified(..))
 import List.Nonempty as NEL
+import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
+import Route.Parsers as RP exposing (b, reference, slash)
 import Url exposing (Url)
 import Url.Builder exposing (relative)
-import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
 
 
 
@@ -67,59 +71,36 @@ import Url.Parser as Parser exposing ((</>), Parser, oneOf, s)
 
 type Route
     = Perspective PerspectiveParams
-    | ByReference PerspectiveParams Reference
+    | Definition PerspectiveParams Reference
+
+
+updatePerspectiveParams : Route -> PerspectiveParams -> Route
+updatePerspectiveParams route params =
+    case route of
+        Perspective _ ->
+            Perspective params
+
+        Definition _ ref ->
+            Definition params ref
 
 
 
--- CREATE
+-- PARSER ---------------------------------------------------------------------
 
 
-urlParser : Parser (Route -> a) a
-urlParser =
-    let
-        relativeCodebase =
-            Perspective (ByCodebase Relative)
+perspective : Parser Route
+perspective =
+    succeed Perspective |. slash |= RP.perspectiveParams |. end
 
-        relativePerspective =
-            ByNamespace Relative >> Perspective
 
-        relativeByReference =
-            ByReference (ByCodebase Relative)
+definition : Parser Route
+definition =
+    succeed Definition |. slash |= RP.perspectiveParams |. slash |= reference |. end
 
-        absoluteCodebase =
-            Absolute >> ByCodebase >> Perspective
 
-        absolutePerspective codebaseHash namespaceFqn =
-            Perspective (ByNamespace (Absolute codebaseHash) namespaceFqn)
-
-        absoluteByReference codebaseHash definitionRef =
-            ByReference (ByCodebase (Absolute codebaseHash)) definitionRef
-
-        absoluteByReferenceAndNamespace codebaseHash namespaceFqn definitionRef =
-            ByReference (ByNamespace (Absolute codebaseHash) namespaceFqn) definitionRef
-    in
-    oneOf
-        [ -- Relative Routes
-          Parser.map relativeCodebase Parser.top
-        , Parser.map relativeCodebase (s "latest")
-        , Parser.map relativePerspective (s "latest" </> s "namespaces" </> FQN.urlParser)
-        , Parser.map relativeByReference (s "latest" </> s "types" </> Reference.urlParser TypeReference)
-        , Parser.map relativeByReference (s "latest" </> s "terms" </> Reference.urlParser TermReference)
-        , Parser.map relativeByReference (s "latest" </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
-        , Parser.map relativeByReference (s "latest" </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
-
-        -- Absolute Routes
-        , Parser.map absoluteCodebase Hash.urlParser
-        , Parser.map absolutePerspective (Hash.urlParser </> s "namespaces" </> FQN.urlParser)
-        , Parser.map absoluteByReferenceAndNamespace (Hash.urlParser </> s "namespaces" </> FQN.urlParser </> s "-" </> s "types" </> Reference.urlParser TypeReference)
-        , Parser.map absoluteByReferenceAndNamespace (Hash.urlParser </> s "namespaces" </> FQN.urlParser </> s "-" </> s "terms" </> Reference.urlParser TermReference)
-        , Parser.map absoluteByReferenceAndNamespace (Hash.urlParser </> s "namespaces" </> FQN.urlParser </> s "-" </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
-        , Parser.map absoluteByReferenceAndNamespace (Hash.urlParser </> s "namespaces" </> FQN.urlParser </> s "-" </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
-        , Parser.map absoluteByReference (Hash.urlParser </> s "types" </> Reference.urlParser TypeReference)
-        , Parser.map absoluteByReference (Hash.urlParser </> s "terms" </> Reference.urlParser TermReference)
-        , Parser.map absoluteByReference (Hash.urlParser </> s "ability-constructors" </> Reference.urlParser AbilityConstructorReference)
-        , Parser.map absoluteByReference (Hash.urlParser </> s "data-constructors" </> Reference.urlParser DataConstructorReference)
-        ]
+toRoute : Parser Route
+toRoute =
+    oneOf [ b perspective, b definition ]
 
 
 fromUrl : String -> Url -> Route
@@ -131,15 +112,18 @@ fromUrl basePath url =
 
             else
                 { u | path = String.replace basePath "" u.path }
+
+        parse url_ =
+            Result.withDefault (Perspective (ByCodebase Relative)) (Parser.run toRoute url_)
     in
     url
         |> stripBasePath
-        |> Parser.parse urlParser
-        |> Maybe.withDefault (Perspective (ByCodebase Relative))
+        |> .path
+        |> parse
 
 
 
--- HELPERS
+-- HELPERS --------------------------------------------------------------------
 
 
 perspectiveParams : Route -> PerspectiveParams
@@ -148,7 +132,7 @@ perspectiveParams route =
         Perspective nsRef ->
             nsRef
 
-        ByReference nsRef _ ->
+        Definition nsRef _ ->
             nsRef
 
 
@@ -156,9 +140,9 @@ perspectiveParams route =
 -- TRANSFORM
 
 
-toByReference : Route -> Reference -> Route
-toByReference oldRoute ref =
-    ByReference (perspectiveParams oldRoute) ref
+toDefinition : Route -> Reference -> Route
+toDefinition oldRoute ref =
+    Definition (perspectiveParams oldRoute) ref
 
 
 toUrlString : Route -> String
@@ -194,7 +178,7 @@ toUrlString route =
                 Perspective pp ->
                     perspectiveParamsToPath pp
 
-                ByReference pp ref ->
+                Definition pp ref ->
                     case ref of
                         TypeReference hq ->
                             perspectiveParamsToPath pp ++ ("types" :: hqToPath hq)
@@ -227,6 +211,11 @@ navigateToPerspective navKey pp =
     navigate navKey (Perspective pp)
 
 
+navigateToCurrentPerspective : Nav.Key -> Route -> Cmd msg
+navigateToCurrentPerspective navKey oldRoute =
+    navigateToPerspective navKey (perspectiveParams oldRoute)
+
+
 navigateToLatestCodebase : Nav.Key -> Cmd msg
 navigateToLatestCodebase navKey =
     navigateToPerspective navKey (ByCodebase Relative)
@@ -234,4 +223,4 @@ navigateToLatestCodebase navKey =
 
 navigateToByReference : Nav.Key -> Route -> Reference -> Cmd msg
 navigateToByReference navKey currentRoute reference =
-    navigate navKey (toByReference currentRoute reference)
+    navigate navKey (toDefinition currentRoute reference)

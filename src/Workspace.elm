@@ -14,7 +14,6 @@ import Browser.Dom as Dom
 import Definition.Doc as Doc
 import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
-import Hash
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, id, rel, target)

@@ -82,8 +82,13 @@ update msg model =
                         env =
                             Env.init preEnv.flags perspective
 
+                        newRoute =
+                            perspective
+                                |> Perspective.toParams
+                                |> Route.updatePerspectiveParams preEnv.route
+
                         ( app, cmd ) =
-                            App.init env preEnv.route preEnv.navKey
+                            App.init env newRoute preEnv.navKey
                     in
                     ( Initialized app, Cmd.map AppMsg cmd )
 
