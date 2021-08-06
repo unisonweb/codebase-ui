@@ -85,7 +85,7 @@ decode listingFqn =
     Decode.map3
         NamespaceListing
         (field "namespaceListingHash" Hash.decode)
-        (field "namespaceListingName" FQN.decode)
+        (field "namespaceListingFQN" FQN.decode)
         -- The main namespace being decoded has children, so we use Success for
         -- the RemoteData. There children of the children however are not yet
         -- fetched
