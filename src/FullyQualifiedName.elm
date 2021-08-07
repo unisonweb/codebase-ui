@@ -3,6 +3,7 @@ module FullyQualifiedName exposing
     , decode
     , decodeFromParent
     , equals
+    , fromList
     , fromParent
     , fromString
     , fromUrlString
@@ -33,6 +34,13 @@ type FQN
 -}
 fromString : String -> FQN
 fromString rawFqn =
+    rawFqn
+        |> String.split "."
+        |> fromList
+
+
+fromList : List String -> FQN
+fromList segments_ =
     let
         rootEmptyToDot i s =
             if i == 0 && String.isEmpty s then
@@ -41,8 +49,7 @@ fromString rawFqn =
             else
                 s
     in
-    rawFqn
-        |> String.split "."
+    segments_
         |> List.map String.trim
         |> List.indexedMap rootEmptyToDot
         |> List.filter (\s -> String.length s > 0)

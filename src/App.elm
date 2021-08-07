@@ -55,7 +55,7 @@ init env route navKey =
     let
         ( workspace, workspaceCmd ) =
             case route of
-                Route.ByReference _ ref ->
+                Route.Definition _ ref ->
                     Workspace.init env (Just ref)
 
                 _ ->
@@ -221,7 +221,7 @@ handleWorkspaceOutMsg model out =
             ( model, Route.navigateToByReference model.navKey model.route ref )
 
         Workspace.Emptied ->
-            ( model, Route.navigateToLatestCodebase model.navKey )
+            ( model, Route.navigateToCurrentPerspective model.navKey model.route )
 
 
 keydown : Model -> KeyboardEvent -> ( Model, Cmd Msg )

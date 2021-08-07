@@ -94,17 +94,17 @@ namespace fm =
 reference : FinderMatch -> Reference
 reference fm =
     case fm.item of
-        TypeItem (Type h _ _) ->
-            TypeReference (HashOnly h)
+        TypeItem (Type _ _ { fqn }) ->
+            TypeReference (NameOnly fqn)
 
-        TermItem (Term h _ _) ->
-            TermReference (HashOnly h)
+        TermItem (Term _ _ { fqn }) ->
+            TermReference (NameOnly fqn)
 
-        DataConstructorItem (DataConstructor h _) ->
-            DataConstructorReference (HashOnly h)
+        DataConstructorItem (DataConstructor _ { fqn }) ->
+            DataConstructorReference (NameOnly fqn)
 
-        AbilityConstructorItem (AbilityConstructor h _) ->
-            AbilityConstructorReference (HashOnly h)
+        AbilityConstructorItem (AbilityConstructor _ { fqn }) ->
+            AbilityConstructorReference (NameOnly fqn)
 
 
 matchSegmentsToMatchPositions : MatchSegments -> NEL.Nonempty Int

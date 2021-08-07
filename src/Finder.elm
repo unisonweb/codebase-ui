@@ -11,7 +11,6 @@ import Definition.Term exposing (Term(..))
 import Definition.Type exposing (Type(..))
 import Env exposing (AppContext(..), Env)
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
-import Hash
 import HashQualified exposing (HashQualified(..))
 import Html
     exposing
@@ -416,30 +415,30 @@ viewMatch keyboardShortcut match isFocused shortcut =
                 ]
     in
     case match.item of
-        FinderMatch.TypeItem (Type hash category { name, namespace, source }) ->
+        FinderMatch.TypeItem (Type _ category { fqn, name, namespace, source }) ->
             viewMatch_
-                (TypeReference (HashOnly hash))
+                (TypeReference (NameOnly fqn))
                 (Category.icon (Category.Type category))
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTypeSource Source.Monochrome source)
 
-        FinderMatch.TermItem (Term hash category { name, namespace, signature }) ->
+        FinderMatch.TermItem (Term _ category { fqn, name, namespace, signature }) ->
             viewMatch_
-                (TermReference (HashOnly hash))
+                (TermReference (NameOnly fqn))
                 (Category.icon (Category.Term category))
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
 
-        FinderMatch.DataConstructorItem (DataConstructor hash { name, namespace, signature }) ->
+        FinderMatch.DataConstructorItem (DataConstructor _ { fqn, name, namespace, signature }) ->
             viewMatch_
-                (DataConstructorReference (HashOnly hash))
+                (DataConstructorReference (NameOnly fqn))
                 Icon.dataConstructor
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)
 
-        FinderMatch.AbilityConstructorItem (AbilityConstructor hash { name, namespace, signature }) ->
+        FinderMatch.AbilityConstructorItem (AbilityConstructor _ { fqn, name, namespace, signature }) ->
             viewMatch_
-                (AbilityConstructorReference (HashOnly hash))
+                (AbilityConstructorReference (NameOnly fqn))
                 Icon.abilityConstructor
                 (viewMarkedNaming match.matchPositions namespace name)
                 (Source.viewTermSignature Source.Monochrome signature)

@@ -189,17 +189,17 @@ viewDefinitionListing listing =
             viewListingRow (Just (OpenDefinitionListing ref)) (unqualifiedName fqn)
     in
     case listing of
-        TypeListing hash fqn category ->
-            viewDefRow (TypeReference (HashOnly hash)) fqn (Category.name category) (Category.icon category)
+        TypeListing _ fqn category ->
+            viewDefRow (TypeReference (NameOnly fqn)) fqn (Category.name category) (Category.icon category)
 
-        TermListing hash fqn category ->
-            viewDefRow (TermReference (HashOnly hash)) fqn (Category.name category) (Category.icon category)
+        TermListing _ fqn category ->
+            viewDefRow (TermReference (NameOnly fqn)) fqn (Category.name category) (Category.icon category)
 
-        DataConstructorListing hash fqn ->
-            viewDefRow (DataConstructorReference (HashOnly hash)) fqn "constructor" Icon.dataConstructor
+        DataConstructorListing _ fqn ->
+            viewDefRow (DataConstructorReference (NameOnly fqn)) fqn "constructor" Icon.dataConstructor
 
-        AbilityConstructorListing hash fqn ->
-            viewDefRow (AbilityConstructorReference (HashOnly hash)) fqn "constructor" Icon.abilityConstructor
+        AbilityConstructorListing _ fqn ->
+            viewDefRow (AbilityConstructorReference (NameOnly fqn)) fqn "constructor" Icon.abilityConstructor
 
         PatchListing _ ->
             viewListingRow Nothing "Patch" "patch" Icon.patch
