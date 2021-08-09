@@ -7,6 +7,7 @@ module Route exposing
     , navigateToLatestCodebase
     , navigateToPerspective
     , perspectiveParams
+    , replacePerspective
     , toRoute
     , toUrlString
     , updatePerspectiveParams
@@ -159,7 +160,7 @@ toUrlString route =
                 HashQualified fqn h ->
                     String.split "/" (FQN.toUrlString fqn ++ Hash.toUrlString h)
 
-        perspectiveParamsToPath pp =
+        perspectiveParamsToPath pp includeNamespacesSuffix =
             case pp of
                 ByCodebase Relative ->
                     [ "latest" ]
@@ -168,29 +169,37 @@ toUrlString route =
                     [ Hash.toUrlString hash ]
 
                 ByNamespace Relative fqn ->
-                    "latest" :: NEL.toList (FQN.segments fqn)
+                    if includeNamespacesSuffix then
+                        "latest" :: "-" :: NEL.toList (FQN.segments fqn)
+
+                    else
+                        "latest" :: NEL.toList (FQN.segments fqn)
 
                 ByNamespace (Absolute hash) fqn ->
-                    [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn)
+                    if includeNamespacesSuffix then
+                        [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn) ++ [ "-" ]
+
+                    else
+                        [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn)
 
         path =
             case route of
                 Perspective pp ->
-                    perspectiveParamsToPath pp
+                    perspectiveParamsToPath pp False
 
                 Definition pp ref ->
                     case ref of
                         TypeReference hq ->
-                            perspectiveParamsToPath pp ++ ("types" :: hqToPath hq)
+                            perspectiveParamsToPath pp True ++ ("types" :: hqToPath hq)
 
                         TermReference hq ->
-                            perspectiveParamsToPath pp ++ ("terms" :: hqToPath hq)
+                            perspectiveParamsToPath pp True ++ ("terms" :: hqToPath hq)
 
                         AbilityConstructorReference hq ->
-                            perspectiveParamsToPath pp ++ ("ability-constructors" :: hqToPath hq)
+                            perspectiveParamsToPath pp True ++ ("ability-constructors" :: hqToPath hq)
 
                         DataConstructorReference hq ->
-                            perspectiveParamsToPath pp ++ ("data-constructors" :: hqToPath hq)
+                            perspectiveParamsToPath pp True ++ ("data-constructors" :: hqToPath hq)
     in
     relative path []
 
@@ -207,8 +216,8 @@ navigate navKey route =
 
 
 navigateToPerspective : Nav.Key -> PerspectiveParams -> Cmd msg
-navigateToPerspective navKey pp =
-    navigate navKey (Perspective pp)
+navigateToPerspective navKey perspectiveParams_ =
+    navigate navKey (Perspective perspectiveParams_)
 
 
 navigateToCurrentPerspective : Nav.Key -> Route -> Cmd msg
@@ -224,3 +233,17 @@ navigateToLatestCodebase navKey =
 navigateToByReference : Nav.Key -> Route -> Reference -> Cmd msg
 navigateToByReference navKey currentRoute reference =
     navigate navKey (toDefinition currentRoute reference)
+
+
+replacePerspective : Nav.Key -> PerspectiveParams -> Route -> Cmd msg
+replacePerspective navKey perspectiveParams_ oldRoute =
+    let
+        newRoute =
+            case oldRoute of
+                Perspective _ ->
+                    Perspective perspectiveParams_
+
+                Definition _ ref ->
+                    Definition perspectiveParams_ ref
+    in
+    navigate navKey newRoute

@@ -14,7 +14,7 @@ import Env exposing (Env)
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, a, div, h2, label, span, text)
+import Html exposing (Html, a, div, h3, label, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Http
@@ -304,6 +304,6 @@ view model =
                     viewLoading
     in
     div [ class "codebase-tree" ]
-        [ h2 [] [ text "All Namespaces" ]
+        [ h3 [] [ text "Namespaces and Definitions" ]
         , div [ class "namespace-tree" ] [ listings ]
         ]

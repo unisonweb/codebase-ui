@@ -6,8 +6,9 @@ import CodebaseTree
 import Definition.Reference exposing (Reference(..))
 import Env as Env exposing (AppContext(..), Env, OperatingSystem(..))
 import Finder
+import FullyQualifiedName as FQN
 import HashQualified exposing (HashQualified(..))
-import Html exposing (Html, a, aside, div, h1, h3, header, nav, p, section, span, strong, text)
+import Html exposing (Html, a, aside, div, h1, h2, h3, header, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import KeyboardShortcut
@@ -90,6 +91,7 @@ init env route navKey =
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url
+    | ChangePerspective Perspective
     | Keydown KeyboardEvent
     | OpenDefinition Reference
     | ShowModal Modal
@@ -113,6 +115,21 @@ update msg ({ env } as model) =
             -- Currently, the URL change is a result of that as oppose to focus
             -- being a result of a URL change
             ( { model | route = Route.fromUrl env.basePath url }, Cmd.none )
+
+        ChangePerspective perspective ->
+            let
+                newEnv =
+                    { env | perspective = perspective }
+
+                ( codebaseTree, codebaseTreeCmd ) =
+                    CodebaseTree.init newEnv
+
+                changeRouteCmd =
+                    Route.replacePerspective model.navKey (Perspective.toParams perspective) model.route
+            in
+            ( { model | env = newEnv, codebaseTree = codebaseTree }
+            , Cmd.batch [ Cmd.map CodebaseTreeMsg codebaseTreeCmd, changeRouteCmd ]
+            )
 
         Keydown event ->
             keydown model event
@@ -287,13 +304,21 @@ subscriptions model =
 viewMainHeader : Model -> Html Msg
 viewMainHeader model =
     let
-        appContext =
+        changePerspectiveMsg =
+            case model.env.perspective of
+                Codebase codebaseHash ->
+                    ChangePerspective (Codebase codebaseHash)
+
+                Namespace { codebaseHash } ->
+                    ChangePerspective (Codebase codebaseHash)
+
+        title =
             case model.env.appContext of
                 Env.Ucm ->
-                    h1 [ class "app-context" ] [ text "Unison", span [ class "context ucm" ] [ text "Local" ] ]
+                    a [ onClick changePerspectiveMsg, class "app-context" ] [ h1 [] [ text "Unison", span [ class "context ucm" ] [ text "Local" ] ] ]
 
                 Env.UnisonShare ->
-                    h1 [ class "app-context" ] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ]
+                    a [ onClick changePerspectiveMsg, class "app-context" ] [ h1 [] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ] ]
 
         sidebarToggle =
             a [ class "sidebar-toggle", onClick ToggleSidebar ] [ Icon.view Icon.list ]
@@ -301,7 +326,7 @@ viewMainHeader model =
     header
         [ id "main-header" ]
         [ sidebarToggle
-        , appContext
+        , title
         , section [ class "right" ]
             [ Button.button (ShowModal PublishModal)
                 "Publish on Unison Share"
@@ -309,6 +334,37 @@ viewMainHeader model =
                 |> Button.view
             ]
         ]
+
+
+viewPerspective : Env -> Html Msg
+viewPerspective env =
+    case env.perspective of
+        Codebase _ ->
+            UI.nothing
+
+        Namespace { codebaseHash, fqn } ->
+            let
+                fqnText =
+                    FQN.toString fqn
+
+                back =
+                    case env.appContext of
+                        Env.Ucm ->
+                            UI.withTooltip (text ("You're currently viewing a subset of your codebase (" ++ fqnText ++ "), click to view everything."))
+                                (a
+                                    [ onClick (ChangePerspective (Codebase codebaseHash))
+                                    , class "back"
+                                    ]
+                                    [ Icon.view Icon.arrowLeftUp, text "View full codebase" ]
+                                )
+
+                        Env.UnisonShare ->
+                            UI.nothing
+            in
+            header [ class "perspective" ]
+                [ div [ class "perspective-name" ] [ div [ class "namespace-slug" ] [], h2 [] [ text fqnText ] ]
+                , back
+                ]
 
 
 viewMainSidebar : Model -> Html Msg
@@ -324,7 +380,8 @@ viewMainSidebar model =
     in
     aside
         [ id "main-sidebar" ]
-        [ div [] [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
+        [ viewPerspective model.env
+        , Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree)
         , nav []
             [ a [ href "https://unisonweb.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
             , a [ href "https://unisonweb.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
