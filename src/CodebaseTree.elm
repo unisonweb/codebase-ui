@@ -13,7 +13,6 @@ import Definition.Reference exposing (Reference(..))
 import Env exposing (Env)
 import FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import FullyQualifiedNameSet as FQNSet exposing (FQNSet)
-import Hash
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, div, h2, label, span, text)
 import Html.Attributes exposing (class, title)
@@ -177,9 +176,14 @@ viewListingRow clickMsg label_ category icon =
     in
     container
         [ Icon.view icon
-        , label [] [ text label_ ]
+        , viewListingLabel label_
         , span [ class "definition-category" ] [ text category ]
         ]
+
+
+viewListingLabel : String -> Html msg
+viewListingLabel label_ =
+    label [ title label_ ] [ text label_ ]
 
 
 viewDefinitionListing : DefinitionListing -> Html Msg
@@ -257,7 +261,7 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) 
             , onClick (ToggleExpandedNamespaceListing fqn)
             ]
             [ Icon.caretRight |> Icon.withClassList [ ( "expanded", isExpanded ) ] |> Icon.view
-            , label [] [ text (unqualifiedName fqn) ]
+            , viewListingLabel (unqualifiedName fqn)
             ]
         , namespaceContent
         ]
