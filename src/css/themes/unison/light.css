@@ -28,9 +28,11 @@
   --color-keyboard-shortcut-separator: var(--color-gray-lighten-30);
 
   --color-sidebar-fg: var(--color-gray-lighten-50);
+  --color-sidebar-fg-em: var(--color-gray-lighten-100);
   --color-sidebar-bg: var(--color-gray-darken-20);
   --color-sidebar-border: transparent;
   --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
+  --color-sidebar-subtle-fg-em: var(--color-gray-lighten-30);
   --color-sidebar-subtle-bg: transparent;
   --color-sidebar-focus-fg: var(--color-gray-lighten-60);
   --color-sidebar-focus-bg: var(--color-gray-darken-10);

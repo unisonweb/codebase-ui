@@ -316,8 +316,7 @@ a.button:hover {
   width: 0;
   position: absolute;
   pointer-events: none;
-  border-color: rgba(0, 0, 0, 0);
-  border-bottom-color: #000000;
+  border-bottom-color: var(--color-tooltip-bg);
   border-width: 0.375rem;
   margin-left: -0.375rem;
 }
@@ -390,4 +389,12 @@ a.button:hover {
   margin: 0 0.35rem;
   color: var(--color-keyboard-shortcut-then);
   align-items: center;
+}
+
+/* Namespace Slug */
+.namespace-slug {
+  display: inline-flex;
+  width: 1.5rem;
+  height: 1.5rem;
+  background: url(../img/namespace-slug-untitled.svg);
 }
