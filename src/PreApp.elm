@@ -1,14 +1,16 @@
-module Main exposing (..)
+module PreApp exposing (..)
 
 import Api exposing (ApiBasePath(..), ApiRequest)
 import App
 import Browser
 import Browser.Navigation as Nav
 import Env exposing (AppContext(..), Flags, OperatingSystem(..))
-import Html exposing (div, text)
+import Html exposing (div, p, text)
+import Html.Attributes exposing (class, id, title)
 import Http
 import Perspective exposing (CodebasePerspectiveParam(..), Perspective(..), PerspectiveParams(..))
 import Route exposing (Route)
+import UI.Icon as Icon
 import Url exposing (Url)
 
 
@@ -120,15 +122,19 @@ subscriptions model =
 
 view : Model -> Browser.Document Msg
 view model =
+    let
+        appContext flags =
+            Env.appContextFromString flags.appContext
+    in
     case model of
-        Initializing _ ->
+        Initializing preEnv ->
             { title = "Loading.."
-            , body = [ div [] [ text "Loading.." ] ]
+            , body = [ App.viewAppLoading (appContext preEnv.flags) ]
             }
 
-        InitializationError _ _ ->
+        InitializationError preEnv error ->
             { title = "Application Error"
-            , body = [ div [] [ text "Application Error" ] ]
+            , body = [ App.viewAppError (appContext preEnv.flags) error ]
             }
 
         Initialized appModel ->

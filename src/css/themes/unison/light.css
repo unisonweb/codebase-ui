@@ -3,6 +3,7 @@
 :root {
   /* -- Default Theme -------------------------------------------------------*/
   --color-main-fg: var(--color-gray-darken-30);
+  --color-main-mg: var(--color-gray-base);
   --color-main-bg: var(--color-gray-lighten-100);
   --color-main-subtle-fg: var(--color-gray-lighten-30);
   --color-main-subtle-bg: var(--color-gray-lighten-60);
@@ -11,6 +12,7 @@
   --color-main-divider: var(--color-gray-lighten-55);
   --color-main-focus-fg: var(--color-blue-2);
   --color-main-focus-bg: var(--color-blue-2);
+  --color-main-alert: var(--color-pink-1);
   --color-main-mark-fg: var(--color-blue-2);
   --color-main-mark-bg: transparent;
 
