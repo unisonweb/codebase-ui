@@ -42,6 +42,14 @@
   --color-sidebar-keyboard-shortcut-key-bg: var(--color-gray-base);
   --color-sidebar-keyboard-shortcut-then: var(--color-gray-lighten-20);
   --color-sidebar-keyboard-shortcut-separator: var(--color-gray-base);
+  --color-sidebar-button-default-fg: var(--color-gray-lighten-30);
+  --color-sidebar-button-default-bg: var(--color-gray-base);
+  --color-sidebar-button-default-hover-fg: var(--color-gray-lighten-50);
+  --color-sidebar-button-default-hover-bg: var(--color-gray-base);
+
+  --color-sidebar-tooltip-fg: var(--color-gray-lighten-60);
+  --color-sidebar-tooltip-bg: var(--color-gray-darken-30);
+  --color-sidebar-tooltip-border: var(--color-gray-darken-10);
 
   --color-workspace-fg: var(--color-main-fg);
   --color-workspace-bg: var(--color-main-bg);
@@ -137,6 +145,7 @@
   /* Tooltips */
   --color-tooltip-fg: var(--color-gray-lighten-60);
   --color-tooltip-bg: var(--color-gray-darken-30);
+  --color-tooltip-border: transparent;
 
   /* Syntax */
   --color-syntax-base: var(--color-main-fg);

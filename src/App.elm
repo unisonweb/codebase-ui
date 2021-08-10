@@ -23,6 +23,7 @@ import UI
 import UI.Button as Button
 import UI.Icon as Icon
 import UI.Modal as Modal
+import UI.Tooltip as Tooltip
 import Url exposing (Url)
 import Workspace
 
@@ -364,22 +365,20 @@ viewPerspective env =
                 fqnText =
                     FQN.toString fqn
 
-                back =
-                    case env.appContext of
-                        Env.Ucm ->
-                            UI.withTooltip (text ("You're currently viewing a subset of your codebase (" ++ fqnText ++ "), click to view everything."))
-                                (a
-                                    [ onClick (ChangePerspective (Codebase codebaseHash))
-                                    , class "back"
-                                    ]
-                                    [ Icon.view Icon.arrowLeftUp, text "View full codebase" ]
-                                )
+                context =
+                    Env.appContextToString env.appContext
 
-                        Env.UnisonShare ->
-                            UI.nothing
+                back =
+                    Tooltip.tooltip
+                        (Button.buttonIcon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.view)
+                        (text ("You're currently viewing a subset of " ++ context ++ " (" ++ fqnText ++ "), click to view everything."))
+                        |> Tooltip.withArrow Tooltip.TopRight
+                        |> Tooltip.view
             in
-            header [ class "perspective" ]
-                [ div [ class "perspective-name" ] [ div [ class "namespace-slug" ] [], h2 [] [ text fqnText ] ]
+            header
+                [ class "perspective" ]
+                [ div [ class "namespace-slug" ] []
+                , h2 [] [ text fqnText ]
                 , back
                 ]
 

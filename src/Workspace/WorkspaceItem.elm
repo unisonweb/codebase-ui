@@ -23,6 +23,7 @@ import Maybe.Extra as MaybeE
 import String.Extra exposing (pluralize)
 import UI
 import UI.Icon as Icon
+import UI.Tooltip as Tooltip
 import Util
 import Workspace.Zoom exposing (Zoom(..))
 
@@ -169,7 +170,7 @@ viewNames onClick_ info category =
                 in
                 div []
                     [ span [ class "separator" ] [ text "•" ]
-                    , span [ class "other-names" ] [ UI.withTooltip otherNamesTooltipContent otherNamesLabel ]
+                    , span [ class "other-names" ] [ Tooltip.tooltip otherNamesTooltipContent otherNamesLabel |> Tooltip.withArrow Tooltip.TopLeft |> Tooltip.view ]
                     ]
 
             else
