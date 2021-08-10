@@ -1,7 +1,7 @@
 Unison Codebase UI
 ==================
 
-![CI](https://github.com/unisonweb/codebase-ui/workflows/CI/badge.svg)
+[![CI](https://github.com/unisonweb/codebase-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/unisonweb/codebase-ui/actions/workflows/ci.yml)
 
 Running Development Server
 --------------------------
