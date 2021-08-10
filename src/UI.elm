@@ -59,13 +59,3 @@ divider =
 charWidth : Int -> String
 charWidth numChars =
     String.fromInt numChars ++ "ch"
-
-
-tooltip : Html msg -> Html msg
-tooltip content =
-    div [ class "tooltip" ] [ content ]
-
-
-withTooltip : Html msg -> Html msg -> Html msg
-withTooltip content triggerContent =
-    span [ class "with-tooltip" ] [ tooltip content, triggerContent ]

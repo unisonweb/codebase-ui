@@ -49,6 +49,7 @@ import Syntax exposing (Syntax)
 import TreePath exposing (TreePath)
 import UI
 import UI.Icon as Icon
+import UI.Tooltip as Tooltip
 
 
 type EmbeddedSource
@@ -374,9 +375,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     hr [] []
 
                 Tooltip triggerContent tooltipContent ->
-                    UI.withTooltip
-                        (viewAtCurrentSectionLevel tooltipContent)
-                        (viewAtCurrentSectionLevel triggerContent)
+                    Tooltip.tooltip (viewAtCurrentSectionLevel triggerContent) (viewAtCurrentSectionLevel tooltipContent) |> Tooltip.withArrow Tooltip.TopLeft |> Tooltip.view
 
                 Aside d ->
                     aside [] [ viewAtCurrentSectionLevel d ]

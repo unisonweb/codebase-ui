@@ -95,10 +95,14 @@
   margin: 1.5rem 0;
 }
 
-.definition-doc .with-tooltip {
+.definition-doc .tooltip-trigger {
   text-decoration: underline dotted var(--color-workspace-item-subtle-fg);
   text-underline-offset: 2px;
-  /* Other tooltip styling is handled by UI.tooltip */
+  /* Other tooltip styling is handled by elements/tooltip */
+}
+
+.definition-doc .tooltip {
+  min-width: 20rem;
 }
 
 .definition-doc aside {

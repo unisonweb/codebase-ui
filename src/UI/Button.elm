@@ -110,16 +110,16 @@ linkIconThenLabel url icon_ label =
 view : Button clickMsg -> Html clickMsg
 view { content, type_, action, size } =
     let
-        content_ =
+        ( contentType, content_ ) =
             case content of
                 Icon i ->
-                    [ I.view i ]
+                    ( "content-icon", [ I.view i ] )
 
                 IconThenLabel i l ->
-                    [ I.view i, text l ]
+                    ( "content-icon-then-label", [ I.view i, text l ] )
 
                 Label l ->
-                    [ text l ]
+                    ( "content-label", [ text l ] )
     in
     case action of
         OnClick clickMsg ->
@@ -127,6 +127,7 @@ view { content, type_, action, size } =
                 [ class "button"
                 , class (typeToClassName type_)
                 , class (sizeToClassName size)
+                , class contentType
                 , onClick clickMsg
                 ]
                 content_
@@ -136,6 +137,7 @@ view { content, type_, action, size } =
                 [ class "button"
                 , class (typeToClassName type_)
                 , class (sizeToClassName size)
+                , class contentType
                 , href url
                 , rel "noopener"
                 , target "_blank"
