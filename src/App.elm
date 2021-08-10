@@ -1,5 +1,6 @@
 module App exposing (..)
 
+import Api
 import Browser
 import Browser.Navigation as Nav
 import CodebaseTree
@@ -11,6 +12,7 @@ import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, aside, div, h1, h2, h3, header, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
+import Http
 import KeyboardShortcut
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
@@ -301,6 +303,30 @@ subscriptions model =
 -- VIEW
 
 
+viewMainHeader_ : List (Html msg) -> Html msg
+viewMainHeader_ content =
+    header [ id "main-header" ] content
+
+
+viewAppTitle : Maybe msg -> AppContext -> Html msg
+viewAppTitle clickMsg appContext =
+    let
+        attrs =
+            case clickMsg of
+                Nothing ->
+                    [ class "app-title" ]
+
+                Just msg ->
+                    [ onClick msg, class "app-title" ]
+    in
+    case appContext of
+        Env.Ucm ->
+            a attrs [ h1 [] [ text "Unison", span [ class "context ucm" ] [ text "Local" ] ] ]
+
+        Env.UnisonShare ->
+            a attrs [ h1 [] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ] ]
+
+
 viewMainHeader : Model -> Html Msg
 viewMainHeader model =
     let
@@ -312,21 +338,12 @@ viewMainHeader model =
                 Namespace { codebaseHash } ->
                     ChangePerspective (Codebase codebaseHash)
 
-        title =
-            case model.env.appContext of
-                Env.Ucm ->
-                    a [ onClick changePerspectiveMsg, class "app-context" ] [ h1 [] [ text "Unison", span [ class "context ucm" ] [ text "Local" ] ] ]
-
-                Env.UnisonShare ->
-                    a [ onClick changePerspectiveMsg, class "app-context" ] [ h1 [] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ] ]
-
         sidebarToggle =
             a [ class "sidebar-toggle", onClick ToggleSidebar ] [ Icon.view Icon.list ]
     in
-    header
-        [ id "main-header" ]
+    viewMainHeader_
         [ sidebarToggle
-        , title
+        , viewAppTitle (Just changePerspectiveMsg) model.env.appContext
         , section [ class "right" ]
             [ Button.button (ShowModal PublishModal)
                 "Publish on Unison Share"
@@ -367,6 +384,11 @@ viewPerspective env =
                 ]
 
 
+viewMainSidebar_ : List (Html msg) -> Html msg
+viewMainSidebar_ content =
+    aside [ id "main-sidebar" ] content
+
+
 viewMainSidebar : Model -> Html Msg
 viewMainSidebar model =
     let
@@ -378,8 +400,7 @@ viewMainSidebar model =
                 Env.UnisonShare ->
                     UI.nothing
     in
-    aside
-        [ id "main-sidebar" ]
+    viewMainSidebar_
         [ viewPerspective model.env
         , Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree)
         , nav []
@@ -530,6 +551,32 @@ viewModal model =
 
         ReportBugModal ->
             viewReportBugModal model.env.appContext
+
+
+viewAppLoading : AppContext -> Html msg
+viewAppLoading appContext =
+    div [ id "app" ]
+        [ viewMainHeader_ [ viewAppTitle Nothing appContext ]
+        , viewMainSidebar_ []
+        , div [ id "main-content" ] []
+        ]
+
+
+viewAppError : AppContext -> Http.Error -> Html msg
+viewAppError appContext error =
+    let
+        context =
+            Env.appContextToString appContext
+    in
+    div [ id "app" ]
+        [ viewMainHeader_ [ viewAppTitle Nothing appContext ]
+        , viewMainSidebar_ []
+        , div [ id "main-content", class "app-error" ]
+            [ Icon.view Icon.warn
+            , p [ title (Api.errorToString error) ]
+                [ text (context ++ " could not be started.") ]
+            ]
+        ]
 
 
 view : Model -> Browser.Document Msg

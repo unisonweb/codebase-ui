@@ -9,6 +9,21 @@
     "main-sidebar main-content";
 }
 
+#app .app-error {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8rem;
+  font-weight: 600;
+  color: var(--color-main-mg);
+}
+
+#app .app-error .icon {
+  font-size: 4rem;
+  color: var(--color-main-alert);
+}
+
 /* -- Main Header ---------------------------------------------------------- */
 
 #main-header {
@@ -36,32 +51,32 @@
   color: var(--color-main-header-subtle-fg-em);
 }
 
-#main-header .app-context {
+#main-header .app-title {
   font-size: var(--font-size-base);
-  display: flex;
-  flex: 1;
+  display: inline-flex;
   flex-direction: row;
   align-items: center;
   color: var(--color-main-header-fg);
 }
 
-#main-header .app-context h1 {
+#main-header .app-title h1 {
   font-size: var(--font-size-base);
 }
 
-#main-header .app-context:hover {
+#main-header .app-title:hover {
   text-decoration: none;
+  transform: translate(0, 0.1rem);
 }
 
-#main-header .app-context .context {
+#main-header .app-title .context {
   margin-left: 0.375rem;
 }
 
-#main-header .app-context .unison-share {
+#main-header .app-title .unison-share {
   color: var(--color-main-header-context-unison-share-fg);
 }
 
-#main-header .app-context .ucm {
+#main-header .app-title .ucm {
   color: var(--color-main-header-context-ucm-fg);
 }
 

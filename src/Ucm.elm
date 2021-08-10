@@ -3,16 +3,16 @@ module Ucm exposing (..)
 import App
 import Browser
 import Env exposing (Flags)
-import Main
+import PreApp
 
 
-main : Program Flags Main.Model Main.Msg
+main : Program Flags PreApp.Model PreApp.Msg
 main =
     Browser.application
-        { init = Main.init
-        , update = Main.update
-        , view = Main.view
-        , subscriptions = Main.subscriptions
-        , onUrlRequest = App.LinkClicked >> Main.AppMsg
-        , onUrlChange = App.UrlChanged >> Main.AppMsg
+        { init = PreApp.init
+        , update = PreApp.update
+        , view = PreApp.view
+        , subscriptions = PreApp.subscriptions
+        , onUrlRequest = App.LinkClicked >> PreApp.AppMsg
+        , onUrlChange = App.UrlChanged >> PreApp.AppMsg
         }
