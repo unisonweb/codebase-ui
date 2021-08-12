@@ -117,12 +117,7 @@ update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
 update env msg model =
     let
         debounceDelay =
-            case env.appContext of
-                UnisonShare ->
-                    300
-
-                Ucm ->
-                    0
+            300
 
         exit =
             ( model, Cmd.none, Exit )
