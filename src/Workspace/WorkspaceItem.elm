@@ -170,7 +170,7 @@ viewNames onClick_ info category =
                 in
                 div []
                     [ span [ class "separator" ] [ text "•" ]
-                    , span [ class "other-names" ] [ Tooltip.tooltip otherNamesTooltipContent otherNamesLabel |> Tooltip.withArrow Tooltip.TopLeft |> Tooltip.view ]
+                    , span [ class "other-names" ] [ Tooltip.tooltip otherNamesLabel otherNamesTooltipContent |> Tooltip.withArrow Tooltip.TopLeft |> Tooltip.view ]
                     ]
 
             else
