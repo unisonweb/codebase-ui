@@ -71,20 +71,20 @@ fromUrlString =
                         Maybe.map HashQualified.HashOnly hash_
                 in
                 Expect.equal expected (Just (HashQualified.fromUrlString "@testhash"))
-        , test "HashQualified when called with a string and name" <|
+        , test "HashQualified when called with a name and hash" <|
             \_ ->
                 let
                     expected =
-                        Maybe.map (HashQualified.HashQualified name_) hash_
+                        Maybe.map (HashQualified.HashQualified urlName_) hash_
                 in
-                Expect.equal expected (Just (HashQualified.fromUrlString "test.name@testhash"))
+                Expect.equal expected (Just (HashQualified.fromUrlString "/test/;./name/@testhash"))
         , test "NameOnly when called with a name" <|
             \_ ->
                 let
                     expected =
-                        HashQualified.NameOnly name_
+                        HashQualified.NameOnly urlName_
                 in
-                Expect.equal expected (HashQualified.fromUrlString "test.name")
+                Expect.equal expected (HashQualified.fromUrlString "test/;./name")
         ]
 
 
@@ -95,6 +95,11 @@ fromUrlString =
 name_ : FQN
 name_ =
     FQN.fromString "test.name"
+
+
+urlName_ : FQN
+urlName_ =
+    FQN.fromString "test...name"
 
 
 hash_ : Maybe Hash

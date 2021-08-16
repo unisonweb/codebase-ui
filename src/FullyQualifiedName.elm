@@ -6,11 +6,15 @@ module FullyQualifiedName exposing
     , fromList
     , fromParent
     , fromString
+    , fromUrlList
     , fromUrlString
     , isSuffixOf
+    , isValidSegmentChar
+    , isValidUrlSegmentChar
     , namespaceOf
     , segments
     , toString
+    , toUrlSegments
     , toUrlString
     , unqualifiedName
     , urlParser
@@ -19,6 +23,7 @@ module FullyQualifiedName exposing
 import Json.Decode as Decode
 import List.Nonempty as NEL
 import String.Extra as StringE
+import Url
 import Url.Parser
 
 
@@ -31,28 +36,39 @@ type FQN
 
 
 {-| Turn a string, like "base.List.map" into FQN ["base", "List", "map"]
+
+    Split text into segments. A smarter version of `Text.split` that handles
+    the name `.` properly.
+
 -}
 fromString : String -> FQN
 fromString rawFqn =
+    let
+        go s =
+            case s of
+                [] ->
+                    []
+
+                "" :: "" :: z ->
+                    "." :: go z
+
+                "" :: z ->
+                    go z
+
+                x :: y ->
+                    x :: go y
+    in
     rawFqn
         |> String.split "."
+        |> go
         |> fromList
 
 
 fromList : List String -> FQN
 fromList segments_ =
-    let
-        rootEmptyToDot i s =
-            if i == 0 && String.isEmpty s then
-                "."
-
-            else
-                s
-    in
     segments_
         |> List.map String.trim
-        |> List.indexedMap rootEmptyToDot
-        |> List.filter (\s -> String.length s > 0)
+        |> List.filter (String.isEmpty >> not)
         |> NEL.fromList
         |> Maybe.withDefault (NEL.fromElement ".")
         |> FQN
@@ -61,8 +77,21 @@ fromList segments_ =
 fromUrlString : String -> FQN
 fromUrlString str =
     str
-        |> String.replace "/" "."
-        |> fromString
+        |> String.split "/"
+        |> fromUrlList
+
+
+fromUrlList : List String -> FQN
+fromUrlList segments_ =
+    let
+        urlDecode s =
+            -- Let invalid % encoding fall through, since it then must be valid
+            -- strings
+            Maybe.withDefault s (Url.percentDecode s)
+    in
+    segments_
+        |> List.map (urlDecode >> urlDecodeSegmentDot)
+        |> fromList
 
 
 toString : FQN -> String
@@ -71,6 +100,7 @@ toString (FQN nameParts) =
         -- Absolute FQNs start with a dot, so when also
         -- joining parts using a dot, we get dot dot (..),
         -- which we don't want.
+        -- TODO: this does mean that we don't support . as a term name on the root...
         trimLeadingDot str =
             if String.startsWith ".." str then
                 String.dropLeft 1 str
@@ -84,11 +114,19 @@ toString (FQN nameParts) =
         |> trimLeadingDot
 
 
+toUrlSegments : FQN -> NEL.Nonempty String
+toUrlSegments fqn =
+    fqn
+        |> segments
+        |> NEL.map (Url.percentEncode >> urlEncodeSegmentDot)
+
+
 toUrlString : FQN -> String
 toUrlString fqn =
     fqn
-        |> toString
-        |> String.replace "." "/"
+        |> toUrlSegments
+        |> NEL.toList
+        |> String.join "/"
 
 
 segments : FQN -> NEL.Nonempty String
@@ -161,3 +199,48 @@ decodeFromParent parentFqn =
 decode : Decode.Decoder FQN
 decode =
     Decode.map fromString Decode.string
+
+
+isValidSegmentChar : Char -> Bool
+isValidSegmentChar c =
+    let
+        validSymbols =
+            String.toList "!$%^&*-=+<>.~\\/:_'"
+    in
+    Char.isAlphaNum c || List.member c validSymbols
+
+
+isValidUrlSegmentChar : Char -> Bool
+isValidUrlSegmentChar c =
+    -- '/' is a segment separator in Urls and
+    -- should be escaped to %2F, so when
+    -- unescaped, its not a valid segment
+    -- character when parsing URLs.
+    c /= '/' && isValidSegmentChar c
+
+
+
+-- INTERNAL HELPERS
+
+
+{-| URLs can't include a single dot in a path segment like so "base/./docs",
+but this is a valid definition name in Unison, the composition operator for
+example is named "." To get around this we encode dots as ";." in segments such
+that "base...doc" becomes "base/;./doc"
+-}
+urlEncodeSegmentDot : String -> String
+urlEncodeSegmentDot s =
+    if s == "." then
+        ";."
+
+    else
+        s
+
+
+urlDecodeSegmentDot : String -> String
+urlDecodeSegmentDot s =
+    if s == ";." then
+        "."
+
+    else
+        s

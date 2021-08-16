@@ -26,11 +26,21 @@ fqn : Parser FQN
 fqn =
     let
         segment =
+            Parser.oneOf
+                -- Special case ;. which is an escaped . (dot), since we also use
+                -- ';' as the separator character between namespace FQNs and
+                -- definition FQNs. (';' is not a valid character in FQNs and is
+                -- safe as a separator/escape character).
+                [ b (succeed (identity ".") |. s ";.")
+                , b chompSegment
+                ]
+
+        chompSegment =
             Parser.getChompedString <|
                 Parser.succeed ()
-                    |. Parser.chompWhile Char.isAlphaNum
+                    |. Parser.chompWhile FQN.isValidUrlSegmentChar
     in
-    Parser.map FQN.fromList
+    Parser.map FQN.fromUrlList
         (Parser.sequence
             { start = ""
             , separator = "/"
@@ -44,7 +54,7 @@ fqn =
 
 fqnEnd : Parser ()
 fqnEnd =
-    Parser.symbol "-"
+    Parser.symbol ";"
 
 
 hash : Parser Hash
