@@ -2,6 +2,7 @@ module FullyQualifiedNameTests exposing (..)
 
 import Expect
 import FullyQualifiedName as FQN exposing (..)
+import List.Nonempty as NEL
 import Test exposing (..)
 
 
@@ -10,17 +11,20 @@ fromString =
     describe "FullyQualifiedName.fromString"
         [ test "Creates an FQN from a string" <|
             \_ ->
-                Expect.equal "a.b.c" (FQN.toString (FQN.fromString "a.b.c"))
+                Expect.equal [ "a", "b", "c" ] (segments (FQN.fromString "a.b.c"))
+        , test "Creates an FQN from a string where a segment includes a dot (like the composition operatory)" <|
+            \_ ->
+                Expect.equal [ "base", "." ] (segments (FQN.fromString "base.."))
         , describe "Root"
             [ test "Creates a root FQN from \"\"" <|
                 \_ ->
-                    Expect.equal "." (FQN.toString (FQN.fromString ""))
+                    Expect.equal [ "." ] (segments (FQN.fromString ""))
             , test "Creates a root FQN from \" \"" <|
                 \_ ->
-                    Expect.equal "." (FQN.toString (FQN.fromString " "))
+                    Expect.equal [ "." ] (segments (FQN.fromString " "))
             , test "Creates a root FQN from \".\"" <|
                 \_ ->
-                    Expect.equal "." (FQN.toString (FQN.fromString "."))
+                    Expect.equal [ "." ] (segments (FQN.fromString "."))
             ]
         ]
 
@@ -30,17 +34,44 @@ fromUrlString =
     describe "FullyQualifiedName.fromUrlString"
         [ test "Creates an FQN from a URL string (segments separate by /)" <|
             \_ ->
-                Expect.equal "a.b.c" (FQN.toString (FQN.fromUrlString "a/b/c"))
+                Expect.equal [ "a", "b", "c" ] (segments (FQN.fromUrlString "a/b/c"))
+        , test "Supports . in segments (compose)" <|
+            \_ ->
+                Expect.equal [ "a", "b", "." ] (segments (FQN.fromUrlString "a/b/."))
+        , test "Supports special characters n segments" <|
+            \_ ->
+                let
+                    results =
+                        [ segments (FQN.fromUrlString "a/b/+")
+                        , segments (FQN.fromUrlString "a/b/*")
+                        , segments (FQN.fromUrlString "a/b/%2F") -- /
+                        , segments (FQN.fromUrlString "a/b/%25") -- %
+                        , segments (FQN.fromUrlString "a/b/!")
+                        , segments (FQN.fromUrlString "a/b/-")
+                        , segments (FQN.fromUrlString "a/b/==")
+                        ]
+
+                    expects =
+                        [ [ "a", "b", "+" ]
+                        , [ "a", "b", "*" ]
+                        , [ "a", "b", "/" ]
+                        , [ "a", "b", "%" ]
+                        , [ "a", "b", "!" ]
+                        , [ "a", "b", "-" ]
+                        , [ "a", "b", "==" ]
+                        ]
+                in
+                Expect.equal expects results
         , describe "Root"
             [ test "Creates a root FQN from \"\"" <|
                 \_ ->
-                    Expect.equal "." (FQN.toString (FQN.fromUrlString ""))
+                    Expect.equal [ "." ] (segments (FQN.fromUrlString ""))
             , test "Creates a root FQN from \" \"" <|
                 \_ ->
-                    Expect.equal "." (FQN.toString (FQN.fromUrlString " "))
+                    Expect.equal [ "." ] (segments (FQN.fromUrlString " "))
             , test "Creates a root FQN from \"/\"" <|
                 \_ ->
-                    Expect.equal "." (FQN.toString (FQN.fromUrlString "/"))
+                    Expect.equal [ "." ] (segments (FQN.fromUrlString "/"))
             ]
         ]
 
@@ -51,9 +82,9 @@ toString =
         [ test "serializes the FQN" <|
             \_ ->
                 Expect.equal "foo.bar" (FQN.toString (FQN.fromString "foo.bar"))
-        , test "includes root dot when an absolute fqn" <|
+        , test "it supports . as term names (compose)" <|
             \_ ->
-                Expect.equal ".foo.bar" (FQN.toString (FQN.fromString ".foo.bar"))
+                Expect.equal "foo.bar.." (FQN.toString (FQN.fromString "foo.bar.."))
         ]
 
 
@@ -63,9 +94,15 @@ toUrlString =
         [ test "serializes the FQN with segments separate by /" <|
             \_ ->
                 Expect.equal "foo/bar" (FQN.toUrlString (FQN.fromString "foo.bar"))
-        , test "includes root dot when an absolute fqn" <|
+        , test "URL encodes / (divide) segments" <|
             \_ ->
-                Expect.equal "/foo/bar" (FQN.toUrlString (FQN.fromString ".foo.bar"))
+                Expect.equal "foo/bar/%2F/doc" (FQN.toUrlString (FQN.fromString "foo.bar./.doc"))
+        , test "URL encodes % segments" <|
+            \_ ->
+                Expect.equal "foo/bar/%25/doc" (FQN.toUrlString (FQN.fromString "foo.bar.%.doc"))
+        , test "URL encodes . segments with a ; prefix" <|
+            \_ ->
+                Expect.equal "foo/bar/;./doc" (FQN.toUrlString (FQN.fromString "foo.bar...doc"))
         ]
 
 
@@ -157,3 +194,12 @@ namespaceOf =
                 in
                 Expect.equal (Just "base.Map") (FQN.namespaceOf suffix fqn)
         ]
+
+
+
+-- HELPERS
+
+
+segments : FQN -> List String
+segments =
+    FQN.segments >> NEL.toList

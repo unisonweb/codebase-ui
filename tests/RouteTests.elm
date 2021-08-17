@@ -4,6 +4,7 @@ import Definition.Reference as Reference exposing (Reference(..))
 import Expect
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
+import HashQualified as HQ
 import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
 import Route
 import Test exposing (..)
@@ -65,6 +66,16 @@ perspectiveRoute =
                             |> Maybe.map (\h -> Route.Perspective (ByNamespace (Absolute h) (fqn "base.List")))
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
+        , test "Matches a namespace with special characters" <|
+            \_ ->
+                let
+                    url =
+                        mkUrl "/latest/namespaces/base/List/;./%2F/docs"
+
+                    expected =
+                        Route.Perspective (ByNamespace Relative (segments [ "base", "List", ".", "/", "docs" ]))
+                in
+                Expect.equal expected (Route.fromUrl "" url)
         ]
 
 
@@ -85,7 +96,7 @@ definitionRoute =
             \_ ->
                 let
                     url =
-                        mkUrl "/latest/namespaces/base/List/-/terms/map"
+                        mkUrl "/latest/namespaces/base/List/;/terms/map"
 
                     expected =
                         Route.Definition (ByNamespace Relative (fqn "base.List")) (Reference.fromString TermReference "map")
@@ -105,7 +116,7 @@ definitionRoute =
             \_ ->
                 let
                     url =
-                        mkUrl "/latest/namespaces/base/List/-/terms/@definitionhash"
+                        mkUrl "/latest/namespaces/base/List/;/terms/@definitionhash"
 
                     expected =
                         Route.Definition (ByNamespace Relative (fqn "base.List")) (Reference.fromString TermReference "#definitionhash")
@@ -126,7 +137,7 @@ definitionRoute =
             \_ ->
                 let
                     url =
-                        mkUrl "/@codebasehash/namespaces/base/List/-/terms/map"
+                        mkUrl "/@codebasehash/namespaces/base/List/;/terms/map"
 
                     expected =
                         hash "@codebasehash"
@@ -148,13 +159,25 @@ definitionRoute =
             \_ ->
                 let
                     url =
-                        mkUrl "/@codebasehash/namespaces/base/List/-/terms/map"
+                        mkUrl "/@codebasehash/namespaces/base/List/;/terms/map"
 
                     expected =
                         hash "@codebasehash"
                             |> Maybe.map (\h -> Route.Definition (ByNamespace (Absolute h) (fqn "base.List")) (Reference.fromString TermReference "map"))
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
+        , test "Matches a namespace and definition with special characters" <|
+            \_ ->
+                let
+                    url =
+                        mkUrl "/latest/namespaces/base/List/;./%2F/docs/;/terms/docs/about/;./and/%2F/doc"
+
+                    expected =
+                        Route.Definition
+                            (ByNamespace Relative (segments [ "base", "List", ".", "/", "docs" ]))
+                            (TermReference (HQ.NameOnly (segments [ "docs", "about", ".", "and", "/", "doc" ])))
+                in
+                Expect.equal expected (Route.fromUrl "" url)
         ]
 
 
@@ -188,6 +211,11 @@ fromUrlBasePath =
                 in
                 Expect.equal expected (Route.fromUrl basePath url)
         ]
+
+
+segments : List String -> FQN
+segments =
+    FQN.fromList
 
 
 fqn : String -> FQN

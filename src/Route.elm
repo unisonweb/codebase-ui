@@ -152,13 +152,13 @@ toUrlString route =
         hqToPath hq =
             case hq of
                 NameOnly fqn ->
-                    NEL.toList (FQN.segments fqn)
+                    fqn |> FQN.toUrlSegments |> NEL.toList
 
                 HashOnly h ->
                     [ Hash.toUrlString h ]
 
                 HashQualified fqn h ->
-                    String.split "/" (FQN.toUrlString fqn ++ Hash.toUrlString h)
+                    NEL.toList (FQN.toUrlSegments fqn) ++ [ Hash.toUrlString h ]
 
         perspectiveParamsToPath pp includeNamespacesSuffix =
             case pp of

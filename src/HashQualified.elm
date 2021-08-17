@@ -48,7 +48,7 @@ fromString str =
     str
         |> Hash.fromString
         |> Maybe.map HashOnly
-        |> MaybeE.orElse (hashQualifiedFromString Hash.prefix str)
+        |> MaybeE.orElse (hashQualifiedFromString FQN.fromString Hash.prefix str)
         |> Maybe.withDefault (NameOnly (FQN.fromString str))
 
 
@@ -57,7 +57,7 @@ fromUrlString str =
     str
         |> Hash.fromUrlString
         |> Maybe.map HashOnly
-        |> MaybeE.orElse (hashQualifiedFromString Hash.urlPrefix str)
+        |> MaybeE.orElse (hashQualifiedFromString FQN.fromUrlString Hash.urlPrefix str)
         |> Maybe.withDefault (NameOnly (FQN.fromUrlString str))
 
 
@@ -142,8 +142,8 @@ isRawHashQualified str =
     not (Hash.isRawHash str) && String.contains Hash.urlPrefix str
 
 
-hashQualifiedFromString : String -> String -> Maybe HashQualified
-hashQualifiedFromString sep str =
+hashQualifiedFromString : (String -> FQN) -> String -> String -> Maybe HashQualified
+hashQualifiedFromString toFQN sep str =
     if isRawHashQualified str then
         let
             parts =
@@ -161,7 +161,7 @@ hashQualifiedFromString sep str =
 
             name_ :: unprefixedHash :: [] ->
                 Hash.fromString (Hash.prefix ++ unprefixedHash)
-                    |> Maybe.map (HashQualified (FQN.fromString name_))
+                    |> Maybe.map (HashQualified (toFQN name_))
 
             _ ->
                 Nothing
