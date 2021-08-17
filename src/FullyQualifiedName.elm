@@ -11,6 +11,7 @@ module FullyQualifiedName exposing
     , isSuffixOf
     , isValidSegmentChar
     , isValidUrlSegmentChar
+    , namespace
     , namespaceOf
     , segments
     , toString
@@ -21,6 +22,7 @@ module FullyQualifiedName exposing
     )
 
 import Json.Decode as Decode
+import List.Extra as ListE
 import List.Nonempty as NEL
 import String.Extra as StringE
 import Url
@@ -142,6 +144,19 @@ fromParent (FQN parentParts) childName =
 unqualifiedName : FQN -> String
 unqualifiedName (FQN nameParts) =
     NEL.last nameParts
+
+
+namespace : FQN -> Maybe FQN
+namespace (FQN segments_) =
+    case segments_ |> NEL.toList |> ListE.init of
+        Nothing ->
+            Nothing
+
+        Just [] ->
+            Nothing
+
+        Just segments__ ->
+            Just (fromList segments__)
 
 
 equals : FQN -> FQN -> Bool

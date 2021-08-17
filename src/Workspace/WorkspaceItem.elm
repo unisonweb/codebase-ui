@@ -5,15 +5,15 @@ import Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityCo
 import Definition.Category as Category exposing (Category)
 import Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail, DataConstructorSource(..))
 import Definition.Doc as Doc exposing (Doc(..), DocFoldToggles)
-import Definition.Info as Info
+import Definition.Info as Info exposing (Info)
 import Definition.Reference as Reference exposing (Reference(..))
 import Definition.Source as Source
 import Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, TermSignature(..), TermSource(..))
 import Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource(..))
 import FullyQualifiedName as FQN exposing (FQN)
-import Hash
+import Hash exposing (Hash)
 import HashQualified as HQ exposing (HashQualified(..))
-import Html exposing (Attribute, Html, a, div, h3, header, section, span, strong, text)
+import Html exposing (Attribute, Html, a, div, h3, header, label, section, span, strong, text)
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
@@ -22,7 +22,7 @@ import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
 import String.Extra exposing (pluralize)
 import UI
-import UI.Icon as Icon
+import UI.Icon as Icon exposing (Icon)
 import UI.Tooltip as Tooltip
 import Util
 import Workspace.Zoom exposing (Zoom(..))
@@ -136,22 +136,18 @@ viewBuiltin item =
                     UI.nothing
 
 
-{-| TODO: Some of this that isn't Workspace specific might be moved into Definition.Info
--}
-viewNames :
-    msg
-    -> { a | name : String, namespace : Maybe String, otherNames : List FQN }
-    -> Category
-    -> Html msg
-viewNames onClick_ info category =
+viewMenuItem : Icon msg -> String -> Html msg
+viewMenuItem icon label_ =
+    div [ class "menu-item" ] [ Icon.view icon, label [] [ text label_ ] ]
+
+
+viewMenuItems : Hash -> Info -> Html msg
+viewMenuItems hash_ info =
     let
         namespace =
             case info.namespace of
                 Just ns ->
-                    div [ class "namespace" ]
-                        [ span [ class "separator in" ] [ text "in" ]
-                        , text ns
-                        ]
+                    viewMenuItem Icon.folderOutlined (FQN.toString ns)
 
                 Nothing ->
                     UI.nothing
@@ -166,21 +162,35 @@ viewNames onClick_ info category =
                         div [] (List.map (\n -> div [] [ text (FQN.toString n) ]) info.otherNames)
 
                     otherNamesLabel =
-                        text (pluralize "other name..." "other names..." numOtherNames)
+                        pluralize "other name..." "other names..." numOtherNames
                 in
-                div []
-                    [ span [ class "separator" ] [ text "•" ]
-                    , span [ class "other-names" ] [ Tooltip.tooltip otherNamesLabel otherNamesTooltipContent |> Tooltip.withArrow Tooltip.TopLeft |> Tooltip.view ]
-                    ]
+                Tooltip.tooltip (viewMenuItem Icon.tagsOutlined otherNamesLabel) otherNamesTooltipContent
+                    |> Tooltip.withArrow Tooltip.TopLeft
+                    |> Tooltip.view
 
             else
                 UI.nothing
+
+        formatHash h =
+            h |> Hash.toString |> String.dropLeft 1 |> String.left 8
+
+        hash =
+            Tooltip.tooltip (viewMenuItem Icon.hash (formatHash hash_)) (text (Hash.toString hash_))
+                |> Tooltip.withArrow Tooltip.TopLeft
+                |> Tooltip.view
     in
-    div [ class "names", onClick onClick_ ]
-        [ Icon.view Icon.caretRight
-        , Icon.view (Category.icon category)
-        , h3 [ class "name" ] [ text info.name ]
-        , div [ class "info" ] [ namespace, otherNames ]
+    div [ class "menu-items" ] [ hash, namespace, otherNames ]
+
+
+viewInfo : msg -> Hash -> Info -> Category -> Html msg
+viewInfo onClick_ hash info category =
+    div [ class "info" ]
+        [ a [ class "toggle-zoom", onClick onClick_ ]
+            [ Icon.view Icon.caretRight
+            , Icon.view (Category.icon category)
+            , h3 [ class "name" ] [ text info.name ]
+            ]
+        , viewMenuItems hash info
         ]
 
 
@@ -267,44 +277,44 @@ viewItem closeMsg toOpenReferenceMsg toUpdateZoomMsg toggleFoldMsg ref data isFo
                 |> Maybe.withDefault UI.nothing
     in
     case data.item of
-        TermItem (Term _ category detail) ->
+        TermItem (Term h category detail) ->
             viewClosableRow
                 closeMsg
                 ref
                 attrs
-                (viewNames docZoomMsg detail.info (Category.Term category))
+                (viewInfo docZoomMsg h detail.info (Category.Term category))
                 [ ( UI.nothing, viewDoc_ detail.doc )
                 , ( UI.nothing, viewBuiltin data.item )
                 , viewSource toOpenReferenceMsg data.item
                 ]
 
-        TypeItem (Type _ category detail) ->
+        TypeItem (Type h category detail) ->
             viewClosableRow
                 closeMsg
                 ref
                 attrs
-                (viewNames docZoomMsg detail.info (Category.Type category))
+                (viewInfo docZoomMsg h detail.info (Category.Type category))
                 [ ( UI.nothing, viewDoc_ detail.doc )
                 , ( UI.nothing, viewBuiltin data.item )
                 , viewSource toOpenReferenceMsg data.item
                 ]
 
-        DataConstructorItem (DataConstructor _ detail) ->
+        DataConstructorItem (DataConstructor h detail) ->
             viewClosableRow
                 closeMsg
                 ref
                 attrs
-                (viewNames docZoomMsg detail.info (Category.Type Type.DataType))
+                (viewInfo docZoomMsg h detail.info (Category.Type Type.DataType))
                 [ ( UI.nothing, viewBuiltin data.item )
                 , viewSource toOpenReferenceMsg data.item
                 ]
 
-        AbilityConstructorItem (AbilityConstructor _ detail) ->
+        AbilityConstructorItem (AbilityConstructor h detail) ->
             viewClosableRow
                 closeMsg
                 ref
                 attrs
-                (viewNames docZoomMsg detail.info (Category.Type Type.AbilityType))
+                (viewInfo docZoomMsg h detail.info (Category.Type Type.AbilityType))
                 [ ( UI.nothing, viewBuiltin data.item )
                 , viewSource toOpenReferenceMsg data.item
                 ]

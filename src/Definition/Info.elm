@@ -15,7 +15,7 @@ import List.Nonempty as NEL
 
 type alias Info =
     { name : String
-    , namespace : Maybe String
+    , namespace : Maybe FQN
     , otherNames : List FQN
     }
 
@@ -33,7 +33,7 @@ makeInfo name_ allFqns =
 -- Helpers
 
 
-namespaceAndOtherNames : String -> NEL.Nonempty FQN -> ( Maybe String, List FQN )
+namespaceAndOtherNames : String -> NEL.Nonempty FQN -> ( Maybe FQN, List FQN )
 namespaceAndOtherNames suffixName fqns =
     let
         fqnWithin =
@@ -46,4 +46,4 @@ namespaceAndOtherNames suffixName fqns =
                 |> NEL.toList
                 |> ListE.filterNot (FQN.equals fqnWithin)
     in
-    ( FQN.namespaceOf suffixName fqnWithin, fqnsWithout )
+    ( FQN.namespace fqnWithin, fqnsWithout )

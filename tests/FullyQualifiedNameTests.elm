@@ -196,6 +196,26 @@ namespaceOf =
         ]
 
 
+namepsace : Test
+namepsace =
+    describe "FullyQualifiedName.namepsace"
+        [ test "removes qualified name" <|
+            \_ ->
+                let
+                    fqn =
+                        FQN.fromString "base.List.map"
+                in
+                Expect.equal (Just (FQN.fromString "base.List")) (FQN.namespace fqn)
+        , test "with an FQN of only 1 segment, it returns Nothing" <|
+            \_ ->
+                let
+                    fqn =
+                        FQN.fromString "map"
+                in
+                Expect.equal Nothing (FQN.namespace fqn)
+        ]
+
+
 
 -- HELPERS
 
