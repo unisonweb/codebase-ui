@@ -120,19 +120,7 @@ update msg ({ env } as model) =
             ( { model | route = Route.fromUrl env.basePath url }, Cmd.none )
 
         ChangePerspective perspective ->
-            let
-                newEnv =
-                    { env | perspective = perspective }
-
-                ( codebaseTree, codebaseTreeCmd ) =
-                    CodebaseTree.init newEnv
-
-                changeRouteCmd =
-                    Route.replacePerspective model.navKey (Perspective.toParams perspective) model.route
-            in
-            ( { model | env = newEnv, codebaseTree = codebaseTree }
-            , Cmd.batch [ Cmd.map CodebaseTreeMsg codebaseTreeCmd, changeRouteCmd ]
-            )
+            replacePerspective model perspective
 
         Keydown event ->
             keydown model event
@@ -228,6 +216,23 @@ openDefinition model ref =
     ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
 
 
+replacePerspective : Model -> Perspective -> ( Model, Cmd Msg )
+replacePerspective ({ env } as model) perspective =
+    let
+        newEnv =
+            { env | perspective = perspective }
+
+        ( codebaseTree, codebaseTreeCmd ) =
+            CodebaseTree.init newEnv
+
+        changeRouteCmd =
+            Route.replacePerspective model.navKey (Perspective.toParams perspective) model.route
+    in
+    ( { model | env = newEnv, codebaseTree = codebaseTree }
+    , Cmd.batch [ Cmd.map CodebaseTreeMsg codebaseTreeCmd, changeRouteCmd ]
+    )
+
+
 handleWorkspaceOutMsg : Model -> Workspace.OutMsg -> ( Model, Cmd Msg )
 handleWorkspaceOutMsg model out =
     case out of
@@ -242,6 +247,11 @@ handleWorkspaceOutMsg model out =
 
         Workspace.Emptied ->
             ( model, Route.navigateToCurrentPerspective model.navKey model.route )
+
+        Workspace.ChangePerspectiveToNamespace fqn ->
+            fqn
+                |> Perspective.toNamespacePerspective model.env.perspective
+                |> replacePerspective model
 
 
 keydown : Model -> KeyboardEvent -> ( Model, Cmd Msg )
@@ -370,9 +380,9 @@ viewPerspective env =
 
                 back =
                     Tooltip.tooltip
-                        (Button.buttonIcon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.view)
-                        (text ("You're currently viewing a subset of " ++ context ++ " (" ++ fqnText ++ "), click to view everything."))
-                        |> Tooltip.withArrow Tooltip.TopRight
+                        (Button.icon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.view)
+                        (Tooltip.Text ("You're currently viewing a subset of " ++ context ++ " (" ++ fqnText ++ "), click to view everything."))
+                        |> Tooltip.withArrow Tooltip.End
                         |> Tooltip.view
             in
             header

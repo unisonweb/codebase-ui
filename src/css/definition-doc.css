@@ -102,7 +102,12 @@
 }
 
 .definition-doc .tooltip {
-  min-width: 20rem;
+  min-width: 24rem;
+  top: 1rem;
+}
+
+.definition-doc .tooltip-bubble > section:only-child {
+  margin: 0;
 }
 
 .definition-doc aside {
@@ -233,6 +238,10 @@
 
 .definition-doc p {
   margin-bottom: 1em;
+}
+
+.definition-doc p:last-child {
+  margin: 0;
 }
 
 .definition-doc ol,

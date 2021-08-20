@@ -175,43 +175,51 @@
   font-weight: bold;
 }
 
-.definition-row header .info .menu-items {
-  font-size: var(--font-size-small);
+.definition-row header .info .info-items {
+  font-size: var(--font-size-medium);
   display: flex;
   flex-direction: row;
   align-items: flex-end;
-  color: var(--color-workspace-item-subtle-fg);
+  color: var(--color-workspace-item-info-item-fg);
   height: 1.5rem;
   margin-left: 0.25rem;
   margin-top: 1px;
 }
 
-.definition-row header .info .menu-items .icon {
-  color: var(--color-workspace-item-subtle-fg);
+.definition-row header .info .info-items .info-item > .icon {
+  color: var(--color-workspace-item-info-item-subtle-fg);
+  font-size: var(--font-size-base);
   margin-right: 0.25rem;
-  margin-top: -1px;
 }
 
-.definition-row header .info .menu-items .menu-item {
+.definition-row header .info .info-items .info-item {
   display: flex;
   flex-direction: row;
   align-items: center;
   justify-content: center;
   padding: 0 0.5rem;
-  margin-right: 0.5rem;
   height: 1.5rem;
   line-height: 0.875rem;
-  transition: 0.2s all;
+  transition: 0.2s background;
   border-radius: var(--border-radius-base);
 }
-
-.definition-row header .info .menu-items .menu-item:hover {
-  color: var(--color-workspace-item-fg);
-  background: var(--color-workspace-item-em-bg);
+.definition-row header .info .info-items .info-item > label {
+  transition: 0.2s all;
 }
 
-.definition-row header .info .menu-items .menu-item:hover .icon {
-  color: var(--color-workspace-item-fg);
+.definition-row header .info .info-items .info-item:hover,
+.definition-row header .info .info-items .tooltip:hover + .info-item {
+  color: var(--color-workspace-item-info-item-hover-fg);
+  background: var(--color-workspace-item-info-item-hover-bg);
+}
+
+.definition-row header .info .info-items .info-item:hover > .icon,
+.definition-row header .info .info-items .tooltip:hover + .info-item > .icon {
+  color: var(--color-workspace-item-info-item-hover-sublte-fg);
+}
+
+.definition-row header .info .info-items .tooltip {
+  margin-left: -0.2rem;
 }
 
 .definition-row header .error-header {

@@ -66,11 +66,17 @@
   --color-workspace-item-link-active: var(--color-pink-1);
   --color-workspace-item-link-hover: var(--color-pink-2);
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
-  --color-workspace-item-subtle-fg-em: var(--color-gray-lighten-20);
+  --color-workspace-item-subtle-fg-em: var(--color-gray-lighten-30);
   --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
   --color-workspace-item-em-bg: var(--color-gray-lighten-55);
   --color-workspace-item-content-border: var(--color-gray-lighten-55);
   --color-workspace-item-border: transparent;
+
+  --color-workspace-item-info-item-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-info-item-subtle-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-info-item-hover-fg: var(--color-gray-darken-30);
+  --color-workspace-item-info-item-hover-subtle-fg: var(--color-gray-base);
+  --color-workspace-item-info-item-hover-bg: var(--color-gray-lighten-50);
 
   --color-workspace-item-focus-fg: var(--color-gray-darken-30);
   --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-30);
@@ -144,8 +150,14 @@
 
   /* Tooltips */
   --color-tooltip-fg: var(--color-gray-lighten-60);
+  --color-tooltip-subtle-fg: var(--color-gray-lighten-20);
   --color-tooltip-bg: var(--color-gray-darken-30);
-  --color-tooltip-border: transparent;
+  --color-tooltip-item-fg: var(--color-gray-lighten-60);
+  --color-tooltip-item-subtle-fg: var(--color-gray-lighten-20);
+  --color-tooltip-item-bg: transparent;
+  --color-tooltip-item-hover-fg: var(--color-gray-lighten-60);
+  --color-tooltip-item-hover-subtle-fg: var(--color-gray-lighten-30);
+  --color-tooltip-item-hover-bg: var(--color-gray-darken-10);
 
   /* Syntax */
   --color-syntax-base: var(--color-main-fg);

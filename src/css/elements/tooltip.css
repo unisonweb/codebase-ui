@@ -2,12 +2,6 @@
 
 .tooltip {
   position: absolute;
-  font-size: var(--font-size-medium);
-  color: var(--color-tooltip-fg);
-  background: var(--color-tooltip-bg);
-  padding: 0.5rem 0.75rem;
-  border-radius: var(--border-radius-base);
-  min-width: 10rem;
   opacity: 0;
   pointer-events: none;
   z-index: var(--layer-tooltip);
@@ -22,12 +16,23 @@
   --tooltip-arrow-border-size: calc(
     var(--tooltip-border-size) + var(--tooltip-arrow-size)
   );
+}
 
+/* -- Core ------------------------------------------------------------------*/
+
+.tooltip-bubble {
+  position: relative;
+  font-size: var(--font-size-medium);
+  color: var(--color-tooltip-fg);
+  background: var(--color-tooltip-bg);
+  padding: 0.5rem 0.75rem;
+  border-radius: var(--border-radius-base);
+  min-width: 10rem;
   border: var(--tooltip-border-size) solid var(--color-tooltip-border);
 }
 
-.tooltip:after,
-.tooltip:before {
+.tooltip-bubble:after,
+.tooltip-bubble:before {
   border: solid transparent;
   content: "";
   height: 0;
@@ -36,62 +41,68 @@
   pointer-events: none;
 }
 
-.tooltip:after {
+.tooltip-bubble:after {
   border-width: var(--tooltip-arrow-size);
 }
 
-.tooltip:before {
+.tooltip-bubble:before {
   border-width: var(--tooltip-arrow-border-size);
 }
 
 /* -- Arrows and Positions --------------------------------------------------*/
 
-/*
-
-TODO: 
-  - top
-  - right, right-top, right-bottom
-  - bottom, bottom-left, bottom-right
-  - left, left-top, left-bottom
-
-*/
-
-.tooltip:is(.top, .top-right, .top-left) {
-  top: 1.75rem;
+.tooltip.below {
+  padding-top: 0.5rem;
+  top: 1.5rem;
 }
 
-.tooltip:is(.top, .top-right, .top-left):after {
+.tooltip.below .tooltip-bubble:after {
   bottom: 100%;
   border-bottom-color: var(--color-tooltip-bg);
 }
 
-.tooltip:is(.top, .top-right, .top-left):before {
+.tooltip.below .tooltip-bubble:before {
   bottom: 100%;
   border-bottom-color: var(--color-tooltip-border);
 }
 
-.tooltip.top-right {
-  right: -0.8rem;
+.tooltip.above {
+  padding-bottom: 0.5rem;
+  bottom: 1.5rem;
 }
 
-.tooltip.top-right:after {
-  right: var(--tooltip-arrow-edge-offset);
+.tooltip.above .tooltip-bubble:after {
+  bottom: 100%;
+  border-bottom-color: var(--color-tooltip-bg);
 }
 
-.tooltip.top-right:before {
-  right: calc(var(--tooltip-arrow-edge-offset) - var(--tooltip-border-size));
+.tooltip.above .tooltip-bubble:before {
+  bottom: 100%;
+  border-bottom-color: var(--color-tooltip-border);
 }
 
-.tooltip.top-left {
-  left: -0.8rem;
+.tooltip:is(.below, .above).arrow-start {
+  left: 0;
 }
 
-.tooltip.top-left:after {
+.tooltip:is(.below, .above).arrow-start .tooltip-bubble:after {
   left: var(--tooltip-arrow-edge-offset);
 }
 
-.tooltip.top-left:before {
+.tooltip:is(.below, .above).arrow-start .tooltip-bubble:before {
   left: calc(var(--tooltip-arrow-edge-offset) - var(--tooltip-border-size));
+}
+
+.tooltip:is(.below, .above).arrow-end {
+  right: 0;
+}
+
+.tooltip:is(.below, .above).arrow-end .tooltip-bubble:after {
+  right: var(--tooltip-arrow-edge-offset);
+}
+
+.tooltip:is(.below, .above).arrow-end .tooltip-bubble:before {
+  right: calc(var(--tooltip-arrow-edge-offset) - var(--tooltip-border-size));
 }
 
 /* -- Trigger ---------------------------------------------------------------*/
@@ -103,5 +114,47 @@ TODO:
 
 .tooltip-trigger:hover .tooltip {
   animation: fade-in 0.2s;
+  pointer-events: auto;
   opacity: 1;
+}
+
+/* -- Content -------------------------------------------------------------- */
+
+.tooltip.content-menu .tooltip-bubble {
+  padding: 0.5rem;
+}
+
+.tooltip .tooltip-menu-items .tooltip-menu-items {
+  display: flex;
+  flex-direction: column;
+}
+
+.tooltip .tooltip-menu-items .tooltip-menu-item {
+  display: flex;
+  align-items: center;
+  flex: 1;
+  height: 2rem;
+  color: var(--color-tooltip-item-fg);
+  background: var(--color-tooltip-item-bg);
+  white-space: nowrap;
+  padding: 0 0.5rem;
+  line-height: 1rem;
+  border-radius: var(--border-radius-base);
+}
+
+.tooltip .tooltip-menu-items .tooltip-menu-item .icon {
+  font-size: var(--font-size-base);
+  margin-right: 0.5rem;
+  color: var(--color-tooltip-item-subtle-fg);
+  margin-top: -1px;
+}
+
+.tooltip .tooltip-menu-items .tooltip-menu-item:hover {
+  text-decoration: none;
+  color: var(--color-tooltip-item-hover-fg);
+  background: var(--color-tooltip-item-hover-bg);
+}
+
+.tooltip .tooltip-menu-items .tooltip-menu-item:hover .icon {
+  color: var(--color-tooltip-item-hover-subtle-fg);
 }

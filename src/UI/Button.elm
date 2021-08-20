@@ -3,10 +3,10 @@ module UI.Button exposing
     , Size(..)
     , Type(..)
     , button
-    , buttonIcon
-    , buttonIconThenLabel
     , danger
     , default
+    , icon
+    , iconThenLabel
     , large
     , link
     , linkIcon
@@ -59,8 +59,8 @@ button clickMsg label =
     }
 
 
-buttonIcon : msg -> I.Icon msg -> Button msg
-buttonIcon msg icon_ =
+icon : msg -> I.Icon msg -> Button msg
+icon msg icon_ =
     { action = OnClick msg
     , content = Icon icon_
     , type_ = Default
@@ -68,8 +68,8 @@ buttonIcon msg icon_ =
     }
 
 
-buttonIconThenLabel : msg -> I.Icon msg -> String -> Button msg
-buttonIconThenLabel msg icon_ label =
+iconThenLabel : msg -> I.Icon msg -> String -> Button msg
+iconThenLabel msg icon_ label =
     { action = OnClick msg
     , content = IconThenLabel icon_ label
     , type_ = Default
