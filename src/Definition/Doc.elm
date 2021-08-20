@@ -375,7 +375,11 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     hr [] []
 
                 Tooltip triggerContent tooltipContent ->
-                    Tooltip.tooltip (viewAtCurrentSectionLevel triggerContent) (viewAtCurrentSectionLevel tooltipContent) |> Tooltip.withArrow Tooltip.TopLeft |> Tooltip.view
+                    Tooltip.tooltip
+                        (viewAtCurrentSectionLevel triggerContent)
+                        (Tooltip.Rich (viewAtCurrentSectionLevel tooltipContent))
+                        |> Tooltip.withArrow Tooltip.Start
+                        |> Tooltip.view
 
                 Aside d ->
                     aside [] [ viewAtCurrentSectionLevel d ]
@@ -435,7 +439,12 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                         )
 
                 Span docs ->
-                    span [] (List.map viewAtCurrentSectionLevel (mergeWords docs))
+                    case docs of
+                        [ d ] ->
+                            viewAtCurrentSectionLevel d
+
+                        ds ->
+                            span [ class "span" ] (List.map viewAtCurrentSectionLevel (mergeWords ds))
 
                 BulletedList items ->
                     let
@@ -585,7 +594,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                             span [ class "source rich embed-inline" ] [ UI.inlineCode [] (viewSyntax syntax) ]
 
                 Join docs ->
-                    span [] (List.map viewAtCurrentSectionLevel (mergeWords docs))
+                    span [ class "join" ] (List.map viewAtCurrentSectionLevel (mergeWords docs))
 
                 UntitledSection docs ->
                     section [] (List.map (viewSectionContent viewAtCurrentSectionLevel) docs)

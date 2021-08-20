@@ -160,6 +160,10 @@ toUrlString route =
                 HashQualified fqn h ->
                     NEL.toList (FQN.toUrlSegments fqn) ++ [ Hash.toUrlString h ]
 
+        namespaceSuffix =
+            ";"
+
+        -- used to mark the end of a namespace FQN
         perspectiveParamsToPath pp includeNamespacesSuffix =
             case pp of
                 ByCodebase Relative ->
@@ -170,14 +174,14 @@ toUrlString route =
 
                 ByNamespace Relative fqn ->
                     if includeNamespacesSuffix then
-                        "latest" :: "-" :: NEL.toList (FQN.segments fqn)
+                        "latest" :: NEL.toList (FQN.segments fqn) ++ [ namespaceSuffix ]
 
                     else
                         "latest" :: NEL.toList (FQN.segments fqn)
 
                 ByNamespace (Absolute hash) fqn ->
                     if includeNamespacesSuffix then
-                        [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn) ++ [ "-" ]
+                        [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn) ++ [ namespaceSuffix ]
 
                     else
                         [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn)

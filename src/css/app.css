@@ -162,8 +162,7 @@
 }
 
 #main-sidebar .perspective .tooltip {
-  margin-right: 0.5rem;
-  margin-top: 0.4rem;
+  right: -0.3rem;
   min-width: calc(var(--main-sidebar-width) - 1.5rem);
 }
 
@@ -172,106 +171,6 @@
 }
 #main-sidebar .perspective .button:hover {
   opacity: 1;
-}
-
-/* -- Codebase Tree -------------------------------------------------------- */
-
-.codebase-tree .namespace-tree {
-  margin-left: -0.5rem;
-}
-
-.codebase-tree .namespace-tree .node {
-  display: flex;
-  user-select: none;
-  align-items: center;
-  border-radius: var(--border-radius-base);
-  padding-left: 0.5rem;
-  margin-bottom: 0.125rem;
-  height: 1.75rem;
-}
-
-.codebase-tree .error {
-  padding-left: 0.5rem;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin: 0.5rem 0;
-  color: var(--color-pink-3);
-}
-
-.codebase-tree .error .icon {
-  font-size: 1rem;
-  margin-right: 0.25rem;
-  color: var(--color-pink-1);
-}
-
-.codebase-tree .loading {
-  padding-left: 0.5rem;
-}
-
-.codebase-tree .loading .loading-placeholder {
-  width: 8rem;
-}
-
-.codebase-tree .namespace-content .loading {
-  padding-left: 0.875rem;
-}
-
-.codebase-tree .namespace-content .loading .loading-placeholder {
-  width: 6rem;
-}
-
-.codebase-tree .namespace-tree .node:hover {
-  background: var(--color-sidebar-focus-bg);
-  text-decoration: none;
-}
-
-.codebase-tree .namespace-tree .node .icon {
-  font-size: 0.875rem;
-  text-align: center;
-  margin-right: 0.5rem;
-  transition: transform 0.1s ease-out;
-  flex-shrink: 0;
-}
-
-.codebase-tree .namespace-tree .node .icon.expanded {
-  transform: rotate(90deg);
-}
-
-.codebase-tree .namespace-tree .node .icon:is(.caret-right, .caret-down) {
-  color: var(--color-sidebar-subtle-fg);
-}
-
-.codebase-tree .namespace-tree .node:hover .icon:is(.caret-right, .caret-down) {
-  color: var(--color-sidebar-focus-fg);
-}
-
-.codebase-tree .namespace-tree .node label {
-  color: var(--color-sidebar-fg);
-  transition: all 0.2s;
-  cursor: pointer;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.codebase-tree .namespace-tree .node .definition-category {
-  font-family: var(--font-monospace);
-  color: var(--color-sidebar-subtle-fg);
-  margin-left: 0.375rem;
-  font-size: 0.75rem;
-  margin-top: 0.25rem;
-}
-
-.codebase-tree .namespace-tree .node:hover label {
-  color: var(--color-sidebar-focus-fg);
-}
-
-.codebase-tree .namespace-tree .node.open label {
-  font-weight: bold;
-}
-
-.codebase-tree .namespace-tree .namespace-content {
-  margin-left: 1rem;
 }
 
 /* -- Main Sidebar Nav ----------------------------------------------------- */

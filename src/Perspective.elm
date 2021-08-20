@@ -10,6 +10,11 @@ type Perspective
     | Namespace { codebaseHash : Hash, fqn : FQN }
 
 
+toNamespacePerspective : Perspective -> FQN -> Perspective
+toNamespacePerspective perspective fqn_ =
+    Namespace { codebaseHash = codebaseHash perspective, fqn = fqn_ }
+
+
 codebaseHash : Perspective -> Hash
 codebaseHash perspective =
     case perspective of

@@ -14,6 +14,7 @@ import Browser.Dom as Dom
 import Definition.Doc as Doc
 import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
+import FullyQualifiedName exposing (FQN)
 import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, id, rel, target)
@@ -69,13 +70,10 @@ init env mRef =
 type Msg
     = NoOp
     | Find
-    | OpenDefinitionRelativeTo Reference Reference
-    | CloseDefinition Reference
-    | UpdateZoom Reference Zoom
-    | ToggleDocFold Reference Doc.FoldId
     | FetchItemFinished Reference (Result Http.Error Item)
     | Keydown KeyboardEvent
     | KeyboardShortcutMsg KeyboardShortcut.Msg
+    | WorkspaceItemMsg WorkspaceItem.Msg
 
 
 type OutMsg
@@ -83,6 +81,7 @@ type OutMsg
     | Focused Reference
     | Emptied
     | ShowFinderRequest
+    | ChangePerspectiveToNamespace FQN
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -93,54 +92,6 @@ update env msg ({ workspaceItems } as model) =
 
         Find ->
             ( model, Cmd.none, ShowFinderRequest )
-
-        OpenDefinitionRelativeTo relativeToRef ref ->
-            openItem env model (Just relativeToRef) ref
-
-        CloseDefinition ref ->
-            let
-                nextModel =
-                    { model | workspaceItems = WorkspaceItems.remove workspaceItems ref }
-            in
-            ( nextModel, Cmd.none, openDefinitionsFocusToOutMsg nextModel.workspaceItems )
-
-        UpdateZoom ref zoom ->
-            let
-                updateMatching workspaceItem =
-                    case workspaceItem of
-                        Success r d ->
-                            if ref == r then
-                                Success r { d | zoom = zoom }
-
-                            else
-                                workspaceItem
-
-                        _ ->
-                            workspaceItem
-            in
-            ( { model | workspaceItems = WorkspaceItems.map updateMatching workspaceItems }
-            , Cmd.none
-            , None
-            )
-
-        ToggleDocFold ref docId ->
-            let
-                updateMatching workspaceItem =
-                    case workspaceItem of
-                        Success r d ->
-                            if ref == r then
-                                Success r { d | docFoldToggles = Doc.toggleFold d.docFoldToggles docId }
-
-                            else
-                                workspaceItem
-
-                        _ ->
-                            workspaceItem
-            in
-            ( { model | workspaceItems = WorkspaceItems.map updateMatching workspaceItems }
-            , Cmd.none
-            , None
-            )
 
         FetchItemFinished ref itemResult ->
             let
@@ -176,6 +127,59 @@ update env msg ({ workspaceItems } as model) =
                     handleKeyboardShortcut { model | keyboardShortcut = keyboardShortcut } shortcut
             in
             ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ], out )
+
+        WorkspaceItemMsg wiMsg ->
+            case wiMsg of
+                WorkspaceItem.OpenReference relativeToRef ref ->
+                    openItem env model (Just relativeToRef) ref
+
+                WorkspaceItem.Close ref ->
+                    let
+                        nextModel =
+                            { model | workspaceItems = WorkspaceItems.remove workspaceItems ref }
+                    in
+                    ( nextModel, Cmd.none, openDefinitionsFocusToOutMsg nextModel.workspaceItems )
+
+                WorkspaceItem.UpdateZoom ref zoom ->
+                    let
+                        updateMatching workspaceItem =
+                            case workspaceItem of
+                                Success r d ->
+                                    if ref == r then
+                                        Success r { d | zoom = zoom }
+
+                                    else
+                                        workspaceItem
+
+                                _ ->
+                                    workspaceItem
+                    in
+                    ( { model | workspaceItems = WorkspaceItems.map updateMatching workspaceItems }
+                    , Cmd.none
+                    , None
+                    )
+
+                WorkspaceItem.ToggleDocFold ref docId ->
+                    let
+                        updateMatching workspaceItem =
+                            case workspaceItem of
+                                Success r d ->
+                                    if ref == r then
+                                        Success r { d | docFoldToggles = Doc.toggleFold d.docFoldToggles docId }
+
+                                    else
+                                        workspaceItem
+
+                                _ ->
+                                    workspaceItem
+                    in
+                    ( { model | workspaceItems = WorkspaceItems.map updateMatching workspaceItems }
+                    , Cmd.none
+                    , None
+                    )
+
+                WorkspaceItem.ChangePerspectiveToNamespace fqn ->
+                    ( model, Cmd.none, ChangePerspectiveToNamespace fqn )
 
         KeyboardShortcutMsg kMsg ->
             let
@@ -439,7 +443,7 @@ viewEmptyState appContext =
                         , fauxDefinition
                         , fauxDefinition
                         , section [ class "actions" ]
-                            [ Button.buttonIconThenLabel Find Icon.search "Find Definitions"
+                            [ Button.iconThenLabel Find Icon.search "Find Definitions"
                                 |> Button.primaryMono
                                 |> Button.medium
                                 |> Button.view
@@ -459,7 +463,7 @@ viewEmptyState appContext =
                         , fauxDefinition
                         , fauxDefinition
                         , section [ class "actions" ]
-                            [ Button.buttonIconThenLabel Find Icon.search "Find Definitions"
+                            [ Button.iconThenLabel Find Icon.search "Find Definitions"
                                 |> Button.primaryMono
                                 |> Button.medium
                                 |> Button.view
@@ -489,17 +493,7 @@ view env model =
 
 viewItem : WorkspaceItem -> Bool -> Html Msg
 viewItem workspaceItem isFocused =
-    let
-        ref =
-            WorkspaceItem.reference workspaceItem
-    in
-    WorkspaceItem.view
-        (CloseDefinition ref)
-        (OpenDefinitionRelativeTo ref)
-        (UpdateZoom ref)
-        (ToggleDocFold ref)
-        workspaceItem
-        isFocused
+    Html.map WorkspaceItemMsg (WorkspaceItem.view workspaceItem isFocused)
 
 
 viewWorkspaceItems : WorkspaceItems -> List (Html Msg)
