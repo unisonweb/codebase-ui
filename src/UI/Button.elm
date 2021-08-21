@@ -3,6 +3,7 @@ module UI.Button exposing
     , Size(..)
     , Type(..)
     , button
+    , contained
     , danger
     , default
     , icon
@@ -16,6 +17,7 @@ module UI.Button exposing
     , primaryMono
     , share
     , small
+    , uncontained
     , view
     , withSize
     , withType
@@ -42,6 +44,7 @@ type alias Button msg =
     { action : Action msg
     , content : Content msg
     , type_ : Type
+    , color : Color
     , size : Size
     }
 
@@ -54,7 +57,8 @@ button : clickMsg -> String -> Button clickMsg
 button clickMsg label =
     { action = OnClick clickMsg
     , content = Label label
-    , type_ = Default
+    , type_ = Contained
+    , color = Default
     , size = Medium
     }
 
@@ -63,7 +67,8 @@ icon : msg -> I.Icon msg -> Button msg
 icon msg icon_ =
     { action = OnClick msg
     , content = Icon icon_
-    , type_ = Default
+    , type_ = Contained
+    , color = Default
     , size = Medium
     }
 
@@ -72,7 +77,8 @@ iconThenLabel : msg -> I.Icon msg -> String -> Button msg
 iconThenLabel msg icon_ label =
     { action = OnClick msg
     , content = IconThenLabel icon_ label
-    , type_ = Default
+    , type_ = Contained
+    , color = Default
     , size = Medium
     }
 
@@ -84,7 +90,8 @@ link : String -> String -> Button clickMsg
 link url label =
     { action = Href url
     , content = Label label
-    , type_ = Default
+    , type_ = Uncontained
+    , color = Default
     , size = Medium
     }
 
@@ -93,7 +100,8 @@ linkIcon : String -> I.Icon msg -> Button msg
 linkIcon url icon_ =
     { action = Href url
     , content = Icon icon_
-    , type_ = Default
+    , type_ = Uncontained
+    , color = Default
     , size = Medium
     }
 
@@ -102,13 +110,14 @@ linkIconThenLabel : String -> I.Icon msg -> String -> Button msg
 linkIconThenLabel url icon_ label =
     { action = Href url
     , content = IconThenLabel icon_ label
-    , type_ = Default
+    , type_ = Uncontained
+    , color = Default
     , size = Medium
     }
 
 
 view : Button clickMsg -> Html clickMsg
-view { content, type_, action, size } =
+view { content, type_, color, action, size } =
     let
         ( contentType, content_ ) =
             case content of
@@ -126,6 +135,7 @@ view { content, type_, action, size } =
             Html.button
                 [ class "button"
                 , class (typeToClassName type_)
+                , class (colorToClassName color)
                 , class (sizeToClassName size)
                 , class contentType
                 , onClick clickMsg
@@ -150,6 +160,11 @@ view { content, type_, action, size } =
 
 
 type Type
+    = Contained
+    | Uncontained
+
+
+type Color
     = Default
     | PrimaryMono
     | Primary
@@ -157,34 +172,49 @@ type Type
     | Danger
 
 
-default : Button clickMsg -> Button clickMsg
-default =
-    withType Default
+contained : Button clickMsg -> Button clickMsg
+contained button_ =
+    { button_ | type_ = Contained }
 
 
-primaryMono : Button clickMsg -> Button clickMsg
-primaryMono =
-    withType PrimaryMono
-
-
-primary : Button clickMsg -> Button clickMsg
-primary =
-    withType Primary
-
-
-share : Button clickMsg -> Button clickMsg
-share =
-    withType Share
-
-
-danger : Button clickMsg -> Button clickMsg
-danger =
-    withType Danger
+uncontained : Button clickMsg -> Button clickMsg
+uncontained button_ =
+    { button_ | type_ = Uncontained }
 
 
 withType : Type -> Button clickMsg -> Button clickMsg
 withType type_ button_ =
     { button_ | type_ = type_ }
+
+
+default : Button clickMsg -> Button clickMsg
+default =
+    withColor Default
+
+
+primaryMono : Button clickMsg -> Button clickMsg
+primaryMono =
+    withColor PrimaryMono
+
+
+primary : Button clickMsg -> Button clickMsg
+primary =
+    withColor Primary
+
+
+share : Button clickMsg -> Button clickMsg
+share =
+    withColor Share
+
+
+danger : Button clickMsg -> Button clickMsg
+danger =
+    withColor Danger
+
+
+withColor : Color -> Button clickMsg -> Button clickMsg
+withColor color_ button_ =
+    { button_ | color = color_ }
 
 
 
@@ -237,6 +267,16 @@ sizeToClassName size =
 typeToClassName : Type -> String
 typeToClassName type_ =
     case type_ of
+        Contained ->
+            "contained"
+
+        Uncontained ->
+            "uncontained"
+
+
+colorToClassName : Color -> String
+colorToClassName color =
+    case color of
         Default ->
             "default"
 

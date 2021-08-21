@@ -70,12 +70,25 @@
   color: var(--color-sidebar-focus-fg);
 }
 
-.codebase-tree .namespace-tree .node label {
+.codebase-tree .namespace-tree .node > label {
   color: var(--color-sidebar-fg);
   transition: all 0.2s;
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.codebase-tree .namespace-tree .node > .tooltip-trigger {
+  margin-left: auto;
+  opacity: 0;
+}
+
+.codebase-tree .namespace-tree .node:hover > .tooltip-trigger {
+  opacity: 1;
+}
+.codebase-tree .namespace-tree .node:hover .tooltip {
+  right: -0.3rem;
+  min-width: calc(var(--main-sidebar-width) - 1.5rem);
 }
 
 .codebase-tree .namespace-tree .node .definition-category {

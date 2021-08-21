@@ -21,7 +21,9 @@ import Http
 import Perspective exposing (Perspective(..))
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
+import UI.Button as Button
 import UI.Icon as Icon exposing (Icon)
+import UI.Tooltip as Tooltip
 
 
 
@@ -51,12 +53,13 @@ type Msg
     = ToggleExpandedNamespaceListing FQN
     | FetchSubNamespaceListingFinished FQN (Result Http.Error NamespaceListing)
     | FetchRootNamespaceListingFinished (Result Http.Error NamespaceListing)
-    | OpenDefinitionListing Reference
+    | Out OutMsg
 
 
 type OutMsg
     = None
     | OpenDefinition Reference
+    | ChangePerspectiveToNamespace FQN
 
 
 update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
@@ -131,8 +134,8 @@ update env msg model =
                 Err err ->
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none, None )
 
-        OpenDefinitionListing ref ->
-            ( model, Cmd.none, OpenDefinition ref )
+        Out outMsg ->
+            ( model, Cmd.none, outMsg )
 
 
 
@@ -190,7 +193,7 @@ viewDefinitionListing : DefinitionListing -> Html Msg
 viewDefinitionListing listing =
     let
         viewDefRow ref fqn =
-            viewListingRow (Just (OpenDefinitionListing ref)) (unqualifiedName fqn)
+            viewListingRow (Just (Out (OpenDefinition ref))) (unqualifiedName fqn)
     in
     case listing of
         TypeListing _ fqn category ->
@@ -254,6 +257,15 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) 
 
             else
                 ( False, UI.nothing )
+
+        changePerspectiveTo =
+            Button.icon (Out (ChangePerspectiveToNamespace fqn)) Icon.intoFolder
+                |> Button.uncontained
+                |> Button.small
+                |> Button.view
+
+        fullName =
+            FQN.toString fqn
     in
     div [ class "subtree" ]
         [ a
@@ -262,6 +274,9 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) 
             ]
             [ Icon.caretRight |> Icon.withClassList [ ( "expanded", isExpanded ) ] |> Icon.view
             , viewListingLabel (unqualifiedName fqn)
+            , Tooltip.tooltip changePerspectiveTo (Tooltip.Text ("Change perspective to " ++ fullName))
+                |> Tooltip.withArrow Tooltip.End
+                |> Tooltip.view
             ]
         , namespaceContent
         ]
