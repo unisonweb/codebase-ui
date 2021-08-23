@@ -166,6 +166,11 @@ update msg ({ env } as model) =
 
                         CodebaseTree.OpenDefinition ref ->
                             openDefinition model2 ref
+
+                        CodebaseTree.ChangePerspectiveToNamespace fqn ->
+                            fqn
+                                |> Perspective.toNamespacePerspective model.env.perspective
+                                |> replacePerspective model
             in
             ( model3, Cmd.batch [ cmd, Cmd.map CodebaseTreeMsg cCmd ] )
 
