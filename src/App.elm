@@ -7,7 +7,7 @@ import CodebaseTree
 import Definition.Reference exposing (Reference)
 import Env exposing (AppContext(..), Env, OperatingSystem(..))
 import Finder
-import FullyQualifiedName as FQN
+import FullyQualifiedName as FQN exposing (FQN)
 import Html exposing (Html, a, aside, div, h1, h2, h3, header, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
@@ -19,6 +19,7 @@ import Perspective exposing (Perspective(..))
 import Route exposing (Route)
 import UI
 import UI.Button as Button
+import UI.CopyField as CopyField
 import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.Tooltip as Tooltip
@@ -36,6 +37,7 @@ type Modal
     | HelpModal
     | ReportBugModal
     | PublishModal
+    | DownloadModal FQN
 
 
 type alias Model =
@@ -383,16 +385,30 @@ viewPerspective env =
 
                 back =
                     Tooltip.tooltip
-                        (Button.icon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.view)
+                        (Button.icon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.uncontained |> Button.view)
                         (Tooltip.Text ("You're currently viewing a subset of " ++ context ++ " (" ++ fqnText ++ "), click to view everything."))
                         |> Tooltip.withArrow Tooltip.End
                         |> Tooltip.view
+
+                download =
+                    case env.appContext of
+                        UnisonShare ->
+                            Button.iconThenLabel (ShowModal (DownloadModal fqn)) Icon.download "Download latest version"
+                                |> Button.small
+                                |> Button.view
+
+                        Ucm ->
+                            UI.nothing
             in
             header
                 [ class "perspective" ]
-                [ div [ class "namespace-slug" ] []
-                , h2 [] [ text fqnText ]
-                , back
+                [ div [ class "perspective-row" ]
+                    [ div [ class "namespace-slug" ] []
+                    , h2 [] [ text fqnText ]
+                    , back
+                    ]
+                , div [ class "perspective-row" ] [ download ]
+                , UI.divider
                 ]
 
 
@@ -486,7 +502,10 @@ viewHelpModal os keyboardShortcut =
 
 githubLinkButton : String -> Html msg
 githubLinkButton repo =
-    Button.linkIconThenLabel ("https://github.com/" ++ repo) Icon.github repo |> Button.small |> Button.view
+    Button.linkIconThenLabel ("https://github.com/" ++ repo) Icon.github repo
+        |> Button.small
+        |> Button.contained
+        |> Button.view
 
 
 viewPublishModal : Html Msg
@@ -544,6 +563,33 @@ viewReportBugModal appContext =
         |> Modal.view
 
 
+viewDownloadModal : FQN -> Html Msg
+viewDownloadModal fqn =
+    let
+        prettyName =
+            FQN.toString fqn
+
+        unqualified =
+            FQN.unqualifiedName fqn
+
+        pullCommand =
+            "pull git@github.com:unisonweb/share.git:." ++ prettyName ++ " ." ++ unqualified
+
+        content =
+            Modal.Content
+                (section
+                    []
+                    [ p [] [ text "Download ", UI.bold prettyName, text " by pulling the namespace from Unison Share into a namespace in your local codebase:" ]
+                    , CopyField.copyField (\_ -> CloseModal) pullCommand |> CopyField.withPrefix ".>" |> CopyField.view
+                    , div [ class "hint" ] [ text "Copy and paste this command into UCM." ]
+                    ]
+                )
+    in
+    Modal.modal "download-modal" CloseModal content
+        |> Modal.withHeader ("Download " ++ prettyName)
+        |> Modal.view
+
+
 viewModal :
     { m | env : Env, modal : Modal, keyboardShortcut : KeyboardShortcut.Model }
     -> Html Msg
@@ -563,6 +609,9 @@ viewModal model =
 
         ReportBugModal ->
             viewReportBugModal model.env.appContext
+
+        DownloadModal fqn ->
+            viewDownloadModal fqn
 
 
 viewAppLoading : AppContext -> Html msg

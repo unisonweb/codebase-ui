@@ -1,7 +1,12 @@
 module UI exposing (..)
 
-import Html exposing (Attribute, Html, code, div, hr, pre, span, text)
+import Html exposing (Attribute, Html, code, div, hr, pre, span, strong, text)
 import Html.Attributes exposing (class)
+
+
+bold : String -> Html msg
+bold text_ =
+    strong [] [ text text_ ]
 
 
 codeBlock : List (Attribute msg) -> Html msg -> Html msg

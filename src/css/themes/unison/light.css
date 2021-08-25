@@ -46,6 +46,7 @@
   --color-sidebar-button-default-bg: var(--color-gray-base);
   --color-sidebar-button-default-hover-fg: var(--color-gray-lighten-50);
   --color-sidebar-button-default-hover-bg: var(--color-gray-base);
+  --color-sidebar-divider: var(--color-gray-darken-10);
 
   --color-sidebar-tooltip-fg: var(--color-gray-lighten-60);
   --color-sidebar-tooltip-bg: var(--color-gray-darken-30);
@@ -93,7 +94,6 @@
   --color-modal-mg: var(--color-gray-lighten-60);
   --color-modal-bg: var(--color-gray-lighten-100);
   --color-modal-inner-border: var(--color-gray-lighten-50);
-  --color-modal-separator: var(--color-gray-lighten-55);
   --color-modal-shadow: rgba(24, 24, 28, 0.2); /* 20% gray-darken-30 */
   --color-modal-overlay: rgba(24, 24, 28, 0.5); /* 50% gray-darken-30 */
   --color-modal-border: transparent;
@@ -126,7 +126,7 @@
   --color-button-default-fg: var(--color-main-fg);
   --color-button-default-bg: var(--color-gray-lighten-50);
   --color-button-default-hover-fg: var(--color-main-fg);
-  --color-button-default-hover-bg: var(--color-gray-lighten-40);
+  --color-button-default-hover-bg: var(--color-gray-lighten-45);
 
   --color-button-primary-mono-fg: var(--color-gray-lighten-60);
   --color-button-primary-mono-bg: var(--color-gray-darken-20);

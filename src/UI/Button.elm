@@ -129,30 +129,21 @@ view { content, type_, color, action, size } =
 
                 Label l ->
                     ( "content-label", [ text l ] )
+
+        attrs =
+            [ class "button"
+            , class (typeToClassName type_)
+            , class (colorToClassName color)
+            , class (sizeToClassName size)
+            , class contentType
+            ]
     in
     case action of
         OnClick clickMsg ->
-            Html.button
-                [ class "button"
-                , class (typeToClassName type_)
-                , class (colorToClassName color)
-                , class (sizeToClassName size)
-                , class contentType
-                , onClick clickMsg
-                ]
-                content_
+            Html.button (onClick clickMsg :: attrs) content_
 
         Href url ->
-            a
-                [ class "button"
-                , class (typeToClassName type_)
-                , class (sizeToClassName size)
-                , class contentType
-                , href url
-                , rel "noopener"
-                , target "_blank"
-                ]
-                content_
+            a (attrs ++ [ href url, rel "noopener", target "_blank" ]) content_
 
 
 

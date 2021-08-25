@@ -109,6 +109,8 @@
   --color-tooltip-fg: var(--color-sidebar-tooltip-fg);
   --color-tooltip-bg: var(--color-sidebar-tooltip-bg);
   --color-tooltip-border: var(--color-sidebar-tooltip-border);
+
+  --color-main-divider: var(--color-sidebar-divider);
 }
 
 #main-sidebar::-webkit-scrollbar {
@@ -139,10 +141,22 @@
 /* -- Perspective -------------------------------------------------------- */
 
 #main-sidebar .perspective {
-  margin-bottom: 3rem;
   display: flex;
   flex-direction: column;
+}
+
+#main-sidebar .perspective .perspective-row {
+  margin-bottom: 1.5rem;
+  display: flex;
   flex-direction: row;
+}
+
+#main-sidebar .perspective .perspective-row:last-of-type {
+  margin-bottom: 0;
+}
+
+#main-sidebar .perspective .perspective-row .button {
+  width: 100%;
 }
 
 #main-sidebar .perspective .namespace-slug {
@@ -164,13 +178,6 @@
 #main-sidebar .perspective .tooltip {
   right: -0.3rem;
   min-width: calc(var(--main-sidebar-width) - 1.5rem);
-}
-
-#main-sidebar .perspective .button {
-  opacity: 0.5;
-}
-#main-sidebar .perspective .button:hover {
-  opacity: 1;
 }
 
 /* -- Main Sidebar Nav ----------------------------------------------------- */
@@ -285,6 +292,7 @@
 @import "./help-modal.css";
 @import "./publish-modal.css";
 @import "./report-bug-modal.css";
+@import "./download-modal.css";
 @import "./finder.css";
 
 @import "./workspace.css";
