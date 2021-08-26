@@ -31,7 +31,7 @@ fqn =
                 -- ';' as the separator character between namespace FQNs and
                 -- definition FQNs. (';' is not a valid character in FQNs and is
                 -- safe as a separator/escape character).
-                [ b (succeed (identity ".") |. s ";.")
+                [ b (succeed "." |. s ";.")
                 , b chompSegment
                 ]
 

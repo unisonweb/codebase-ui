@@ -18,7 +18,7 @@ import Html exposing (Html, a, div, h3, label, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Http
-import Perspective exposing (Perspective(..))
+import Perspective exposing (Perspective)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button

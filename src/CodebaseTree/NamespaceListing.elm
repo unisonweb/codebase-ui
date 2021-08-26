@@ -8,11 +8,9 @@ module CodebaseTree.NamespaceListing exposing
     , map
     )
 
-import Definition.AbilityConstructor as AbilityConstructor
 import Definition.Category as Category exposing (Category)
-import Definition.DataConstructor as DataConstructor
-import Definition.Term as Term exposing (TermCategory(..))
-import Definition.Type as Type exposing (TypeCategory(..))
+import Definition.Term as Term
+import Definition.Type as Type
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode exposing (andThen, at, field)

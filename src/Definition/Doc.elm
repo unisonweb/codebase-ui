@@ -11,7 +11,7 @@ module Definition.Doc exposing
     , view
     )
 
-import Definition.Reference exposing (Reference(..))
+import Definition.Reference exposing (Reference)
 import Definition.Source as Source
 import Definition.Term exposing (TermSignature(..))
 import Html

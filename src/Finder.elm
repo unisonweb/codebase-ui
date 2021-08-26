@@ -9,7 +9,7 @@ import Definition.Reference exposing (Reference(..))
 import Definition.Source as Source
 import Definition.Term exposing (Term(..))
 import Definition.Type exposing (Type(..))
-import Env exposing (AppContext(..), Env)
+import Env exposing (Env)
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import HashQualified exposing (HashQualified(..))
 import Html

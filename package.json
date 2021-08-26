@@ -10,7 +10,8 @@
     "build": "webpack --mode production --config webpack.prod.js",
     "clean": "rm -rf dist",
     "start": "webpack serve --mode development --port 1234 --config webpack.dev.js",
-    "test": "elm-test"
+    "test": "elm-test",
+    "review": "elm-review"
   },
   "bugs": {
     "url": "https://github.com/unisonweb/codebase-ui/issues"
@@ -23,6 +24,7 @@
     "elm": "^0.19.1-5",
     "elm-asset-webpack-loader": "^1.1.2",
     "elm-format": "^0.8.5",
+    "elm-review": "^2.5.5",
     "elm-test": "^0.19.1-revision6",
     "elm-webpack-loader": "^8.0.0",
     "filemanager-webpack-plugin": "^4.0.0",

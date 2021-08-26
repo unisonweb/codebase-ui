@@ -4,13 +4,11 @@ import Api exposing (ApiBasePath(..), ApiRequest)
 import App
 import Browser
 import Browser.Navigation as Nav
-import Env exposing (AppContext(..), Flags, OperatingSystem(..))
-import Html exposing (div, p, text)
-import Html.Attributes exposing (class, id, title)
+import Env exposing (Flags)
+import Html
 import Http
-import Perspective exposing (CodebasePerspectiveParam(..), Perspective(..), PerspectiveParams(..))
+import Perspective exposing (CodebasePerspectiveParam(..), Perspective, PerspectiveParams(..))
 import Route exposing (Route)
-import UI.Icon as Icon
 import Url exposing (Url)
 
 
