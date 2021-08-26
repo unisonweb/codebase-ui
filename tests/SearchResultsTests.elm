@@ -1,7 +1,7 @@
 module SearchResultsTests exposing (..)
 
 import Expect
-import SearchResults exposing (..)
+import SearchResults
 import Test exposing (..)
 
 

@@ -4,11 +4,10 @@ import Api
 import Browser
 import Browser.Navigation as Nav
 import CodebaseTree
-import Definition.Reference exposing (Reference(..))
-import Env as Env exposing (AppContext(..), Env, OperatingSystem(..))
+import Definition.Reference exposing (Reference)
+import Env exposing (AppContext(..), Env, OperatingSystem(..))
 import Finder
 import FullyQualifiedName as FQN
-import HashQualified exposing (HashQualified(..))
 import Html exposing (Html, a, aside, div, h1, h2, h3, header, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
@@ -17,7 +16,6 @@ import KeyboardShortcut
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Perspective exposing (Perspective(..))
-import RemoteData exposing (RemoteData(..))
 import Route exposing (Route)
 import UI
 import UI.Button as Button

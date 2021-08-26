@@ -15,7 +15,7 @@ import Definition.Doc as Doc
 import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
 import FullyQualifiedName exposing (FQN)
-import HashQualified exposing (HashQualified(..))
+import HashQualified as HQ
 import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, id, rel, target)
 import Http
@@ -23,14 +23,13 @@ import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Perspective exposing (Perspective)
-import Route exposing (Route(..))
 import Task
 import UI
 import UI.Button as Button
 import UI.Icon as Icon
-import Workspace.WorkspaceItem as WorkspaceItem exposing (Item(..), WorkspaceItem(..))
+import Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem(..))
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
-import Workspace.Zoom as Zoom exposing (Zoom(..))
+import Workspace.Zoom as Zoom
 
 
 
@@ -373,7 +372,7 @@ fetchDefinition : Perspective -> Reference -> ApiRequest Item Msg
 fetchDefinition perspective ref =
     let
         definitionHash =
-            (Reference.hashQualified >> HashQualified.toString) ref
+            (Reference.hashQualified >> HQ.toString) ref
     in
     [ definitionHash ]
         |> Api.getDefinition perspective

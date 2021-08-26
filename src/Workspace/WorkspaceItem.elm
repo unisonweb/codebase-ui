@@ -1,18 +1,18 @@
 module Workspace.WorkspaceItem exposing (..)
 
 import Api
-import Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail, AbilityConstructorSource(..))
+import Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail)
 import Definition.Category as Category exposing (Category)
-import Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail, DataConstructorSource(..))
-import Definition.Doc as Doc exposing (Doc(..), DocFoldToggles)
+import Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail)
+import Definition.Doc as Doc exposing (Doc, DocFoldToggles)
 import Definition.Info as Info exposing (Info)
-import Definition.Reference as Reference exposing (Reference(..))
+import Definition.Reference as Reference exposing (Reference)
 import Definition.Source as Source
-import Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, TermSignature(..), TermSource(..))
-import Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource(..))
+import Definition.Term as Term exposing (Term(..), TermCategory, TermDetail, TermSource)
+import Definition.Type as Type exposing (Type(..), TypeCategory, TypeDetail, TypeSource)
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
-import HashQualified as HQ exposing (HashQualified(..))
+import HashQualified as HQ
 import Html exposing (Attribute, Html, a, div, h3, header, label, section, span, strong, text)
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)

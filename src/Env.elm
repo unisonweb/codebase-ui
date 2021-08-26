@@ -1,7 +1,7 @@
 module Env exposing (..)
 
 import Api exposing (ApiBasePath(..))
-import Perspective exposing (Perspective(..))
+import Perspective exposing (Perspective)
 
 
 type AppContext
