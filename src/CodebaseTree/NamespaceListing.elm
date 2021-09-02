@@ -78,7 +78,7 @@ contentFetched (NamespaceListing _ fqn content) needleFqn =
 -- JSON DECODE
 
 
-decode : FQN -> Decode.Decoder NamespaceListing
+decode : Maybe FQN -> Decode.Decoder NamespaceListing
 decode listingFqn =
     Decode.map3
         NamespaceListing
@@ -97,23 +97,33 @@ decode listingFqn =
 -- JSON Decode Helpers
 
 
+decodeFromParent : Maybe FQN -> Decode.Decoder FQN
+decodeFromParent parentFqn =
+    parentFqn
+        |> Maybe.map FQN.decodeFromParent
+        |> Maybe.withDefault FQN.decode
+
+
 {-| Decoding specific intermediate type |
 -}
-decodeSubNamespace : FQN -> Decode.Decoder NamespaceListingChild
+decodeSubNamespace : Maybe FQN -> Decode.Decoder NamespaceListingChild
 decodeSubNamespace parentFqn =
     Decode.map SubNamespace
         (Decode.map3 NamespaceListing
             (field "namespaceHash" Hash.decode)
-            (field "namespaceName" (FQN.decodeFromParent parentFqn))
+            (field "namespaceName" (decodeFromParent parentFqn))
             (Decode.succeed NotAsked)
         )
 
 
-decodeContent : FQN -> Decode.Decoder NamespaceListingContent
+decodeContent : Maybe FQN -> Decode.Decoder NamespaceListingContent
 decodeContent parentFqn =
     let
         decodeTag =
             field "tag" Decode.string
+
+        decodeFqn =
+            decodeFromParent parentFqn
 
         termTypeByHash hash =
             if Hash.isAbilityConstructorHash hash then
@@ -132,21 +142,21 @@ decodeContent parentFqn =
             Decode.map SubDefinition
                 (Decode.map2 AbilityConstructorListing
                     (field "termHash" Hash.decode)
-                    (field "termName" (FQN.decodeFromParent parentFqn))
+                    (field "termName" decodeFqn)
                 )
 
         decodeDataConstructorListing =
             Decode.map SubDefinition
                 (Decode.map2 DataConstructorListing
                     (field "termHash" Hash.decode)
-                    (field "termName" (FQN.decodeFromParent parentFqn))
+                    (field "termName" decodeFqn)
                 )
 
         decodeTypeListing =
             Decode.map SubDefinition
                 (Decode.map3 TypeListing
                     (field "typeHash" Hash.decode)
-                    (field "typeName" (FQN.decodeFromParent parentFqn))
+                    (field "typeName" decodeFqn)
                     (Decode.map Category.Type (Type.decodeTypeCategory [ "typeTag" ]))
                 )
 
@@ -154,7 +164,7 @@ decodeContent parentFqn =
             Decode.map SubDefinition
                 (Decode.map3 TermListing
                     (field "termHash" Hash.decode)
-                    (field "termName" (FQN.decodeFromParent parentFqn))
+                    (field "termName" decodeFqn)
                     (Decode.map Category.Term (Term.decodeTermCategory [ "termTag" ]))
                 )
 

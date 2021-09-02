@@ -33,9 +33,13 @@ type Endpoint
     = Endpoint (List String) (List QueryParameter)
 
 
-list : PerspectiveParams -> String -> Endpoint
+list : PerspectiveParams -> Maybe String -> Endpoint
 list perspectiveParams fqnOrHash =
-    Endpoint [ "list" ] (string "namespace" fqnOrHash :: perspectiveParamsToQueryParams perspectiveParams)
+    let
+        namespace =
+            Maybe.withDefault "." fqnOrHash
+    in
+    Endpoint [ "list" ] (string "namespace" namespace :: perspectiveParamsToQueryParams perspectiveParams)
 
 
 getDefinition : Perspective -> List String -> Endpoint
