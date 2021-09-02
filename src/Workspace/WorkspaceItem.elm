@@ -401,7 +401,7 @@ viewRow ref attrs actionsContent ( headerGutter, headerContent ) content =
                 UI.nothing
     in
     div
-        (class "definition-row" :: id ("definition-" ++ Reference.toString ref) :: attrs)
+        (class "workspace-item" :: id ("definition-" ++ Reference.toString ref) :: attrs)
         [ actions
         , header [ class "inner-row" ] headerItems
         , section [ class "content" ] contentRows

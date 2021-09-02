@@ -419,8 +419,8 @@ subscriptions _ =
 viewEmptyState : Env.AppContext -> Html Msg
 viewEmptyState appContext =
     let
-        fauxDefinition =
-            div [ class "faux-definition" ]
+        fauxItem =
+            div [ class "faux-workspace-item" ]
                 [ UI.loadingPlaceholderRow
                 , UI.loadingPlaceholderRow
                 ]
@@ -439,8 +439,8 @@ viewEmptyState appContext =
                             , a [ href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ strong [] [ text "Unison Share" ] ]
                             , text " for community projects."
                             ]
-                        , fauxDefinition
-                        , fauxDefinition
+                        , fauxItem
+                        , fauxItem
                         , section [ class "actions" ]
                             [ Button.iconThenLabel Find Icon.search "Find Definitions"
                                 |> Button.primaryMono
@@ -459,8 +459,8 @@ viewEmptyState appContext =
                         [ class "content" ]
                         [ h2 [] [ text "Unison ", span [ class "context" ] [ text "Share" ] ]
                         , p [] [ text "Explore to discover and share Unison libraries, documentation, types, and terms." ]
-                        , fauxDefinition
-                        , fauxDefinition
+                        , fauxItem
+                        , fauxItem
                         , section [ class "actions" ]
                             [ Button.iconThenLabel Find Icon.search "Find Definitions"
                                 |> Button.primaryMono

@@ -16,6 +16,32 @@
   --tooltip-arrow-border-size: calc(
     var(--tooltip-border-size) + var(--tooltip-arrow-size)
   );
+
+  /* Docs (.definition-doc) can exist inside tooltips, but tooltips often have
+   * a different background color, so overwrite doc colors to match tooltip */
+  --color-doc-link: var(--color-tooltip-link);
+  --color-doc-link-active: var(--color-tooltip-link-active);
+  --color-doc-link-hover: var(--color-tooltip-link-hover);
+  --color-doc-source-bg: var(--color-tooltip-source-bg);
+  --color-doc-source-mg: var(--color-tooltip-source-mg);
+  --color-doc-fold-hover-bg: var(--color-tooltip-fold-hover-bg);
+
+  /* Syntax (via Docs) can be rendered inside tooltips */
+  --color-syntax-base: var(--color-tooltip-syntax-base);
+  --color-syntax-subtle: var(--color-tooltip-syntax-subtle);
+  --color-syntax-subtle-em: var(--color-tooltip-syntax-subtle-em);
+  --color-syntax-keyword: var(--color-tooltip-syntax-keyword);
+  --color-syntax-operator: var(--color-tooltip-syntax-operator);
+  --color-syntax-term: var(--color-tooltip-syntax-term);
+  --color-syntax-term-namespace: var(--color-tooltip-syntax-term-namespace);
+  --color-syntax-ability: var(--color-tooltip-syntax-ability);
+  --color-syntax-type: var(--color-tooltip-syntax-type);
+  --color-syntax-type-namespace: var(--color-tooltip-syntax-type-namespace);
+  --color-syntax-constructor: var(--color-tooltip-syntax-constructor);
+  --color-syntax-constructor-namespace: var(
+    --color-tooltip-syntax-constructor-namespace
+  );
+  --color-syntax-text: var(--color-tooltip-syntax-text);
 }
 
 /* -- Core ------------------------------------------------------------------*/

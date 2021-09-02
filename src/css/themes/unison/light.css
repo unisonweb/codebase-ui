@@ -6,6 +6,7 @@
   --color-main-mg: var(--color-gray-base);
   --color-main-bg: var(--color-gray-lighten-100);
   --color-main-subtle-fg: var(--color-gray-lighten-30);
+  --color-main-subtle-fg-em: var(--color-gray-lighten-20);
   --color-main-subtle-bg: var(--color-gray-lighten-60);
   --color-main-border: var(--color-gray-lighten-40);
   --color-main-subtle-border: var(--color-gray-lighten-50);
@@ -60,24 +61,16 @@
   --color-workspace-item-mg: var(--color-gray-lighten-60);
   --color-workspace-item-bg: var(--color-gray-lighten-100);
   --color-workspace-item-source-bg: transparent;
-  --color-workspace-item-doc-source-bg: var(--color-gray-lighten-60);
-  --color-workspace-item-doc-source-mg: var(--color-gray-lighten-45);
-  --color-workspace-item-link: var(--color-blue-1);
-  --color-workspace-item-link-active: var(--color-pink-1);
-  --color-workspace-item-link-hover: var(--color-pink-2);
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
-  --color-workspace-item-subtle-fg-em: var(--color-gray-lighten-30);
   --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
   --color-workspace-item-em-bg: var(--color-gray-lighten-55);
   --color-workspace-item-content-border: var(--color-gray-lighten-55);
   --color-workspace-item-border: transparent;
-
   --color-workspace-item-info-item-fg: var(--color-gray-lighten-30);
   --color-workspace-item-info-item-subtle-fg: var(--color-gray-lighten-30);
   --color-workspace-item-info-item-hover-fg: var(--color-gray-darken-30);
   --color-workspace-item-info-item-hover-subtle-fg: var(--color-gray-base);
   --color-workspace-item-info-item-hover-bg: var(--color-gray-lighten-50);
-
   --color-workspace-item-focus-fg: var(--color-gray-darken-30);
   --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-30);
   --color-workspace-item-focus-subtle-bg: var(--color-gray-lighten-50);
@@ -88,6 +81,32 @@
   --color-workspace-item-focus-em-bg: var(--color-gray-lighten-50);
   --color-workspace-item-focus-content-border: var(--color-gray-lighten-50);
   --color-workspace-item-focus-border: var(--color-gray-lighten-50);
+
+  --color-doc-fg: var(--color-gray-darken-30);
+  --color-doc-bg: var(--color-gray-lighten-100);
+  --color-doc-aside-bg: var(--color-gray-lighten-60);
+  --color-doc-callout-bg: var(--color-gray-lighten-55);
+  --color-doc-subtle-fg: var(--color-gray-lighten-30);
+  --color-doc-source-bg: var(--color-gray-lighten-60);
+  --color-doc-source-mg: var(--color-gray-lighten-45);
+  --color-doc-fold-hover-bg: var(--color-gray-lighten-45);
+  --color-doc-link: var(--color-blue-1);
+  --color-doc-link-active: var(--color-pink-1);
+  --color-doc-link-hover: var(--color-pink-2);
+  --color-doc-content-border: var(--color-gray-lighten-50);
+
+  --color-doc-focus-fg: var(--color-gray-darken-30);
+  --color-doc-focus-bg: var(--color-gray-lighten-60);
+  --color-doc-focus-aside-bg: var(--color-gray-lighten-55);
+  --color-doc-focus-callout-bg: var(--color-gray-lighten-50);
+  --color-doc-focus-subtle-fg: var(--color-gray-lighten-30);
+  --color-doc-focus-source-bg: var(--color-gray-lighten-55);
+  --color-doc-focus-source-mg: var(--color-gray-lighten-45);
+  --color-doc-focus-fold-hover-bg: var(--color-gray-lighten-45);
+  --color-doc-focus-link: var(--color-blue-1);
+  --color-doc-focus-link-active: var(--color-pink-1);
+  --color-doc-focus-link-hover: var(--color-pink-2);
+  --color-doc-focus-content-border: var(--color-gray-lighten-50);
 
   --color-modal-fg: var(--color-main-fg);
   --color-modal-mg: var(--color-gray-lighten-60);
@@ -152,6 +171,27 @@
   --color-tooltip-fg: var(--color-gray-lighten-60);
   --color-tooltip-subtle-fg: var(--color-gray-lighten-20);
   --color-tooltip-bg: var(--color-gray-darken-30);
+  --color-tooltip-source-bg: var(--color-gray-darken-20);
+  --color-tooltip-source-mg: var(--color-gray-darken-10);
+  --color-tooltip-fold-hover-bg: var(--color-gray-darken-10);
+  --color-tooltip-link: var(--color-blue-3);
+  --color-tooltip-link-active: var(--color-pink-2);
+  --color-tooltip-link-hover: var(--color-pink-3);
+  --color-tooltip-syntax-base: var(--color-gray-lighten-60);
+  --color-tooltip-syntax-subtle: var(--color-gray-lighten-20);
+  --color-tooltip-syntax-subtle-em: var(--color-gray-lighten-30);
+  --color-tooltip-syntax-keyword: var(--color-pink-3);
+  --color-tooltip-syntax-operator: var(--color-gray-lighten-20);
+  --color-tooltip-syntax-term: var(--color-purple-3);
+  --color-tooltip-syntax-term-namespace: var(--color-purple-4);
+  --color-tooltip-syntax-ability: var(--color-pink-2);
+  --color-tooltip-syntax-type: var(--color-blue-2);
+  --color-tooltip-syntax-type-namespace: var(--color-blue-3);
+  --color-tooltip-syntax-constructor: var(--color-blue-2);
+  --color-tooltip-syntax-constructor-namespace: var(--color-blue-3);
+  --color-tooltip-syntax-text: var(--color-green-2);
+
+  /* ActionMenu (should probably be moved out of tooltip) */
   --color-tooltip-item-fg: var(--color-gray-lighten-60);
   --color-tooltip-item-subtle-fg: var(--color-gray-lighten-20);
   --color-tooltip-item-bg: transparent;
