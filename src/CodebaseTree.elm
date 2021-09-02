@@ -144,21 +144,17 @@ update env msg model =
 
 fetchRootNamespaceListing : Perspective -> ApiRequest NamespaceListing Msg
 fetchRootNamespaceListing perspective =
-    let
-        rootFqn =
-            FQN.fromString "."
-    in
-    fetchNamespaceListing perspective rootFqn FetchRootNamespaceListingFinished
+    fetchNamespaceListing perspective Nothing FetchRootNamespaceListingFinished
 
 
 fetchSubNamespaceListing : Perspective -> FQN -> ApiRequest NamespaceListing Msg
 fetchSubNamespaceListing perspective fqn =
-    fetchNamespaceListing perspective fqn (FetchSubNamespaceListingFinished fqn)
+    fetchNamespaceListing perspective (Just fqn) (FetchSubNamespaceListingFinished fqn)
 
 
-fetchNamespaceListing : Perspective -> FQN -> (Result Http.Error NamespaceListing -> msg) -> ApiRequest NamespaceListing msg
+fetchNamespaceListing : Perspective -> Maybe FQN -> (Result Http.Error NamespaceListing -> msg) -> ApiRequest NamespaceListing msg
 fetchNamespaceListing perspective fqn toMsg =
-    Api.list (Perspective.toParams perspective) (FQN.toString fqn)
+    Api.list (Perspective.toParams perspective) (Maybe.map FQN.toString fqn)
         |> Api.toRequest (NamespaceListing.decode fqn) toMsg
 
 

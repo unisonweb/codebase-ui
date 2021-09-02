@@ -63,7 +63,7 @@ init flags url navKey =
 
 fetchPerspective : PreEnv -> ApiRequest Perspective Msg
 fetchPerspective preEnv =
-    Api.list (ByCodebase Relative) "."
+    Api.list (ByCodebase Relative) (Just ".")
         |> Api.toRequest (Perspective.decode preEnv.perspectiveParams) (FetchPerspectiveFinished preEnv)
 
 
