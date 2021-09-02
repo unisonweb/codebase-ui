@@ -383,7 +383,7 @@ viewPerspective env =
 
                 back =
                     Tooltip.tooltip
-                        (Button.icon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.view)
+                        (Button.icon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.uncontained |> Button.view)
                         (Tooltip.Text ("You're currently viewing a subset of " ++ context ++ " (" ++ fqnText ++ "), click to view everything."))
                         |> Tooltip.withArrow Tooltip.End
                         |> Tooltip.view
@@ -486,7 +486,10 @@ viewHelpModal os keyboardShortcut =
 
 githubLinkButton : String -> Html msg
 githubLinkButton repo =
-    Button.linkIconThenLabel ("https://github.com/" ++ repo) Icon.github repo |> Button.small |> Button.view
+    Button.linkIconThenLabel ("https://github.com/" ++ repo) Icon.github repo
+        |> Button.small
+        |> Button.contained
+        |> Button.view
 
 
 viewPublishModal : Html Msg
