@@ -2,6 +2,25 @@
   display: flex;
   flex-direction: column;
   font-size: var(--font-size-medium);
+  color: var(--color-doc-fg);
+  background: var(--color-doc-bg);
+}
+
+/* When the parent wrapper (typically .workspace-item is focused and has a
+ * slightly darker background, we want to use focus colors */
+.focused .definition-doc {
+  --color-doc-fg: var(--color-doc-focus-fg);
+  --color-doc-bg: var(--color-doc-focus-bg);
+  --color-doc-aside-bg: var(--color-doc-focus-aside-bg);
+  --color-doc-callout-bg: var(--color-doc-focus-callout-bg);
+  --color-doc-subtle-fg: var(--color-doc-focus-subtle-fg);
+  --color-doc-source-bg: var(--color-doc-focus-source-bg);
+  --color-doc-source-mg: var(--color-doc-focus-source-mg);
+  --color-doc-fold-hover-bg: var(--color-doc-focus-fold-hover-bg);
+  --color-doc-link: var(--color-doc-focus-link);
+  --color-doc-link-active: var(--color-doc-focus-link-active);
+  --color-doc-link-hover: var(--color-doc-focus-link-hover);
+  --color-doc-content-border: var(--color-doc-focus-content-border);
 }
 
 .definition-doc .word {
@@ -15,7 +34,7 @@
 .definition-doc .source.eval,
 .definition-doc .source.signatures .signature {
   padding: 0.5rem;
-  background: var(--color-workspace-item-doc-source-bg);
+  background: var(--color-doc-source-bg);
   border-radius: var(--border-radius-base);
   margin-bottom: 1rem;
 }
@@ -33,7 +52,7 @@
   display: inline-block;
   padding: 0 0.25rem;
   margin-right: 0.5ch;
-  background: var(--color-workspace-item-doc-source-bg);
+  background: var(--color-doc-source-bg);
   border-radius: var(--border-radius-base);
 }
 
@@ -45,7 +64,7 @@
 
 .definition-doc .eval .result .icon,
 .definition-doc .eval-inline .result .icon {
-  color: var(--color-workspace-item-subtle-fg-em);
+  color: var(--color-doc-subtle-fg);
 }
 
 .definition-doc strong {
@@ -62,13 +81,13 @@
 
 .definition-doc .named-link:not(.invalid-href),
 .definition-doc .named-link:not(.invalid-href):visited {
-  color: var(--color-workspace-item-link);
+  color: var(--color-doc-link);
 }
 .definition-doc .named-link:not(.invalid-href):active {
-  color: var(--color-workspace-item-link-active);
+  color: var(--color-doc-link-active);
 }
 .definition-doc .named-link:not(.invalid-href):hover {
-  color: var(--color-workspace-item-link-hover);
+  color: var(--color-doc-link-hover);
   text-decoration: none;
 }
 
@@ -85,18 +104,18 @@
   top: 0;
   bottom: 0;
   left: 0;
-  background: var(--color-workspace-item-content-border);
+  background: var(--color-doc-content-border);
   width: 0.25rem;
   border-radius: var(--border-radius-base);
 }
 
 .definition-doc hr {
-  background: var(--color-workspace-item-content-border);
+  background: var(--color-doc-content-border);
   margin: 1.5rem 0;
 }
 
 .definition-doc .tooltip-trigger {
-  text-decoration: underline dotted var(--color-workspace-item-subtle-fg);
+  text-decoration: underline dotted var(--color-doc-subtle-fg);
   text-underline-offset: 2px;
   /* Other tooltip styling is handled by elements/tooltip */
 }
@@ -109,11 +128,14 @@
 .definition-doc .tooltip-bubble > section:only-child {
   margin: 0;
 }
+.definition-doc .tooltip-bubble > section:only-child > :is(h1, h2, h3, h4, h5) {
+  margin-top: 0;
+}
 
 .definition-doc aside {
   width: 33%;
   font-size: var(--font-size-small);
-  background: var(--color-workspace-item-mg);
+  background: var(--color-doc-aside-bg);
   padding: 0.5rem 0.75rem;
   margin-left: 1rem;
   float: right;
@@ -125,7 +147,7 @@
 }
 
 .definition-doc .callout {
-  background: var(--color-workspace-item-em-bg);
+  background: var(--color-doc-callout-bg);
   padding: 0.5rem 0.75rem;
   margin-bottom: 1rem;
   border-radius: var(--border-radius-base);
@@ -153,7 +175,7 @@
 }
 
 .definition-doc table td {
-  border: 1px solid var(--color-workspace-item-content-border);
+  border: 1px solid var(--color-doc-content-border);
   padding: 0.5rem;
 }
 
@@ -179,7 +201,7 @@
 }
 
 .definition-doc .folded .icon {
-  color: var(--color-workspace-item-subtle-fg);
+  color: var(--color-doc-subtle-fg);
 }
 
 .definition-doc .folded .fold-toggle:hover {
@@ -187,17 +209,17 @@
 }
 
 .definition-doc .folded:not(.disabled) .fold-toggle:hover {
-  background: var(--color-workspace-item-subtle-bg);
+  background: var(--color-doc-subtle-bg);
 }
 .definition-doc .folded:not(.disabled) .fold-toggle:hover .icon {
-  color: var(--color-workspace-item-subtle-fg-em);
+  color: var(--color-doc-subtle-fg);
 }
 
 .definition-doc
   .source.folded:not(.disabled)
   .fold-toggle:hover
   .fold-toggle-indicator {
-  background: var(--color-workspace-item-doc-source-mg);
+  background: var(--color-doc-fold-hover-bg);
 }
 
 .definition-doc .folded .icon {
@@ -229,7 +251,7 @@
 .definition-doc .source.folded .badge {
   margin-left: auto;
   justify-self: flex-end;
-  background: var(--color-workspace-item-doc-source-mg);
+  background: var(--color-doc-source-mg);
   border: 0;
   font-size: 0.75rem;
   height: 1.25rem;
@@ -326,7 +348,7 @@
 }
 
 .definition-doc .column {
-  margin: none;
+  margin: 0;
   list-style-type: none;
 }
 

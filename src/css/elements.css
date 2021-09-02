@@ -21,6 +21,10 @@ input {
   color: var(--color-main-subtle-fg);
 }
 
+li::marker {
+  color: var(--color-main-subtle-fg-em);
+}
+
 h1 {
   font-size: var(--font-size-large);
 }
