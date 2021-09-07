@@ -21,19 +21,56 @@ equals =
         ]
 
 
-toString : Test
-toString =
-    describe "Hash.toString"
-        [ test "Extracts the raw hash value" <|
+toShortString : Test
+toShortString =
+    describe "Hash.toShortString"
+        [ test "Returns a short version of the hash" <|
             \_ ->
                 let
                     result =
-                        "#foo"
+                        "#abc123def456"
                             |> Hash.fromString
-                            |> Maybe.map Hash.toString
+                            |> Maybe.map Hash.toShortString
                             |> Maybe.withDefault "fail"
                 in
-                Expect.equal "#foo" result
+                Expect.equal "#abc123de" result
+        , test "doesn't shorten for builtins" <|
+            \_ ->
+                let
+                    result =
+                        "##IO.socketSend.impl"
+                            |> Hash.fromString
+                            |> Maybe.map Hash.toShortString
+                            |> Maybe.withDefault "fail"
+                in
+                Expect.equal "##IO.socketSend.impl" result
+        ]
+
+
+stripHashPrefix : Test
+stripHashPrefix =
+    describe "Hash.stripHashPrefix"
+        [ test "removes the prefix of the hash" <|
+            \_ ->
+                let
+                    result =
+                        Hash.stripHashPrefix "#abc123def456"
+                in
+                Expect.equal "abc123def456" result
+        , test "removes both hash prefixes for builtins" <|
+            \_ ->
+                let
+                    result =
+                        Hash.stripHashPrefix "##IO.socketSend.impl"
+                in
+                Expect.equal "IO.socketSend.impl" result
+        , test "ignores non hashes" <|
+            \_ ->
+                let
+                    result =
+                        Hash.stripHashPrefix "thisis#not##ahash"
+                in
+                Expect.equal "thisis#not##ahash" result
         ]
 
 
