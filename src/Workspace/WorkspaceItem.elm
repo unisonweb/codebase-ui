@@ -191,11 +191,11 @@ viewInfoItems hash_ info =
             else
                 UI.nothing
 
-        formatHash h =
-            h |> Hash.toString |> String.dropLeft 1 |> String.left 8
+        formattedHash =
+            hash_ |> Hash.toShortString |> Hash.stripHashPrefix
 
         hash =
-            Tooltip.tooltip (viewInfoItem Icon.hash (formatHash hash_)) (Tooltip.Text (Hash.toString hash_))
+            Tooltip.tooltip (viewInfoItem Icon.hash formattedHash) (Tooltip.Text (Hash.toString hash_))
                 |> Tooltip.withArrow Tooltip.Start
                 |> Tooltip.view
     in
