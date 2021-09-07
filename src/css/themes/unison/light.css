@@ -62,6 +62,7 @@
   --color-workspace-item-bg: var(--color-gray-lighten-100);
   --color-workspace-item-source-bg: transparent;
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-subtle-fg-em: var(--color-gray-base);
   --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
   --color-workspace-item-em-bg: var(--color-gray-lighten-55);
   --color-workspace-item-content-border: var(--color-gray-lighten-55);
