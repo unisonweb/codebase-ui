@@ -70,15 +70,44 @@ hr {
 }
 
 .badge {
-  color: var(--color-gray-base);
-  background: var(--color-gray-lighten-60);
-  border: 1px solid var(--color-gray-lighten-50);
-  font-size: 0.75rem;
+  color: var(--color-badge-fg);
+  background: var(--color-badge-bg);
+  border: 1px solid var(--color-badge-border);
+  font-size: var(--font-size-small);
   height: 1.5rem;
   display: flex;
   align-items: center;
   padding: 0 0.5rem;
   border-radius: var(--border-radius-base);
+}
+
+.option-badge {
+  padding: 0 0.75rem;
+  align-items: center;
+  display: inline-flex;
+  flex-direction: row;
+  height: 1.5rem;
+  border-radius: calc(1.5rem / 2);
+  border: 1px solid var(--color-option-badge-border);
+  background: var(--color-option-badge-bg);
+  color: var(--color-option-badge-fg);
+  font-size: var(--font-size-small);
+  cursor: pointer;
+}
+
+.option-badge .icon {
+  font-size: 0.625rem;
+  color: var(--color-gray-option-badge-icon);
+  margin-right: 0.375rem;
+  line-height: 1;
+}
+
+.option-badge:hover .icon {
+  color: var(--color-option-badge-hover-icon);
+}
+
+.option-badge .subtle {
+  color: var(--color-option-badge-subtle-fg);
 }
 
 /* -- KEYBOARD SHORTCUT -- */

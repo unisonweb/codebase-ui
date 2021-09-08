@@ -7,7 +7,8 @@ import CodebaseTree
 import Definition.Reference exposing (Reference)
 import Env exposing (AppContext(..), Env, OperatingSystem(..))
 import Finder
-import FullyQualifiedName as FQN
+import Finder.SearchOptions as SearchOptions
+import FullyQualifiedName as FQN exposing (FQN)
 import Html exposing (Html, a, aside, div, h1, h2, h3, header, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
@@ -242,8 +243,8 @@ handleWorkspaceOutMsg model out =
         Workspace.None ->
             ( model, Cmd.none )
 
-        Workspace.ShowFinderRequest ->
-            showFinder model
+        Workspace.ShowFinderRequest withinNamespace ->
+            showFinder model withinNamespace
 
         Workspace.Focused ref ->
             ( model, Route.navigateToByReference model.navKey model.route ref )
@@ -268,17 +269,17 @@ keydown model keyboardEvent =
     in
     case shortcut of
         KeyboardShortcut.Chord Ctrl (K _) ->
-            showFinder model
+            showFinder model Nothing
 
         KeyboardShortcut.Chord Meta (K _) ->
             if model.env.operatingSystem == Env.MacOS then
-                showFinder model
+                showFinder model Nothing
 
             else
                 noOp
 
         KeyboardShortcut.Sequence _ ForwardSlash ->
-            showFinder model
+            showFinder model Nothing
 
         KeyboardShortcut.Chord Shift QuestionMark ->
             ( { model | modal = HelpModal }, Cmd.none )
@@ -296,11 +297,15 @@ keydown model keyboardEvent =
 
 showFinder :
     { m | env : Env, modal : Modal }
+    -> Maybe FQN
     -> ( { m | env : Env, modal : Modal }, Cmd Msg )
-showFinder model =
+showFinder model withinNamespace =
     let
+        options =
+            SearchOptions.init model.env.perspective withinNamespace
+
         ( fm, fcmd ) =
-            Finder.init model.env
+            Finder.init model.env options
     in
     ( { model | modal = FinderModal fm }, Cmd.map FinderMsg fcmd )
 

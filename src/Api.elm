@@ -57,15 +57,24 @@ getDefinition perspective fqnsOrHashes =
         |> (\names -> Endpoint [ "getDefinition" ] (names ++ perspectiveToQueryParams perspective))
 
 
-find : Perspective -> Int -> Syntax.Width -> String -> Endpoint
-find perspective limit (Syntax.Width sourceWidth) query =
+find : Perspective -> Maybe FQN -> Int -> Syntax.Width -> String -> Endpoint
+find perspective withinFqn limit (Syntax.Width sourceWidth) query =
+    let
+        params =
+            case withinFqn of
+                Just fqn ->
+                    [ rootBranch (Perspective.codebaseHash perspective), relativeTo fqn ]
+
+                Nothing ->
+                    perspectiveToQueryParams perspective
+    in
     Endpoint
         [ "find" ]
         ([ int "limit" limit
          , int "renderWidth" sourceWidth
          , string "query" query
          ]
-            ++ perspectiveToQueryParams perspective
+            ++ params
         )
 
 
@@ -132,8 +141,8 @@ perspectiveToQueryParams perspective =
         Codebase h ->
             [ rootBranch h ]
 
-        Namespace d ->
-            [ rootBranch d.codebaseHash, string "relativeTo" (FQN.toString d.fqn) ]
+        Namespace { codebaseHash, fqn } ->
+            [ rootBranch codebaseHash, relativeTo fqn ]
 
 
 perspectiveParamsToQueryParams : PerspectiveParams -> List QueryParameter
