@@ -6,6 +6,32 @@ import List.Nonempty as NEL
 import Test exposing (..)
 
 
+append : Test
+append =
+    describe "FullyQualifiedName.append"
+        [ test "Appends 2 FQNs" <|
+            \_ ->
+                let
+                    a =
+                        FQN.fromString "base"
+
+                    b =
+                        FQN.fromString "List"
+                in
+                Expect.equal [ "base", "List" ] (segments (FQN.append a b))
+        , test "Appending doesn't attempt to dedupe" <|
+            \_ ->
+                let
+                    a =
+                        FQN.fromString "base"
+
+                    b =
+                        FQN.fromString "base.List"
+                in
+                Expect.equal [ "base", "base", "List" ] (segments (FQN.append a b))
+        ]
+
+
 fromString : Test
 fromString =
     describe "FullyQualifiedName.fromString"

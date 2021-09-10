@@ -135,7 +135,28 @@ update env msg model =
                     ( { model | rootNamespaceListing = Failure err }, Cmd.none, None )
 
         Out outMsg ->
-            ( model, Cmd.none, outMsg )
+            case outMsg of
+                {- CodebaseTree deals in names relative to the
+                   Perspective and perspectives need to be relative to the
+                   codebase, so when changing the perspective when a
+                   namespace perspective already exists, merge the
+                   namespace perspective fqn with the relative name of the
+                   namespace being selected.
+                -}
+                ChangePerspectiveToNamespace name ->
+                    let
+                        newPerspectiveFqn =
+                            case env.perspective of
+                                Perspective.Namespace { fqn } ->
+                                    FQN.append fqn name
+
+                                Perspective.Codebase _ ->
+                                    name
+                    in
+                    ( model, Cmd.none, ChangePerspectiveToNamespace newPerspectiveFqn )
+
+                _ ->
+                    ( model, Cmd.none, outMsg )
 
 
 
@@ -239,10 +260,10 @@ viewNamespaceListingContent expandedNamespaceListings content =
 
 
 viewNamespaceListing : FQNSet -> NamespaceListing -> Html Msg
-viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) =
+viewNamespaceListing expandedNamespaceListings (NamespaceListing _ name content) =
     let
         ( isExpanded, namespaceContent ) =
-            if FQNSet.member fqn expandedNamespaceListings then
+            if FQNSet.member name expandedNamespaceListings then
                 ( True
                 , div [ class "namespace-content" ]
                     [ viewNamespaceListingContent
@@ -255,21 +276,21 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ fqn content) 
                 ( False, UI.nothing )
 
         changePerspectiveTo =
-            Button.icon (Out (ChangePerspectiveToNamespace fqn)) Icon.intoFolder
+            Button.icon (Out (ChangePerspectiveToNamespace name)) Icon.intoFolder
                 |> Button.uncontained
                 |> Button.small
                 |> Button.view
 
         fullName =
-            FQN.toString fqn
+            FQN.toString name
     in
     div [ class "subtree" ]
         [ a
             [ class "node namespace"
-            , onClick (ToggleExpandedNamespaceListing fqn)
+            , onClick (ToggleExpandedNamespaceListing name)
             ]
             [ Icon.caretRight |> Icon.withClassList [ ( "expanded", isExpanded ) ] |> Icon.view
-            , viewListingLabel (unqualifiedName fqn)
+            , viewListingLabel (unqualifiedName name)
             , Tooltip.tooltip changePerspectiveTo (Tooltip.Text ("Change perspective to " ++ fullName))
                 |> Tooltip.withArrow Tooltip.End
                 |> Tooltip.view
