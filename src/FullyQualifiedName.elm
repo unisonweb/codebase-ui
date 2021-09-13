@@ -1,5 +1,6 @@
 module FullyQualifiedName exposing
     ( FQN
+    , append
     , decode
     , decodeFromParent
     , equals
@@ -162,6 +163,11 @@ namespace (FQN segments_) =
 equals : FQN -> FQN -> Bool
 equals a b =
     toString a == toString b
+
+
+append : FQN -> FQN -> FQN
+append (FQN a) (FQN b) =
+    FQN (NEL.append a b)
 
 
 {-| This is passed through a string as a suffix name can include
