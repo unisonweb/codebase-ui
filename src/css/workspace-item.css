@@ -221,6 +221,19 @@
   flex-direction: row;
   background: var(--color-workspace-item-source-bg);
   width: var(--workspace-content-width);
+  overflow: auto;
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-workspace-item-subtle-fg) transparent;
+}
+.workspace-item .content .definition-source::-webkit-scrollbar {
+  height: 0.375rem;
+}
+.workspace-item .content .definition-source::-webkit-scrollbar-track {
+  background: transparent;
+}
+.workspace-item .content .definition-source::-webkit-scrollbar-thumb {
+  background-color: var(--color-workspace-item-subtle-fg);
+  border-radius: var(--border-radius-base);
 }
 
 .workspace-item .content .definition-source .source-toggle {
@@ -312,6 +325,7 @@
   .workspace-item .content .error {
     padding-left: 0;
     margin-left: 0;
+    width: auto;
   }
 
   .workspace-item .gutter {

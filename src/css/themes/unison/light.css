@@ -67,6 +67,7 @@
   --color-workspace-item-em-bg: var(--color-gray-lighten-55);
   --color-workspace-item-content-border: var(--color-gray-lighten-55);
   --color-workspace-item-border: transparent;
+  --color-workspace-item-subtle-border: var(--color-gray-lighten-45);
   --color-workspace-item-info-item-fg: var(--color-gray-lighten-30);
   --color-workspace-item-info-item-subtle-fg: var(--color-gray-lighten-30);
   --color-workspace-item-info-item-hover-fg: var(--color-gray-darken-30);
@@ -86,6 +87,7 @@
   --color-doc-fg: var(--color-gray-darken-30);
   --color-doc-bg: var(--color-gray-lighten-100);
   --color-doc-aside-bg: var(--color-gray-lighten-60);
+  --color-doc-aside-source-bg: var(--color-gray-lighten-55);
   --color-doc-callout-bg: var(--color-gray-lighten-55);
   --color-doc-subtle-fg: var(--color-gray-lighten-30);
   --color-doc-source-bg: var(--color-gray-lighten-60);
@@ -99,6 +101,7 @@
   --color-doc-focus-fg: var(--color-gray-darken-30);
   --color-doc-focus-bg: var(--color-gray-lighten-60);
   --color-doc-focus-aside-bg: var(--color-gray-lighten-55);
+  --color-doc-focus-aside-source-bg: var(--color-gray-lighten-50);
   --color-doc-focus-callout-bg: var(--color-gray-lighten-50);
   --color-doc-focus-subtle-fg: var(--color-gray-lighten-30);
   --color-doc-focus-source-bg: var(--color-gray-lighten-55);

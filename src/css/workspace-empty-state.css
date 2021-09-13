@@ -35,7 +35,7 @@
 
 .workspace-empty-state .faux-workspace-item {
   width: 28rem;
-  border: 1px solid var(--color-workspace-item-subtle-fg);
+  border: 1px solid var(--color-workspace-item-subtle-border);
   border-radius: var(--border-radius-base);
   background: var(--color-workspace-item-bg);
   padding: 1rem 0.75rem;
@@ -74,7 +74,9 @@
     align-self: center;
     width: calc(100vw - 4rem);
   }
+}
 
+@media only screen and (max-width: 414px) {
   .workspace-empty-state .faux-workspace-item {
     width: calc(100vw - 4rem);
   }

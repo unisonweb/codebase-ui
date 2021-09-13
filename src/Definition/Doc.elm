@@ -382,7 +382,9 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                         |> Tooltip.view
 
                 Aside d ->
-                    aside [] [ viewAtCurrentSectionLevel d ]
+                    span [ class "aside-anchor" ]
+                        [ aside [] [ viewAtCurrentSectionLevel d ]
+                        ]
 
                 Callout icon content ->
                     let
