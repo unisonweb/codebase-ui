@@ -1,5 +1,7 @@
 .definition-doc {
+  position: relative;
   display: flex;
+  line-height: 1.5;
   flex-direction: column;
   font-size: var(--font-size-medium);
   color: var(--color-doc-fg);
@@ -12,6 +14,7 @@
   --color-doc-fg: var(--color-doc-focus-fg);
   --color-doc-bg: var(--color-doc-focus-bg);
   --color-doc-aside-bg: var(--color-doc-focus-aside-bg);
+  --color-doc-aside-source-bg: var(--color-doc-focus-aside-source-bg);
   --color-doc-callout-bg: var(--color-doc-focus-callout-bg);
   --color-doc-subtle-fg: var(--color-doc-focus-subtle-fg);
   --color-doc-source-bg: var(--color-doc-focus-source-bg);
@@ -33,10 +36,39 @@
 .definition-doc .source.example,
 .definition-doc .source.eval,
 .definition-doc .source.signatures .signature {
-  padding: 0.5rem;
+  padding: 0.5rem 0.75rem;
   background: var(--color-doc-source-bg);
   border-radius: var(--border-radius-base);
   margin-bottom: 1rem;
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-workspace-item-subtle-fg) transparent;
+  overflow: auto;
+}
+
+.definition-doc .source.code::-webkit-scrollbar,
+.definition-doc .sources .source::-webkit-scrollbar,
+.definition-doc .folded-sources .source::-webkit-scrollbar,
+.definition-doc .source.example::-webkit-scrollbar,
+.definition-doc .source.eval::-webkit-scrollbar,
+.definition-doc .source.signatures .signature::-webkit-scrollbar {
+  height: 0.375rem;
+}
+.definition-doc .source.code::-webkit-scrollbar-track,
+.definition-doc .sources .source::-webkit-scrollbar-track,
+.definition-doc .folded-sources .source::-webkit-scrollbar-track,
+.definition-doc .source.example::-webkit-scrollbar-track,
+.definition-doc .source.eval::-webkit-scrollbar-track,
+.definition-doc .source.signatures .signature::-webkit-scrollbar-track {
+  background: transparent;
+}
+.definition-doc .source.code::-webkit-scrollbar-thumb,
+.definition-doc .sources .source::-webkit-scrollbar-thumb,
+.definition-doc .folded-sources .source::-webkit-scrollbar-thumb,
+.definition-doc .source.example::-webkit-scrollbar-thumb,
+.definition-doc .source.eval::-webkit-scrollbar-thumb,
+.definition-doc .source.signatures .signature::-webkit-scrollbar-thumb {
+  background-color: var(--color-workspace-item-subtle-fg);
+  border-radius: var(--border-radius-base);
 }
 
 .definition-doc .source code {
@@ -45,15 +77,20 @@
   flex: 1;
 }
 
-.definition-doc .source.inline-code,
-.definition-doc .source.example-inline,
-.definition-doc .source.eval-inline,
-.definition-doc .source.signature-inline {
+.definition-doc
+  .source:is(.inline-code, .example-inline, .eval-inline, .signature-inline) {
   display: inline-block;
   padding: 0 0.25rem;
   margin-right: 0.5ch;
   background: var(--color-doc-source-bg);
   border-radius: var(--border-radius-base);
+  white-space: nowrap;
+}
+.definition-doc
+  .source:is(.inline-code, .example-inline, .eval-inline, .signature-inline)
+  :is(.inline-code, code) {
+  display: inline-flex;
+  white-space: nowrap;
 }
 
 /* code and inline-code render sub definition-docs, not syntax */
@@ -133,15 +170,39 @@
 }
 
 .definition-doc aside {
-  width: 33%;
+  position: absolute;
+  right: -16rem;
+  width: 15rem;
   font-size: var(--font-size-small);
   background: var(--color-doc-aside-bg);
   padding: 0.5rem 0.75rem;
   margin-left: 1rem;
-  float: right;
   border-radius: var(--border-radius-base);
 }
 
+.definition-doc aside > section:first-child {
+  margin: 0;
+}
+
+.definition-doc aside .source.code,
+.definition-doc aside .sources .source,
+.definition-doc aside .folded-sources .source,
+.definition-doc aside .source.example,
+.definition-doc aside .source.eval,
+.definition-doc aside .source.signatures .signature {
+  background: var(--color-doc-aside-source-bg);
+  padding: 0.375rem;
+  max-width: 14rem; /* accounting for the aside padding */
+  overflow: auto;
+}
+.definition-doc
+  aside
+  .source:is(.inline-code, .example-inline, .eval-inline, .signature-inline) {
+  background: var(--color-doc-aside-source-bg);
+  white-space: wrap;
+}
+
+.definition-doc aside .source:last-child,
 .definition-doc aside p:last-child {
   margin-bottom: 0;
 }
@@ -159,6 +220,11 @@
   padding-top: 1px;
 }
 
+.definition-doc .callout .callout-content > section:first-child {
+  margin: 0;
+}
+
+.definition-doc .callout .source:last-child,
 .definition-doc .callout p:last-child {
   margin-bottom: 0;
 }
@@ -268,7 +334,7 @@
 
 .definition-doc ol,
 .definition-doc ul {
-  margin-left: 2rem;
+  margin-left: 1.5rem;
   margin-bottom: 1em;
 }
 
@@ -319,13 +385,23 @@
   margin-bottom: 0.5rem;
 }
 
+/* A bunch of margin-top reset to deal with the very top of the doc. We don't
+ * want any margin there and there might be a strange combination of sections
+ * */
+.definition-doc > section:first-child,
+.definition-doc > section:first-child > section:first-child,
+.definition-doc
+  > section:first-child
+  > section:first-child
+  > section:first-child,
 .definition-doc > section:first-child > h1:first-child,
-.definition-doc > section:first-child > h2:first-child,
-.definition-doc > section:first-child > h3:first-child,
-.definition-doc > section:first-child > h4:first-child,
-.definition-doc > section:first-child > h5:first-child,
-.definition-doc > section:first-child > h6:first-child {
-  margin: 0;
+.definition-doc > section:first-child > section:first-child > h1:first-child,
+.definition-doc
+  > section:first-child
+  > section:first-child
+  > section:first-child
+  > h1:first-child {
+  margin-top: 0;
 }
 
 .definition-doc img {
@@ -363,14 +439,23 @@
   .definition-doc .source.eval,
   .definition-doc .source.signatures .signature {
     width: calc(100vw - 2rem);
-    overflow: scroll;
+    overflow: auto;
   }
-}
 
-@media only screen and (max-width: 414px) {
   .definition-doc aside {
+    position: relative;
+    right: auto;
     width: auto;
-    float: none;
-    margin: 0 1rem;
+    margin: 1.5rem 1.5rem 1.5rem 1.5rem;
+  }
+
+  .definition-doc aside .source.code,
+  .definition-doc aside .sources .source,
+  .definition-doc aside .folded-sources .source,
+  .definition-doc aside .source.example,
+  .definition-doc aside .source.eval,
+  .definition-doc aside .source.signatures .signature {
+    max-width: none;
+    width: min(40rem, calc(calc(100vw - 2rem)) - 3rem);
   }
 }
