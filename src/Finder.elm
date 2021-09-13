@@ -11,6 +11,8 @@ import Definition.Term exposing (Term(..))
 import Definition.Type exposing (Type(..))
 import Env exposing (Env)
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
+import Finder.SearchOptions as SearchOptions exposing (SearchOptions(..), WithinOption(..))
+import FullyQualifiedName exposing (FQN)
 import HashQualified exposing (HashQualified(..))
 import Html
     exposing
@@ -78,14 +80,16 @@ type alias Model =
     { input : String
     , search : FinderSearch
     , keyboardShortcut : KeyboardShortcut.Model
+    , options : SearchOptions
     }
 
 
-init : Env -> ( Model, Cmd Msg )
-init env =
+init : Env -> SearchOptions -> ( Model, Cmd Msg )
+init env options =
     ( { input = ""
       , search = NotAsked
       , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
+      , options = options
       }
     , focusSearchInput
     )
@@ -104,6 +108,7 @@ type Msg
     | Select Reference
     | Keydown KeyboardEvent
     | FetchMatchesFinished String (Result Http.Error (List FinderMatch))
+    | RemoveWithinOption
     | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
@@ -172,8 +177,16 @@ update env msg model =
 
                             _ ->
                                 Searching query Nothing
+
+                    fetch =
+                        case model.options of
+                            SearchOptions (WithinNamespace fqn) ->
+                                fetchMatches env.perspective (Just fqn) query
+
+                            _ ->
+                                fetchMatches env.perspective Nothing query
                 in
-                ( { model | search = search }, Api.perform env.apiBasePath (fetchMatches env.perspective query), Remain )
+                ( { model | search = search }, Api.perform env.apiBasePath fetch, Remain )
 
             else
                 ( model, Cmd.none, Remain )
@@ -196,6 +209,12 @@ update env msg model =
 
             else
                 ( model, Cmd.none, Remain )
+
+        RemoveWithinOption ->
+            ( { model | options = SearchOptions.removeWithin env.perspective model.options }
+            , Cmd.none
+            , Remain
+            )
 
         ResetOrClose ->
             resetOrClose
@@ -311,8 +330,8 @@ finderSearchToMaybe fs =
 -- EFFECTS
 
 
-fetchMatches : Perspective -> String -> ApiRequest (List FinderMatch) Msg
-fetchMatches perspective query =
+fetchMatches : Perspective -> Maybe FQN -> String -> ApiRequest (List FinderMatch) Msg
+fetchMatches perspective withinFqn query =
     let
         limit =
             9
@@ -320,7 +339,7 @@ fetchMatches perspective query =
         sourceWidth =
             Syntax.Width 100
     in
-    Api.find perspective limit sourceWidth query
+    Api.find perspective withinFqn limit sourceWidth query
         |> Api.toRequest FinderMatch.decodeMatches (FetchMatchesFinished query)
 
 
@@ -492,7 +511,8 @@ view model =
             Modal.CustomContent
                 (div
                     [ classList [ ( "is-searching", isSearching ) ] ]
-                    [ header []
+                    [ SearchOptions.view RemoveWithinOption model.options
+                    , header []
                         [ Icon.search |> Icon.withToggleAnimation isSearching |> Icon.view
                         , input
                             [ type_ "text"

@@ -2,6 +2,8 @@ module UI exposing (..)
 
 import Html exposing (Attribute, Html, code, div, hr, pre, span, text)
 import Html.Attributes exposing (class)
+import Html.Events exposing (onClick)
+import UI.Icon as Icon
 
 
 codeBlock : List (Attribute msg) -> Html msg -> Html msg
@@ -22,6 +24,11 @@ nothing =
 badge : Html msg -> Html msg
 badge content =
     span [ class "badge" ] [ content ]
+
+
+optionBadge : msg -> Html msg -> Html msg
+optionBadge removeMsg content =
+    span [ class "option-badge", onClick removeMsg ] [ Icon.view Icon.x, content ]
 
 
 subtle : String -> Html msg

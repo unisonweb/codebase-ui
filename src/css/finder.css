@@ -1,12 +1,22 @@
 #finder {
+  position: relative;
   width: 50rem;
+  margin-top: 7rem;
 }
 
 #finder:focus {
   outline: none;
 }
 
+#finder .finder-search-options {
+  position: absolute;
+  top: -2.25rem;
+  display: flex;
+  flex-direction: row;
+}
+
 #finder header {
+  border-radius: var(--border-radius-base);
   background: var(--color-modal-mg);
   display: flex;
   align-items: center;
@@ -109,6 +119,11 @@
   position: relative;
   padding: 0.75rem;
   border-top: 1px solid var(--color-modal-inner-border);
+}
+#finder .results + header {
+  border-radius: 0;
+  border-top-left-radius: var(--border-radius-base);
+  border-top-right-radius: var(--border-radius-base);
 }
 
 #finder .results:after,

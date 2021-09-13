@@ -62,6 +62,7 @@ type Msg
     | UpdateZoom Reference Zoom
     | ToggleDocFold Reference Doc.FoldId
     | ChangePerspectiveToNamespace FQN
+    | FindWithinNamespace FQN
 
 
 reference : WorkspaceItem -> Reference
@@ -162,7 +163,8 @@ viewInfoItems hash_ info =
                             FQN.toString fqn
 
                         namespaceMenuItems =
-                            [ Tooltip.MenuItem Icon.intoFolder ("Change perspective to " ++ ns) (ChangePerspectiveToNamespace fqn)
+                            [ Tooltip.MenuItem Icon.browse ("Find within " ++ ns) (FindWithinNamespace fqn)
+                            , Tooltip.MenuItem Icon.intoFolder ("Change perspective to " ++ ns) (ChangePerspectiveToNamespace fqn)
                             ]
                     in
                     Tooltip.tooltip (viewInfoItem Icon.folderOutlined ns) (Tooltip.Menu namespaceMenuItems)

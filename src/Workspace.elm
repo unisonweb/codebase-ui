@@ -79,7 +79,7 @@ type OutMsg
     = None
     | Focused Reference
     | Emptied
-    | ShowFinderRequest
+    | ShowFinderRequest (Maybe FQN)
     | ChangePerspectiveToNamespace FQN
 
 
@@ -90,7 +90,7 @@ update env msg ({ workspaceItems } as model) =
             ( model, Cmd.none, None )
 
         Find ->
-            ( model, Cmd.none, ShowFinderRequest )
+            ( model, Cmd.none, ShowFinderRequest Nothing )
 
         FetchItemFinished ref itemResult ->
             let
@@ -179,6 +179,9 @@ update env msg ({ workspaceItems } as model) =
 
                 WorkspaceItem.ChangePerspectiveToNamespace fqn ->
                     ( model, Cmd.none, ChangePerspectiveToNamespace fqn )
+
+                WorkspaceItem.FindWithinNamespace fqn ->
+                    ( model, Cmd.none, ShowFinderRequest (Just fqn) )
 
         KeyboardShortcutMsg kMsg ->
             let
