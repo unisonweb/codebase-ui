@@ -100,9 +100,17 @@ update env msg ({ workspaceItems } as model) =
                             WorkspaceItem.Failure ref e
 
                         Ok i ->
+                            let
+                                zoom =
+                                    if WorkspaceItem.isDocItem i then
+                                        Zoom.Medium
+
+                                    else
+                                        Zoom.Near
+                            in
                             WorkspaceItem.Success ref
                                 { item = i
-                                , zoom = Zoom.Medium
+                                , zoom = zoom
                                 , docFoldToggles = Doc.emptyDocFoldToggles
                                 }
 

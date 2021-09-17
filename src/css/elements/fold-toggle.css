@@ -1,0 +1,38 @@
+.fold-toggle {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: row;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.25rem;
+  line-height: 1;
+  border-radius: var(--border-radius-base);
+  transition: all 0.2s;
+  cursor: pointer;
+  background: var(--color-fold-toggle-bg);
+}
+
+.fold-toggle.disabled {
+  cursor: default;
+  opacity: 0.5;
+}
+
+/* ▶ */
+.fold-toggle .icon {
+  color: var(--color-fold-toggle-fg);
+  transition: color 0.2s, transform 0.1s ease-out;
+}
+
+/* rotate ▶ to ▼ */
+.fold-toggle.folded-open {
+  transform: rotate(90deg);
+}
+
+.fold-toggle:not(.disabled):hover {
+  background: var(--color-fold-toggle-hover-bg);
+}
+
+.fold-toggle:not(.disabled):hover .icon {
+  color: var(--color-fold-toggle-hover-fg);
+}

@@ -14,8 +14,7 @@ cycle z =
             Medium
 
         Medium ->
-            -- TODO: Support source zoom
-            Far
+            Near
 
         Near ->
             Far

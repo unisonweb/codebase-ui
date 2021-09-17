@@ -88,10 +88,11 @@
   --color-doc-bg: var(--color-gray-lighten-100);
   --color-doc-aside-bg: var(--color-gray-lighten-60);
   --color-doc-aside-source-bg: var(--color-gray-lighten-55);
-  --color-doc-callout-bg: var(--color-gray-lighten-55);
+  --color-doc-callout-bg: var(--color-blue-5);
   --color-doc-subtle-fg: var(--color-gray-lighten-30);
   --color-doc-source-bg: var(--color-gray-lighten-60);
   --color-doc-source-mg: var(--color-gray-lighten-45);
+  --color-doc-fold-hover-fg: var(--color-gray-base);
   --color-doc-fold-hover-bg: var(--color-gray-lighten-45);
   --color-doc-link: var(--color-blue-1);
   --color-doc-link-active: var(--color-pink-1);
@@ -102,10 +103,11 @@
   --color-doc-focus-bg: var(--color-gray-lighten-60);
   --color-doc-focus-aside-bg: var(--color-gray-lighten-55);
   --color-doc-focus-aside-source-bg: var(--color-gray-lighten-50);
-  --color-doc-focus-callout-bg: var(--color-gray-lighten-50);
+  --color-doc-focus-callout-bg: var(--color-blue-5);
   --color-doc-focus-subtle-fg: var(--color-gray-lighten-30);
   --color-doc-focus-source-bg: var(--color-gray-lighten-55);
   --color-doc-focus-source-mg: var(--color-gray-lighten-45);
+  --color-doc-focus-fold-hover-fg: var(--color-gray-base);
   --color-doc-focus-fold-hover-bg: var(--color-gray-lighten-45);
   --color-doc-focus-link: var(--color-blue-1);
   --color-doc-focus-link-active: var(--color-pink-1);
@@ -143,6 +145,13 @@
   --color-icon-ability-constructor: var(--color-pink-1);
   --color-icon-doc: var(--color-orange-2);
   --color-icon-patch: var(--color-blue-2);
+
+  /* FoldToggle */
+
+  --color-fold-toggle-fg: var(--color-gray-lighten-30);
+  --color-fold-toggle-bg: transparent;
+  --color-fold-toggle-hover-fg: var(--color-gray-base);
+  --color-fold-toggle-hover-bg: var(--color-gray-lighten-45);
 
   /* Buttons */
 

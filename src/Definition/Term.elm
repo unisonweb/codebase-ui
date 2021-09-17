@@ -9,6 +9,7 @@ module Definition.Term exposing
     , decodeSignature
     , decodeTermCategory
     , decodeTermSource
+    , termSignature
     )
 
 import Definition.Info exposing (Info)
@@ -57,6 +58,20 @@ type alias TermSummary =
 
 type alias TermListing =
     Term FQN
+
+
+
+-- HELPERS
+
+
+termSignature : TermSource -> TermSignature
+termSignature source =
+    case source of
+        Source sig _ ->
+            sig
+
+        Builtin sig ->
+            sig
 
 
 
