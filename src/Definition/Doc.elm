@@ -48,6 +48,7 @@ import Set exposing (Set)
 import Syntax exposing (Syntax)
 import TreePath exposing (TreePath)
 import UI
+import UI.FoldToggle as FoldToggle
 import UI.Icon as Icon
 import UI.Tooltip as Tooltip
 
@@ -222,18 +223,14 @@ viewFolded : List (Attribute msg) -> IsFolded msg -> Html msg
 viewFolded attrs isFolded_ =
     case isFolded_ of
         Disabled summary ->
-            div (class "folded is-folded disabled" :: attrs)
-                [ a [ class "fold-toggle" ] [ Icon.view Icon.caretDown ]
+            div (class "folded is-folded" :: attrs)
+                [ FoldToggle.disabled |> FoldToggle.view
                 , div [ class "folded-content" ] [ summary ]
                 ]
 
         IsFolded { toggleFoldMsg, content, foldId, isFolded } ->
             div (classList [ ( "folded", True ), ( "is-folded", isFolded ) ] :: attrs)
-                -- Caret orientation for folded/unfolded is rotated
-                -- by CSS such that it can be animated
-                [ a
-                    [ class "fold-toggle", onClick (toggleFoldMsg foldId) ]
-                    [ Icon.view Icon.caretDown ]
+                [ FoldToggle.foldToggle (toggleFoldMsg foldId) |> FoldToggle.isOpen (not isFolded) |> FoldToggle.view
                 , div [ class "folded-content" ] content
                 ]
 

@@ -22,6 +22,7 @@ import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
 import String.Extra exposing (pluralize)
 import UI
+import UI.FoldToggle as FoldToggle
 import UI.Icon as Icon exposing (Icon)
 import UI.Tooltip as Tooltip
 import Util
@@ -54,7 +55,7 @@ type Item
     | AbilityConstructorItem AbilityConstructorDetail
 
 
-{-| WorkspaceItem doesn't manage state itself, but has a limit set of actions
+{-| WorkspaceItem doesn't manage state itself, but has a limited set of actions
 -}
 type Msg
     = Close Reference
@@ -86,6 +87,16 @@ isSameReference item ref =
 isSameByReference : WorkspaceItem -> WorkspaceItem -> Bool
 isSameByReference a b =
     reference a == reference b
+
+
+isDocItem : Item -> Bool
+isDocItem item =
+    case item of
+        TermItem (Term _ Term.DocTerm _) ->
+            True
+
+        _ ->
+            False
 
 
 
@@ -204,14 +215,12 @@ viewInfoItems hash_ info =
     div [ class "info-items" ] [ hash, namespace, otherNames ]
 
 
-viewInfo : Msg -> Hash -> Info -> Category -> Html Msg
-viewInfo onClick_ hash info category =
+viewInfo : Zoom -> Msg -> Hash -> Info -> Category -> Html Msg
+viewInfo zoom onClick_ hash info category =
     div [ class "info" ]
-        [ a [ class "toggle-zoom", onClick onClick_ ]
-            [ Icon.view Icon.caretRight
-            , Icon.view (Category.icon category)
-            , h3 [ class "name" ] [ text info.name ]
-            ]
+        [ FoldToggle.foldToggle onClick_ |> FoldToggle.isOpen (zoom /= Far) |> FoldToggle.view
+        , div [ class "category-icon" ] [ Icon.view (Category.icon category) ]
+        , h3 [ class "name" ] [ text info.name ]
         , viewInfoItems hash info
         ]
 
@@ -223,8 +232,8 @@ viewDoc ref docFoldToggles doc =
 
 {-| TODO: Yikes, this isn't great. Needs cleanup
 -}
-viewSource : Source.ViewConfig Msg -> Item -> ( Html msg, Html Msg )
-viewSource sourceConfig item =
+viewSource : Zoom -> Msg -> Source.ViewConfig Msg -> Item -> ( Html msg, Html Msg )
+viewSource zoom onSourceToggleClick sourceConfig item =
     let
         viewLineGutter numLines =
             let
@@ -235,36 +244,42 @@ viewSource sourceConfig item =
             in
             UI.codeBlock [] (div [] lines)
 
-        viewToggableSource icon disabled renderedSource =
+        viewToggableSource foldToggle renderedSource =
             div [ class "definition-source" ]
-                [ div
-                    [ class "source-toggle"
-                    , classList [ ( "disabled", disabled ) ]
-                    ]
-                    [ Icon.view icon ]
-                , renderedSource
-                ]
+                [ FoldToggle.view foldToggle, renderedSource ]
     in
     case item of
         TermItem (Term _ _ detail) ->
-            ( detail.source, detail.source )
-                |> Tuple.mapBoth Source.numTermLines (Source.viewTermSource sourceConfig detail.info.name)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.caretRight False)
+            let
+                ( numLines, source ) =
+                    case zoom of
+                        Near ->
+                            ( Source.numTermLines detail.source
+                            , Source.viewTermSource sourceConfig detail.info.name detail.source
+                            )
+
+                        _ ->
+                            ( Source.numTermSignatureLines detail.source
+                            , Source.viewNamedTermSignature sourceConfig detail.info.name (Term.termSignature detail.source)
+                            )
+            in
+            ( numLines, source )
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.foldToggle onSourceToggleClick |> FoldToggle.isOpen (zoom == Near)))
 
         TypeItem (Type _ _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource sourceConfig)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.caretRight True)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.open))
 
         DataConstructorItem (DataConstructor _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource sourceConfig)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.caretRight True)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.open))
 
         AbilityConstructorItem (AbilityConstructor _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource sourceConfig)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource Icon.caretRight True)
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.open))
 
 
 viewItem :
@@ -275,7 +290,7 @@ viewItem :
 viewItem ref data isFocused =
     let
         -- TODO: Support zoom level on the source
-        ( zoomClass, docZoomMsg, _ ) =
+        ( zoomClass, infoZoomToggle, sourceZoomToggle ) =
             case data.zoom of
                 Far ->
                     ( "zoom-level-far", UpdateZoom ref Medium, UpdateZoom ref Near )
@@ -284,7 +299,7 @@ viewItem ref data isFocused =
                     ( "zoom-level-medium", UpdateZoom ref Far, UpdateZoom ref Near )
 
                 Near ->
-                    ( "zoom-level-near", UpdateZoom ref Far, UpdateZoom ref Near )
+                    ( "zoom-level-near", UpdateZoom ref Far, UpdateZoom ref Medium )
 
         attrs =
             [ class zoomClass, classList [ ( "focused", isFocused ) ] ]
@@ -302,38 +317,38 @@ viewItem ref data isFocused =
             viewClosableRow
                 ref
                 attrs
-                (viewInfo docZoomMsg h detail.info (Category.Term category))
+                (viewInfo data.zoom infoZoomToggle h detail.info (Category.Term category))
                 [ ( UI.nothing, viewDoc_ detail.doc )
                 , ( UI.nothing, viewBuiltin data.item )
-                , viewSource sourceConfig data.item
+                , viewSource data.zoom sourceZoomToggle sourceConfig data.item
                 ]
 
         TypeItem (Type h category detail) ->
             viewClosableRow
                 ref
                 attrs
-                (viewInfo docZoomMsg h detail.info (Category.Type category))
+                (viewInfo data.zoom infoZoomToggle h detail.info (Category.Type category))
                 [ ( UI.nothing, viewDoc_ detail.doc )
                 , ( UI.nothing, viewBuiltin data.item )
-                , viewSource sourceConfig data.item
+                , viewSource data.zoom sourceZoomToggle sourceConfig data.item
                 ]
 
         DataConstructorItem (DataConstructor h detail) ->
             viewClosableRow
                 ref
                 attrs
-                (viewInfo docZoomMsg h detail.info (Category.Type Type.DataType))
+                (viewInfo data.zoom infoZoomToggle h detail.info (Category.Type Type.DataType))
                 [ ( UI.nothing, viewBuiltin data.item )
-                , viewSource sourceConfig data.item
+                , viewSource data.zoom sourceZoomToggle sourceConfig data.item
                 ]
 
         AbilityConstructorItem (AbilityConstructor h detail) ->
             viewClosableRow
                 ref
                 attrs
-                (viewInfo docZoomMsg h detail.info (Category.Type Type.AbilityType))
+                (viewInfo data.zoom infoZoomToggle h detail.info (Category.Type Type.AbilityType))
                 [ ( UI.nothing, viewBuiltin data.item )
-                , viewSource sourceConfig data.item
+                , viewSource data.zoom sourceZoomToggle sourceConfig data.item
                 ]
 
 

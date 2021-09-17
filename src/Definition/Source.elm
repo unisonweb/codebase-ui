@@ -2,8 +2,10 @@ module Definition.Source exposing
     ( Source(..)
     , ViewConfig(..)
     , numTermLines
+    , numTermSignatureLines
     , numTypeLines
     , view
+    , viewNamedTermSignature
     , viewTermSignature
     , viewTermSource
     , viewTypeSource
@@ -51,8 +53,18 @@ numTermLines source =
         Term.Source _ syntax ->
             Syntax.numLines syntax
 
-        Term.Builtin (TermSignature syntax) ->
-            Syntax.numLines syntax
+        Term.Builtin (TermSignature signature) ->
+            Syntax.numLines signature
+
+
+numTermSignatureLines : TermSource -> Int
+numTermSignatureLines source =
+    case source of
+        Term.Source (TermSignature signature) _ ->
+            Syntax.numLines signature
+
+        Term.Builtin (TermSignature signature) ->
+            Syntax.numLines signature
 
 
 
@@ -92,6 +104,21 @@ viewTermSignature viewConfig (TermSignature syntax) =
     viewCode viewConfig (viewSyntax viewConfig syntax)
 
 
+viewNamedTermSignature : ViewConfig msg -> String -> TermSignature -> Html msg
+viewNamedTermSignature viewConfig termName signature =
+    viewCode viewConfig (viewNamedTermSignature_ viewConfig termName signature)
+
+
+viewNamedTermSignature_ : ViewConfig msg -> String -> TermSignature -> Html msg
+viewNamedTermSignature_ viewConfig termName (TermSignature syntax) =
+    span
+        []
+        [ span [ class "hash-qualifier" ] [ text termName ]
+        , span [ class "type-ascription-colon" ] [ text " : " ]
+        , viewSyntax viewConfig syntax
+        ]
+
+
 viewTermSource : ViewConfig msg -> String -> TermSource -> Html msg
 viewTermSource viewConfig termName source =
     let
@@ -100,13 +127,8 @@ viewTermSource viewConfig termName source =
                 Term.Source _ syntax ->
                     viewSyntax viewConfig syntax
 
-                Term.Builtin (TermSignature syntax) ->
-                    span
-                        []
-                        [ span [ class "hash-qualifier" ] [ text termName ]
-                        , span [ class "type-ascription-colon" ] [ text " : " ]
-                        , viewSyntax viewConfig syntax
-                        ]
+                Term.Builtin signature ->
+                    viewNamedTermSignature viewConfig termName signature
     in
     viewCode viewConfig content
 

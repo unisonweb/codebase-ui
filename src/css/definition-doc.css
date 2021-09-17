@@ -19,6 +19,7 @@
   --color-doc-subtle-fg: var(--color-doc-focus-subtle-fg);
   --color-doc-source-bg: var(--color-doc-focus-source-bg);
   --color-doc-source-mg: var(--color-doc-focus-source-mg);
+  --color-doc-fold-hover-fg: var(--color-doc-focus-fold-hover-fg);
   --color-doc-fold-hover-bg: var(--color-doc-focus-fold-hover-bg);
   --color-doc-link: var(--color-doc-focus-link);
   --color-doc-link-active: var(--color-doc-focus-link-active);
@@ -43,6 +44,10 @@
   scrollbar-width: auto;
   scrollbar-color: var(--color-workspace-item-subtle-fg) transparent;
   overflow: auto;
+}
+
+.definition-doc .folded-sources .source {
+  padding: 0.5rem;
 }
 
 .definition-doc .source.code::-webkit-scrollbar,
@@ -202,11 +207,6 @@
   white-space: wrap;
 }
 
-.definition-doc aside .source:last-child,
-.definition-doc aside p:last-child {
-  margin-bottom: 0;
-}
-
 .definition-doc .callout {
   background: var(--color-doc-callout-bg);
   padding: 0.5rem 0.75rem;
@@ -218,15 +218,6 @@
 
 .definition-doc .callout.callout-with-icon .callout-content {
   padding-top: 1px;
-}
-
-.definition-doc .callout .callout-content > section:first-child {
-  margin: 0;
-}
-
-.definition-doc .callout .source:last-child,
-.definition-doc .callout p:last-child {
-  margin-bottom: 0;
 }
 
 .definition-doc .callout .callout-icon {
@@ -249,58 +240,6 @@
   margin-bottom: 1rem;
   display: flex;
   flex-direction: row;
-}
-
-.definition-doc .folded .fold-toggle {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  margin-right: 0.25rem;
-  width: 1.2rem;
-  height: 1.2rem;
-  line-height: 1rem;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border-radius: var(--border-radius-base);
-  transition: all 0.2s;
-}
-
-.definition-doc .folded .icon {
-  color: var(--color-doc-subtle-fg);
-}
-
-.definition-doc .folded .fold-toggle:hover {
-  text-decoration: none;
-}
-
-.definition-doc .folded:not(.disabled) .fold-toggle:hover {
-  background: var(--color-doc-subtle-bg);
-}
-.definition-doc .folded:not(.disabled) .fold-toggle:hover .icon {
-  color: var(--color-doc-subtle-fg);
-}
-
-.definition-doc
-  .source.folded:not(.disabled)
-  .fold-toggle:hover
-  .fold-toggle-indicator {
-  background: var(--color-doc-fold-hover-bg);
-}
-
-.definition-doc .folded .icon {
-  font-size: 1rem;
-  cursor: pointer;
-  transition: transform 0.1s ease-out;
-}
-
-.definition-doc .folded.disabled .icon {
-  cursor: inherit;
-  opacity: 0.5;
-}
-
-.definition-doc .folded.is-folded .icon {
-  transform: rotate(-90deg);
 }
 
 .definition-doc .folded .folded-content {
@@ -338,9 +277,20 @@
   margin-bottom: 1em;
 }
 
+.definition-doc ol:last-child,
+.definition-doc ul:last-child {
+  margin-bottom: 0;
+}
+
 .definition-doc section {
   margin-bottom: 1rem;
   margin-top: 1rem;
+}
+.definition-doc section:first-child {
+  margin-top: 0;
+}
+.definition-doc section:last-child {
+  margin-bottom: 0;
 }
 
 :is(.definition-doc h1, .definition-doc h2, .definition-doc h3, .definition-doc
@@ -353,6 +303,9 @@
   font-size: 1.25rem;
   margin-top: 1.5rem;
   margin-bottom: 0.75rem;
+}
+.definition-doc h1:first-child {
+  margin-top: 0;
 }
 
 .definition-doc h2 {
@@ -383,25 +336,6 @@
   font-size: 0.875rem;
   margin-top: 1.25rem;
   margin-bottom: 0.5rem;
-}
-
-/* A bunch of margin-top reset to deal with the very top of the doc. We don't
- * want any margin there and there might be a strange combination of sections
- * */
-.definition-doc > section:first-child,
-.definition-doc > section:first-child > section:first-child,
-.definition-doc
-  > section:first-child
-  > section:first-child
-  > section:first-child,
-.definition-doc > section:first-child > h1:first-child,
-.definition-doc > section:first-child > section:first-child > h1:first-child,
-.definition-doc
-  > section:first-child
-  > section:first-child
-  > section:first-child
-  > h1:first-child {
-  margin-top: 0;
 }
 
 .definition-doc img {
