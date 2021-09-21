@@ -26,10 +26,6 @@
   color: var(--color-workspace-item-subtle-fg);
 }
 
-.workspace-item .loading-placeholder {
-  background: var(--color-workspace-item-subtle-fg);
-}
-
 .workspace-item header {
   position: relative;
   display: flex;
@@ -45,7 +41,7 @@
   top: 0.75rem;
   right: 1rem;
   height: 1.25rem;
-  background: var(--color-workspace-item-em-bg);
+  background: var(--color-workspace-item-bg-em);
   border-radius: var(--border-radius-base);
   display: flex;
   flex-direction: row;
@@ -232,6 +228,10 @@
 
 /* Definition Row: Loading */
 
+.workspace-item .loading-placeholder {
+  background: var(--color-workspace-item-subtle-fg);
+}
+
 .workspace-item header .loading-placeholder {
   width: 10%;
 }
@@ -269,7 +269,8 @@
   );
   --color-workspace-item-border: var(--color-workspace-item-focus-border);
   --color-workspace-item-mg: var(--color-workspace-item-focus-mg);
-  --color-workspace-item-em-bg: var(--color-workspace-item-focus-em-bg);
+  --color-workspace-item-bg: var(--color-workspace-item-focus-bg);
+  --color-workspace-item-bg-em: var(--color-workspace-item-focus-bg-em);
   --color-workspace-item-source-bg: var(--color-workspace-item-focus-source-bg);
 }
 

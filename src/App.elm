@@ -16,7 +16,10 @@ import Http
 import KeyboardShortcut
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
+import Namespace exposing (NamespaceDetails)
 import Perspective exposing (Perspective(..))
+import PerspectiveLanding
+import RemoteData
 import Route exposing (Route)
 import UI
 import UI.Button as Button
@@ -44,11 +47,13 @@ type alias Model =
     , route : Route
     , codebaseTree : CodebaseTree.Model
     , workspace : Workspace.Model
+    , perspectiveLanding : PerspectiveLanding.Model
     , modal : Modal
     , keyboardShortcut : KeyboardShortcut.Model
     , env : Env
 
-    -- This is called "toggled" and not "hidden" because the behavior if toggling the sidebar on/off is inverse on mobile vs desktop
+    -- This is called "toggled" and not "hidden" because the behavior of
+    -- toggling the sidebar on/off is inverse on mobile vs desktop
     , sidebarToggled : Bool
     }
 
@@ -67,10 +72,17 @@ init env route navKey =
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init env
 
+        fetchNamespaceDetailsCmd =
+            env.perspective
+                |> fetchNamespaceDetails
+                |> Maybe.map (Api.perform env.apiBasePath)
+                |> Maybe.withDefault Cmd.none
+
         model =
             { navKey = navKey
             , route = route
             , workspace = workspace
+            , perspectiveLanding = PerspectiveLanding.init
             , codebaseTree = codebaseTree
             , modal = NoModal
             , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
@@ -82,6 +94,7 @@ init env route navKey =
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
         , Cmd.map WorkspaceMsg workspaceCmd
+        , fetchNamespaceDetailsCmd
         ]
     )
 
@@ -94,6 +107,7 @@ type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url
     | ChangePerspective Perspective
+    | FetchPerspectiveNamespaceDetailsFinished FQN (Result Http.Error NamespaceDetails)
     | Keydown KeyboardEvent
     | OpenDefinition Reference
     | ShowModal Modal
@@ -102,6 +116,7 @@ type Msg
       -- sub msgs
     | FinderMsg Finder.Msg
     | WorkspaceMsg Workspace.Msg
+    | PerspectiveLandingMsg PerspectiveLanding.Msg
     | CodebaseTreeMsg CodebaseTree.Msg
     | KeyboardShortcutMsg KeyboardShortcut.Msg
 
@@ -120,6 +135,25 @@ update msg ({ env } as model) =
 
         ChangePerspective perspective ->
             replacePerspective model perspective
+
+        FetchPerspectiveNamespaceDetailsFinished fqn details ->
+            let
+                perspective =
+                    case env.perspective of
+                        Namespace p ->
+                            if FQN.equals p.fqn fqn then
+                                Namespace { p | details = RemoteData.fromResult details }
+
+                            else
+                                env.perspective
+
+                        _ ->
+                            env.perspective
+
+                nextEnv =
+                    { env | perspective = perspective }
+            in
+            ( { model | env = nextEnv }, Cmd.none )
 
         Keydown event ->
             keydown model event
@@ -149,6 +183,24 @@ update msg ({ env } as model) =
                     handleWorkspaceOutMsg model2 outMsg
             in
             ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
+
+        PerspectiveLandingMsg rMsg ->
+            let
+                ( perspectiveLanding, outMsg ) =
+                    PerspectiveLanding.update rMsg model.perspectiveLanding
+
+                model2 =
+                    { model | perspectiveLanding = perspectiveLanding }
+            in
+            case outMsg of
+                PerspectiveLanding.OpenDefinition ref ->
+                    openDefinition model2 ref
+
+                PerspectiveLanding.ShowFinderRequest ->
+                    showFinder model2 Nothing
+
+                PerspectiveLanding.None ->
+                    ( model2, Cmd.none )
 
         CodebaseTreeMsg cMsg ->
             let
@@ -231,9 +283,19 @@ replacePerspective ({ env } as model) perspective =
 
         changeRouteCmd =
             Route.replacePerspective model.navKey (Perspective.toParams perspective) model.route
+
+        fetchNamespaceDetailsCmd =
+            perspective
+                |> fetchNamespaceDetails
+                |> Maybe.map (Api.perform env.apiBasePath)
+                |> Maybe.withDefault Cmd.none
     in
     ( { model | env = newEnv, codebaseTree = codebaseTree }
-    , Cmd.batch [ Cmd.map CodebaseTreeMsg codebaseTreeCmd, changeRouteCmd ]
+    , Cmd.batch
+        [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
+        , changeRouteCmd
+        , fetchNamespaceDetailsCmd
+        ]
     )
 
 
@@ -308,6 +370,27 @@ showFinder model withinNamespace =
             Finder.init model.env options
     in
     ( { model | modal = FinderModal fm }, Cmd.map FinderMsg fcmd )
+
+
+
+-- EFFECTS
+
+
+fetchNamespaceDetails : Perspective -> Maybe (Api.ApiRequest NamespaceDetails Msg)
+fetchNamespaceDetails perspective =
+    case perspective of
+        Namespace { fqn } ->
+            fqn
+                |> Api.namespace perspective
+                |> Api.toRequest Namespace.decodeDetails (FetchPerspectiveNamespaceDetailsFinished fqn)
+                |> Just
+
+        _ ->
+            Nothing
+
+
+
+-- SUBSCRIPTIONS
 
 
 subscriptions : Model -> Sub Msg
@@ -609,13 +692,25 @@ view model =
 
                 Ucm ->
                     "Unison Local"
+
+        page =
+            case model.route of
+                Route.Perspective _ ->
+                    Html.map PerspectiveLandingMsg
+                        (PerspectiveLanding.view
+                            model.env
+                            model.perspectiveLanding
+                        )
+
+                Route.Definition _ _ ->
+                    Html.map WorkspaceMsg (Workspace.view model.workspace)
     in
     { title = title_
     , body =
         [ div [ id "app", classList [ ( "sidebar-toggled", model.sidebarToggled ) ] ]
             [ viewMainHeader model
             , viewMainSidebar model
-            , div [ id "main-content" ] [ Html.map WorkspaceMsg (Workspace.view model.env model.workspace) ]
+            , div [ id "main-content" ] [ page ]
             , viewModal model
             ]
         ]

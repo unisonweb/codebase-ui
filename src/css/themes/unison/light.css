@@ -52,6 +52,14 @@
   --color-sidebar-tooltip-bg: var(--color-gray-darken-30);
   --color-sidebar-tooltip-border: var(--color-gray-darken-10);
 
+  --color-perspective-landing-fg: var(--color-main-fg);
+  --color-perspective-landing-bg: var(--color-main-bg);
+  --color-perspective-landing-bg-em: var(--color-gray-lighten-55);
+  --color-perspective-landing-subtle-fg: var(--color-gray-lighten-30);
+  --color-perspective-landing-subtle-fg-em: var(--color-gray-base);
+  --color-perspective-landing-subtle-bg: var(--color-gray-lighten-60);
+  --color-perspective-landing-subtle-border: var(--color-gray-lighten-45);
+
   --color-workspace-fg: var(--color-main-fg);
   --color-workspace-bg: var(--color-main-bg);
   --color-workspace-subtle-bg: var(--color-gray-lighten-60);
@@ -62,12 +70,10 @@
   --color-workspace-item-bg: var(--color-gray-lighten-100);
   --color-workspace-item-source-bg: transparent;
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
-  --color-workspace-item-subtle-fg-em: var(--color-gray-base);
   --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
-  --color-workspace-item-em-bg: var(--color-gray-lighten-55);
+  --color-workspace-item-bg-em: var(--color-gray-lighten-55);
   --color-workspace-item-content-border: var(--color-gray-lighten-55);
   --color-workspace-item-border: transparent;
-  --color-workspace-item-subtle-border: var(--color-gray-lighten-45);
   --color-workspace-item-info-item-fg: var(--color-gray-lighten-30);
   --color-workspace-item-info-item-subtle-fg: var(--color-gray-lighten-30);
   --color-workspace-item-info-item-hover-fg: var(--color-gray-darken-30);
@@ -78,9 +84,8 @@
   --color-workspace-item-focus-subtle-bg: var(--color-gray-lighten-50);
   --color-workspace-item-focus-mg: var(--color-gray-lighten-55);
   --color-workspace-item-focus-source-bg: transparent;
-  --color-workspace-item-focus-doc-source-bg: var(--color-gray-lighten-55);
   --color-workspace-item-focus-bg: var(--color-gray-lighten-60);
-  --color-workspace-item-focus-em-bg: var(--color-gray-lighten-50);
+  --color-workspace-item-focus-bg-em: var(--color-gray-lighten-50);
   --color-workspace-item-focus-content-border: var(--color-gray-lighten-50);
   --color-workspace-item-focus-border: var(--color-gray-lighten-50);
 
