@@ -277,6 +277,7 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ name content)
 
         changePerspectiveTo =
             Button.icon (Out (ChangePerspectiveToNamespace name)) Icon.intoFolder
+                |> Button.stopPropagation
                 |> Button.uncontained
                 |> Button.small
                 |> Button.view
