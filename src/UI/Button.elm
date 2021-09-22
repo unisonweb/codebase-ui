@@ -13,12 +13,15 @@ module UI.Button exposing
     , linkIcon
     , linkIconThenLabel
     , medium
+    , preventDefault
     , primary
     , primaryMono
     , share
     , small
+    , stopPropagation
     , uncontained
     , view
+    , withOnClickSettings
     , withSize
     , withType
     )
@@ -26,11 +29,12 @@ module UI.Button exposing
 import Html exposing (Html, a, text)
 import Html.Attributes exposing (class, href, rel, target)
 import Html.Events exposing (onClick)
+import Html.Events.Extra exposing (onClickPreventDefault, onClickPreventDefaultAndStopPropagation, onClickStopPropagation)
 import UI.Icon as I
 
 
 type Action clickMsg
-    = OnClick clickMsg
+    = OnClick clickMsg OnClickSettings
     | Href String
 
 
@@ -55,7 +59,7 @@ type alias Button msg =
 
 button : clickMsg -> String -> Button clickMsg
 button clickMsg label =
-    { action = OnClick clickMsg
+    { action = OnClick clickMsg defaultOnClickSettings
     , content = Label label
     , type_ = Contained
     , color = Default
@@ -65,7 +69,7 @@ button clickMsg label =
 
 icon : msg -> I.Icon msg -> Button msg
 icon msg icon_ =
-    { action = OnClick msg
+    { action = OnClick msg defaultOnClickSettings
     , content = Icon icon_
     , type_ = Contained
     , color = Default
@@ -75,7 +79,7 @@ icon msg icon_ =
 
 iconThenLabel : msg -> I.Icon msg -> String -> Button msg
 iconThenLabel msg icon_ label =
-    { action = OnClick msg
+    { action = OnClick msg defaultOnClickSettings
     , content = IconThenLabel icon_ label
     , type_ = Contained
     , color = Default
@@ -116,6 +120,57 @@ linkIconThenLabel url icon_ label =
     }
 
 
+
+-- OnClick
+
+
+type alias OnClickSettings =
+    { stopPropagation : Bool, preventDefault : Bool }
+
+
+defaultOnClickSettings : OnClickSettings
+defaultOnClickSettings =
+    { stopPropagation = False, preventDefault = False }
+
+
+stopPropagation : Button msg -> Button msg
+stopPropagation button_ =
+    case button_.action of
+        OnClick msg settings ->
+            let
+                newSettings =
+                    { settings | stopPropagation = True }
+            in
+            { button_ | action = OnClick msg newSettings }
+
+        _ ->
+            button_
+
+
+preventDefault : Button msg -> Button msg
+preventDefault button_ =
+    case button_.action of
+        OnClick msg settings ->
+            let
+                newSettings =
+                    { settings | preventDefault = True }
+            in
+            { button_ | action = OnClick msg newSettings }
+
+        _ ->
+            button_
+
+
+withOnClickSettings : OnClickSettings -> Button msg -> Button msg
+withOnClickSettings settings button_ =
+    case button_.action of
+        OnClick msg _ ->
+            { button_ | action = OnClick msg settings }
+
+        _ ->
+            button_
+
+
 view : Button clickMsg -> Html clickMsg
 view { content, type_, color, action, size } =
     let
@@ -139,8 +194,22 @@ view { content, type_, color, action, size } =
             ]
     in
     case action of
-        OnClick clickMsg ->
-            Html.button (onClick clickMsg :: attrs) content_
+        OnClick clickMsg settings ->
+            let
+                click =
+                    if settings.stopPropagation && settings.preventDefault then
+                        onClickPreventDefaultAndStopPropagation
+
+                    else if settings.stopPropagation then
+                        onClickStopPropagation
+
+                    else if settings.preventDefault then
+                        onClickPreventDefault
+
+                    else
+                        onClick
+            in
+            Html.button (click clickMsg :: attrs) content_
 
         Href url ->
             a (attrs ++ [ href url, rel "noopener", target "_blank" ]) content_
