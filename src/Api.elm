@@ -5,6 +5,7 @@ module Api exposing
     , find
     , getDefinition
     , list
+    , namespace
     , perform
     , toRequest
     , toUrl
@@ -36,10 +37,19 @@ type Endpoint
 list : PerspectiveParams -> Maybe String -> Endpoint
 list perspectiveParams fqnOrHash =
     let
-        namespace =
+        namespace_ =
             Maybe.withDefault "." fqnOrHash
     in
-    Endpoint [ "list" ] (string "namespace" namespace :: perspectiveParamsToQueryParams perspectiveParams)
+    Endpoint [ "list" ] (string "namespace" namespace_ :: perspectiveParamsToQueryParams perspectiveParams)
+
+
+namespace : Perspective -> FQN -> Endpoint
+namespace perspective fqn =
+    let
+        queryParams =
+            [ rootBranch (Perspective.codebaseHash perspective) ]
+    in
+    Endpoint [ "namespaces", FQN.toString fqn ] queryParams
 
 
 getDefinition : Perspective -> List String -> Endpoint

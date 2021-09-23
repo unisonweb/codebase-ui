@@ -3,16 +3,22 @@ module Perspective exposing (..)
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Json.Decode as Decode exposing (field)
+import Namespace exposing (NamespaceDetails)
+import RemoteData exposing (RemoteData(..), WebData)
 
 
 type Perspective
     = Codebase Hash
-    | Namespace { codebaseHash : Hash, fqn : FQN }
+    | Namespace
+        { codebaseHash : Hash
+        , fqn : FQN
+        , details : WebData NamespaceDetails
+        }
 
 
 toNamespacePerspective : Perspective -> FQN -> Perspective
 toNamespacePerspective perspective fqn_ =
-    Namespace { codebaseHash = codebaseHash perspective, fqn = fqn_ }
+    Namespace { codebaseHash = codebaseHash perspective, fqn = fqn_, details = NotAsked }
 
 
 codebaseHash : Perspective -> Hash
@@ -58,7 +64,7 @@ fromParams params =
             Just (Codebase h)
 
         ByNamespace (Absolute h) fqn_ ->
-            Just (Namespace { codebaseHash = h, fqn = fqn_ })
+            Just (Namespace { codebaseHash = h, fqn = fqn_, details = NotAsked })
 
 
 
@@ -74,7 +80,7 @@ decode perspectiveParams =
                     Codebase codebaseHash_
 
                 ByNamespace _ fqn_ ->
-                    Namespace { codebaseHash = codebaseHash_, fqn = fqn_ }
+                    Namespace { codebaseHash = codebaseHash_, fqn = fqn_, details = NotAsked }
     in
     Decode.map make (field "namespaceListingHash" Hash.decode)
 

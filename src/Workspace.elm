@@ -16,17 +16,15 @@ import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
 import FullyQualifiedName exposing (FQN)
 import HashQualified as HQ
-import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
-import Html.Attributes exposing (class, href, id, rel, target)
+import Html exposing (Html, article, div, header, section)
+import Html.Attributes exposing (class, id)
 import Http
 import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Perspective exposing (Perspective)
 import Task
-import UI
 import UI.Button as Button
-import UI.Icon as Icon
 import Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem(..))
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 import Workspace.Zoom as Zoom
@@ -427,67 +425,13 @@ subscriptions _ =
 -- VIEW
 
 
-viewEmptyState : Env.AppContext -> Html Msg
-viewEmptyState appContext =
-    let
-        fauxItem =
-            div [ class "faux-workspace-item" ]
-                [ UI.loadingPlaceholderRow
-                , UI.loadingPlaceholderRow
-                ]
-    in
-    case appContext of
-        Env.Ucm ->
-            article
-                [ id "workspace" ]
-                [ section [ class "workspace-empty-state ucm" ]
-                    [ section
-                        [ class "content" ]
-                        [ h2 [] [ text "Your ", span [ class "context" ] [ text "Local" ], text " Unison Codebase" ]
-                        , p [] [ text "Browse, search, read docs, open definition and explore explore your local codebase." ]
-                        , p []
-                            [ text "Check out "
-                            , a [ href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ strong [] [ text "Unison Share" ] ]
-                            , text " for community projects."
-                            ]
-                        , fauxItem
-                        , fauxItem
-                        , section [ class "actions" ]
-                            [ Button.iconThenLabel Find Icon.search "Find Definitions"
-                                |> Button.primaryMono
-                                |> Button.medium
-                                |> Button.view
-                            ]
-                        ]
-                    ]
-                ]
-
-        Env.UnisonShare ->
-            article
-                [ id "workspace" ]
-                [ section [ class "workspace-empty-state unison-share" ]
-                    [ section
-                        [ class "content" ]
-                        [ h2 [] [ text "Unison ", span [ class "context" ] [ text "Share" ] ]
-                        , p [] [ text "Explore to discover and share Unison libraries, documentation, types, and terms." ]
-                        , fauxItem
-                        , fauxItem
-                        , section [ class "actions" ]
-                            [ Button.iconThenLabel Find Icon.search "Find Definitions"
-                                |> Button.primaryMono
-                                |> Button.medium
-                                |> Button.view
-                            ]
-                        ]
-                    ]
-                ]
-
-
-view : Env -> Model -> Html Msg
-view env model =
+view : Model -> Html Msg
+view model =
     case model.workspaceItems of
         WorkspaceItems.Empty ->
-            viewEmptyState env.appContext
+            -- TODO: Remove WorkspaceItems.Empty
+            -- this state is now determined via Route
+            div [] []
 
         WorkspaceItems.WorkspaceItems _ ->
             article [ id "workspace" ]

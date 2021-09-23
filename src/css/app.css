@@ -287,5 +287,6 @@
 @import "./report-bug-modal.css";
 @import "./finder.css";
 
+@import "./perspective-landing.css";
 @import "./workspace.css";
 @import "./definition-doc.css";

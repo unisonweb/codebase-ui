@@ -7,7 +7,7 @@
   color: var(--color-workspace-fg);
 
   --workspace-toolbar-height: 3.5rem;
-  --workspace-content-width: 45.5rem;
+  --workspace-content-width: var(--main-content-width);
 }
 
 #workspace-toolbar {
@@ -62,4 +62,3 @@
 }
 
 @import "./workspace-item.css";
-@import "./workspace-empty-state.css";

@@ -5,6 +5,7 @@ import Finder.SearchOptions as SearchOptions exposing (SearchOptions(..), Within
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash
 import Perspective exposing (Perspective)
+import RemoteData exposing (RemoteData(..))
 import Test exposing (..)
 
 
@@ -113,7 +114,7 @@ perspectiveFqn =
 namespacePerspective : Maybe Perspective
 namespacePerspective =
     Hash.fromString "#testhash"
-        |> Maybe.map (\h -> Perspective.Namespace { codebaseHash = h, fqn = perspectiveFqn })
+        |> Maybe.map (\h -> Perspective.Namespace { codebaseHash = h, fqn = perspectiveFqn, details = NotAsked })
 
 
 codebasePerspective : Maybe Perspective
