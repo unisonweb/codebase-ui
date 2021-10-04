@@ -188,7 +188,7 @@ fromUrlBasePath =
             \_ ->
                 let
                     url =
-                        mkUrl "/latest/terms/@abc123"
+                        mkUrl "/some-token/ui/latest/terms/@abc123"
 
                     basePath =
                         "/some-token/ui/"
