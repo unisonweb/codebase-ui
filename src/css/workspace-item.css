@@ -179,7 +179,6 @@
 }
 
 .workspace-item .content .workspace-item-definition-doc {
-  margin-bottom: 1.5rem;
   padding-left: 1.5rem;
   width: var(--workspace-content-width);
 }
@@ -196,6 +195,7 @@
 .workspace-item .content .definition-source {
   position: relative;
   padding-left: 1.5rem;
+  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: row;
   background: var(--color-workspace-item-source-bg);

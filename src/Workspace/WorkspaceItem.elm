@@ -40,17 +40,23 @@ type WorkspaceItem
         }
 
 
+type alias WithDoc =
+    { doc : Maybe Doc }
+
+
 type alias TermDetailWithDoc =
-    TermDetail { doc : Maybe Doc }
+    TermDetail WithDoc
 
 
 type alias TypeDetailWithDoc =
-    TypeDetail { doc : Maybe Doc }
+    TypeDetail WithDoc
 
 
 type Item
     = TermItem TermDetailWithDoc
     | TypeItem TypeDetailWithDoc
+      -- TODO: DataConstructorItem and AbilityConstructorItem are currently not
+      -- rendered separate from TypeItem
     | DataConstructorItem DataConstructorDetail
     | AbilityConstructorItem AbilityConstructorDetail
 
@@ -64,6 +70,27 @@ type Msg
     | ToggleDocFold Reference Doc.FoldId
     | ChangePerspectiveToNamespace FQN
     | FindWithinNamespace FQN
+
+
+fromItem : Reference -> Item -> WorkspaceItem
+fromItem ref item =
+    let
+        zoom =
+            -- Doc items always have docs
+            if isDocItem item then
+                Medium
+
+            else if hasDoc item then
+                Medium
+
+            else
+                Near
+    in
+    Success ref
+        { item = item
+        , zoom = zoom
+        , docFoldToggles = Doc.emptyDocFoldToggles
+        }
 
 
 reference : WorkspaceItem -> Reference
@@ -94,6 +121,23 @@ isDocItem item =
     case item of
         TermItem (Term _ Term.DocTerm _) ->
             True
+
+        _ ->
+            False
+
+
+hasDoc : Item -> Bool
+hasDoc item =
+    let
+        hasDoc_ details =
+            MaybeE.isJust details.doc
+    in
+    case item of
+        TermItem (Term _ _ d) ->
+            hasDoc_ d
+
+        TypeItem (Type _ _ d) ->
+            hasDoc_ d
 
         _ ->
             False
@@ -289,7 +333,6 @@ viewItem :
     -> Html Msg
 viewItem ref data isFocused =
     let
-        -- TODO: Support zoom level on the source
         ( zoomClass, infoZoomToggle, sourceZoomToggle ) =
             case data.zoom of
                 Far ->
@@ -304,52 +347,51 @@ viewItem ref data isFocused =
         attrs =
             [ class zoomClass, classList [ ( "focused", isFocused ) ] ]
 
+        sourceConfig =
+            Source.Rich (OpenReference ref)
+
         viewDoc_ doc =
             doc
                 |> Maybe.map (viewDoc ref data.docFoldToggles)
                 |> Maybe.withDefault UI.nothing
 
-        sourceConfig =
-            Source.Rich (OpenReference ref)
+        viewContent doc =
+            [ viewSource data.zoom sourceZoomToggle sourceConfig data.item
+            , ( UI.nothing, viewBuiltin data.item )
+            , ( UI.nothing, viewDoc_ doc )
+            ]
+
+        viewInfo_ hash_ info cat =
+            viewInfo data.zoom infoZoomToggle hash_ info cat
     in
     case data.item of
         TermItem (Term h category detail) ->
             viewClosableRow
                 ref
                 attrs
-                (viewInfo data.zoom infoZoomToggle h detail.info (Category.Term category))
-                [ ( UI.nothing, viewDoc_ detail.doc )
-                , ( UI.nothing, viewBuiltin data.item )
-                , viewSource data.zoom sourceZoomToggle sourceConfig data.item
-                ]
+                (viewInfo_ h detail.info (Category.Term category))
+                (viewContent detail.doc)
 
         TypeItem (Type h category detail) ->
             viewClosableRow
                 ref
                 attrs
-                (viewInfo data.zoom infoZoomToggle h detail.info (Category.Type category))
-                [ ( UI.nothing, viewDoc_ detail.doc )
-                , ( UI.nothing, viewBuiltin data.item )
-                , viewSource data.zoom sourceZoomToggle sourceConfig data.item
-                ]
+                (viewInfo_ h detail.info (Category.Type category))
+                (viewContent detail.doc)
 
         DataConstructorItem (DataConstructor h detail) ->
             viewClosableRow
                 ref
                 attrs
-                (viewInfo data.zoom infoZoomToggle h detail.info (Category.Type Type.DataType))
-                [ ( UI.nothing, viewBuiltin data.item )
-                , viewSource data.zoom sourceZoomToggle sourceConfig data.item
-                ]
+                (viewInfo_ h detail.info (Category.Type Type.DataType))
+                (viewContent Nothing)
 
         AbilityConstructorItem (AbilityConstructor h detail) ->
             viewClosableRow
                 ref
                 attrs
-                (viewInfo data.zoom infoZoomToggle h detail.info (Category.Type Type.AbilityType))
-                [ ( UI.nothing, viewBuiltin data.item )
-                , viewSource data.zoom sourceZoomToggle sourceConfig data.item
-                ]
+                (viewInfo_ h detail.info (Category.Type Type.AbilityType))
+                (viewContent Nothing)
 
 
 view : WorkspaceItem -> Bool -> Html Msg
