@@ -104,22 +104,45 @@ toRoute =
     oneOf [ b perspective, b definition ]
 
 
+{-| In environments like Unison Local, the UI is served with a base path
+
+This means that a route to a definition might look like:
+
+  - "/:some-token/ui/latest/terms/base/List/map"
+    (where "/:some-token/ui/" is the base path.)
+
+The base path is determined outside of the Elm app using the <base> tag in the
+<head> section of the document. The Browser uses this tag to prefix all links.
+
+The base path must end in a slash for links to work correctly, but our parser
+expects a path to starts with a slash. When parsing the URL we thus pre-process
+the path to strip the base path and ensure a slash prefix before we parse.
+
+-}
 fromUrl : String -> Url -> Route
 fromUrl basePath url =
     let
-        stripBasePath u =
+        stripBasePath path =
             if basePath == "/" then
-                u
+                path
 
             else
-                { u | path = String.replace basePath "" u.path }
+                String.replace basePath "" path
+
+        ensureSlashPrefix path =
+            if String.startsWith "/" path then
+                path
+
+            else
+                "/" ++ path
 
         parse url_ =
             Result.withDefault (Perspective (ByCodebase Relative)) (Parser.run toRoute url_)
     in
     url
-        |> stripBasePath
         |> .path
+        |> stripBasePath
+        |> ensureSlashPrefix
         |> parse
 
 
