@@ -195,6 +195,7 @@
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-shrink: 0;
   width: 1.25rem;
   height: 1.25rem;
   margin-right: 0.25rem;
@@ -220,37 +221,24 @@
 .workspace-item .content .workspace-item-definition-doc .show-full-doc {
   position: relative;
   background: var(--color-workspace-item-bg);
-  padding: 1rem 1.5rem;
+  padding: 0 1.5rem;
 }
 
-/* Gradient border */
-.workspace-item .content .workspace-item-definition-doc .show-full-doc:after {
-  position: absolute;
-  top: -1px;
-  left: 0;
-  right: 0;
-  content: " ";
-  height: 1px;
-  background: linear-gradient(
-    90deg,
-    var(--color-workspace-item-bg) 0%,
-    var(--color-workspace-item-cropped-control-border) 20%,
-    var(--color-workspace-item-bg) 80%,
-    var(--color-workspace-item-bg) 100%
-  );
-}
-/* Shadow */
+/* overlapping gradient for the content to peek out behind, indicating more is
+ * below the fold */
 .workspace-item .content .workspace-item-definition-doc .show-full-doc:before {
   position: absolute;
-  top: -16px;
+  top: -4.5rem;
   left: 0;
   right: 0;
-  content: " ";
-  height: 1rem;
-  background: radial-gradient(
-    ellipse at 16.6rem bottom,
-    var(--color-workspace-item-cropped-control-shadow) 0%,
-    transparent 50%
+  content: "";
+  margin: 0;
+  height: 4.5rem;
+  background: linear-gradient(
+    0deg,
+    var(--color-workspace-item-bg) 20%,
+    var(--color-workspace-item-bg-faded) 80%,
+    rgba(255, 255, 255, 0)
   );
 }
 
@@ -333,6 +321,7 @@
 .workspace-item.focused {
   --color-workspace-item-fg: var(--color-workspace-item-focus-fg);
   --color-workspace-item-bg: var(--color-workspace-item-focus-bg);
+  --color-workspace-item-bg-faded: var(--color-workspace-item-focus-bg-faded);
   --color-workspace-item-subtle-fg: var(--color-workspace-item-focus-subtle-fg);
   --color-workspace-item-subtle-bg: var(--color-workspace-item-focus-subtle-bg);
   --color-workspace-item-content-border: var(

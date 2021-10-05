@@ -68,6 +68,12 @@
   --color-workspace-item-fg: var(--color-gray-darken-30);
   --color-workspace-item-mg: var(--color-gray-lighten-60);
   --color-workspace-item-bg: var(--color-gray-lighten-100);
+  --color-workspace-item-bg-faded: rgba(
+    255,
+    255,
+    255,
+    0.5
+  ); /* 50% gray-lighten-100 */
   --color-workspace-item-source-bg: transparent;
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
   --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
@@ -85,6 +91,12 @@
   --color-workspace-item-focus-mg: var(--color-gray-lighten-55);
   --color-workspace-item-focus-source-bg: transparent;
   --color-workspace-item-focus-bg: var(--color-gray-lighten-60);
+  --color-workspace-item-focus-bg-faded: rgba(
+    250,
+    250,
+    251,
+    0.5
+  ); /* 50% gray-lighten-60 */
   --color-workspace-item-focus-bg-em: var(--color-gray-lighten-50);
   --color-workspace-item-focus-content-border: var(--color-gray-lighten-50);
   --color-workspace-item-focus-border: var(--color-gray-lighten-50);
