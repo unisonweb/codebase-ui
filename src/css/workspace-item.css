@@ -1,4 +1,4 @@
-/* -- WorkspaceItem ---------------------------------------------------------- */
+/* -- WorkspaceItem -------------------------------------------------------- */
 
 .workspace-item {
   position: relative;
@@ -179,8 +179,67 @@
 }
 
 .workspace-item .content .workspace-item-definition-doc {
-  padding-left: 1.5rem;
   width: var(--workspace-content-width);
+}
+
+.workspace-item
+  .content
+  .workspace-item-definition-doc
+  .definition-doc-columns {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+.workspace-item .content .workspace-item-definition-doc .icon-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-shrink: 0;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.25rem;
+}
+
+.workspace-item .content .workspace-item-definition-doc .icon-column .icon.doc {
+  color: var(--color-workspace-item-subtle-fg);
+}
+
+.workspace-item .content .workspace-item-definition-doc .doc-column {
+  max-height: 12rem;
+  overflow: hidden;
+}
+
+.workspace-item
+  .content
+  .workspace-item-definition-doc.shown-in-full
+  .doc-column {
+  overflow: visible;
+  max-height: fit-content;
+}
+
+.workspace-item .content .workspace-item-definition-doc .show-full-doc {
+  position: relative;
+  background: var(--color-workspace-item-bg);
+  padding: 0 1.5rem;
+}
+
+/* overlapping gradient for the content to peek out behind, indicating more is
+ * below the fold */
+.workspace-item .content .workspace-item-definition-doc .show-full-doc:before {
+  position: absolute;
+  top: -4.5rem;
+  left: 0;
+  right: 0;
+  content: "";
+  margin: 0;
+  height: 4.5rem;
+  background: linear-gradient(
+    0deg,
+    var(--color-workspace-item-bg) 20%,
+    var(--color-workspace-item-bg-faded) 80%,
+    rgba(255, 255, 255, 0)
+  );
 }
 
 .workspace-item .content .built-in {
@@ -262,6 +321,7 @@
 .workspace-item.focused {
   --color-workspace-item-fg: var(--color-workspace-item-focus-fg);
   --color-workspace-item-bg: var(--color-workspace-item-focus-bg);
+  --color-workspace-item-bg-faded: var(--color-workspace-item-focus-bg-faded);
   --color-workspace-item-subtle-fg: var(--color-workspace-item-focus-subtle-fg);
   --color-workspace-item-subtle-bg: var(--color-workspace-item-focus-subtle-bg);
   --color-workspace-item-content-border: var(

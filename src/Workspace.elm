@@ -68,6 +68,7 @@ type Msg
     = NoOp
     | Find
     | FetchItemFinished Reference (Result Http.Error Item)
+    | IsDocCropped Reference (Result Dom.Error Bool)
     | Keydown KeyboardEvent
     | KeyboardShortcutMsg KeyboardShortcut.Msg
     | WorkspaceItemMsg WorkspaceItem.Msg
@@ -92,20 +93,51 @@ update env msg ({ workspaceItems } as model) =
 
         FetchItemFinished ref itemResult ->
             let
-                workspaceItem =
+                ( workspaceItem, cmd ) =
                     case itemResult of
                         Err e ->
-                            WorkspaceItem.Failure ref e
+                            ( WorkspaceItem.Failure ref e, Cmd.none )
 
                         Ok i ->
-                            WorkspaceItem.fromItem ref i
+                            let
+                                c =
+                                    -- Docs items are always shown in full and never cropped
+                                    if WorkspaceItem.isDocItem i then
+                                        Cmd.none
+
+                                    else
+                                        isDocCropped ref
+                            in
+                            ( WorkspaceItem.fromItem ref i, c )
 
                 nextWorkspaceItems =
                     WorkspaceItems.replace workspaceItems ref workspaceItem
             in
             ( { model | workspaceItems = nextWorkspaceItems }
-            , Cmd.none
+            , cmd
             , openDefinitionsFocusToOutMsg nextWorkspaceItems
+            )
+
+        IsDocCropped ref res ->
+            let
+                visibility =
+                    case res of
+                        Ok True ->
+                            WorkspaceItem.Cropped
+
+                        Ok False ->
+                            WorkspaceItem.NotCropped
+
+                        -- If we can't tell, better make it fully visible, than Unknown
+                        Err _ ->
+                            WorkspaceItem.MadeFullyVisible
+
+                updateVisibility d =
+                    { d | docVisibility = visibility }
+            in
+            ( { model | workspaceItems = WorkspaceItems.updateData updateVisibility ref workspaceItems }
+            , Cmd.none
+            , None
             )
 
         Keydown event ->
@@ -135,38 +167,30 @@ update env msg ({ workspaceItems } as model) =
 
                 WorkspaceItem.UpdateZoom ref zoom ->
                     let
-                        updateMatching workspaceItem =
-                            case workspaceItem of
-                                Success r d ->
-                                    if ref == r then
-                                        Success r { d | zoom = zoom }
-
-                                    else
-                                        workspaceItem
-
-                                _ ->
-                                    workspaceItem
+                        updateZoom d =
+                            { d | zoom = zoom }
                     in
-                    ( { model | workspaceItems = WorkspaceItems.map updateMatching workspaceItems }
+                    ( { model | workspaceItems = WorkspaceItems.updateData updateZoom ref workspaceItems }
+                    , Cmd.none
+                    , None
+                    )
+
+                WorkspaceItem.ShowFullDoc ref ->
+                    let
+                        updateDocVisibility d =
+                            { d | docVisibility = WorkspaceItem.MadeFullyVisible }
+                    in
+                    ( { model | workspaceItems = WorkspaceItems.updateData updateDocVisibility ref workspaceItems }
                     , Cmd.none
                     , None
                     )
 
                 WorkspaceItem.ToggleDocFold ref docId ->
                     let
-                        updateMatching workspaceItem =
-                            case workspaceItem of
-                                Success r d ->
-                                    if ref == r then
-                                        Success r { d | docFoldToggles = Doc.toggleFold d.docFoldToggles docId }
-
-                                    else
-                                        workspaceItem
-
-                                _ ->
-                                    workspaceItem
+                        updateDocFoldToggles d =
+                            { d | docFoldToggles = Doc.toggleFold d.docFoldToggles docId }
                     in
-                    ( { model | workspaceItems = WorkspaceItems.map updateMatching workspaceItems }
+                    ( { model | workspaceItems = WorkspaceItems.updateData updateDocFoldToggles ref workspaceItems }
                     , Cmd.none
                     , None
                     )
@@ -374,6 +398,17 @@ fetchDefinition perspective ref =
     [ definitionHash ]
         |> Api.getDefinition perspective
         |> Api.toRequest WorkspaceItem.decodeItem (FetchItemFinished ref)
+
+
+isDocCropped : Reference -> Cmd Msg
+isDocCropped ref =
+    let
+        id =
+            "definition-doc-" ++ Reference.toString ref
+    in
+    Dom.getViewportOf id
+        |> Task.map (\v -> v.viewport.height < v.scene.height)
+        |> Task.attempt (IsDocCropped ref)
 
 
 scrollToDefinition : Reference -> Cmd Msg

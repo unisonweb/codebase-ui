@@ -399,6 +399,28 @@ prev items =
 -- TRANFORM
 
 
+updateData :
+    (WorkspaceItem.ItemData -> WorkspaceItem.ItemData)
+    -> Reference
+    -> WorkspaceItems
+    -> WorkspaceItems
+updateData f ref wItems =
+    let
+        update_ workspaceItem =
+            case workspaceItem of
+                WorkspaceItem.Success r d ->
+                    if ref == r then
+                        WorkspaceItem.Success r (f d)
+
+                    else
+                        workspaceItem
+
+                _ ->
+                    workspaceItem
+    in
+    map update_ wItems
+
+
 map :
     (WorkspaceItem -> WorkspaceItem)
     -> WorkspaceItems

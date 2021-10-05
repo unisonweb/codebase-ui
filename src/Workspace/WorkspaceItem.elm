@@ -22,6 +22,7 @@ import List.Nonempty as NEL
 import Maybe.Extra as MaybeE
 import String.Extra exposing (pluralize)
 import UI
+import UI.Button as Button
 import UI.FoldToggle as FoldToggle
 import UI.Icon as Icon exposing (Icon)
 import UI.Tooltip as Tooltip
@@ -32,12 +33,22 @@ import Workspace.Zoom exposing (Zoom(..))
 type WorkspaceItem
     = Loading Reference
     | Failure Reference Http.Error
-    | Success
-        Reference
-        { item : Item
-        , zoom : Zoom
-        , docFoldToggles : DocFoldToggles
-        }
+    | Success Reference ItemData
+
+
+type DocVisibility
+    = Unknown
+    | Cropped
+    | NotCropped
+    | MadeFullyVisible
+
+
+type alias ItemData =
+    { item : Item
+    , zoom : Zoom
+    , docFoldToggles : DocFoldToggles
+    , docVisibility : DocVisibility
+    }
 
 
 type alias WithDoc =
@@ -70,6 +81,7 @@ type Msg
     | ToggleDocFold Reference Doc.FoldId
     | ChangePerspectiveToNamespace FQN
     | FindWithinNamespace FQN
+    | ShowFullDoc Reference
 
 
 fromItem : Reference -> Item -> WorkspaceItem
@@ -85,11 +97,19 @@ fromItem ref item =
 
             else
                 Near
+
+        docVisibility =
+            if isDocItem item then
+                MadeFullyVisible
+
+            else
+                Unknown
     in
     Success ref
         { item = item
         , zoom = zoom
         , docFoldToggles = Doc.emptyDocFoldToggles
+        , docVisibility = docVisibility
         }
 
 
@@ -269,9 +289,47 @@ viewInfo zoom onClick_ hash info category =
         ]
 
 
-viewDoc : Reference -> DocFoldToggles -> Doc -> Html Msg
-viewDoc ref docFoldToggles doc =
-    div [ class "workspace-item-definition-doc" ] [ Doc.view (OpenReference ref) (ToggleDocFold ref) docFoldToggles doc ]
+viewDoc : Reference -> DocVisibility -> DocFoldToggles -> Doc -> Html Msg
+viewDoc ref docVisibility docFoldToggles doc =
+    let
+        ( showFullDoc, shownInFull ) =
+            case docVisibility of
+                Unknown ->
+                    ( UI.nothing, False )
+
+                Cropped ->
+                    ( div [ class "show-full-doc" ]
+                        [ Button.iconThenLabel (ShowFullDoc ref) Icon.arrowDown "Show full documentation"
+                            |> Button.small
+                            |> Button.view
+                        ]
+                    , False
+                    )
+
+                _ ->
+                    ( UI.nothing, True )
+
+        classes =
+            classList
+                [ ( "workspace-item-definition-doc", True )
+                , ( "shown-in-full", shownInFull )
+                ]
+    in
+    div [ classes ]
+        [ div [ class "definition-doc-columns" ]
+            [ div [ class "icon-column" ] [ Icon.view Icon.doc ]
+            , div
+                [ class "doc-column"
+                , id ("definition-doc-" ++ Reference.toString ref)
+                ]
+                [ Doc.view (OpenReference ref)
+                    (ToggleDocFold ref)
+                    docFoldToggles
+                    doc
+                ]
+            ]
+        , showFullDoc
+        ]
 
 
 {-| TODO: Yikes, this isn't great. Needs cleanup
@@ -326,11 +384,7 @@ viewSource zoom onSourceToggleClick sourceConfig item =
                 |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.open))
 
 
-viewItem :
-    Reference
-    -> { item : Item, zoom : Zoom, docFoldToggles : DocFoldToggles }
-    -> Bool
-    -> Html Msg
+viewItem : Reference -> ItemData -> Bool -> Html Msg
 viewItem ref data isFocused =
     let
         ( zoomClass, infoZoomToggle, sourceZoomToggle ) =
@@ -352,7 +406,7 @@ viewItem ref data isFocused =
 
         viewDoc_ doc =
             doc
-                |> Maybe.map (viewDoc ref data.docFoldToggles)
+                |> Maybe.map (viewDoc ref data.docVisibility data.docFoldToggles)
                 |> Maybe.withDefault UI.nothing
 
         viewContent doc =
