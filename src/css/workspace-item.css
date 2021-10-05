@@ -1,4 +1,4 @@
-/* -- WorkspaceItem ---------------------------------------------------------- */
+/* -- WorkspaceItem -------------------------------------------------------- */
 
 .workspace-item {
   position: relative;
@@ -179,8 +179,79 @@
 }
 
 .workspace-item .content .workspace-item-definition-doc {
-  padding-left: 1.5rem;
   width: var(--workspace-content-width);
+}
+
+.workspace-item
+  .content
+  .workspace-item-definition-doc
+  .definition-doc-columns {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+}
+
+.workspace-item .content .workspace-item-definition-doc .icon-column {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.25rem;
+}
+
+.workspace-item .content .workspace-item-definition-doc .icon-column .icon.doc {
+  color: var(--color-workspace-item-subtle-fg);
+}
+
+.workspace-item .content .workspace-item-definition-doc .doc-column {
+  max-height: 12rem;
+  overflow: hidden;
+}
+
+.workspace-item
+  .content
+  .workspace-item-definition-doc.shown-in-full
+  .doc-column {
+  overflow: visible;
+  max-height: fit-content;
+}
+
+.workspace-item .content .workspace-item-definition-doc .show-full-doc {
+  position: relative;
+  background: var(--color-workspace-item-bg);
+  padding: 1rem 1.5rem;
+}
+
+/* Gradient border */
+.workspace-item .content .workspace-item-definition-doc .show-full-doc:after {
+  position: absolute;
+  top: -1px;
+  left: 0;
+  right: 0;
+  content: " ";
+  height: 1px;
+  background: linear-gradient(
+    90deg,
+    var(--color-workspace-item-bg) 0%,
+    var(--color-workspace-item-cropped-control-border) 20%,
+    var(--color-workspace-item-bg) 80%,
+    var(--color-workspace-item-bg) 100%
+  );
+}
+/* Shadow */
+.workspace-item .content .workspace-item-definition-doc .show-full-doc:before {
+  position: absolute;
+  top: -16px;
+  left: 0;
+  right: 0;
+  content: " ";
+  height: 1rem;
+  background: radial-gradient(
+    ellipse at 16.6rem bottom,
+    var(--color-workspace-item-cropped-control-shadow) 0%,
+    transparent 50%
+  );
 }
 
 .workspace-item .content .built-in {

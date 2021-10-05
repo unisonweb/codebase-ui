@@ -88,6 +88,8 @@
   --color-workspace-item-focus-bg-em: var(--color-gray-lighten-50);
   --color-workspace-item-focus-content-border: var(--color-gray-lighten-50);
   --color-workspace-item-focus-border: var(--color-gray-lighten-50);
+  --color-workspace-item-cropped-control-border: var(--color-gray-lighten-30);
+  --color-workspace-item-cropped-control-shadow: var(--color-gray-lighten-45);
 
   --color-doc-fg: var(--color-gray-darken-30);
   --color-doc-bg: var(--color-gray-lighten-100);
