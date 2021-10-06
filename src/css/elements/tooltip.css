@@ -59,7 +59,7 @@
 
 .tooltip-bubble:after,
 .tooltip-bubble:before {
-  border: solid transparent;
+  border: solid var(--color-transparent);
   content: "";
   height: 0;
   width: 0;

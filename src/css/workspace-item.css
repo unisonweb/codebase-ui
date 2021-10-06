@@ -238,7 +238,7 @@
     0deg,
     var(--color-workspace-item-bg) 20%,
     var(--color-workspace-item-bg-faded) 80%,
-    rgba(255, 255, 255, 0)
+    var(--color-transparent)
   );
 }
 
@@ -262,7 +262,8 @@
   width: var(--workspace-content-width);
   overflow: auto;
   scrollbar-width: auto;
-  scrollbar-color: var(--color-workspace-item-subtle-fg) transparent;
+  scrollbar-color: var(--color-workspace-item-subtle-fg)
+    var(--color-transparent);
 }
 
 .workspace-item .content .definition-source .fold-toggle {
@@ -277,7 +278,7 @@
 }
 
 .workspace-item .content .definition-source::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-transparent);
 }
 
 .workspace-item .content .definition-source::-webkit-scrollbar-thumb {

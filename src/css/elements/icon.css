@@ -48,19 +48,19 @@
 }
 
 .icon.animate.search .search-shine-trail-1 {
-  fill: var(--color-icon-2, transparent);
+  fill: var(--color-icon-2, var(--color-transparent, transparent));
   animation-delay: calc(0.1s + var(--icon-animation-delay, 0s));
   transition-delay: var(--icon-transition-delay, 0s);
 }
 
 .icon.animate.search .search-shine-trail-2 {
-  fill: var(--color-icon-3, transparent);
+  fill: var(--color-icon-3, var(--color-transparent, transparent));
   animation-delay: calc(0.2s + var(--icon-animation-delay, 0s));
   transition-delay: var(--icon-transition-delay, 0s);
 }
 
 .icon.animate.search .search-shine-trail-3 {
-  fill: var(--color-icon-4, transparent);
+  fill: var(--color-icon-4, var(--color-transparent, transparent));
   animation-delay: calc(0.3s + var(--icon-animation-delay, 0s));
   transition-delay: var(--icon-transition-delay, 0s);
 }

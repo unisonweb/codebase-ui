@@ -42,7 +42,8 @@
   border-radius: var(--border-radius-base);
   margin-bottom: 1rem;
   scrollbar-width: auto;
-  scrollbar-color: var(--color-workspace-item-subtle-fg) transparent;
+  scrollbar-color: var(--color-workspace-item-subtle-fg)
+    var(--color-transparent);
   overflow: auto;
 }
 
@@ -64,7 +65,7 @@
 .definition-doc .source.example::-webkit-scrollbar-track,
 .definition-doc .source.eval::-webkit-scrollbar-track,
 .definition-doc .source.signatures .signature::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-transparent);
 }
 .definition-doc .source.code::-webkit-scrollbar-thumb,
 .definition-doc .sources .source::-webkit-scrollbar-thumb,

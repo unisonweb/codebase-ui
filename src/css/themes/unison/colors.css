@@ -1,4 +1,11 @@
 :root {
+  /* `transparent` sometimes renders as a dark shade when used
+   * in gradients in some browsers.  Having a variable based
+   * on rgba fixes this and makes it convienient to use
+   * everywhere.
+   */
+  --color-transparent: rgba(255, 255, 255, 0);
+
   /* Brand colors */
   --color-brand-bright-red: #ff4756;
   --color-brand-orange: #ff8800;
