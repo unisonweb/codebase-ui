@@ -45,7 +45,7 @@
 
 #finder input {
   height: 2rem;
-  background: transparent;
+  background: var(--color-transparent);
   width: 100%;
   border-radius: 0;
   font-size: 1rem;
@@ -240,7 +240,11 @@
   right: 0;
   bottom: 0;
   width: 2rem;
-  background: linear-gradient(90deg, transparent, var(--color-modal-bg));
+  background: linear-gradient(
+    90deg,
+    var(--color-transparent),
+    var(--color-modal-bg)
+  );
 }
 
 #finder .definition-match .source code {
@@ -294,7 +298,11 @@
 }
 
 #finder .definition-match.focused .source:after {
-  background: linear-gradient(90deg, transparent, var(--color-modal-focus-bg));
+  background: linear-gradient(
+    90deg,
+    var(--color-transparent),
+    var(--color-modal-focus-bg)
+  );
 }
 
 /* hover */
@@ -308,5 +316,9 @@
 }
 
 #finder .definition-match:not(.focused):hover .source:after {
-  background: linear-gradient(90deg, transparent, var(--color-modal-mg));
+  background: linear-gradient(
+    90deg,
+    var(--color-transparent),
+    var(--color-modal-mg)
+  );
 }

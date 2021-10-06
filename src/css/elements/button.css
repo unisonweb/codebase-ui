@@ -155,7 +155,7 @@ a.button:hover {
 
 /* -- Uncontained & Colors ------------------------------------------------- */
 .button.uncontained {
-  background: transparent;
+  background: var(--color-transparent);
 }
 
 .button.uncontained.default,
