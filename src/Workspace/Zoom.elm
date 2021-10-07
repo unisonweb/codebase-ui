@@ -18,3 +18,16 @@ cycle z =
 
         Near ->
             Far
+
+
+cycleEdges : Zoom -> Zoom
+cycleEdges z =
+    case z of
+        Far ->
+            Near
+
+        Medium ->
+            Far
+
+        Near ->
+            Far
