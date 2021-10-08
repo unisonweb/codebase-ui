@@ -1,6 +1,7 @@
 module Definition.Source exposing
     ( Source(..)
     , ViewConfig(..)
+    , isBuiltin
     , numTermLines
     , numTermSignatureLines
     , numTypeLines
@@ -35,6 +36,19 @@ type
 
 
 -- HELPERS
+
+
+isBuiltin : Source -> Bool
+isBuiltin source =
+    case source of
+        Type Type.Builtin ->
+            True
+
+        Term _ (Term.Builtin _) ->
+            True
+
+        _ ->
+            False
 
 
 numTypeLines : TypeSource -> Int

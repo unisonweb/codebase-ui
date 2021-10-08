@@ -9,6 +9,8 @@ module Definition.Term exposing
     , decodeSignature
     , decodeTermCategory
     , decodeTermSource
+    , isBuiltin
+    , isBuiltinSource
     , termSignature
     )
 
@@ -62,6 +64,21 @@ type alias TermListing =
 
 
 -- HELPERS
+
+
+isBuiltin : TermDetail d -> Bool
+isBuiltin (Term _ _ d) =
+    isBuiltinSource d.source
+
+
+isBuiltinSource : TermSource -> Bool
+isBuiltinSource source =
+    case source of
+        Source _ _ ->
+            False
+
+        Builtin _ ->
+            True
 
 
 termSignature : TermSource -> TermSignature

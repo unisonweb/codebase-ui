@@ -7,6 +7,8 @@ module Definition.Type exposing
     , TypeSummary
     , decodeTypeCategory
     , decodeTypeSource
+    , isBuiltin
+    , isBuiltinSource
     )
 
 import Definition.Info exposing (Info)
@@ -50,6 +52,25 @@ type alias TypeSummary =
 
 type alias TypeListing =
     Type FQN
+
+
+
+-- HELPERS
+
+
+isBuiltin : TypeDetail d -> Bool
+isBuiltin (Type _ _ d) =
+    isBuiltinSource d.source
+
+
+isBuiltinSource : TypeSource -> Bool
+isBuiltinSource source =
+    case source of
+        Source _ ->
+            False
+
+        Builtin ->
+            True
 
 
 

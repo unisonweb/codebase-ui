@@ -27,7 +27,6 @@ import Task
 import UI.Button as Button
 import Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem(..))
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
-import Workspace.Zoom as Zoom
 
 
 
@@ -344,21 +343,8 @@ handleKeyboardShortcut ({ workspaceItems } as model) shortcut =
 
         Sequence _ Space ->
             let
-                cycleZoom items ref =
-                    let
-                        mapper item =
-                            case item of
-                                Success r data ->
-                                    if r == ref then
-                                        Success r { data | zoom = Zoom.cycle data.zoom }
-
-                                    else
-                                        item
-
-                                _ ->
-                                    item
-                    in
-                    WorkspaceItems.map mapper items
+                cycleZoom wItems ref =
+                    WorkspaceItems.updateData WorkspaceItem.cycleZoom ref wItems
 
                 cycled =
                     model.workspaceItems

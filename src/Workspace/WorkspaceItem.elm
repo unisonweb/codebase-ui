@@ -27,7 +27,7 @@ import UI.FoldToggle as FoldToggle
 import UI.Icon as Icon exposing (Icon)
 import UI.Tooltip as Tooltip
 import Util
-import Workspace.Zoom exposing (Zoom(..))
+import Workspace.Zoom as Zoom exposing (Zoom(..))
 
 
 type WorkspaceItem
@@ -126,6 +126,18 @@ reference item =
             r
 
 
+{-| Builtins and Types can't be expanded, so we can skip the Medium Zoom level entirely
+TODO: Remove isTypeItem from this conditional when we can collapse types (TypeSummary)
+-}
+cycleZoom : ItemData -> ItemData
+cycleZoom data =
+    if isBuiltinItem data.item || isTypeItem data.item || not (hasDoc data.item) then
+        { data | zoom = Zoom.cycleEdges data.zoom }
+
+    else
+        { data | zoom = Zoom.cycle data.zoom }
+
+
 isSameReference : WorkspaceItem -> Reference -> Bool
 isSameReference item ref =
     reference item == ref
@@ -134,6 +146,59 @@ isSameReference item ref =
 isSameByReference : WorkspaceItem -> WorkspaceItem -> Bool
 isSameByReference a b =
     reference a == reference b
+
+
+isBuiltinItem : Item -> Bool
+isBuiltinItem item =
+    case item of
+        TermItem term ->
+            Term.isBuiltin term
+
+        TypeItem type_ ->
+            Type.isBuiltin type_
+
+        _ ->
+            False
+
+
+isTypeItem : Item -> Bool
+isTypeItem item =
+    case item of
+        TypeItem _ ->
+            True
+
+        _ ->
+            False
+
+
+isTermItem : Item -> Bool
+isTermItem item =
+    case item of
+        TermItem _ ->
+            True
+
+        _ ->
+            False
+
+
+isDataConstructorItem : Item -> Bool
+isDataConstructorItem item =
+    case item of
+        DataConstructorItem _ ->
+            True
+
+        _ ->
+            False
+
+
+isAbilityConstructorItem : Item -> Bool
+isAbilityConstructorItem item =
+    case item of
+        AbilityConstructorItem _ ->
+            True
+
+        _ ->
+            False
 
 
 isDocItem : Item -> Bool
