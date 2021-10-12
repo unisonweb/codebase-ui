@@ -3,6 +3,14 @@ Unison Codebase UI
 
 [![CI](https://github.com/unisonweb/codebase-ui/actions/workflows/ci.yml/badge.svg)](https://github.com/unisonweb/codebase-ui/actions/workflows/ci.yml)
 
+Hacktoberfest 2021
+------------------
+
+🎃 Unison is participating in [Hacktoberfest](https://hacktoberfest.digitalocean.com/)! There's a number of ways to contribute:
+Look for issues tagged with #hacktoberfest in the [Unison language repo](https://github.com/unisonweb/unison/issues?q=is%3Aissue+is%3Aopen+label%3AHacktoberfest) or the [Unison Codebase UI](https://github.com/unisonweb/codebase-ui/issues?q=is%3Aissue+is%3Aopen+label%3AHacktoberfest) repo
+Add contributions like missing functions and docs to our [base library](https://github.com/unisonweb/base/issues?q=is%3Aissue+is%3Aopen+label%3AHacktoberfest)
+Author your own library and submit a PR to the [Share repository](https://github.com/unisonweb/share/)
+
 Running Development Server
 --------------------------
 
