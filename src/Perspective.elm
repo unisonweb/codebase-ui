@@ -67,6 +67,26 @@ fromParams params =
             Just (Namespace { codebaseHash = h, fqn = fqn_, details = NotAsked })
 
 
+isCodebasePerspective : Perspective -> Bool
+isCodebasePerspective perspective =
+    case perspective of
+        Codebase _ ->
+            True
+
+        Namespace _ ->
+            False
+
+
+isNamespacePerspective : Perspective -> Bool
+isNamespacePerspective perspective =
+    case perspective of
+        Codebase _ ->
+            False
+
+        Namespace _ ->
+            True
+
+
 
 -- Decode ---------------------------------------------------------------------
 

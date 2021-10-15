@@ -127,13 +127,50 @@
   opacity: 0.5;
 }
 
-#main-sidebar h3 {
+#main-sidebar .sidebar-section {
+  margin-top: 1.5rem;
+}
+
+#main-sidebar .sidebar-section:first-child {
+  margin-top: 0.5rem;
+}
+
+#main-sidebar .sidebar-header {
   font-size: var(--font-size-medium);
   font-weight: normal;
   color: var(--color-sidebar-subtle-fg);
-  margin-bottom: 0.125rem;
   text-transform: uppercase;
   font-size: 0.75rem;
+  height: 1.875rem;
+  display: flex;
+  align-items: center;
+}
+
+/* TODO: Consolidate with codebase-tree .node */
+
+#main-sidebar .sidebar-item {
+  margin-left: -0.5rem;
+  display: flex;
+  user-select: none;
+  align-items: center;
+  border-radius: var(--border-radius-base);
+  padding-left: 0.5rem;
+  margin-bottom: 0.125rem;
+  height: 1.875rem;
+}
+
+#main-sidebar .sidebar-item > label {
+  color: var(--color-sidebar-fg);
+  transition: all 0.2s;
+  cursor: pointer;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  line-height: 1.875;
+}
+
+#main-sidebar .sidebar-item:hover {
+  background: var(--color-sidebar-focus-bg);
+  text-decoration: none;
 }
 
 /* -- Perspective -------------------------------------------------------- */

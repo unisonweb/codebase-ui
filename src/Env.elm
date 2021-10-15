@@ -64,6 +64,26 @@ appContextToString appContext =
             "Unison Local"
 
 
+isUnisonShare : AppContext -> Bool
+isUnisonShare appContext =
+    case appContext of
+        UnisonShare ->
+            True
+
+        Ucm ->
+            False
+
+
+isUnisonLocal : AppContext -> Bool
+isUnisonLocal appContext =
+    case appContext of
+        UnisonShare ->
+            False
+
+        Ucm ->
+            True
+
+
 operatingSystemFromString : String -> OperatingSystem
 operatingSystemFromString rawOs =
     case rawOs of

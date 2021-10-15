@@ -9,7 +9,7 @@ import Env exposing (AppContext(..), Env, OperatingSystem(..))
 import Finder
 import Finder.SearchOptions as SearchOptions
 import FullyQualifiedName as FQN exposing (FQN)
-import Html exposing (Html, a, aside, div, h1, h2, h3, header, nav, p, section, span, strong, text)
+import Html exposing (Html, a, div, h1, h2, h3, header, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import Http
@@ -25,7 +25,9 @@ import UI
 import UI.Button as Button
 import UI.Icon as Icon
 import UI.Modal as Modal
+import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
+import UnisonShare.SidebarContent
 import Url exposing (Url)
 import Workspace
 
@@ -486,33 +488,54 @@ viewPerspective env =
                 ]
 
 
-viewMainSidebar_ : List (Html msg) -> Html msg
-viewMainSidebar_ content =
-    aside [ id "main-sidebar" ] content
-
-
 viewMainSidebar : Model -> Html Msg
 viewMainSidebar model =
     let
-        share =
-            case model.env.appContext of
-                Env.Ucm ->
-                    a [ href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ text "Unison Share" ]
+        perspective =
+            model.env.perspective
 
-                Env.UnisonShare ->
-                    UI.nothing
+        appContext =
+            model.env.appContext
+
+        changePerspectiveMsg =
+            Perspective.toNamespacePerspective perspective >> ChangePerspective
+
+        sidebarContent =
+            if Perspective.isCodebasePerspective perspective && Env.isUnisonShare appContext then
+                UnisonShare.SidebarContent.view changePerspectiveMsg
+
+            else
+                UI.nothing
+
+        shareLink =
+            if Env.isUnisonLocal appContext then
+                a
+                    [ href "https://share.unison-lang.org"
+                    , rel "noopener"
+                    , target "_blank"
+                    ]
+                    [ text "Unison Share" ]
+
+            else
+                UI.nothing
     in
-    viewMainSidebar_
+    Sidebar.view
         [ viewPerspective model.env
-        , Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree)
+        , sidebarContent
+        , Sidebar.section
+            "Namespaces and Definitions"
+            [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
         , nav []
             [ a [ href "https://unisonweb.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
             , a [ href "https://unisonweb.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
             , a [ href "https://unisonweb.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
             , a [ href "https://unisonweb.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
             , a [ onClick (ShowModal ReportBugModal) ] [ text "Report a bug" ]
-            , share
-            , a [ class "show-help", onClick (ShowModal HelpModal) ] [ text "Keyboard Shortcuts", KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark) ]
+            , shareLink
+            , a [ class "show-help", onClick (ShowModal HelpModal) ]
+                [ text "Keyboard Shortcuts"
+                , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                ]
             ]
         ]
 
@@ -662,7 +685,7 @@ viewAppLoading : AppContext -> Html msg
 viewAppLoading appContext =
     div [ id "app" ]
         [ viewMainHeader_ [ viewAppTitle Nothing appContext ]
-        , viewMainSidebar_ []
+        , Sidebar.view []
         , div [ id "main-content" ] []
         ]
 
@@ -675,7 +698,7 @@ viewAppError appContext error =
     in
     div [ id "app" ]
         [ viewMainHeader_ [ viewAppTitle Nothing appContext ]
-        , viewMainSidebar_ []
+        , Sidebar.view []
         , div [ id "main-content", class "app-error" ]
             [ Icon.view Icon.warn
             , p [ title (Api.errorToString error) ]
