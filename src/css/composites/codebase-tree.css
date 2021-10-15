@@ -76,6 +76,7 @@
   cursor: pointer;
   overflow: hidden;
   text-overflow: ellipsis;
+  line-height: 1.875;
 }
 
 .codebase-tree .namespace-tree .node > .tooltip-trigger {
