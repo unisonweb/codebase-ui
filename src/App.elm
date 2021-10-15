@@ -216,7 +216,9 @@ update msg ({ env } as model) =
                             ( model2, Cmd.none )
 
                         CodebaseTree.OpenDefinition ref ->
-                            openDefinition model2 ref
+                            -- reset sidebarToggled to close it on mobile, but keep it open on desktop
+                            let model4 = { model2 | sidebarToggled = False }
+                            in openDefinition model4 ref
 
                         CodebaseTree.ChangePerspectiveToNamespace fqn ->
                             fqn
