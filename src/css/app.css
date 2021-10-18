@@ -265,6 +265,14 @@
     display: none
   }
 
+  #app.sidebar-toggled .perspective {
+    display: none
+  }
+
+  #app.sidebar-toggled .sidebar-section {
+    display: none
+  }
+
   #app.sidebar-toggled nav > a {
     display: none
   }
