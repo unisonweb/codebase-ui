@@ -257,22 +257,10 @@
   #app.sidebar-toggled #main-sidebar .collapsed  {
     display: block;
   }
-  #app.sidebar-toggled .collapse-sidebar-header h2 {
-    display: none
-  }
 
-  #app.sidebar-toggled .sidebar-section {
-    display: none
-  }
-
-  #app.sidebar-toggled .perspective {
-    display: none
-  }
-
-  #app.sidebar-toggled .sidebar-section {
-    display: none
-  }
-
+  #app.sidebar-toggled .collapse-sidebar-header h2,
+  #app.sidebar-toggled .sidebar-section,
+  #app.sidebar-toggled .perspective,
   #app.sidebar-toggled nav > a {
     display: none
   }
