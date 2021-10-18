@@ -309,6 +309,7 @@
     height: 100vw;
   }
 
+  #app.sidebar-toggled .collapse-sidebar-header,
   #app.sidebar-toggled #main-content {
     display: none;
   }
