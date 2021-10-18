@@ -303,8 +303,8 @@ viewInfoItems hash_ info =
                             FQN.toString fqn
 
                         namespaceMenuItems =
-                            [ Tooltip.MenuItem Icon.browse ("Find within " ++ ns) (FindWithinNamespace fqn)
-                            , Tooltip.MenuItem Icon.intoFolder ("Change perspective to " ++ ns) (ChangePerspectiveToNamespace fqn)
+                            [ Tooltip.MenuItem (Just Icon.browse) ("Find within " ++ ns) (Tooltip.OnClick (FindWithinNamespace fqn))
+                            , Tooltip.MenuItem (Just Icon.intoFolder) ("Change perspective to " ++ ns) (Tooltip.OnClick (ChangePerspectiveToNamespace fqn))
                             ]
                     in
                     Tooltip.tooltip (viewInfoItem Icon.folderOutlined ns) (Tooltip.Menu namespaceMenuItems)

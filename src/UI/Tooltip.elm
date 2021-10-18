@@ -1,5 +1,6 @@
 module UI.Tooltip exposing
-    ( Arrow(..)
+    ( Action(..)
+    , Arrow(..)
     , Content(..)
     , MenuItem
     , Position(..)
@@ -11,8 +12,9 @@ module UI.Tooltip exposing
     )
 
 import Html exposing (Html, a, div, span, text)
-import Html.Attributes exposing (class)
+import Html.Attributes exposing (class, href)
 import Html.Events exposing (onClick)
+import UI
 import UI.Icon as Icon exposing (Icon)
 
 
@@ -40,8 +42,13 @@ type Position
     | RightOf
 
 
+type Action msg
+    = OnClick msg
+    | Href String (List (Html.Attribute msg))
+
+
 type alias MenuItem msg =
-    { icon : Icon msg, label : String, onClick : msg }
+    { icon : Maybe (Icon msg), label : String, action : Action msg }
 
 
 type Content msg
@@ -73,8 +80,21 @@ view : Tooltip msg -> Html msg
 view { arrow, content, trigger, position } =
     let
         viewMenuItem item =
-            a [ class "tooltip-menu-item", onClick item.onClick ]
-                [ Icon.view item.icon, text item.label ]
+            let
+                iconHtml =
+                    case item.icon of
+                        Just icon ->
+                            Icon.view icon
+
+                        Nothing ->
+                            UI.nothing
+            in
+            case item.action of
+                OnClick clickMsg ->
+                    a [ class "tooltip-menu-item", onClick clickMsg ] [ iconHtml, text item.label ]
+
+                Href url attrs ->
+                    a ([ class "tooltip-menu-item", href url ] ++ attrs) [ iconHtml, text item.label ]
 
         content_ =
             case content of

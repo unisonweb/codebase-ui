@@ -529,11 +529,11 @@ unisonSubmenu _ =
             |> Icon.view
         )
         (Tooltip.Menu
-            [ Tooltip.MenuItem Icon.unisonMark "Unison website" (ShowModal HelpModal)
-            , Tooltip.MenuItem Icon.unisonMark "Docs" (ShowModal HelpModal)
-            , Tooltip.MenuItem Icon.unisonMark "Language Reference" (ShowModal HelpModal)
-            , Tooltip.MenuItem Icon.unisonMark "Community" (ShowModal HelpModal)
-            , Tooltip.MenuItem Icon.unisonMark "Report a bug" (ShowModal ReportBugModal)
+            [ Tooltip.MenuItem Nothing "Unison website" (Tooltip.Href "https://unisonweb.org" [ rel "noopener", target "_blank" ])
+            , Tooltip.MenuItem Nothing "Docs" (Tooltip.Href "https://unisonweb.org/docs" [ rel "noopener", target "_blank" ])
+            , Tooltip.MenuItem Nothing "Language Reference" (Tooltip.Href "https://unisonweb.org/docs/language-reference" [ rel "noopener", target "_blank" ])
+            , Tooltip.MenuItem Nothing "Community" (Tooltip.Href "https://unisonweb.org/community" [ rel "noopener", target "_blank" ])
+            , Tooltip.MenuItem Nothing "Report a bug" (Tooltip.OnClick (ShowModal ReportBugModal))
             ]
         )
         |> Tooltip.withPosition Tooltip.RightOf
