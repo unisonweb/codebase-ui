@@ -504,6 +504,45 @@ viewPerspective env =
                 ]
 
 
+viewMainSidebarHeader : Model -> Html Msg
+viewMainSidebarHeader model =
+    div
+        [ class "collapse-sidebar-header" ]
+        [ h2 [] [ text "Unison Codebase" ]
+        , a [ onClick ToggleSidebar, classList [ ( "collapse", True ) ] ]
+            [ span []
+                [ text
+                    (if model.sidebarToggled then
+                        ">"
+
+                     else
+                        "<"
+                    )
+                ]
+            ]
+        ]
+
+
+unisonSubmenu : Model -> Html Msg
+unisonSubmenu _ =
+    Tooltip.tooltip
+        (Icon.unisonMark
+            |> Icon.withClassList [ ( "collapsed sidebar-unison-submenu", True ) ]
+            |> Icon.view
+        )
+        (Tooltip.Menu
+            [ Tooltip.MenuItem Icon.unisonMark "Unison website" (ShowModal HelpModal)
+            , Tooltip.MenuItem Icon.unisonMark "Docs" (ShowModal HelpModal)
+            , Tooltip.MenuItem Icon.unisonMark "Language Reference" (ShowModal HelpModal)
+            , Tooltip.MenuItem Icon.unisonMark "Community" (ShowModal HelpModal)
+            , Tooltip.MenuItem Icon.unisonMark "Report a bug" (ShowModal ReportBugModal)
+            ]
+        )
+        |> Tooltip.withPosition Tooltip.RightOf
+        |> Tooltip.withArrow Tooltip.End
+        |> Tooltip.view
+
+
 viewMainSidebar : Model -> Html Msg
 viewMainSidebar model =
     let
@@ -536,7 +575,8 @@ viewMainSidebar model =
                 UI.nothing
     in
     Sidebar.view
-        [ viewPerspective model.env
+        [ viewMainSidebarHeader model
+        , viewPerspective model.env
         , sidebarContent
         , Sidebar.section
             "Namespaces and Definitions"
@@ -551,6 +591,19 @@ viewMainSidebar model =
             , a [ class "show-help", onClick (ShowModal HelpModal) ]
                 [ text "Keyboard Shortcuts"
                 , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                ]
+            , unisonSubmenu model
+            , div [ class "collapsed" ]
+                [ Tooltip.tooltip
+                    (a
+                        [ class "show-help", onClick (ShowModal HelpModal) ]
+                        [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                        ]
+                    )
+                    (Tooltip.Text "Keyboard Shortcuts")
+                    |> Tooltip.withPosition Tooltip.RightOf
+                    |> Tooltip.withArrow Tooltip.End
+                    |> Tooltip.view
                 ]
             ]
         ]
