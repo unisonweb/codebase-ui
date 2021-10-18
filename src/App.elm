@@ -22,6 +22,8 @@ import PerspectiveLanding
 import RemoteData
 import Route exposing (Route)
 import UI
+import UI.AppHeader as AppHeader
+import UI.Banner as Banner
 import UI.Button as Button
 import UI.Icon as Icon
 import UI.Modal as Modal
@@ -219,8 +221,11 @@ update msg ({ env } as model) =
 
                         CodebaseTree.OpenDefinition ref ->
                             -- reset sidebarToggled to close it on mobile, but keep it open on desktop
-                            let model4 = { model2 | sidebarToggled = False }
-                            in openDefinition model4 ref
+                            let
+                                model4 =
+                                    { model2 | sidebarToggled = False }
+                            in
+                            openDefinition model4 ref
 
                         CodebaseTree.ChangePerspectiveToNamespace fqn ->
                             fqn
@@ -409,54 +414,65 @@ subscriptions model =
 -- VIEW
 
 
-viewMainHeader_ : List (Html msg) -> Html msg
-viewMainHeader_ content =
-    header [ id "main-header" ] content
-
-
-viewAppTitle : Maybe msg -> AppContext -> Html msg
-viewAppTitle clickMsg appContext =
+appTitle : Maybe msg -> AppContext -> AppHeader.AppTitle msg
+appTitle clickMsg appContext =
     let
-        attrs =
+        appTitle_ =
             case clickMsg of
                 Nothing ->
-                    [ class "app-title" ]
+                    AppHeader.Disabled
 
                 Just msg ->
-                    [ onClick msg, class "app-title" ]
+                    AppHeader.Clickable msg
+
+        content =
+            case appContext of
+                Env.Ucm ->
+                    h1 [] [ text "Unison", span [ class "context ucm" ] [ text "Local" ] ]
+
+                Env.UnisonShare ->
+                    h1 [] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ]
     in
-    case appContext of
-        Env.Ucm ->
-            a attrs [ h1 [] [ text "Unison", span [ class "context ucm" ] [ text "Local" ] ] ]
-
-        Env.UnisonShare ->
-            a attrs [ h1 [] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ] ]
+    appTitle_ content
 
 
-viewMainHeader : Model -> Html Msg
-viewMainHeader model =
+viewAppHeader : Model -> Html Msg
+viewAppHeader model =
     let
+        { appContext, perspective } =
+            model.env
+
         changePerspectiveMsg =
-            case model.env.perspective of
+            case perspective of
                 Codebase codebaseHash ->
                     ChangePerspective (Codebase codebaseHash)
 
                 Namespace { codebaseHash } ->
                     ChangePerspective (Codebase codebaseHash)
 
-        sidebarToggle =
-            a [ class "sidebar-toggle", onClick ToggleSidebar ] [ Icon.view Icon.list ]
+        appTitle_ =
+            appTitle (Just changePerspectiveMsg) appContext
+
+        banner =
+            case appContext of
+                Env.Ucm ->
+                    Nothing
+
+                Env.UnisonShare ->
+                    Just
+                        (Banner.promotion
+                            "hacktoberfest"
+                            "🎃 Unison is participating in #Hacktoberfest: contribute and get rewards!"
+                            (ChangePerspective (Perspective.toNamespacePerspective perspective (FQN.fromString "unison.hacktoberfest")))
+                            "Get Involved!"
+                        )
     in
-    viewMainHeader_
-        [ sidebarToggle
-        , viewAppTitle (Just changePerspectiveMsg) model.env.appContext
-        , section [ class "right" ]
-            [ Button.button (ShowModal PublishModal)
-                "Publish on Unison Share"
-                |> Button.share
-                |> Button.view
-            ]
-        ]
+    AppHeader.view
+        { menuToggle = Just ToggleSidebar
+        , appTitle = appTitle_
+        , banner = banner
+        , rightButton = Just (Button.button (ShowModal PublishModal) "Publish on Unison Share" |> Button.share)
+        }
 
 
 viewPerspective : Env -> Html Msg
@@ -684,7 +700,7 @@ viewModal model =
 viewAppLoading : AppContext -> Html msg
 viewAppLoading appContext =
     div [ id "app" ]
-        [ viewMainHeader_ [ viewAppTitle Nothing appContext ]
+        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing appContext))
         , Sidebar.view []
         , div [ id "main-content" ] []
         ]
@@ -697,7 +713,7 @@ viewAppError appContext error =
             Env.appContextToString appContext
     in
     div [ id "app" ]
-        [ viewMainHeader_ [ viewAppTitle Nothing appContext ]
+        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing appContext))
         , Sidebar.view []
         , div [ id "main-content", class "app-error" ]
             [ Icon.view Icon.warn
@@ -733,7 +749,7 @@ view model =
     { title = title_
     , body =
         [ div [ id "app", classList [ ( "sidebar-toggled", model.sidebarToggled ) ] ]
-            [ viewMainHeader model
+            [ viewAppHeader model
             , viewMainSidebar model
             , div [ id "main-content" ] [ page ]
             , viewModal model

@@ -179,6 +179,7 @@ hr {
 }
 
 @import "./elements/icon.css";
+@import "./elements/banner.css";
 @import "./elements/button.css";
 @import "./elements/tooltip.css";
 @import "./elements/fold-toggle.css";

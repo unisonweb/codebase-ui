@@ -1,0 +1,44 @@
+.banner {
+  display: inline-flex;
+  height: 1.5rem;
+  border-radius: calc(1.5rem / 2);
+  border: 1px solid var(--banner-border);
+  background: var(--banner-bg);
+  color: var(--banner-fg);
+  padding: 0 0.75rem;
+  line-height: 1;
+  align-items: center;
+  font-size: var(--font-size-small);
+}
+
+.banner:hover {
+  text-decoration: none;
+  transform: translate(0, 0.1rem);
+}
+
+.banner.info {
+  --banner-fg: var(--banner-info-fg);
+  --banner-bg: var(--banner-info-bg);
+  --banner-fg-em: var(--banner-info-fg-em);
+  --banner-border: var(--banner-info-border);
+}
+
+/* Seasonal Promotion */
+.banner.hacktoberfest {
+  --banner-fg: var(--color-orange-3);
+  --banner-bg: rgba(255, 136, 0, 0.2); /* color-orange-1 20% */
+  --banner-fg-em: var(--color-orange-5);
+  --banner-border: var(--color-orange-1);
+  text-shadow: 0 1px rgba(0, 0, 0, 0.25);
+}
+
+.banner .banner-cta {
+  color: var(--banner-fg-em);
+  border-left: 1px solid var(--banner-border);
+  display: inline-flex;
+  height: 1.5rem;
+  align-items: center;
+  font-weight: bold;
+  margin-left: 0.75rem;
+  padding-left: 0.75rem;
+}
