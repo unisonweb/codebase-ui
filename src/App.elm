@@ -509,17 +509,15 @@ viewMainSidebarHeader model =
     div
         [ class "collapse-sidebar-header" ]
         [ h2 [] [ text "Unison Codebase" ]
-        , a [ onClick ToggleSidebar, classList [ ( "collapse", True ) ] ]
-            [ span []
-                [ text
-                    (if model.sidebarToggled then
-                        ">"
+        , Button.icon ToggleSidebar
+            (if model.sidebarToggled then
+                Icon.chevronRight
 
-                     else
-                        "<"
-                    )
-                ]
-            ]
+             else
+                Icon.chevronLeft
+            )
+            |> Button.small
+            |> Button.view
         ]
 
 
