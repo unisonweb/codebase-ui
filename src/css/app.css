@@ -177,6 +177,9 @@
   color: var(color-sidebar-focus-fg);
 }
 
+#main-sidebar nav a.tooltip-menu-item {
+  margin-left: 0;
+}
 
 /* -- Main Sidebar Nav ----------------------------------------------------- */
 
