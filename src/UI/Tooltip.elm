@@ -2,6 +2,7 @@ module UI.Tooltip exposing
     ( Arrow(..)
     , Content(..)
     , MenuItem
+    , Position(..)
     , Tooltip
     , tooltip
     , view
