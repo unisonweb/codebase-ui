@@ -243,7 +243,6 @@
   #app.sidebar-toggled #main-sidebar {
     display: flex;
     width: 100vw;
-    height: 100vh;
   }
 
   #app.sidebar-toggled #main-content {
