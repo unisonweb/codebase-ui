@@ -525,7 +525,7 @@ unisonSubmenu : AppContext -> Html Msg
 unisonSubmenu appContext =
     Tooltip.tooltip
         (Icon.unisonMark
-            |> Icon.withClassList [ ( "collapsed sidebar-unison-submenu", True ) ]
+            |> Icon.withClassList [ ( "sidebar-unison-submenu", True ) ]
             |> Icon.view
         )
         (Tooltip.Menu
@@ -597,9 +597,9 @@ viewMainSidebar model =
                 [ text "Keyboard Shortcuts"
                 , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
                 ]
-            , unisonSubmenu appContext
             , div [ class "collapsed" ]
-                [ Tooltip.tooltip
+                [ unisonSubmenu appContext
+                , Tooltip.tooltip
                     (a
                         [ class "show-help", onClick (ShowModal HelpModal) ]
                         [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
