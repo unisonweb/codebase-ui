@@ -211,6 +211,24 @@
 
 #main-content {
   grid-area: main-content;
+  height: calc(100vh - var(--app-header-height));
+  overflow: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-main-subtle-fg) var(--color-main-bg);
+}
+#main-content::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+#main-content::-webkit-scrollbar-track {
+  background: var(--color-main-bg);
+}
+
+#main-content::-webkit-scrollbar-thumb {
+  background-color: var(--color-main-subtle-fg);
+  border-radius: var(--border-radius-base);
 }
 
 /* -- Responsive ----------------------------------------------------------- */
