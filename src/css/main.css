@@ -1,6 +1,6 @@
 :root {
   --size-base: 16px;
-  --main-header-height: 3.5rem;
+  --app-header-height: 3.5rem;
   --main-sidebar-width: 17rem;
   --main-sidebar-collapsed-width: 4.5rem;
   --main-content-width: 45.5rem;
