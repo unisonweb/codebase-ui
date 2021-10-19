@@ -521,20 +521,27 @@ viewMainSidebarHeader model =
         ]
 
 
-unisonSubmenu : Model -> Html Msg
-unisonSubmenu _ =
+unisonSubmenu : AppContext -> Html Msg
+unisonSubmenu appContext =
     Tooltip.tooltip
         (Icon.unisonMark
             |> Icon.withClassList [ ( "collapsed sidebar-unison-submenu", True ) ]
             |> Icon.view
         )
         (Tooltip.Menu
-            [ Tooltip.MenuItem Nothing "Unison website" (Tooltip.Href "https://unisonweb.org" [ rel "noopener", target "_blank" ])
-            , Tooltip.MenuItem Nothing "Docs" (Tooltip.Href "https://unisonweb.org/docs" [ rel "noopener", target "_blank" ])
-            , Tooltip.MenuItem Nothing "Language Reference" (Tooltip.Href "https://unisonweb.org/docs/language-reference" [ rel "noopener", target "_blank" ])
-            , Tooltip.MenuItem Nothing "Community" (Tooltip.Href "https://unisonweb.org/community" [ rel "noopener", target "_blank" ])
-            , Tooltip.MenuItem Nothing "Report a bug" (Tooltip.OnClick (ShowModal ReportBugModal))
-            ]
+            ([ Tooltip.MenuItem Nothing "Unison website" (Tooltip.Href "https://unisonweb.org" [ rel "noopener", target "_blank" ])
+             , Tooltip.MenuItem Nothing "Docs" (Tooltip.Href "https://unisonweb.org/docs" [ rel "noopener", target "_blank" ])
+             , Tooltip.MenuItem Nothing "Language Reference" (Tooltip.Href "https://unisonweb.org/docs/language-reference" [ rel "noopener", target "_blank" ])
+             , Tooltip.MenuItem Nothing "Community" (Tooltip.Href "https://unisonweb.org/community" [ rel "noopener", target "_blank" ])
+             , Tooltip.MenuItem Nothing "Report a bug" (Tooltip.OnClick (ShowModal ReportBugModal))
+             ]
+                ++ (if Env.isUnisonLocal appContext then
+                        [ Tooltip.MenuItem Nothing "Unison Share" (Tooltip.Href "https://share.unison-lang.org" [ rel "noopener", target "_blank" ]) ]
+
+                    else
+                        []
+                   )
+            )
         )
         |> Tooltip.withPosition Tooltip.RightOf
         |> Tooltip.withArrow Tooltip.End
@@ -590,7 +597,7 @@ viewMainSidebar model =
                 [ text "Keyboard Shortcuts"
                 , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
                 ]
-            , unisonSubmenu model
+            , unisonSubmenu appContext
             , div [ class "collapsed" ]
                 [ Tooltip.tooltip
                     (a
