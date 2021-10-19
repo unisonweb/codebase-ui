@@ -8,7 +8,8 @@
 
   --tooltip-border-size: 1px;
   --tooltip-arrow-size: 0.375rem;
-  --tooltip-arrow-edge-offset: 0.75rem;
+  --tooltip-arrow-edge-offset-horizontal: 0.75rem;
+  --tooltip-arrow-edge-offset-vertical: 0.4rem;
 
   /* A faux Arrow that is " larger than "arrow-size" such
    * that it appears to give the original arrow a border. All :before styles
@@ -98,13 +99,13 @@
 }
 
 .tooltip.above .tooltip-bubble:after {
-  bottom: 100%;
-  border-bottom-color: var(--color-tooltip-bg);
+  top: 100%;
+  border-top-color: var(--color-tooltip-bg);
 }
 
 .tooltip.above .tooltip-bubble:before {
-  bottom: 100%;
-  border-bottom-color: var(--color-tooltip-border);
+  top: 100%;
+  border-top-color: var(--color-tooltip-border);
 }
 
 .tooltip:is(.below, .above).arrow-start {
@@ -112,11 +113,11 @@
 }
 
 .tooltip:is(.below, .above).arrow-start .tooltip-bubble:after {
-  left: var(--tooltip-arrow-edge-offset);
+  left: var(--tooltip-arrow-edge-offset-horizontal);
 }
 
 .tooltip:is(.below, .above).arrow-start .tooltip-bubble:before {
-  left: calc(var(--tooltip-arrow-edge-offset) - var(--tooltip-border-size));
+  left: calc(var(--tooltip-arrow-edge-offset-horizontal) - var(--tooltip-border-size));
 }
 
 .tooltip:is(.below, .above).arrow-end {
@@ -124,11 +125,65 @@
 }
 
 .tooltip:is(.below, .above).arrow-end .tooltip-bubble:after {
-  right: var(--tooltip-arrow-edge-offset);
+  right: var(--tooltip-arrow-edge-offset-horizontal);
 }
 
 .tooltip:is(.below, .above).arrow-end .tooltip-bubble:before {
-  right: calc(var(--tooltip-arrow-edge-offset) - var(--tooltip-border-size));
+  right: calc(var(--tooltip-arrow-edge-offset-horizontal) - var(--tooltip-border-size));
+}
+
+.tooltip.right-of {
+  padding-left: 0.5rem;
+  left: 100%;
+}
+
+.tooltip.right-of .tooltip-bubble:after {
+  right: 100%;
+  border-right-color: var(--color-tooltip-bg);
+}
+
+.tooltip.right-of .tooltip-bubble:before {
+  right: 100%;
+  border-right-color: var(--color-tooltip-border);
+}
+
+.tooltip.left-of {
+  padding-right: 0.5rem;
+  right: 100%;
+}
+
+.tooltip.left-of .tooltip-bubble:after {
+  left: 100%;
+  border-left-color: var(--color-tooltip-bg);
+}
+
+.tooltip.left-of .tooltip-bubble:before {
+  left: 100%;
+  border-left-color: var(--color-tooltip-border);
+}
+
+.tooltip:is(.right-of, .left-of).arrow-start {
+  top: 0;
+}
+
+.tooltip:is(.right-of, .left-of).arrow-start .tooltip-bubble:after {
+  top: var(--tooltip-arrow-edge-offset-vertical);
+}
+
+.tooltip:is(.right-of, .left-of).arrow-start .tooltip-bubble:before {
+  top: calc(var(--tooltip-arrow-edge-offset-vertical) - var(--tooltip-border-size));
+}
+
+.tooltip:is(.right-of, .left-of).arrow-end {
+  bottom: 0;
+}
+
+.tooltip:is(.right-of, .left-of).arrow-end .tooltip-bubble:after {
+  bottom: var(--tooltip-arrow-edge-offset-vertical);
+}
+
+.tooltip:is(.right-of, .left-of).arrow-end .tooltip-bubble:before {
+  bottom: calc(var(--tooltip-arrow-edge-offset-vertical) - var(--tooltip-border-size));
 }
 
 /* -- Trigger ---------------------------------------------------------------*/
