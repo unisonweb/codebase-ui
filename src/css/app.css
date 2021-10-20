@@ -174,7 +174,7 @@
 }
 
 #main-sidebar .sidebar-unison-submenu:hover {
-  color: var(color-sidebar-focus-fg);
+  color: var(--color-sidebar-focus-fg);
 }
 
 #main-sidebar nav a.tooltip-menu-item {
