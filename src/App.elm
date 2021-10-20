@@ -529,14 +529,14 @@ unisonSubmenu appContext =
             |> Icon.view
         )
         (Tooltip.Menu
-            ([ Tooltip.MenuItem Nothing "Unison website" (Tooltip.Href "https://unisonweb.org" [ rel "noopener", target "_blank" ])
-             , Tooltip.MenuItem Nothing "Docs" (Tooltip.Href "https://unisonweb.org/docs" [ rel "noopener", target "_blank" ])
-             , Tooltip.MenuItem Nothing "Language Reference" (Tooltip.Href "https://unisonweb.org/docs/language-reference" [ rel "noopener", target "_blank" ])
-             , Tooltip.MenuItem Nothing "Community" (Tooltip.Href "https://unisonweb.org/community" [ rel "noopener", target "_blank" ])
+            ([ Tooltip.MenuItem Nothing "Unison website" (Tooltip.Href "https://unisonweb.org")
+             , Tooltip.MenuItem Nothing "Docs" (Tooltip.Href "https://unisonweb.org/docs")
+             , Tooltip.MenuItem Nothing "Language Reference" (Tooltip.Href "https://unisonweb.org/docs/language-reference")
+             , Tooltip.MenuItem Nothing "Community" (Tooltip.Href "https://unisonweb.org/community")
              , Tooltip.MenuItem Nothing "Report a bug" (Tooltip.OnClick (ShowModal ReportBugModal))
              ]
                 ++ (if Env.isUnisonLocal appContext then
-                        [ Tooltip.MenuItem Nothing "Unison Share" (Tooltip.Href "https://share.unison-lang.org" [ rel "noopener", target "_blank" ]) ]
+                        [ Tooltip.MenuItem Nothing "Unison Share" (Tooltip.Href "https://share.unison-lang.org") ]
 
                     else
                         []

@@ -12,7 +12,7 @@ module UI.Tooltip exposing
     )
 
 import Html exposing (Html, a, div, span, text)
-import Html.Attributes exposing (class, href)
+import Html.Attributes exposing (class, href, rel, target)
 import Html.Events exposing (onClick)
 import UI
 import UI.Icon as Icon exposing (Icon)
@@ -44,7 +44,7 @@ type Position
 
 type Action msg
     = OnClick msg
-    | Href String (List (Html.Attribute msg))
+    | Href String
 
 
 type alias MenuItem msg =
@@ -93,8 +93,8 @@ view { arrow, content, trigger, position } =
                 OnClick clickMsg ->
                     a [ class "tooltip-menu-item", onClick clickMsg ] [ iconHtml, text item.label ]
 
-                Href url attrs ->
-                    a ([ class "tooltip-menu-item", href url ] ++ attrs) [ iconHtml, text item.label ]
+                Href url ->
+                    a [ class "tooltip-menu-item", href url, rel "noopener", target "_blank" ] [ iconHtml, text item.label ]
 
         content_ =
             case content of
