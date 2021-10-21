@@ -215,6 +215,7 @@
   .workspace-item-definition-doc.shown-in-full
   .doc-column {
   overflow: visible;
+  max-height: -moz-fit-content;
   max-height: fit-content;
 }
 
