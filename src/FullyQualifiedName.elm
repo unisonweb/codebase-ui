@@ -14,14 +14,18 @@ module FullyQualifiedName exposing
     , isValidUrlSegmentChar
     , namespace
     , namespaceOf
+    , numSegments
     , segments
     , toString
     , toUrlSegments
     , toUrlString
     , unqualifiedName
     , urlParser
+    , view
     )
 
+import Html exposing (Html, span, text)
+import Html.Attributes exposing (class)
 import Json.Decode as Decode
 import List.Extra as ListE
 import List.Nonempty as NEL
@@ -137,6 +141,11 @@ segments (FQN segments_) =
     segments_
 
 
+numSegments : FQN -> Int
+numSegments (FQN segments_) =
+    NEL.length segments_
+
+
 fromParent : FQN -> String -> FQN
 fromParent (FQN parentParts) childName =
     FQN (NEL.append parentParts (NEL.fromElement childName))
@@ -201,6 +210,23 @@ namespaceOf suffixName fqn =
 
     else
         Nothing
+
+
+view : FQN -> Html msg
+view fqn =
+    let
+        viewSegment seg =
+            span [ class "fully-qualified-name-segment" ] [ text seg ]
+
+        viewSep =
+            span [ class "fully-qualified-name-separator" ] [ text "." ]
+    in
+    fqn
+        |> segments
+        |> NEL.toList
+        |> List.map viewSegment
+        |> List.intersperse viewSep
+        |> span [ class "fully-qualified-name" ]
 
 
 

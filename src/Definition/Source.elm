@@ -15,6 +15,7 @@ module Definition.Source exposing
 import Definition.Reference exposing (Reference)
 import Definition.Term as Term exposing (TermSignature(..), TermSource)
 import Definition.Type as Type exposing (TypeSource)
+import FullyQualifiedName as FQN exposing (FQN)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
 import Syntax
@@ -30,7 +31,7 @@ type ViewConfig msg
 type
     Source
     -- Term name source
-    = Term String TermSource
+    = Term FQN TermSource
     | Type TypeSource
 
 
@@ -118,22 +119,22 @@ viewTermSignature viewConfig (TermSignature syntax) =
     viewCode viewConfig (viewSyntax viewConfig syntax)
 
 
-viewNamedTermSignature : ViewConfig msg -> String -> TermSignature -> Html msg
+viewNamedTermSignature : ViewConfig msg -> FQN -> TermSignature -> Html msg
 viewNamedTermSignature viewConfig termName signature =
     viewCode viewConfig (viewNamedTermSignature_ viewConfig termName signature)
 
 
-viewNamedTermSignature_ : ViewConfig msg -> String -> TermSignature -> Html msg
+viewNamedTermSignature_ : ViewConfig msg -> FQN -> TermSignature -> Html msg
 viewNamedTermSignature_ viewConfig termName (TermSignature syntax) =
     span
         []
-        [ span [ class "hash-qualifier" ] [ text termName ]
+        [ span [ class "hash-qualifier" ] [ text (FQN.toString termName) ]
         , span [ class "type-ascription-colon" ] [ text " : " ]
         , viewSyntax viewConfig syntax
         ]
 
 
-viewTermSource : ViewConfig msg -> String -> TermSource -> Html msg
+viewTermSource : ViewConfig msg -> FQN -> TermSource -> Html msg
 viewTermSource viewConfig termName source =
     let
         content =

@@ -499,7 +499,7 @@ viewPerspective env =
             header
                 [ class "perspective" ]
                 [ div [ class "namespace-slug" ] []
-                , h2 [] [ text fqnText ]
+                , h2 [] [ FQN.view fqn ]
                 , back
                 ]
 

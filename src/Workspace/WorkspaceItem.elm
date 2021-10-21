@@ -232,13 +232,13 @@ hasDoc item =
 -- VIEW
 
 
-viewBuiltinBadge : String -> Category -> Html msg
+viewBuiltinBadge : FQN -> Category -> Html msg
 viewBuiltinBadge name_ category =
     let
         content =
             span
                 []
-                [ strong [] [ text name_ ]
+                [ strong [] [ text (FQN.toString name_) ]
                 , text " is a "
                 , strong [] [ text ("built-in " ++ Category.name category) ]
                 , text " provided by the Unison runtime"
@@ -349,7 +349,7 @@ viewInfo zoom onClick_ hash info category =
     div [ class "info" ]
         [ FoldToggle.foldToggle onClick_ |> FoldToggle.isOpen (zoom /= Far) |> FoldToggle.view
         , div [ class "category-icon" ] [ Icon.view (Category.icon category) ]
-        , h3 [ class "name" ] [ text info.name ]
+        , h3 [ class "name" ] [ FQN.view info.name ]
         , viewInfoItems hash info
         ]
 
@@ -615,7 +615,7 @@ decodeDocs fieldName =
 decodeTypeDetails :
     Decode.Decoder
         { category : TypeCategory
-        , name : String
+        , name : FQN
         , otherNames : NEL.Nonempty FQN
         , source : TypeSource
         , doc : Maybe Doc
@@ -632,7 +632,7 @@ decodeTypeDetails =
     in
     Decode.map5 make
         (Type.decodeTypeCategory [ "defnTypeTag" ])
-        (field "bestTypeName" Decode.string)
+        (field "bestTypeName" FQN.decode)
         (field "typeNames" (Util.decodeNonEmptyList FQN.decode))
         (Type.decodeTypeSource [ "typeDefinition", "tag" ] [ "typeDefinition", "contents" ])
         (decodeDocs "typeDocs")
@@ -655,7 +655,7 @@ decodeTypes =
 decodeTermDetails :
     Decode.Decoder
         { category : TermCategory
-        , name : String
+        , name : FQN
         , otherNames : NEL.Nonempty FQN
         , source : TermSource
         , doc : Maybe Doc
@@ -672,7 +672,7 @@ decodeTermDetails =
     in
     Decode.map5 make
         (Term.decodeTermCategory [ "defnTermTag" ])
-        (field "bestTermName" Decode.string)
+        (field "bestTermName" FQN.decode)
         (field "termNames" (Util.decodeNonEmptyList FQN.decode))
         (Term.decodeTermSource
             [ "termDefinition", "tag" ]

@@ -14,13 +14,13 @@ import List.Nonempty as NEL
 
 
 type alias Info =
-    { name : String
+    { name : FQN
     , namespace : Maybe FQN
     , otherNames : List FQN
     }
 
 
-makeInfo : String -> NEL.Nonempty FQN -> Info
+makeInfo : FQN -> NEL.Nonempty FQN -> Info
 makeInfo name_ allFqns =
     let
         ( namespace, otherNames ) =
@@ -33,12 +33,13 @@ makeInfo name_ allFqns =
 -- Helpers
 
 
-namespaceAndOtherNames : String -> NEL.Nonempty FQN -> ( Maybe FQN, List FQN )
+namespaceAndOtherNames : FQN -> NEL.Nonempty FQN -> ( Maybe FQN, List FQN )
 namespaceAndOtherNames suffixName fqns =
     let
         fqnWithin =
             fqns
-                |> NEL.filter (FQN.isSuffixOf suffixName) (NEL.head fqns)
+                |> NEL.filter (FQN.isSuffixOf (FQN.toString suffixName)) (NEL.head fqns)
+                |> NEL.sortBy FQN.numSegments
                 |> NEL.head
 
         fqnsWithout =

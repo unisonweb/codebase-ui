@@ -25,6 +25,7 @@ import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Perspective exposing (Perspective)
 import Task
 import UI.Button as Button
+import UI.Icon as Icon
 import Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem(..))
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 
@@ -446,7 +447,7 @@ view model =
             article [ id "workspace" ]
                 [ header
                     [ id "workspace-toolbar" ]
-                    [ Button.button Find "Find" |> Button.view
+                    [ Button.iconThenLabel Find Icon.search "Find Definition" |> Button.small |> Button.view
                     ]
                 , section
                     [ id "workspace-content" ]

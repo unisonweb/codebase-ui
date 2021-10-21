@@ -144,7 +144,7 @@ viewEmptyStateNamespace fqn =
             FQN.toString fqn
     in
     viewEmptyState
-        (text fqn_)
+        (FQN.view fqn)
         [ p [] [ text "Browse, search, read docs, open definitions, and explore" ] ]
         (Button.iconThenLabel Find Icon.search ("Find Definitions in " ++ fqn_)
             |> Button.primaryMono

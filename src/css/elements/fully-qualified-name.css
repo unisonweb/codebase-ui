@@ -1,0 +1,14 @@
+.fully-qualified-name {
+  display: inline-flex;
+  align-items: center;
+  height: 1.5rem;
+  font-weight: bold;
+  color: var(--color-main-fg);
+}
+.fully-qualified-name .fully-qualified-name-separator {
+  /* em instead of rem to have the margin be relative to the font-size of
+   * .fully-qualified-name
+  */
+  margin: 0 0.25em;
+  color: var(--color-main-subtle-fg);
+}
