@@ -40,6 +40,9 @@
   scrollbar-width: thin;
   scrollbar-color: var(--color-sidebar-subtle-fg) var(--color-sidebar-bg);
 
+  --color-main-fg: var(--color-sidebar-fg);
+  --color-main-subtle-fg: var(--color-sidebar-subtle-fg);
+
   --color-button-default-fg: var(--color-sidebar-button-default-fg);
   --color-button-default-bg: var(--color-sidebar-button-default-bg);
   --color-button-default-hover-fg: var(--color-sidebar-button-default-hover-fg);
@@ -120,7 +123,7 @@
 }
 
 #main-sidebar .collapse-sidebar-header button {
-  margin-left : auto;
+  margin-left: auto;
   justify-self: flex-end;
 }
 
@@ -131,7 +134,7 @@
 /* -- Perspective -------------------------------------------------------- */
 
 #main-sidebar .perspective {
-  margin-bottom: 3rem;
+  padding: 1rem 0;
   display: flex;
   flex-direction: column;
   flex-direction: row;
@@ -266,7 +269,6 @@
 /* -- Responsive ----------------------------------------------------------- */
 
 @media only screen and (min-width: 1025px) {
-
   #app.sidebar-toggled {
     grid-template-columns: var(--main-sidebar-collapsed-width) auto;
   }
@@ -275,7 +277,7 @@
     padding: 1rem 1.5rem;
   }
 
-  #app.sidebar-toggled #main-sidebar .collapsed  {
+  #app.sidebar-toggled #main-sidebar .collapsed {
     display: block;
   }
 
@@ -283,7 +285,7 @@
   #app.sidebar-toggled .sidebar-section,
   #app.sidebar-toggled .perspective,
   #app.sidebar-toggled nav > a {
-    display: none
+    display: none;
   }
 }
 
