@@ -504,6 +504,50 @@ viewPerspective env =
                 ]
 
 
+viewMainSidebarHeader : Model -> Html Msg
+viewMainSidebarHeader model =
+    div
+        [ class "collapse-sidebar-header" ]
+        [ h2 [] [ text "Unison Codebase" ]
+        , Button.icon ToggleSidebar
+            (if model.sidebarToggled then
+                Icon.chevronRight
+
+             else
+                Icon.chevronLeft
+            )
+            |> Button.small
+            |> Button.view
+        ]
+
+
+unisonSubmenu : AppContext -> Html Msg
+unisonSubmenu appContext =
+    Tooltip.tooltip
+        (Icon.unisonMark
+            |> Icon.withClassList [ ( "sidebar-unison-submenu", True ) ]
+            |> Icon.view
+        )
+        (Tooltip.Menu
+            ([ Tooltip.MenuItem Nothing "Unison website" (Tooltip.Href "https://unisonweb.org")
+             , Tooltip.MenuItem Nothing "Docs" (Tooltip.Href "https://unisonweb.org/docs")
+             , Tooltip.MenuItem Nothing "Language Reference" (Tooltip.Href "https://unisonweb.org/docs/language-reference")
+             , Tooltip.MenuItem Nothing "Community" (Tooltip.Href "https://unisonweb.org/community")
+             , Tooltip.MenuItem Nothing "Report a bug" (Tooltip.OnClick (ShowModal ReportBugModal))
+             ]
+                ++ (if Env.isUnisonLocal appContext then
+                        [ Tooltip.MenuItem Nothing "Unison Share" (Tooltip.Href "https://share.unison-lang.org") ]
+
+                    else
+                        []
+                   )
+            )
+        )
+        |> Tooltip.withPosition Tooltip.RightOf
+        |> Tooltip.withArrow Tooltip.End
+        |> Tooltip.view
+
+
 viewMainSidebar : Model -> Html Msg
 viewMainSidebar model =
     let
@@ -536,7 +580,8 @@ viewMainSidebar model =
                 UI.nothing
     in
     Sidebar.view
-        [ viewPerspective model.env
+        [ viewMainSidebarHeader model
+        , viewPerspective model.env
         , sidebarContent
         , Sidebar.section
             "Namespaces and Definitions"
@@ -551,6 +596,19 @@ viewMainSidebar model =
             , a [ class "show-help", onClick (ShowModal HelpModal) ]
                 [ text "Keyboard Shortcuts"
                 , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                ]
+            , div [ class "collapsed" ]
+                [ unisonSubmenu appContext
+                , Tooltip.tooltip
+                    (a
+                        [ class "show-help", onClick (ShowModal HelpModal) ]
+                        [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                        ]
+                    )
+                    (Tooltip.Text "Keyboard Shortcuts")
+                    |> Tooltip.withPosition Tooltip.RightOf
+                    |> Tooltip.withArrow Tooltip.End
+                    |> Tooltip.view
                 ]
             ]
         ]

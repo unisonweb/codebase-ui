@@ -112,6 +112,22 @@
   text-decoration: none;
 }
 
+/* -- Collapse Header --- */
+#main-sidebar .collapse-sidebar-header {
+  margin-bottom: 1rem;
+  display: inline-flex;
+  flex-direction: row;
+}
+
+#main-sidebar .collapse-sidebar-header button {
+  margin-left : auto;
+  justify-self: flex-end;
+}
+
+#main-sidebar .collapsed {
+  display: none;
+}
+
 /* -- Perspective -------------------------------------------------------- */
 
 #main-sidebar .perspective {
@@ -147,6 +163,22 @@
 }
 #main-sidebar .perspective .button:hover {
   opacity: 1;
+}
+
+/* -- Main Sidebar Unison Submenu ----------------------------------------------------- */
+
+#main-sidebar .sidebar-unison-submenu {
+  color: var(--color-sidebar-subtle-fg);
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+#main-sidebar .sidebar-unison-submenu:hover {
+  color: var(--color-sidebar-focus-fg);
+}
+
+#main-sidebar nav a.tooltip-menu-item {
+  margin-left: 0;
 }
 
 /* -- Main Sidebar Nav ----------------------------------------------------- */
@@ -233,6 +265,28 @@
 
 /* -- Responsive ----------------------------------------------------------- */
 
+@media only screen and (min-width: 1025px) {
+
+  #app.sidebar-toggled {
+    grid-template-columns: var(--main-sidebar-collapsed-width) auto;
+  }
+  #app.sidebar-toggled #main-sidebar {
+    overflow: visible;
+    padding: 1rem 1.5rem;
+  }
+
+  #app.sidebar-toggled #main-sidebar .collapsed  {
+    display: block;
+  }
+
+  #app.sidebar-toggled .collapse-sidebar-header h2,
+  #app.sidebar-toggled .sidebar-section,
+  #app.sidebar-toggled .perspective,
+  #app.sidebar-toggled nav > a {
+    display: none
+  }
+}
+
 @media only screen and (max-width: 1024px) {
   #app {
     grid-template-rows: 3.5rem auto;
@@ -263,6 +317,7 @@
     width: 100vw;
   }
 
+  #app.sidebar-toggled .collapse-sidebar-header,
   #app.sidebar-toggled #main-content {
     display: none;
   }
