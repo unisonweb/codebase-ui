@@ -11,13 +11,15 @@
     "clean": "rm -rf dist",
     "start": "webpack serve --mode development --port 1234 --config webpack.dev.js",
     "test": "elm-test",
-    "review": "elm-review"
+    "review": "elm-review",
+    "uie": "webpack serve --mode development --port 1235 --config webpack.uie.dev.js"
   },
   "bugs": {
     "url": "https://github.com/unisonweb/codebase-ui/issues"
   },
   "homepage": "https://github.com/unisonweb/codebase-ui#readme",
   "devDependencies": {
+    "@kalutheo/uie": "^0.0.6",
     "archiver": "^5.3.0",
     "copy-webpack-plugin": "^8.1.1",
     "css-loader": "^5.2.4",
