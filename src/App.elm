@@ -492,8 +492,8 @@ viewPerspective env =
                 back =
                     Tooltip.tooltip
                         (Button.icon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.uncontained |> Button.view)
-                        (Tooltip.Text ("You're currently viewing a subset of " ++ context ++ " (" ++ fqnText ++ "), click to view everything."))
-                        |> Tooltip.withArrow Tooltip.End
+                        (Tooltip.Text ("You're currently viewing a subset of " ++ context ++ " (" ++ fqnText ++ "), click to reveal everything."))
+                        |> Tooltip.withArrow Tooltip.Start
                         |> Tooltip.view
             in
             header
@@ -580,9 +580,9 @@ viewMainSidebar model =
     in
     Sidebar.view
         [ viewMainSidebarCollapseButton model
+        , viewPerspective model.env
         , div [ class "sidebar-scroll-area" ]
-            [ viewPerspective model.env
-            , sidebarContent
+            [ sidebarContent
             , Sidebar.section
                 "Namespaces and Definitions"
                 [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
