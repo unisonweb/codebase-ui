@@ -43,7 +43,6 @@ import Html.Attributes exposing (alt, class, classList, href, id, rel, src, star
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (bool, field, index, int, string)
 import Json.Decode.Extra as DecodeE exposing (when)
-import List.Extra as ListE
 import Set exposing (Set)
 import Syntax exposing (Syntax)
 import TreePath exposing (TreePath)
