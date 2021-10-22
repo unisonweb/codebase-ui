@@ -195,6 +195,7 @@
   display: flex;
   flex-direction: column;
   justify-self: flex-end;
+  flex: none;
   margin-top: auto;
   padding-top: 2rem;
 }
