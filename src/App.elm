@@ -504,12 +504,11 @@ viewPerspective env =
                 ]
 
 
-viewMainSidebarHeader : Model -> Html Msg
-viewMainSidebarHeader model =
+viewMainSidebarCollapseButton : Model -> Html Msg
+viewMainSidebarCollapseButton model =
     div
-        [ class "collapse-sidebar-header" ]
-        [ h2 [] [ text "Unison Codebase" ]
-        , Button.icon ToggleSidebar
+        [ class "collapse-sidebar-button" ]
+        [ Button.icon ToggleSidebar
             (if model.sidebarToggled then
                 Icon.chevronRight
 
@@ -580,35 +579,37 @@ viewMainSidebar model =
                 UI.nothing
     in
     Sidebar.view
-        [ viewMainSidebarHeader model
-        , viewPerspective model.env
-        , sidebarContent
-        , Sidebar.section
-            "Namespaces and Definitions"
-            [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
-        , nav []
-            [ a [ href "https://unisonweb.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
-            , a [ href "https://unisonweb.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
-            , a [ href "https://unisonweb.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
-            , a [ href "https://unisonweb.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
-            , a [ onClick (ShowModal ReportBugModal) ] [ text "Report a bug" ]
-            , shareLink
-            , a [ class "show-help", onClick (ShowModal HelpModal) ]
-                [ text "Keyboard Shortcuts"
-                , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
-                ]
-            , div [ class "collapsed" ]
-                [ unisonSubmenu appContext
-                , Tooltip.tooltip
-                    (a
-                        [ class "show-help", onClick (ShowModal HelpModal) ]
-                        [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
-                        ]
-                    )
-                    (Tooltip.Text "Keyboard Shortcuts")
-                    |> Tooltip.withPosition Tooltip.RightOf
-                    |> Tooltip.withArrow Tooltip.End
-                    |> Tooltip.view
+        [ viewMainSidebarCollapseButton model
+        , div [ class "sidebar-scroll-area" ]
+            [ viewPerspective model.env
+            , sidebarContent
+            , Sidebar.section
+                "Namespaces and Definitions"
+                [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
+            , nav []
+                [ a [ href "https://unisonweb.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
+                , a [ href "https://unisonweb.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
+                , a [ href "https://unisonweb.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
+                , a [ href "https://unisonweb.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
+                , a [ onClick (ShowModal ReportBugModal) ] [ text "Report a bug" ]
+                , shareLink
+                , a [ class "show-help", onClick (ShowModal HelpModal) ]
+                    [ text "Keyboard Shortcuts"
+                    , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                    ]
+                , div [ class "collapsed" ]
+                    [ unisonSubmenu appContext
+                    , Tooltip.tooltip
+                        (a
+                            [ class "show-help", onClick (ShowModal HelpModal) ]
+                            [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                            ]
+                        )
+                        (Tooltip.Text "Keyboard Shortcuts")
+                        |> Tooltip.withPosition Tooltip.RightOf
+                        |> Tooltip.withArrow Tooltip.End
+                        |> Tooltip.view
+                    ]
                 ]
             ]
         ]
