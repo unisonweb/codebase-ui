@@ -132,11 +132,6 @@
   top: 1rem;
 }
 
-#main-sidebar .collapse-sidebar-button button {
-  margin-left: auto;
-  justify-self: flex-end;
-}
-
 #main-sidebar .collapsed {
   display: none;
 }
@@ -291,8 +286,8 @@
   }
 
   #app.sidebar-toggled .collapse-sidebar-button {
-  padding: 1rem 1.5rem;
-  position: static;
+    padding: 1rem 1.5rem;
+    position: static;
   }
 
   #app.sidebar-toggled .sidebar-section,
