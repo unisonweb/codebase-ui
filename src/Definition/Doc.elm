@@ -291,20 +291,16 @@ elements for each and every word in the doc, but instead rely on textNodes
 mergeWords : List Doc -> List Doc
 mergeWords docs =
     let
+        merge_ : Doc -> List Doc -> List Doc
         merge_ d acc =
-            case d of
-                Word w ->
-                    case ListE.unconsLast acc of
-                        Just ( Word w_, before ) ->
-                            before ++ [ Word (w_ ++ " " ++ w) ]
-
-                        _ ->
-                            acc ++ [ d ]
+            case ( d, acc ) of
+                ( Word w, (Word w_) :: rest ) ->
+                    Word (w ++ " " ++ w_) :: rest
 
                 _ ->
-                    acc ++ [ d ]
+                    d :: acc
     in
-    List.foldl merge_ [] docs
+    List.foldr merge_ [] docs
 
 
 view : (Reference -> msg) -> (FoldId -> msg) -> DocFoldToggles -> Doc -> Html msg
