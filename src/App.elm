@@ -337,6 +337,9 @@ keydown model keyboardEvent =
 
         noOp =
             ( model, Cmd.none )
+
+        toggleSidebar =
+            ( { model | sidebarToggled = not model.sidebarToggled }, Cmd.none )
     in
     case shortcut of
         KeyboardShortcut.Chord Ctrl (K _) ->
@@ -348,6 +351,15 @@ keydown model keyboardEvent =
 
             else
                 noOp
+
+        KeyboardShortcut.Chord Ctrl (B _) ->
+            toggleSidebar
+
+        KeyboardShortcut.Chord Meta (B _) ->
+            toggleSidebar
+
+        KeyboardShortcut.Sequence _ (S _) ->
+            toggleSidebar
 
         KeyboardShortcut.Sequence _ ForwardSlash ->
             showFinder model Nothing
@@ -524,7 +536,7 @@ unisonSubmenu : AppContext -> Html Msg
 unisonSubmenu appContext =
     Tooltip.tooltip
         (Icon.unisonMark
-            |> Icon.withClassList [ ( "sidebar-unison-submenu", True ) ]
+            |> Icon.withClass "sidebar-unison-submenu"
             |> Icon.view
         )
         (Tooltip.Menu
@@ -580,37 +592,39 @@ viewMainSidebar model =
     in
     Sidebar.view
         [ viewMainSidebarCollapseButton model
-        , viewPerspective model.env
-        , div [ class "sidebar-scroll-area" ]
-            [ sidebarContent
-            , Sidebar.section
-                "Namespaces and Definitions"
-                [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
-            , nav []
-                [ a [ href "https://unisonweb.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
-                , a [ href "https://unisonweb.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
-                , a [ href "https://unisonweb.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
-                , a [ href "https://unisonweb.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
-                , a [ onClick (ShowModal ReportBugModal) ] [ text "Report a bug" ]
-                , shareLink
-                , a [ class "show-help", onClick (ShowModal HelpModal) ]
-                    [ text "Keyboard Shortcuts"
-                    , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
-                    ]
-                , div [ class "collapsed" ]
-                    [ unisonSubmenu appContext
-                    , Tooltip.tooltip
-                        (a
-                            [ class "show-help", onClick (ShowModal HelpModal) ]
-                            [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
-                            ]
-                        )
-                        (Tooltip.Text "Keyboard Shortcuts")
-                        |> Tooltip.withPosition Tooltip.RightOf
-                        |> Tooltip.withArrow Tooltip.End
-                        |> Tooltip.view
+        , div [ class "expanded-content" ]
+            [ viewPerspective model.env
+            , div [ class "sidebar-scroll-area" ]
+                [ sidebarContent
+                , Sidebar.section
+                    "Namespaces and Definitions"
+                    [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
+                , nav []
+                    [ a [ href "https://unisonweb.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
+                    , a [ href "https://unisonweb.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
+                    , a [ href "https://unisonweb.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
+                    , a [ href "https://unisonweb.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
+                    , a [ onClick (ShowModal ReportBugModal) ] [ text "Report a bug" ]
+                    , shareLink
+                    , a [ class "show-help", onClick (ShowModal HelpModal) ]
+                        [ text "Keyboard Shortcuts"
+                        , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                        ]
                     ]
                 ]
+            ]
+        , div [ class "collapsed-content" ]
+            [ unisonSubmenu appContext
+            , Tooltip.tooltip
+                (a
+                    [ class "show-help-collapsed", onClick (ShowModal HelpModal) ]
+                    [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                    ]
+                )
+                (Tooltip.Text "Keyboard Shortcuts")
+                |> Tooltip.withPosition Tooltip.RightOf
+                |> Tooltip.withArrow Tooltip.Middle
+                |> Tooltip.view
             ]
         ]
 
@@ -636,6 +650,14 @@ viewHelpModal os keyboardShortcut =
                 _ ->
                     [ KeyboardShortcut.Chord Ctrl (K Key.Lower), KeyboardShortcut.single ForwardSlash ]
 
+        toggleSidebarInstructions =
+            case os of
+                MacOS ->
+                    [ KeyboardShortcut.Chord Meta (B Key.Lower), KeyboardShortcut.Chord Ctrl (B Key.Lower), KeyboardShortcut.single (S Key.Lower) ]
+
+                _ ->
+                    [ KeyboardShortcut.Chord Ctrl (B Key.Lower), KeyboardShortcut.single (S Key.Lower) ]
+
         content =
             Modal.Content
                 (section
@@ -644,6 +666,7 @@ viewHelpModal os keyboardShortcut =
                         [ h3 [] [ text "General" ]
                         , viewInstructions (span [] [ text "Keyboard shortcuts", UI.subtle " (this dialog)" ]) [ KeyboardShortcut.single QuestionMark ]
                         , viewInstructions (text "Open Finder") openFinderInstructions
+                        , viewInstructions (text "Toggle sidebar") toggleSidebarInstructions
                         , viewInstructions (text "Move focus up") [ KeyboardShortcut.single ArrowUp, KeyboardShortcut.single (K Key.Lower) ]
                         , viewInstructions (text "Move focus down") [ KeyboardShortcut.single ArrowDown, KeyboardShortcut.single (J Key.Lower) ]
                         , viewInstructions (text "Close focused definition") [ KeyboardShortcut.single (X Key.Lower) ]

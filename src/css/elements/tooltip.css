@@ -117,7 +117,9 @@
 }
 
 .tooltip:is(.below, .above).arrow-start .tooltip-bubble:before {
-  left: calc(var(--tooltip-arrow-edge-offset-horizontal) - var(--tooltip-border-size));
+  left: calc(
+    var(--tooltip-arrow-edge-offset-horizontal) - var(--tooltip-border-size)
+  );
 }
 
 .tooltip:is(.below, .above).arrow-end {
@@ -129,7 +131,9 @@
 }
 
 .tooltip:is(.below, .above).arrow-end .tooltip-bubble:before {
-  right: calc(var(--tooltip-arrow-edge-offset-horizontal) - var(--tooltip-border-size));
+  right: calc(
+    var(--tooltip-arrow-edge-offset-horizontal) - var(--tooltip-border-size)
+  );
 }
 
 .tooltip.right-of {
@@ -171,7 +175,9 @@
 }
 
 .tooltip:is(.right-of, .left-of).arrow-start .tooltip-bubble:before {
-  top: calc(var(--tooltip-arrow-edge-offset-vertical) - var(--tooltip-border-size));
+  top: calc(
+    var(--tooltip-arrow-edge-offset-vertical) - var(--tooltip-border-size)
+  );
 }
 
 .tooltip:is(.right-of, .left-of).arrow-end {
@@ -183,7 +189,23 @@
 }
 
 .tooltip:is(.right-of, .left-of).arrow-end .tooltip-bubble:before {
-  bottom: calc(var(--tooltip-arrow-edge-offset-vertical) - var(--tooltip-border-size));
+  bottom: calc(
+    var(--tooltip-arrow-edge-offset-vertical) - var(--tooltip-border-size)
+  );
+}
+
+.tooltip:is(.right-of, .left-of).arrow-middle {
+  transform: translateY(-25%);
+}
+
+.tooltip:is(.right-of, .left-of).arrow-middle .tooltip-bubble:after {
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.tooltip:is(.right-of, .left-of).arrow-middle .tooltip-bubble:before {
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 /* -- Trigger ---------------------------------------------------------------*/

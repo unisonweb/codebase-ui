@@ -51,6 +51,11 @@ withClassList classes icon =
     withAttributes [ classList classes ] icon
 
 
+withClass : String -> Icon msg -> Icon msg
+withClass class_ icon =
+    withAttributes [ class class_ ] icon
+
+
 withToggleAnimation : Bool -> Icon msg -> Icon msg
 withToggleAnimation on icon =
     withClassList [ ( "animate", on ) ] icon

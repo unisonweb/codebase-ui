@@ -40,6 +40,9 @@ a.button:hover {
 .button.small.content-icon-then-label .icon {
   margin-right: 0.25rem;
 }
+.button.small.content-icon {
+  width: 1.5rem;
+}
 
 .button.medium {
   height: 2rem;

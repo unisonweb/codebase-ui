@@ -33,6 +33,8 @@
   --color-sidebar-fg: var(--color-gray-lighten-50);
   --color-sidebar-fg-em: var(--color-gray-lighten-100);
   --color-sidebar-bg: var(--color-gray-darken-20);
+  /* see color files for why this is needed */
+  --color-sidebar-bg-transparent: var(--color-gray-darken-20-transparent);
   --color-sidebar-border: var(--color-transparent);
   --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
   --color-sidebar-subtle-fg-em: var(--color-gray-lighten-30);
@@ -43,6 +45,10 @@
   --color-sidebar-keyboard-shortcut-key-bg: var(--color-gray-base);
   --color-sidebar-keyboard-shortcut-then: var(--color-gray-lighten-20);
   --color-sidebar-keyboard-shortcut-separator: var(--color-gray-base);
+  --color-sidebar-keyboard-shortcut-hover-key-fg: var(--color-gray-lighten-50);
+  --color-sidebar-keyboard-shortcut-hover-key-bg: var(--color-gray-base);
+  --color-sidebar-keyboard-shortcut-hover-then: var(--color-gray-lighten-20);
+  --color-sidebar-keyboard-shortcut-hover-separator: var(--color-gray-base);
   --color-sidebar-button-default-fg: var(--color-gray-lighten-30);
   --color-sidebar-button-default-bg: var(--color-gray-base);
   --color-sidebar-button-default-hover-fg: var(--color-gray-lighten-50);

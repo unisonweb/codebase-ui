@@ -3,8 +3,13 @@
    * in gradients in some browsers.  Having a variable based
    * on rgba fixes this and makes it convienient to use
    * everywhere.
+   * https://stackoverflow.com/a/56548711
+   *
+   * TODO: Just use RGB instead of HEX
+   * https://stackoverflow.com/a/41265350
    */
   --color-transparent: rgba(255, 255, 255, 0);
+  --color-gray-darken-20-transparent: rgba(45, 46, 53, 0);
 
   /* Brand colors */
   --color-brand-bright-red: #ff4756;
