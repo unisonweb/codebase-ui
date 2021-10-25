@@ -1,29 +1,14 @@
 #help-modal .shortcuts {
   display: flex;
   flex-direction: row;
-  /* 
-  Alas - Safari does not support gap and we have to use margins 
-  It was added in Safari 14.1 that was since pulled for unrelated reasons
-
-  gap: 2.625rem; 
-  */
+  gap: 2.625rem;
 }
 
 #help-modal .shortcuts .shortcut-group {
   width: 20rem;
   display: flex;
   flex-direction: column;
-  /*
-  Alas - Safari does not support gap and we have to use margins 
-  It was added in Safari 14.1 that was since pulled for unrelated reasons
-
   gap: 0.75rem;
-  */
-  margin-right: 2.625rem;
-}
-
-#help-modal .shortcuts .shortcut-group:last-child {
-  margin-right: 0;
 }
 
 #help-modal .shortcuts h3 {
@@ -37,10 +22,6 @@
   display: flex;
   height: 1.5rem;
   align-items: center;
-  margin-bottom: 0.75rem;
-}
-#help-modal .shortcuts .row:last-child {
-  margin-bottom: 0;
 }
 
 #help-modal .shortcuts .instructions {
