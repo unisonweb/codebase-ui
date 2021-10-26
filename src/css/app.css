@@ -290,6 +290,7 @@
   color: var(--color-sidebar-fg);
   cursor: pointer;
   height: 1.875rem;
+  margin-top: 1.5rem;
 }
 
 #main-sidebar .show-help:hover {
