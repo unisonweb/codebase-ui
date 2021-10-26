@@ -12,7 +12,7 @@ import Definition.Type exposing (Type(..))
 import Env exposing (Env)
 import Finder.FinderMatch as FinderMatch exposing (FinderMatch)
 import Finder.SearchOptions as SearchOptions exposing (SearchOptions(..), WithinOption(..))
-import FullyQualifiedName exposing (FQN)
+import FullyQualifiedName as FQN exposing (FQN)
 import HashQualified exposing (HashQualified(..))
 import Html
     exposing
@@ -365,7 +365,7 @@ indexToShortcut index =
         n |> String.fromInt |> Key.fromString |> Just
 
 
-viewMarkedNaming : FinderMatch.MatchPositions -> Maybe String -> String -> Html msg
+viewMarkedNaming : FinderMatch.MatchPositions -> Maybe String -> FQN -> Html msg
 viewMarkedNaming matchedPositions namespace name =
     let
         namespaceMod =
@@ -383,6 +383,7 @@ viewMarkedNaming matchedPositions namespace name =
 
         markedName =
             name
+                |> FQN.toString
                 |> String.toList
                 |> List.map (List.singleton >> String.fromList)
                 |> List.indexedMap (mark_ namespaceMod)

@@ -183,15 +183,15 @@ append (FQN a) (FQN b) =
 namespaces like List.map (where the FQN would be
 base.List.map)
 -}
-isSuffixOf : String -> FQN -> Bool
+isSuffixOf : FQN -> FQN -> Bool
 isSuffixOf suffixName fqn =
-    String.endsWith suffixName (toString fqn)
+    String.endsWith (toString suffixName) (toString fqn)
 
 
 {-| TODO: We should distinquish between FQN, Namespace and SuffixName on a type
 level, or rename the FQN type to Name
 -}
-namespaceOf : String -> FQN -> Maybe String
+namespaceOf : FQN -> FQN -> Maybe String
 namespaceOf suffixName fqn =
     let
         dropLastDot s =
@@ -204,7 +204,7 @@ namespaceOf suffixName fqn =
     if isSuffixOf suffixName fqn then
         fqn
             |> toString
-            |> String.dropRight (String.length suffixName)
+            |> String.dropRight (String.length (toString suffixName))
             |> StringE.nonEmpty
             |> Maybe.map dropLastDot
 

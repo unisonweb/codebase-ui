@@ -1,5 +1,6 @@
 module Definition.Info exposing (..)
 
+import Definition.Reference as Reference exposing (Reference)
 import FullyQualifiedName as FQN exposing (FQN)
 import List.Extra as ListE
 import List.Nonempty as NEL
@@ -20,27 +21,45 @@ type alias Info =
     }
 
 
-makeInfo : FQN -> NEL.Nonempty FQN -> Info
-makeInfo name_ allFqns =
+makeInfo : Reference -> FQN -> NEL.Nonempty FQN -> Info
+makeInfo requestedRef suffixName allFqns =
     let
         ( namespace, otherNames ) =
-            namespaceAndOtherNames name_ allFqns
+            namespaceAndOtherNames requestedRef suffixName allFqns
     in
-    Info name_ namespace otherNames
+    Info suffixName namespace otherNames
 
 
 
 -- Helpers
 
 
-namespaceAndOtherNames : FQN -> NEL.Nonempty FQN -> ( Maybe FQN, List FQN )
-namespaceAndOtherNames suffixName fqns =
+namespaceAndOtherNames : Reference -> FQN -> NEL.Nonempty FQN -> ( Maybe FQN, List FQN )
+namespaceAndOtherNames requestedRef suffixName fqns =
     let
-        fqnWithin =
+        shortest =
+            NEL.sortBy FQN.numSegments >> NEL.head
+
+        shortestSuffixMatching =
+            let
+                defaultFqn =
+                    shortest fqns
+            in
             fqns
-                |> NEL.filter (FQN.isSuffixOf (FQN.toString suffixName)) (NEL.head fqns)
-                |> NEL.sortBy FQN.numSegments
-                |> NEL.head
+                |> NEL.filter (FQN.isSuffixOf suffixName) defaultFqn
+                |> shortest
+
+        fqnWithin =
+            case Reference.fqn requestedRef of
+                Just requestedName ->
+                    if FQN.isSuffixOf suffixName requestedName then
+                        requestedName
+
+                    else
+                        shortestSuffixMatching
+
+                Nothing ->
+                    shortestSuffixMatching
 
         fqnsWithout =
             fqns

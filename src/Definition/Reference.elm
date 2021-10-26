@@ -1,5 +1,6 @@
 module Definition.Reference exposing (..)
 
+import FullyQualifiedName exposing (FQN)
 import HashQualified as HQ exposing (HashQualified)
 import UI.Icon as Icon exposing (Icon)
 import Url.Parser
@@ -49,6 +50,11 @@ hashQualified ref =
 
         DataConstructorReference hq ->
             hq
+
+
+fqn : Reference -> Maybe FQN
+fqn =
+    hashQualified >> HQ.name
 
 
 

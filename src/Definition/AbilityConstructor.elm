@@ -33,7 +33,7 @@ type alias AbilityConstructorDetail =
 type alias AbilityConstructorSummary =
     AbilityConstructor
         { fqn : FQN
-        , name : String
+        , name : FQN
         , namespace : Maybe String
         , signature : TermSignature
         }
