@@ -44,7 +44,7 @@ type alias TypeDetail d =
 type alias TypeSummary =
     Type
         { fqn : FQN
-        , name : String
+        , name : FQN
         , namespace : Maybe String
         , source : TypeSource
         }

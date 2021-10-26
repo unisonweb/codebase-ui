@@ -33,7 +33,7 @@ type alias DataConstructorDetail =
 type alias DataConstructorSummary =
     DataConstructor
         { fqn : FQN
-        , name : String
+        , name : FQN
         , namespace : Maybe String
         , signature : TermSignature
         }

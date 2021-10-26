@@ -157,7 +157,7 @@ isSuffixOf =
             \_ ->
                 let
                     suffix =
-                        "List.map"
+                        FQN.fromString "List.map"
 
                     fqn =
                         FQN.fromString "base.List.map"
@@ -167,7 +167,7 @@ isSuffixOf =
             \_ ->
                 let
                     suffix =
-                        "List.foldl"
+                        FQN.fromString "List.foldl"
 
                     fqn =
                         FQN.fromString "base.List.map"
@@ -183,7 +183,7 @@ namespaceOf =
             \_ ->
                 let
                     suffix =
-                        "List.map"
+                        FQN.fromString "List.map"
 
                     fqn =
                         FQN.fromString "base.List.map"
@@ -193,7 +193,7 @@ namespaceOf =
             \_ ->
                 let
                     suffix =
-                        "base.List.map"
+                        FQN.fromString "base.List.map"
 
                     fqn =
                         FQN.fromString "base.List.map"
@@ -203,7 +203,7 @@ namespaceOf =
             \_ ->
                 let
                     suffix =
-                        "List.map.foldl"
+                        FQN.fromString "List.map.foldl"
 
                     fqn =
                         FQN.fromString "base.List.map"
@@ -213,7 +213,7 @@ namespaceOf =
             \_ ->
                 let
                     suffix =
-                        "Map"
+                        FQN.fromString "Map"
 
                     fqn =
                         FQN.fromString "base.Map.Map"

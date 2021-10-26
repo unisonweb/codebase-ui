@@ -5,7 +5,7 @@ import Definition.DataConstructor as DataConstructor exposing (DataConstructor(.
 import Definition.Reference exposing (Reference(..))
 import Definition.Term as Term exposing (Term(..), TermSummary)
 import Definition.Type as Type exposing (Type(..), TypeSummary)
-import FullyQualifiedName as FQN
+import FullyQualifiedName as FQN exposing (FQN)
 import Hash
 import HashQualified exposing (HashQualified(..))
 import Json.Decode as Decode exposing (at, field, string)
@@ -59,7 +59,7 @@ finderMatch score matchSegments item =
 -- HELPERS
 
 
-name : FinderMatch -> String
+name : FinderMatch -> FQN
 name fm =
     case fm.item of
         TypeItem (Type _ _ summary) ->
@@ -159,7 +159,7 @@ decodeTypeItem =
             (Type.decodeTypeCategory [ "namedType", "typeTag" ])
             (Decode.map3 makeSummary
                 (at [ "namedType", "typeName" ] FQN.decode)
-                (field "bestFoundTypeName" string)
+                (field "bestFoundTypeName" FQN.decode)
                 (Type.decodeTypeSource [ "typeDef", "tag" ] [ "typeDef", "contents" ])
             )
         )
@@ -181,7 +181,7 @@ decodeTermItem =
             (Term.decodeTermCategory [ "namedTerm", "termTag" ])
             (Decode.map3 makeSummary
                 (at [ "namedTerm", "termName" ] FQN.decode)
-                (field "bestFoundTermName" string)
+                (field "bestFoundTermName" FQN.decode)
                 (Term.decodeSignature [ "namedTerm", "termType" ])
             )
         )
@@ -202,7 +202,7 @@ decodeAbilityConstructorItem =
             (at [ "namedTerm", "termHash" ] Hash.decode)
             (Decode.map3 makeSummary
                 (at [ "namedTerm", "termName" ] FQN.decode)
-                (field "bestFoundTermName" string)
+                (field "bestFoundTermName" FQN.decode)
                 (AbilityConstructor.decodeSignature [ "namedTerm", "termType" ])
             )
         )
@@ -223,7 +223,7 @@ decodeDataConstructorItem =
             (at [ "namedTerm", "termHash" ] Hash.decode)
             (Decode.map3 makeSummary
                 (at [ "namedTerm", "termName" ] FQN.decode)
-                (field "bestFoundTermName" string)
+                (field "bestFoundTermName" FQN.decode)
                 (DataConstructor.decodeSignature [ "namedTerm", "termType" ])
             )
         )

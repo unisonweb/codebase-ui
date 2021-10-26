@@ -52,7 +52,7 @@ type alias TermDetail d =
 type alias TermSummary =
     Term
         { fqn : FQN
-        , name : String
+        , name : FQN
         , namespace : Maybe String
         , signature : TermSignature
         }

@@ -384,7 +384,7 @@ fetchDefinition perspective ref =
     in
     [ definitionHash ]
         |> Api.getDefinition perspective
-        |> Api.toRequest WorkspaceItem.decodeItem (FetchItemFinished ref)
+        |> Api.toRequest (WorkspaceItem.decodeItem ref) (FetchItemFinished ref)
 
 
 isDocCropped : Reference -> Cmd Msg

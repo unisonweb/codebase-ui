@@ -638,13 +638,21 @@ decodeTypeDetails =
         (decodeDocs "typeDocs")
 
 
-decodeTypes : Decode.Decoder (List TypeDetailWithDoc)
-decodeTypes =
+decodeTypes : Reference -> Decode.Decoder (List TypeDetailWithDoc)
+decodeTypes ref =
     let
         makeType ( hash_, d ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Type h d.category { doc = d.doc, info = Info.makeInfo d.name d.otherNames, source = d.source })
+                |> Maybe.map
+                    (\h ->
+                        Type h
+                            d.category
+                            { doc = d.doc
+                            , info = Info.makeInfo ref d.name d.otherNames
+                            , source = d.source
+                            }
+                    )
 
         buildTypes =
             List.map makeType >> MaybeE.values
@@ -682,13 +690,21 @@ decodeTermDetails =
         (decodeDocs "termDocs")
 
 
-decodeTerms : Decode.Decoder (List TermDetailWithDoc)
-decodeTerms =
+decodeTerms : Reference -> Decode.Decoder (List TermDetailWithDoc)
+decodeTerms ref =
     let
         makeTerm ( hash_, d ) =
             hash_
                 |> Hash.fromString
-                |> Maybe.map (\h -> Term h d.category { doc = d.doc, info = Info.makeInfo d.name d.otherNames, source = d.source })
+                |> Maybe.map
+                    (\h ->
+                        Term h
+                            d.category
+                            { doc = d.doc
+                            , info = Info.makeInfo ref d.name d.otherNames
+                            , source = d.source
+                            }
+                    )
 
         buildTerms =
             List.map makeTerm >> MaybeE.values
@@ -696,16 +712,18 @@ decodeTerms =
     Decode.keyValuePairs decodeTermDetails |> Decode.map buildTerms
 
 
-decodeList : Decode.Decoder (List Item)
-decodeList =
+{-| The server returns a list, but we only query for a single WorkspaceItem at a time.
+-}
+decodeList : Reference -> Decode.Decoder (List Item)
+decodeList ref =
     Decode.map2 List.append
-        (Decode.map (List.map TermItem) (field "termDefinitions" decodeTerms))
-        (Decode.map (List.map TypeItem) (field "typeDefinitions" decodeTypes))
+        (Decode.map (List.map TermItem) (field "termDefinitions" (decodeTerms ref)))
+        (Decode.map (List.map TypeItem) (field "typeDefinitions" (decodeTypes ref)))
 
 
-decodeItem : Decode.Decoder Item
-decodeItem =
-    Decode.map List.head decodeList
+decodeItem : Reference -> Decode.Decoder Item
+decodeItem ref =
+    Decode.map List.head (decodeList ref)
         |> Decode.andThen
             (Maybe.map Decode.succeed
                 >> Maybe.withDefault (Decode.fail "Empty list")
