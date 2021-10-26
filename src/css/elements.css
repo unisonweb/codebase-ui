@@ -158,6 +158,7 @@ hr {
   align-items: center;
   color: var(--color-keyboard-shortcut-key-fg);
   background: var(--color-keyboard-shortcut-key-bg);
+  transition: all 0.2s;
 }
 
 .keyboard-shortcut .then {
