@@ -485,12 +485,18 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                                 Word t ->
                                     [ alt t ]
 
+                                Span ((Word t) :: _) ->
+                                    [ alt t ]
+
                                 _ ->
                                     []
 
                         image =
                             case src_ of
                                 Word s ->
+                                    img (altAttr ++ [ src s ]) []
+
+                                Span ((Word s) :: _) ->
                                     img (altAttr ++ [ src s ]) []
 
                                 _ ->
