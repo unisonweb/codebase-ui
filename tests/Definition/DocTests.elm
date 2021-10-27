@@ -9,7 +9,7 @@ import TreePath
 mergeWords : Test
 mergeWords =
     describe "Doc.mergeWords"
-        [ test "merges adjacent Word elements with a space" <|
+        [ test "merges adjacent Word elements with a separator" <|
             \_ ->
                 let
                     before =
@@ -18,7 +18,7 @@ mergeWords =
                     expected =
                         [ Word "Hello World", Blankline, Word "After non word" ]
                 in
-                Expect.equal expected (Doc.mergeWords before)
+                Expect.equal expected (Doc.mergeWords " " before)
         ]
 
 
@@ -39,6 +39,22 @@ isDocFoldToggled =
                         Doc.emptyDocFoldToggles
                 in
                 Expect.false "doc is not toggled" (Doc.isDocFoldToggled toggles id)
+        ]
+
+
+toString : Test
+toString =
+    describe "Doc.toString"
+        [ test "merges docs down to a string with a separator" <|
+            \_ ->
+                let
+                    before =
+                        Span [ Word "Hello", Word "World", Blankline, Word "After", Word "non", Word "word" ]
+
+                    expected =
+                        "Hello World After non word"
+                in
+                Expect.equal expected (Doc.toString " " before)
         ]
 
 
