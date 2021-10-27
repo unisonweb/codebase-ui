@@ -343,10 +343,11 @@
 
 .definition-doc img {
   margin-bottom: 1rem;
+  max-width: 100%;
 }
 
 .definition-doc .image-with-caption {
-  width: min-content;
+  width: 100%;
 }
 
 .definition-doc .image-with-caption .caption {

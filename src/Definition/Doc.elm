@@ -7,6 +7,7 @@ module Definition.Doc exposing
     , emptyDocFoldToggles
     , isDocFoldToggled
     , mergeWords
+    , toString
     , toggleFold
     , view
     )
@@ -110,7 +111,7 @@ type
     | UntitledSection (List Doc)
       -- A list of documents that should start on separate lines;
       -- this is used for nested lists, for instance
-      -- * A
+      -- * docA
       --   * A.1
       --   * A.2
       -- * B
@@ -287,19 +288,69 @@ normalizeHref href doc =
 separated by space— useful for rendering to the dom without creating dom
 elements for each and every word in the doc, but instead rely on textNodes
 -}
-mergeWords : List Doc -> List Doc
-mergeWords docs =
+mergeWords : String -> List Doc -> List Doc
+mergeWords sep docs =
     let
         merge_ : Doc -> List Doc -> List Doc
         merge_ d acc =
             case ( d, acc ) of
                 ( Word w, (Word w_) :: rest ) ->
-                    Word (w ++ " " ++ w_) :: rest
+                    Word (w ++ sep ++ w_) :: rest
 
                 _ ->
                     d :: acc
     in
     List.foldr merge_ [] docs
+
+
+{-| Merge down Doc to String by merging Paragraphs and Words.
+Used for things like extract an src of an image. I.e something that has to
+be a Text and not a Doc
+-}
+toString : String -> Doc -> String
+toString sep doc =
+    let
+        listToString =
+            List.map (toString sep)
+                >> List.filter (String.isEmpty >> not)
+                >> String.join sep
+    in
+    case doc of
+        Span ds ->
+            listToString ds
+
+        Group d ->
+            toString sep d
+
+        Join ds ->
+            listToString ds
+
+        Bold d ->
+            toString sep d
+
+        Italic d ->
+            toString sep d
+
+        Strikethrough d ->
+            toString sep d
+
+        Blockquote d ->
+            toString sep d
+
+        Section d ds ->
+            toString sep d ++ sep ++ listToString ds
+
+        UntitledSection ds ->
+            listToString ds
+
+        Column ds ->
+            listToString ds
+
+        Word w ->
+            w
+
+        _ ->
+            ""
 
 
 view : (Reference -> msg) -> (FoldId -> msg) -> DocFoldToggles -> Doc -> Html msg
@@ -400,7 +451,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                             td [] [ viewAtCurrentSectionLevel d ]
 
                         viewRow cells =
-                            tr [] (List.map viewCell (mergeWords cells))
+                            tr [] (List.map viewCell (mergeWords " " cells))
                     in
                     table [] [ tbody [] (List.map viewRow rows) ]
 
@@ -438,21 +489,21 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                             viewAtCurrentSectionLevel d
 
                         ds ->
-                            span [ class "span" ] (List.map viewAtCurrentSectionLevel (mergeWords ds))
+                            span [ class "span" ] (List.map viewAtCurrentSectionLevel (mergeWords " " ds))
 
                 BulletedList items ->
                     let
                         viewItem d =
                             li [] [ viewAtCurrentSectionLevel d ]
                     in
-                    ul [] (List.map viewItem (mergeWords items))
+                    ul [] (List.map viewItem (mergeWords " " items))
 
                 NumberedList startNum items ->
                     let
                         viewItem d =
                             li [] [ viewAtCurrentSectionLevel d ]
                     in
-                    ol [ start startNum ] (List.map viewItem (mergeWords items))
+                    ol [ start startNum ] (List.map viewItem (mergeWords " " items))
 
                 Section title docs ->
                     let
@@ -481,20 +532,10 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                 Image altText src_ caption ->
                     let
                         altAttr =
-                            case altText of
-                                Word t ->
-                                    [ alt t ]
-
-                                _ ->
-                                    []
+                            [ alt (toString " " altText) ]
 
                         image =
-                            case src_ of
-                                Word s ->
-                                    img (altAttr ++ [ src s ]) []
-
-                                _ ->
-                                    UI.nothing
+                            img (altAttr ++ [ src (toString "" src_) ]) []
 
                         imageWithCaption c =
                             div [ class "image-with-caption" ]
@@ -588,7 +629,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                             span [ class "source rich embed-inline" ] [ UI.inlineCode [] (viewSyntax syntax) ]
 
                 Join docs ->
-                    span [ class "join" ] (List.map viewAtCurrentSectionLevel (mergeWords docs))
+                    span [ class "join" ] (List.map viewAtCurrentSectionLevel (mergeWords " " docs))
 
                 UntitledSection docs ->
                     section [] (List.map (viewSectionContent viewAtCurrentSectionLevel) docs)
@@ -597,7 +638,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     ul [ class "column" ]
                         (List.map
                             (\c -> li [] [ viewAtCurrentSectionLevel c ])
-                            (mergeWords docs)
+                            (mergeWords " " docs)
                         )
 
                 Group content ->
