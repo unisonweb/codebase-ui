@@ -16,6 +16,11 @@ type Perspective
         }
 
 
+toCodebasePerspective : Perspective -> Perspective
+toCodebasePerspective perspective =
+    Codebase (codebaseHash perspective)
+
+
 toNamespacePerspective : Perspective -> FQN -> Perspective
 toNamespacePerspective perspective fqn_ =
     Namespace { codebaseHash = codebaseHash perspective, fqn = fqn_, details = NotAsked }

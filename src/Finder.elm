@@ -167,24 +167,8 @@ update env msg model =
         PerformSearch query ->
             if query == model.input then
                 let
-                    search =
-                        case model.search of
-                            Success _ r ->
-                                Searching query (Just r)
-
-                            Searching _ (Just r) ->
-                                Searching query (Just r)
-
-                            _ ->
-                                Searching query Nothing
-
-                    fetch =
-                        case model.options of
-                            SearchOptions (WithinNamespace fqn) ->
-                                fetchMatches env.perspective (Just fqn) query
-
-                            _ ->
-                                fetchMatches env.perspective Nothing query
+                    ( search, fetch ) =
+                        performSearch env.perspective model.options model.search query
                 in
                 ( { model | search = search }, Api.perform env.apiBasePath fetch, Remain )
 
@@ -211,8 +195,24 @@ update env msg model =
                 ( model, Cmd.none, Remain )
 
         RemoveWithinOption ->
-            ( { model | options = SearchOptions.removeWithin env.perspective model.options }
-            , Cmd.none
+            let
+                options =
+                    SearchOptions.removeWithin env.perspective model.options
+
+                -- Don't perform search when the query is empty.
+                ( search, cmd ) =
+                    if not (String.isEmpty model.input) then
+                        let
+                            ( search_, fetch ) =
+                                performSearch env.perspective options model.search model.input
+                        in
+                        ( search_, Api.perform env.apiBasePath fetch )
+
+                    else
+                        ( model.search, Cmd.none )
+            in
+            ( { model | search = search, options = options }
+            , cmd
             , Remain
             )
 
@@ -328,6 +328,42 @@ finderSearchToMaybe fs =
 
 
 -- EFFECTS
+
+
+performSearch :
+    Perspective
+    -> SearchOptions
+    -> FinderSearch
+    -> String
+    -> ( FinderSearch, ApiRequest (List FinderMatch) Msg )
+performSearch perspective options search query =
+    let
+        search_ =
+            case search of
+                Success _ r ->
+                    Searching query (Just r)
+
+                Searching _ (Just r) ->
+                    Searching query (Just r)
+
+                _ ->
+                    Searching query Nothing
+
+        fetch =
+            case options of
+                SearchOptions AllNamespaces ->
+                    fetchMatches
+                        (Perspective.toCodebasePerspective perspective)
+                        Nothing
+                        query
+
+                SearchOptions (WithinNamespacePerspective _) ->
+                    fetchMatches perspective Nothing query
+
+                SearchOptions (WithinNamespace fqn) ->
+                    fetchMatches perspective (Just fqn) query
+    in
+    ( search_, fetch )
 
 
 fetchMatches : Perspective -> Maybe FQN -> String -> ApiRequest (List FinderMatch) Msg
