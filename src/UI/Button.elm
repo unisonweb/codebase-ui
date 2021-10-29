@@ -33,6 +33,8 @@ import Html.Events.Extra exposing (onClickPreventDefault, onClickPreventDefaultA
 import UI.Icon as I
 
 
+{-| TODO: Merge with UI.Click
+-}
 type Action clickMsg
     = OnClick clickMsg OnClickSettings
     | Href String

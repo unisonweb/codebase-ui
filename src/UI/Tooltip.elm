@@ -1,20 +1,21 @@
 module UI.Tooltip exposing
-    ( Action(..)
-    , Arrow(..)
+    ( Arrow(..)
     , Content(..)
     , MenuItem
     , Position(..)
     , Tooltip
+    , menu
+    , textMenu
     , tooltip
     , view
     , withArrow
     , withPosition
     )
 
-import Html exposing (Html, a, div, span, text)
-import Html.Attributes exposing (class, href, rel, target)
-import Html.Events exposing (onClick)
+import Html exposing (Html, div, span, text)
+import Html.Attributes exposing (class)
 import UI
+import UI.Click as Click exposing (Click)
 import UI.Icon as Icon exposing (Icon)
 
 
@@ -42,19 +43,28 @@ type Position
     | RightOf
 
 
-type Action msg
-    = OnClick msg
-    | Href String
-
-
 type alias MenuItem msg =
-    { icon : Maybe (Icon msg), label : String, action : Action msg }
+    { icon : Maybe (Icon msg), label : String, click : Click msg }
 
 
 type Content msg
     = Text String
     | Rich (Html msg)
     | Menu (List (MenuItem msg))
+
+
+menu : List ( Icon msg, String, Click msg ) -> Content msg
+menu items =
+    items
+        |> List.map (\( i, l, c ) -> MenuItem (Just i) l c)
+        |> Menu
+
+
+textMenu : List ( String, Click msg ) -> Content msg
+textMenu items =
+    items
+        |> List.map (\( l, c ) -> MenuItem Nothing l c)
+        |> Menu
 
 
 tooltip : Html msg -> Content msg -> Tooltip msg
@@ -89,12 +99,7 @@ view { arrow, content, trigger, position } =
                         Nothing ->
                             UI.nothing
             in
-            case item.action of
-                OnClick clickMsg ->
-                    a [ class "tooltip-menu-item", onClick clickMsg ] [ iconHtml, text item.label ]
-
-                Href url ->
-                    a [ class "tooltip-menu-item", href url, rel "noopener", target "_blank" ] [ iconHtml, text item.label ]
+            Click.view [ class "tooltip-menu-item" ] [ iconHtml, text item.label ] item.click
 
         content_ =
             case content of
