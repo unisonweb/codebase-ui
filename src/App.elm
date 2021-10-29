@@ -25,6 +25,7 @@ import UI
 import UI.AppHeader as AppHeader
 import UI.Banner as Banner
 import UI.Button as Button
+import UI.Click as Click exposing (Click(..))
 import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.Sidebar as Sidebar
@@ -358,9 +359,6 @@ keydown model keyboardEvent =
         KeyboardShortcut.Chord Meta (B _) ->
             toggleSidebar
 
-        KeyboardShortcut.Sequence _ (S _) ->
-            toggleSidebar
-
         KeyboardShortcut.Sequence _ ForwardSlash ->
             showFinder model Nothing
 
@@ -532,6 +530,22 @@ viewMainSidebarCollapseButton model =
         ]
 
 
+subMenu : AppContext -> List ( String, Click Msg )
+subMenu appContext =
+    [ ( "Unison website", ExternalHref "https://unisonweb.org" )
+    , ( "Docs", ExternalHref "https://unisonweb.org/docs" )
+    , ( "Language Reference", ExternalHref "https://unisonweb.org/docs/language-reference" )
+    , ( "Community", ExternalHref "https://unisonweb.org/community" )
+    , ( "Report a bug", OnClick (ShowModal ReportBugModal) )
+    ]
+        ++ (if Env.isUnisonLocal appContext then
+                [ ( "Unison Share", ExternalHref "https://share.unison-lang.org" ) ]
+
+            else
+                []
+           )
+
+
 unisonSubmenu : AppContext -> Html Msg
 unisonSubmenu appContext =
     Tooltip.tooltip
@@ -539,21 +553,7 @@ unisonSubmenu appContext =
             |> Icon.withClass "sidebar-unison-submenu"
             |> Icon.view
         )
-        (Tooltip.Menu
-            ([ Tooltip.MenuItem Nothing "Unison website" (Tooltip.Href "https://unisonweb.org")
-             , Tooltip.MenuItem Nothing "Docs" (Tooltip.Href "https://unisonweb.org/docs")
-             , Tooltip.MenuItem Nothing "Language Reference" (Tooltip.Href "https://unisonweb.org/docs/language-reference")
-             , Tooltip.MenuItem Nothing "Community" (Tooltip.Href "https://unisonweb.org/community")
-             , Tooltip.MenuItem Nothing "Report a bug" (Tooltip.OnClick (ShowModal ReportBugModal))
-             ]
-                ++ (if Env.isUnisonLocal appContext then
-                        [ Tooltip.MenuItem Nothing "Unison Share" (Tooltip.Href "https://share.unison-lang.org") ]
-
-                    else
-                        []
-                   )
-            )
-        )
+        (subMenu appContext |> Tooltip.textMenu)
         |> Tooltip.withPosition Tooltip.RightOf
         |> Tooltip.withArrow Tooltip.End
         |> Tooltip.view
@@ -577,18 +577,6 @@ viewMainSidebar model =
 
             else
                 UI.nothing
-
-        shareLink =
-            if Env.isUnisonLocal appContext then
-                a
-                    [ href "https://share.unison-lang.org"
-                    , rel "noopener"
-                    , target "_blank"
-                    ]
-                    [ text "Unison Share" ]
-
-            else
-                UI.nothing
     in
     Sidebar.view
         [ viewMainSidebarCollapseButton model
@@ -600,17 +588,15 @@ viewMainSidebar model =
                     "Namespaces and Definitions"
                     [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
                 , nav []
-                    [ a [ href "https://unisonweb.org", title "Unison website", rel "noopener", target "_blank" ] [ Icon.view Icon.unisonMark ]
-                    , a [ href "https://unisonweb.org/docs", rel "noopener", target "_blank" ] [ text "Docs" ]
-                    , a [ href "https://unisonweb.org/docs/language-reference", rel "noopener", target "_blank" ] [ text "Language Reference" ]
-                    , a [ href "https://unisonweb.org/community", rel "noopener", target "_blank" ] [ text "Community" ]
-                    , a [ onClick (ShowModal ReportBugModal) ] [ text "Report a bug" ]
-                    , shareLink
-                    , a [ class "show-help", onClick (ShowModal HelpModal) ]
-                        [ text "Keyboard Shortcuts"
-                        , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
-                        ]
-                    ]
+                    (List.map
+                        (\( l, c ) -> Click.view [] [ text l ] c)
+                        (subMenu appContext)
+                        ++ [ a [ class "show-help", onClick (ShowModal HelpModal) ]
+                                [ text "Keyboard Shortcuts"
+                                , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                                ]
+                           ]
+                    )
                 ]
             ]
         , div [ class "collapsed-content" ]
@@ -653,7 +639,7 @@ viewHelpModal os keyboardShortcut =
         toggleSidebarInstructions =
             case os of
                 MacOS ->
-                    [ KeyboardShortcut.Chord Meta (B Key.Lower), KeyboardShortcut.Chord Ctrl (B Key.Lower), KeyboardShortcut.single (S Key.Lower) ]
+                    [ KeyboardShortcut.Chord Meta (B Key.Lower), KeyboardShortcut.Chord Ctrl (B Key.Lower) ]
 
                 _ ->
                     [ KeyboardShortcut.Chord Ctrl (B Key.Lower), KeyboardShortcut.single (S Key.Lower) ]
