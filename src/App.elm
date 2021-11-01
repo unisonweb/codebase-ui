@@ -462,25 +462,11 @@ viewAppHeader model =
 
         appTitle_ =
             appTitle (Just changePerspectiveMsg) appContext
-
-        banner =
-            case appContext of
-                Env.Ucm ->
-                    Nothing
-
-                Env.UnisonShare ->
-                    Just
-                        (Banner.promotion
-                            "hacktoberfest"
-                            "🎃 Unison is participating in #Hacktoberfest: contribute and get rewards!"
-                            (ChangePerspective (Perspective.toNamespacePerspective perspective (FQN.fromString "unison.hacktoberfest")))
-                            "Get Involved!"
-                        )
     in
     AppHeader.view
         { menuToggle = Just ToggleSidebar
         , appTitle = appTitle_
-        , banner = banner
+        , banner = Nothing
         , rightButton = Just (Button.button (ShowModal PublishModal) "Publish on Unison Share" |> Button.share)
         }
 
