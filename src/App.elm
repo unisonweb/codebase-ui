@@ -23,7 +23,6 @@ import RemoteData
 import Route exposing (Route)
 import UI
 import UI.AppHeader as AppHeader
-import UI.Banner as Banner
 import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
 import UI.Icon as Icon
