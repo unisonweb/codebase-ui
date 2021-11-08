@@ -35,7 +35,7 @@ code a:active {
 }
 
 .rich .fqn .sep {
-  color: var(--color-syntax-subtle-em);
+  color: var(--color-syntax-subtle);
 }
 .rich .text-literal,
 .rich .bytes-literal,
@@ -115,7 +115,7 @@ code a:active {
 }
 
 .rich .delimeter-char {
-  color: var(--color-syntax-subtle-em);
+  color: var(--color-syntax-subtle);
 }
 
 .rich .comment,
