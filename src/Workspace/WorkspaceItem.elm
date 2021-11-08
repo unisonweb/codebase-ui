@@ -248,44 +248,52 @@ viewBuiltinBadge name_ category =
     UI.badge content
 
 
-viewBuiltin : Item -> Html msg
+viewBuiltin : Item -> Maybe (Html msg)
 viewBuiltin item =
     case item of
         TermItem (Term _ category detail) ->
             case detail.source of
                 Term.Builtin _ ->
-                    div [ class "built-in" ]
-                        [ viewBuiltinBadge detail.info.name (Category.Term category) ]
+                    Just
+                        (div [ class "built-in" ]
+                            [ viewBuiltinBadge detail.info.name (Category.Term category) ]
+                        )
 
                 Term.Source _ _ ->
-                    UI.nothing
+                    Nothing
 
         TypeItem (Type _ category detail) ->
             case detail.source of
                 Type.Builtin ->
-                    div [ class "built-in" ]
-                        [ viewBuiltinBadge detail.info.name (Category.Type category) ]
+                    Just
+                        (div [ class "built-in" ]
+                            [ viewBuiltinBadge detail.info.name (Category.Type category) ]
+                        )
 
                 Type.Source _ ->
-                    UI.nothing
+                    Nothing
 
         DataConstructorItem (DataConstructor _ detail) ->
             case detail.source of
                 Type.Builtin ->
-                    div [ class "built-in" ]
-                        [ viewBuiltinBadge detail.info.name (Category.Type Type.DataType) ]
+                    Just
+                        (div [ class "built-in" ]
+                            [ viewBuiltinBadge detail.info.name (Category.Type Type.DataType) ]
+                        )
 
                 Type.Source _ ->
-                    UI.nothing
+                    Nothing
 
         AbilityConstructorItem (AbilityConstructor _ detail) ->
             case detail.source of
                 Type.Builtin ->
-                    div [ class "built-in" ]
-                        [ viewBuiltinBadge detail.info.name (Category.Type Type.AbilityType) ]
+                    Just
+                        (div [ class "built-in" ]
+                            [ viewBuiltinBadge detail.info.name (Category.Type Type.AbilityType) ]
+                        )
 
                 Type.Source _ ->
-                    UI.nothing
+                    Nothing
 
 
 viewInfoItem : Icon msg -> String -> Html msg
@@ -474,13 +482,18 @@ viewItem ref data isFocused =
         viewDoc_ doc =
             doc
                 |> Maybe.map (viewDoc ref data.docVisibility data.docFoldToggles)
-                |> Maybe.withDefault UI.nothing
+                |> Maybe.map (\d -> ( UI.nothing, d ))
+
+        viewBuiltin_ item =
+            viewBuiltin item
+                |> Maybe.map (\b -> ( UI.nothing, b ))
 
         viewContent doc =
-            [ viewSource data.zoom sourceZoomToggle sourceConfig data.item
-            , ( UI.nothing, viewBuiltin data.item )
-            , ( UI.nothing, viewDoc_ doc )
+            [ Just (viewSource data.zoom sourceZoomToggle sourceConfig data.item)
+            , viewBuiltin_ data.item
+            , viewDoc_ doc
             ]
+                |> MaybeE.values
 
         viewInfo_ hash_ info cat =
             viewInfo data.zoom infoZoomToggle hash_ info cat

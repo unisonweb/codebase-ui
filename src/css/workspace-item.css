@@ -18,6 +18,14 @@
   flex-direction: row;
 }
 
+.workspace-item .content .inner-row {
+  margin-bottom: 1.5rem;
+}
+
+.workspace-item .content .inner-row:last-child {
+  margin-bottom: 0;
+}
+
 .workspace-item .gutter {
   display: flex;
   justify-content: center;
@@ -244,7 +252,6 @@
 }
 
 .workspace-item .content .built-in {
-  margin-bottom: 1.5rem;
   margin-left: 1.25rem;
 }
 
@@ -255,7 +262,6 @@
 .workspace-item .content .definition-source {
   position: relative;
   padding-left: 1.5rem;
-  margin-bottom: 1.5rem;
   display: flex;
   flex-direction: row;
   background: var(--color-workspace-item-source-bg);
