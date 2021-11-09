@@ -13,7 +13,7 @@ codeBlock attrs code_ =
 
 inlineCode : List (Attribute msg) -> Html msg -> Html msg
 inlineCode attrs code_ =
-    pre (class "inline-code" :: attrs) [ code [] [ code_ ] ]
+    code (class "inline-code" :: attrs) [ code_ ]
 
 
 nothing : Html msg
