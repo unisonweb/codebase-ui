@@ -604,14 +604,16 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                             UI.inlineCode [ class "rich source" ] (viewSyntax syntax)
 
                         Signature signatures ->
-                            div [ class "rich source signatures" ]
-                                (List.map
-                                    (\signature -> div [ class "signature" ] [ viewSignature signature ])
-                                    signatures
+                            UI.codeBlock [ class "rich source signatures" ]
+                                (div []
+                                    (List.map
+                                        (\signature -> div [ class "signature" ] [ viewSignature signature ])
+                                        signatures
+                                    )
                                 )
 
                         SignatureInline signature ->
-                            span [ class "rich source signature-inline" ] [ viewSignature signature ]
+                            UI.inlineCode [ class "rich source signature-inline" ] (viewSignature signature)
 
                         Eval source result ->
                             div
