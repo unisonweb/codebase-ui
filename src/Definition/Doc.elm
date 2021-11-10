@@ -433,10 +433,10 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     let
                         ( cls, ico ) =
                             case icon of
-                                Just (Word emoji) ->
-                                    ( class "callout callout-with-icon", div [ class "callout-icon" ] [ text emoji ] )
+                                Just emoji ->
+                                    ( class "callout callout-with-icon", div [ class "callout-icon" ] [ text (toString "" emoji) ] )
 
-                                _ ->
+                                Nothing ->
                                     ( class "callout", UI.nothing )
                     in
                     div [ cls ]
