@@ -110,6 +110,14 @@
   white-space: nowrap;
 }
 
+.definition-doc
+  .group
+  .join
+  .source:is(.inline-code, .example-inline, .eval-inline, .signature-inline)
+  :is(.inline-code, code) {
+  margin-right: 0;
+}
+
 /* code and inline-code render sub definition-docs, not syntax */
 :is(.definition-doc .source.code, .definition-doc .source.inline-code)
   .word:last-child {
