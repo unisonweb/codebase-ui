@@ -31,6 +31,10 @@
   margin-right: 0.5ch;
 }
 
+.definition-doc .group .join :nth-last-child(2) .word {
+  margin-right: 0;
+}
+
 .definition-doc .source.code,
 .definition-doc .sources .source,
 .definition-doc .folded-sources .source,
@@ -92,6 +96,13 @@
   border-radius: var(--border-radius-base);
   white-space: nowrap;
 }
+.definition-doc
+  .group
+  .join
+  .source:is(.inline-code, .example-inline, .eval-inline, .signature-inline) {
+  margin-right: 0;
+}
+
 .definition-doc
   .source:is(.inline-code, .example-inline, .eval-inline, .signature-inline)
   :is(.inline-code, code) {
