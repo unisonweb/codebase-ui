@@ -16,6 +16,7 @@
   --color-doc-aside-bg: var(--color-doc-focus-aside-bg);
   --color-doc-aside-source-bg: var(--color-doc-focus-aside-source-bg);
   --color-doc-callout-bg: var(--color-doc-focus-callout-bg);
+  --color-doc-callout-source-bg: var(--color-doc-focus-callout-source-bg);
   --color-doc-subtle-fg: var(--color-doc-focus-subtle-fg);
   --color-doc-source-bg: var(--color-doc-focus-source-bg);
   --color-doc-source-mg: var(--color-doc-focus-source-mg);
@@ -244,6 +245,18 @@
 .definition-doc .callout .callout-icon {
   margin-right: 0.5rem;
   font-size: 1rem;
+}
+
+.definition-doc .callout .source.code,
+.definition-doc .callout .sources .source,
+.definition-doc .callout .folded-sources .source,
+.definition-doc .callout .source.example,
+.definition-doc .callout .source.eval,
+.definition-doc .callout .source.signatures .signature,
+.definition-doc
+  .callout
+  .source:is(.inline-code, .example-inline, .eval-inline, .signature-inline) {
+  background: var(--color-doc-callout-source-bg);
 }
 
 .definition-doc table {

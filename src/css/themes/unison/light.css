@@ -114,6 +114,7 @@
   --color-doc-aside-bg: var(--color-gray-lighten-60);
   --color-doc-aside-source-bg: var(--color-gray-lighten-55);
   --color-doc-callout-bg: var(--color-blue-5);
+  --color-doc-callout-source-bg: var(--color-gray-lighten-45);
   --color-doc-subtle-fg: var(--color-gray-lighten-30);
   --color-doc-source-bg: var(--color-gray-lighten-60);
   --color-doc-source-mg: var(--color-gray-lighten-45);
@@ -129,6 +130,7 @@
   --color-doc-focus-aside-bg: var(--color-gray-lighten-55);
   --color-doc-focus-aside-source-bg: var(--color-gray-lighten-50);
   --color-doc-focus-callout-bg: var(--color-blue-5);
+  --color-doc-focus-callout-source-bg: var(--color-gray-lighten-45);
   --color-doc-focus-subtle-fg: var(--color-gray-lighten-30);
   --color-doc-focus-source-bg: var(--color-gray-lighten-55);
   --color-doc-focus-source-mg: var(--color-gray-lighten-45);
