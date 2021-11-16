@@ -231,15 +231,24 @@
 
 .definition-doc .callout {
   background: var(--color-doc-callout-bg);
-  padding: 0.5rem 0.75rem;
+  padding: 0.75rem 1rem;
   margin-bottom: 1rem;
   border-radius: var(--border-radius-base);
   display: flex;
   flex-direction: row;
 }
 
+.definition-doc .callout .callout-content section .folded:last-child {
+  margin-bottom: 0.25rem;
+}
+
+.definition-doc .folded-content .callout:nth-child(2) {
+  margin-top: 1rem;
+}
+
 .definition-doc .callout.callout-with-icon .callout-content {
   padding-top: 1px;
+  width: 100%;
 }
 
 .definition-doc .callout .callout-icon {
@@ -433,5 +442,23 @@
   .definition-doc aside .source.signatures .signature {
     max-width: none;
     width: min(40rem, calc(calc(100vw - 2rem)) - 3rem);
+  }
+
+  .definition-doc .callout .source.code,
+  .definition-doc .callout .sources .source,
+  .definition-doc .callout .folded-sources .source,
+  .definition-doc .callout .source.example,
+  .definition-doc .callout .source.eval,
+  .definition-doc .callout .source.signatures .signature {
+    width: calc(100vw - 7.5rem);
+  }
+
+  .definition-doc .callout .folded .source.code,
+  .definition-doc .callout .folded .sources .source,
+  .definition-doc .callout .folded .folded-sources .source,
+  .definition-doc .callout .folded .source.example,
+  .definition-doc .callout .folded .source.eval,
+  .definition-doc .callout .folded .source.signatures .signature {
+    width: calc(100vw - 9.25rem);
   }
 }
