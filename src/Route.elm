@@ -197,17 +197,17 @@ toUrlString route =
 
                 ByNamespace Relative fqn ->
                     if includeNamespacesSuffix then
-                        "latest" :: NEL.toList (FQN.segments fqn) ++ [ namespaceSuffix ]
+                        "latest" :: "namespaces" :: NEL.toList (FQN.segments fqn) ++ [ namespaceSuffix ]
 
                     else
-                        "latest" :: NEL.toList (FQN.segments fqn)
+                        "latest" :: "namespaces" :: NEL.toList (FQN.segments fqn)
 
-                ByNamespace (Absolute hash) fqn ->
+                ByNamespace (Absolute _) fqn ->
                     if includeNamespacesSuffix then
-                        [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn) ++ [ namespaceSuffix ]
+                        "latest" :: "namespaces" :: NEL.toList (FQN.segments fqn) ++ [ namespaceSuffix ]
 
                     else
-                        [ Hash.toUrlString hash, "namespaces" ] ++ NEL.toList (FQN.segments fqn)
+                        "latest" :: "namespaces" :: NEL.toList (FQN.segments fqn)
 
         path =
             case route of
