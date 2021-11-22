@@ -1,8 +1,7 @@
 module UI.Banner exposing (..)
 
-import Html exposing (Html, a, span, text)
+import Html exposing (Html, span, text)
 import Html.Attributes exposing (class)
-import Html.Events exposing (onClick)
 import UI.Click as Click exposing (Click)
 
 
