@@ -10,11 +10,16 @@ type Click msg
     | OnClick msg
 
 
-view : List (Attribute msg) -> List (Html msg) -> Click msg -> Html msg
-view attrs content click =
+attrs : Click msg -> List (Attribute msg)
+attrs click =
     case click of
         ExternalHref href_ ->
-            a (attrs ++ [ href href_, rel "noopener", target "_blank" ]) content
+            [ href href_, rel "noopener", target "_blank" ]
 
         OnClick msg ->
-            a (attrs ++ [ onClick msg ]) content
+            [ onClick msg ]
+
+
+view : List (Attribute msg) -> List (Html msg) -> Click msg -> Html msg
+view attrs_ content click =
+    a (attrs_ ++ attrs click) content

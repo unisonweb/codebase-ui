@@ -23,6 +23,7 @@ import RemoteData
 import Route exposing (Route)
 import UI
 import UI.AppHeader as AppHeader
+import UI.Banner as Banner
 import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
 import UI.Icon as Icon
@@ -461,11 +462,24 @@ viewAppHeader model =
 
         appTitle_ =
             appTitle (Just changePerspectiveMsg) appContext
+
+        banner =
+            case appContext of
+                Ucm ->
+                    Nothing
+
+                UnisonShare ->
+                    Just
+                        (Banner.promotion "article"
+                            "New Article: Spark-like distributed datasets in under 100 lines of Unison"
+                            (ExternalHref "https://www.unison-lang.org/articles/distributed-datasets/")
+                            "Check it out!"
+                        )
     in
     AppHeader.view
         { menuToggle = Just ToggleSidebar
         , appTitle = appTitle_
-        , banner = Nothing
+        , banner = banner
         , rightButton = Just (Button.button (ShowModal PublishModal) "Publish on Unison Share" |> Button.share)
         }
 
