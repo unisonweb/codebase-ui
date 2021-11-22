@@ -32,8 +32,12 @@
   margin-right: 0.5ch;
 }
 
-.definition-doc .group .join :nth-last-child(2) .word {
-  margin-right: 0;
+.definition-doc .group .join > :last-child {
+  margin-left: -0.5ch;
+}
+
+.definition-doc .group .join {
+  white-space: nowrap;
 }
 
 .definition-doc .source.code,
