@@ -107,3 +107,19 @@ toIcon ref =
 
         DataConstructorReference _ ->
             Icon.dataConstructor
+
+
+map : (HashQualified -> HashQualified) -> Reference -> Reference
+map f ref =
+    case ref of
+        TermReference hq ->
+            TermReference (f hq)
+
+        TypeReference hq ->
+            TypeReference (f hq)
+
+        AbilityConstructorReference hq ->
+            AbilityConstructorReference (f hq)
+
+        DataConstructorReference hq ->
+            DataConstructorReference (f hq)

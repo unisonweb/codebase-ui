@@ -4,6 +4,7 @@ module Workspace exposing
     , OutMsg(..)
     , init
     , open
+    , replaceWorkspaceItemReferencesWithHashOnly
     , subscriptions
     , update
     , view
@@ -220,6 +221,15 @@ type alias WithWorkspaceItems m =
 open : Env -> WithWorkspaceItems m -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
 open env model ref =
     openItem env model Nothing ref
+
+
+replaceWorkspaceItemReferencesWithHashOnly : Model -> Model
+replaceWorkspaceItemReferencesWithHashOnly model =
+    let
+        workspaceItems =
+            WorkspaceItems.map WorkspaceItem.toHashReference model.workspaceItems
+    in
+    { model | workspaceItems = workspaceItems }
 
 
 openItem : Env -> WithWorkspaceItems m -> Maybe Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
