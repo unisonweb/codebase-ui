@@ -20,7 +20,7 @@ appendWithFocus =
             WorkspaceItems.appendWithFocus WorkspaceItems.empty term
 
         currentFocusedRef =
-            getFocusedRef result
+            WorkspaceItems.focusedReference result
     in
     describe "WorkspaceItems.appendWithFocus"
         [ test "Appends the term" <|
@@ -39,7 +39,7 @@ prependWithFocus =
             WorkspaceItems.prependWithFocus WorkspaceItems.empty term
 
         currentFocusedRef =
-            getFocusedRef result
+            WorkspaceItems.focusedReference result
     in
     describe "WorkspaceItems.prependWithFocus"
         [ test "Prepends the term" <|
@@ -73,7 +73,7 @@ insertWithFocusAfter =
             WorkspaceItems.insertWithFocusAfter workspaceItems afterRef toInsert
 
         currentFocusedRef =
-            getFocusedRef inserted
+            WorkspaceItems.focusedReference inserted
     in
     describe "WorkspaceItems.insertWithFocusAfter"
         [ test "Inserts after the 'after ref'" <|
@@ -125,7 +125,7 @@ insertWithFocusBefore =
             WorkspaceItems.insertWithFocusBefore workspaceItems beforeRef toInsert
 
         currentFocusedRef =
-            getFocusedRef inserted
+            WorkspaceItems.focusedReference inserted
     in
     describe "WorkspaceItems.insertWithFocusBefore"
         [ test "Inserts before the 'before ref'" <|
@@ -315,7 +315,7 @@ next =
                     result =
                         workspaceItems
                             |> WorkspaceItems.next
-                            |> getFocusedRef
+                            |> WorkspaceItems.focusedReference
                             |> Maybe.map Reference.toString
                 in
                 Expect.equal (Just "term__#c") result
@@ -325,7 +325,7 @@ next =
                     result =
                         WorkspaceItems.fromItems before focused []
                             |> WorkspaceItems.next
-                            |> getFocusedRef
+                            |> WorkspaceItems.focusedReference
                             |> Maybe.map Reference.toString
                 in
                 Expect.equal (Just "term__#focus") result
@@ -341,7 +341,7 @@ prev =
                     result =
                         workspaceItems
                             |> WorkspaceItems.prev
-                            |> getFocusedRef
+                            |> WorkspaceItems.focusedReference
                             |> Maybe.map Reference.toString
                 in
                 Expect.equal (Just "term__#b") result
@@ -351,10 +351,33 @@ prev =
                     result =
                         WorkspaceItems.fromItems [] focused after
                             |> WorkspaceItems.prev
-                            |> getFocusedRef
+                            |> WorkspaceItems.focusedReference
                             |> Maybe.map Reference.toString
                 in
                 Expect.equal (Just "term__#focus") result
+        ]
+
+
+focusedReference : Test
+focusedReference =
+    describe "WorkspaceItems.focusedReference"
+        [ test "return the reference of the focused item when one exists" <|
+            \_ ->
+                let
+                    result =
+                        workspaceItems
+                            |> WorkspaceItems.focusedReference
+                            |> Maybe.map Reference.toString
+                in
+                Expect.equal (Just "term__#focus") result
+        , test "returns Nothing when Empty" <|
+            \_ ->
+                let
+                    result =
+                        WorkspaceItems.empty
+                            |> WorkspaceItems.focusedReference
+                in
+                Expect.equal Nothing result
         ]
 
 
@@ -533,8 +556,3 @@ after =
 workspaceItems : WorkspaceItems
 workspaceItems =
     WorkspaceItems.fromItems before focused after
-
-
-getFocusedRef : WorkspaceItems -> Maybe Reference
-getFocusedRef =
-    WorkspaceItems.focus >> Maybe.map reference

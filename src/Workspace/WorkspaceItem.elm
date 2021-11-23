@@ -127,6 +127,31 @@ reference item =
             r
 
 
+{-| Convert the Reference of a WorkspaceItem to be HashOnly
+-}
+toHashReference : WorkspaceItem -> WorkspaceItem
+toHashReference workspaceItem =
+    let
+        toHashOnly hash hq =
+            case hq of
+                HQ.NameOnly _ ->
+                    HQ.HashOnly hash
+
+                HQ.HashOnly h ->
+                    HQ.HashOnly h
+
+                HQ.HashQualified _ h ->
+                    HQ.HashOnly h
+    in
+    case workspaceItem of
+        Success r d ->
+            Success (Reference.map (toHashOnly (itemHash d.item)) r) d
+
+        -- Can't change references where we don't have hash information
+        _ ->
+            workspaceItem
+
+
 {-| Builtins and Types can't be expanded, so we can skip the Medium Zoom level entirely
 TODO: Remove isTypeItem from this conditional when we can collapse types (TypeSummary)
 -}
@@ -227,6 +252,22 @@ hasDoc item =
 
         _ ->
             False
+
+
+itemHash : Item -> Hash
+itemHash item =
+    case item of
+        TermItem (Term h _ _) ->
+            h
+
+        TypeItem (Type h _ _) ->
+            h
+
+        AbilityConstructorItem (AbilityConstructor h _) ->
+            h
+
+        DataConstructorItem (DataConstructor h _) ->
+            h
 
 
 

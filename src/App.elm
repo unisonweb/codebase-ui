@@ -33,6 +33,7 @@ import UI.Tooltip as Tooltip
 import UnisonShare.SidebarContent
 import Url exposing (Url)
 import Workspace
+import Workspace.WorkspaceItems as WorkspaceItems
 
 
 
@@ -291,8 +292,21 @@ replacePerspective ({ env } as model) perspective =
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init newEnv
 
+        -- Update all open references to be hash based to ensure that we can
+        -- refresh the page and fetch them appropriately even if they are
+        -- outside of the current perspective
+        workspace =
+            Workspace.replaceWorkspaceItemReferencesWithHashOnly model.workspace
+
+        -- Re-navigate to the currently open definition by hash
+        focusedReferenceRoute =
+            workspace.workspaceItems
+                |> WorkspaceItems.focusedReference
+                |> Maybe.map (Route.toDefinition model.route)
+                |> Maybe.withDefault model.route
+
         changeRouteCmd =
-            Route.replacePerspective model.navKey (Perspective.toParams perspective) model.route
+            Route.replacePerspective model.navKey (Perspective.toParams perspective) focusedReferenceRoute
 
         fetchNamespaceDetailsCmd =
             perspective
@@ -300,7 +314,7 @@ replacePerspective ({ env } as model) perspective =
                 |> Maybe.map (Api.perform env.apiBasePath)
                 |> Maybe.withDefault Cmd.none
     in
-    ( { model | env = newEnv, codebaseTree = codebaseTree }
+    ( { model | env = newEnv, codebaseTree = codebaseTree, workspace = workspace }
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
         , changeRouteCmd

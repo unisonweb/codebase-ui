@@ -288,6 +288,13 @@ focus items =
             Just data.focus
 
 
+focusedReference : WorkspaceItems -> Maybe Reference
+focusedReference items =
+    items
+        |> focus
+        |> Maybe.map WorkspaceItem.reference
+
+
 focusOn : WorkspaceItems -> Reference -> WorkspaceItems
 focusOn items ref =
     let

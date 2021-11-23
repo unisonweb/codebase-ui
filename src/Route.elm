@@ -8,6 +8,7 @@ module Route exposing
     , navigateToPerspective
     , perspectiveParams
     , replacePerspective
+    , toDefinition
     , toRoute
     , toUrlString
     , updatePerspectiveParams
