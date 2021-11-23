@@ -504,26 +504,19 @@ viewPerspective env =
         Codebase _ ->
             UI.nothing
 
-        Namespace { codebaseHash, fqn } ->
+        Namespace { fqn } ->
             let
-                fqnText =
-                    FQN.toString fqn
-
-                context =
-                    Env.appContextToString env.appContext
-
-                back =
-                    Tooltip.tooltip
-                        (Button.icon (ChangePerspective (Codebase codebaseHash)) Icon.arrowLeftUp |> Button.small |> Button.uncontained |> Button.view)
-                        (Tooltip.Text ("You're currently viewing a subset of " ++ context ++ " (" ++ fqnText ++ "), click to reveal everything."))
-                        |> Tooltip.withArrow Tooltip.Start
-                        |> Tooltip.view
+                -- Imprecise, but close enough, approximation of overflowing,
+                -- which results in a slight faded left edge A better way would
+                -- be to measure the DOM like we do for overflowing docs, but
+                -- thats quite involved...
+                isOverflowing =
+                    fqn |> FQN.toString |> String.length |> (\l -> l > 20)
             in
             header
-                [ class "perspective" ]
-                [ div [ class "namespace-slug" ] []
-                , h2 [] [ FQN.view fqn ]
-                , back
+                [ classList [ ( "perspective", True ), ( "is-overflowing", isOverflowing ) ] ]
+                [ UI.namespaceSlug
+                , h2 [ class "namespace" ] [ FQN.view fqn ]
                 ]
 
 

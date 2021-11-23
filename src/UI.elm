@@ -66,3 +66,8 @@ divider =
 charWidth : Int -> String
 charWidth numChars =
     String.fromInt numChars ++ "ch"
+
+
+namespaceSlug : Html msg
+namespaceSlug =
+    div [ class "namespace-slug" ] []
