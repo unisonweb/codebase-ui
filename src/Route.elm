@@ -202,12 +202,17 @@ toUrlString route =
                     else
                         "latest" :: "namespaces" :: NEL.toList (FQN.segments fqn)
 
-                ByNamespace (Absolute _) fqn ->
+                -- Currently the model supports Absolute URLs (aka Permalinks),
+                -- but we don't use it since Unison Share does not support any
+                -- history, meaning that everytime we deploy Unison Share, the
+                -- previous versions of the codebase are lost.
+                -- It's fully intended for this feature to be brought back
+                ByNamespace (Absolute hash) fqn ->
                     if includeNamespacesSuffix then
-                        "latest" :: "namespaces" :: NEL.toList (FQN.segments fqn) ++ [ namespaceSuffix ]
+                        Hash.toUrlString hash :: "namespaces" :: NEL.toList (FQN.segments fqn) ++ [ namespaceSuffix ]
 
                     else
-                        "latest" :: "namespaces" :: NEL.toList (FQN.segments fqn)
+                        Hash.toUrlString hash :: "namespaces" :: NEL.toList (FQN.segments fqn)
 
         path =
             case route of

@@ -175,7 +175,7 @@ fetchSubNamespaceListing perspective fqn =
 
 fetchNamespaceListing : Perspective -> Maybe FQN -> (Result Http.Error NamespaceListing -> msg) -> ApiRequest NamespaceListing msg
 fetchNamespaceListing perspective fqn toMsg =
-    Api.list (Perspective.toParams perspective) (Maybe.map FQN.toString fqn)
+    Api.list perspective (Maybe.map FQN.toString fqn)
         |> Api.toRequest (NamespaceListing.decode fqn) toMsg
 
 

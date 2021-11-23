@@ -7,7 +7,7 @@ import Browser.Navigation as Nav
 import Env exposing (Flags)
 import Html
 import Http
-import Perspective exposing (CodebasePerspectiveParam(..), Perspective, PerspectiveParams(..))
+import Perspective exposing (Perspective, PerspectiveParams)
 import Route exposing (Route)
 import Url exposing (Url)
 
@@ -63,8 +63,7 @@ init flags url navKey =
 
 fetchPerspective : PreEnv -> ApiRequest Perspective Msg
 fetchPerspective preEnv =
-    Api.list (ByCodebase Relative) (Just ".")
-        |> Api.toRequest (Perspective.decode preEnv.perspectiveParams) (FetchPerspectiveFinished preEnv)
+    Api.codebaseHash |> Api.toRequest (Perspective.decode preEnv.perspectiveParams) (FetchPerspectiveFinished preEnv)
 
 
 type Msg
