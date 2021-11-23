@@ -46,14 +46,18 @@ fqn perspective =
             d.fqn
 
 
+{-| Even when we have a Codebase hash, we always constructor Relative params.
+Absolute is currently not supported (until Unison Share includes historic
+codebase), though the model allows it.
+-}
 toParams : Perspective -> PerspectiveParams
 toParams perspective =
     case perspective of
-        Codebase hash ->
-            ByCodebase (Absolute hash)
+        Codebase _ ->
+            ByCodebase Relative
 
         Namespace d ->
-            ByNamespace (Absolute d.codebaseHash) d.fqn
+            ByNamespace Relative d.fqn
 
 
 fromParams : PerspectiveParams -> Maybe Perspective

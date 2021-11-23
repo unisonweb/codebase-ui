@@ -1,6 +1,7 @@
 module Api exposing
     ( ApiBasePath(..)
     , ApiRequest
+    , codebaseHash
     , errorToString
     , find
     , getDefinition
@@ -15,12 +16,7 @@ import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import Http
 import Json.Decode as Decode
-import Perspective
-    exposing
-        ( CodebasePerspectiveParam(..)
-        , Perspective(..)
-        , PerspectiveParams(..)
-        )
+import Perspective exposing (Perspective(..))
 import Regex
 import Syntax
 import Url.Builder exposing (QueryParameter, absolute, int, string)
@@ -34,13 +30,18 @@ type Endpoint
     = Endpoint (List String) (List QueryParameter)
 
 
-list : PerspectiveParams -> Maybe String -> Endpoint
-list perspectiveParams fqnOrHash =
+codebaseHash : Endpoint
+codebaseHash =
+    Endpoint [ "list" ] [ string "namespace" "." ]
+
+
+list : Perspective -> Maybe String -> Endpoint
+list perspective fqnOrHash =
     let
         namespace_ =
             Maybe.withDefault "." fqnOrHash
     in
-    Endpoint [ "list" ] (string "namespace" namespace_ :: perspectiveParamsToQueryParams perspectiveParams)
+    Endpoint [ "list" ] (string "namespace" namespace_ :: perspectiveToQueryParams perspective)
 
 
 namespace : Perspective -> FQN -> Endpoint
@@ -151,24 +152,8 @@ perspectiveToQueryParams perspective =
         Codebase h ->
             [ rootBranch h ]
 
-        Namespace { codebaseHash, fqn } ->
-            [ rootBranch codebaseHash, relativeTo fqn ]
-
-
-perspectiveParamsToQueryParams : PerspectiveParams -> List QueryParameter
-perspectiveParamsToQueryParams perspectiveParams =
-    case perspectiveParams of
-        ByCodebase Relative ->
-            []
-
-        ByCodebase (Absolute h) ->
-            [ rootBranch h ]
-
-        ByNamespace Relative fqn ->
-            [ relativeTo fqn ]
-
-        ByNamespace (Absolute h) fqn ->
-            [ rootBranch h, relativeTo fqn ]
+        Namespace d ->
+            [ rootBranch d.codebaseHash, relativeTo d.fqn ]
 
 
 rootBranch : Hash -> QueryParameter
