@@ -80,25 +80,27 @@ const unisonShareCfg = {
   },
 };
 
-const ucmCfg = {
+const unisonLocalCfg = {
   ...shared,
 
-  entry: "./src/ucm.js",
+  entry: "./src/unisonLocal.js",
 
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "./static/favicon.ico",
-      template: "./src/ucm.ejs",
+      template: "./src/unisonLocal.ejs",
       inject: "body",
       publicPath: "/static/",
       base: false, // set dynamically by grabbing the 2 first path segments in the url.
-      filename: path.resolve(__dirname, "dist/ucm/index.html"),
+      filename: path.resolve(__dirname, "dist/unisonLocal/index.html"),
     }),
 
     new FileManagerPlugin({
       events: {
         onEnd: {
-          archive: [{ source: "dist/ucm", destination: "dist/ucm.zip" }],
+          archive: [
+            { source: "dist/unisonLocal", destination: "dist/unisonLocal.zip" },
+          ],
         },
       },
     }),
@@ -106,9 +108,9 @@ const ucmCfg = {
 
   output: {
     filename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "dist/ucm/static"),
+    path: path.resolve(__dirname, "dist/unisonLocal/static"),
     clean: true,
   },
 };
 
-module.exports = [unisonShareCfg, ucmCfg];
+module.exports = [unisonShareCfg, unisonLocalCfg];

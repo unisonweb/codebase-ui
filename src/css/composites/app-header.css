@@ -51,8 +51,8 @@
   color: var(--color-app-header-context-unison-share-fg);
 }
 
-#app-header .app-title .ucm {
-  color: var(--color-app-header-context-ucm-fg);
+#app-header .app-title .unison-local {
+  color: var(--color-app-header-context-unison-local-fg);
 }
 
 #app-header .right {

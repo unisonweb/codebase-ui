@@ -1,12 +1,8 @@
 module Env exposing (..)
 
 import Api exposing (ApiBasePath(..))
+import Env.AppContext as AppContext exposing (AppContext)
 import Perspective exposing (Perspective)
-
-
-type AppContext
-    = UnisonShare
-    | Ucm
 
 
 type OperatingSystem
@@ -40,48 +36,9 @@ init flags perspective =
     { operatingSystem = operatingSystemFromString flags.operatingSystem
     , basePath = flags.basePath
     , apiBasePath = ApiBasePath flags.apiBasePath
-    , appContext = appContextFromString flags.appContext
+    , appContext = AppContext.fromString flags.appContext
     , perspective = perspective
     }
-
-
-appContextFromString : String -> AppContext
-appContextFromString rawContext =
-    if rawContext == "UnisonShare" then
-        UnisonShare
-
-    else
-        Ucm
-
-
-appContextToString : AppContext -> String
-appContextToString appContext =
-    case appContext of
-        UnisonShare ->
-            "Unison Share"
-
-        Ucm ->
-            "Unison Local"
-
-
-isUnisonShare : AppContext -> Bool
-isUnisonShare appContext =
-    case appContext of
-        UnisonShare ->
-            True
-
-        Ucm ->
-            False
-
-
-isUnisonLocal : AppContext -> Bool
-isUnisonLocal appContext =
-    case appContext of
-        UnisonShare ->
-            False
-
-        Ucm ->
-            True
 
 
 operatingSystemFromString : String -> OperatingSystem

@@ -5,6 +5,7 @@ import Definition.Doc as Doc
 import Definition.Readme as Readme
 import Definition.Reference exposing (Reference)
 import Env exposing (Env)
+import Env.AppContext exposing (AppContext(..))
 import FullyQualifiedName as FQN exposing (FQN)
 import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, id, rel, target)
@@ -109,7 +110,7 @@ viewEmptyState title description cta =
         ]
 
 
-viewEmptyStateCodebase : Env.AppContext -> Html Msg
+viewEmptyStateCodebase : AppContext -> Html Msg
 viewEmptyStateCodebase appContext =
     let
         button =
@@ -118,9 +119,9 @@ viewEmptyStateCodebase appContext =
                 |> Button.medium
     in
     case appContext of
-        Env.Ucm ->
+        UnisonLocal ->
             viewEmptyState
-                (span [ class "ucm" ] [ text "Your ", span [ class "context" ] [ text "Local" ], text " Unison Codebase" ])
+                (span [ class "unison-local" ] [ text "Your ", span [ class "context" ] [ text "Local" ], text " Unison Codebase" ])
                 [ p [] [ text "Browse, search, read docs, open definitions, and explore your local codebase." ]
                 , p []
                     [ text "Check out "
@@ -130,7 +131,7 @@ viewEmptyStateCodebase appContext =
                 ]
                 button
 
-        Env.UnisonShare ->
+        UnisonShare ->
             viewEmptyState
                 (span [ class "unison-share" ] [ text "Unison ", span [ class "context" ] [ text "Share" ] ])
                 [ p [] [ text "Explore to discover and share Unison libraries, documentation, types, and terms." ] ]
