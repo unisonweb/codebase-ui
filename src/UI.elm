@@ -1,6 +1,6 @@
 module UI exposing (..)
 
-import Html exposing (Attribute, Html, code, div, hr, pre, span, text)
+import Html exposing (Attribute, Html, code, div, hr, pre, span, strong, text)
 import Html.Attributes exposing (class)
 import Html.Events exposing (onClick)
 import UI.Icon as Icon
@@ -9,6 +9,11 @@ import UI.Icon as Icon
 codeBlock : List (Attribute msg) -> Html msg -> Html msg
 codeBlock attrs code_ =
     pre attrs [ code [] [ code_ ] ]
+
+
+bold : String -> Html msg
+bold text_ =
+    strong [] [ text text_ ]
 
 
 inlineCode : List (Attribute msg) -> Html msg -> Html msg
@@ -60,7 +65,7 @@ emptyStateMessage message =
 
 divider : Html msg
 divider =
-    hr [] []
+    hr [ class "divider" ] []
 
 
 charWidth : Int -> String

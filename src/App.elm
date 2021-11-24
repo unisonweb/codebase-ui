@@ -9,7 +9,7 @@ import Env exposing (AppContext(..), Env, OperatingSystem(..))
 import Finder
 import Finder.SearchOptions as SearchOptions
 import FullyQualifiedName as FQN exposing (FQN)
-import Html exposing (Html, a, div, h1, h2, h3, header, nav, p, section, span, strong, text)
+import Html exposing (Html, a, div, h1, h2, h3, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import Http
@@ -26,6 +26,7 @@ import UI.AppHeader as AppHeader
 import UI.Banner as Banner
 import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
+import UI.CopyField as CopyField
 import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.Sidebar as Sidebar
@@ -46,6 +47,7 @@ type Modal
     | HelpModal
     | ReportBugModal
     | PublishModal
+    | DownloadModal FQN
 
 
 type alias Model =
@@ -498,8 +500,8 @@ viewAppHeader model =
         }
 
 
-viewPerspective : Env -> Html Msg
-viewPerspective env =
+viewSidebarHeader : Env -> Html Msg
+viewSidebarHeader env =
     case env.perspective of
         Codebase _ ->
             UI.nothing
@@ -512,11 +514,27 @@ viewPerspective env =
                 -- thats quite involved...
                 isOverflowing =
                     fqn |> FQN.toString |> String.length |> (\l -> l > 20)
+
+                download =
+                    case env.appContext of
+                        UnisonShare ->
+                            Button.iconThenLabel (ShowModal (DownloadModal fqn)) Icon.download "Download latest version"
+                                |> Button.small
+                                |> Button.view
+                                |> List.singleton
+                                |> Sidebar.headerItem []
+
+                        Ucm ->
+                            UI.nothing
             in
-            header
-                [ classList [ ( "perspective", True ), ( "is-overflowing", isOverflowing ) ] ]
-                [ UI.namespaceSlug
-                , h2 [ class "namespace" ] [ FQN.view fqn ]
+            Sidebar.header
+                [ Sidebar.headerItem
+                    [ classList [ ( "is-overflowing", isOverflowing ) ] ]
+                    [ UI.namespaceSlug
+                    , h2 [ class "namespace" ] [ FQN.view fqn ]
+                    ]
+                , download
+                , UI.divider
                 ]
 
 
@@ -587,7 +605,7 @@ viewMainSidebar model =
     Sidebar.view
         [ viewMainSidebarCollapseButton model
         , div [ class "expanded-content" ]
-            [ viewPerspective model.env
+            [ viewSidebarHeader model.env
             , div [ class "sidebar-scroll-area" ]
                 [ sidebarContent
                 , Sidebar.section
@@ -619,6 +637,33 @@ viewMainSidebar model =
                 |> Tooltip.view
             ]
         ]
+
+
+viewDownloadModal : FQN -> Html Msg
+viewDownloadModal fqn =
+    let
+        prettyName =
+            FQN.toString fqn
+
+        unqualified =
+            FQN.unqualifiedName fqn
+
+        pullCommand =
+            "pull git@github.com:unisonweb/share.git:." ++ prettyName ++ " ." ++ unqualified
+
+        content =
+            Modal.Content
+                (section
+                    []
+                    [ p [] [ text "Download ", UI.bold prettyName, text " by pulling the namespace from Unison Share into a namespace in your local codebase:" ]
+                    , CopyField.copyField (\_ -> CloseModal) pullCommand |> CopyField.withPrefix ".>" |> CopyField.view
+                    , div [ class "hint" ] [ text "Copy and paste this command into UCM." ]
+                    ]
+                )
+    in
+    Modal.modal "download-modal" CloseModal content
+        |> Modal.withHeader ("Download " ++ prettyName)
+        |> Modal.view
 
 
 viewHelpModal : OperatingSystem -> KeyboardShortcut.Model -> Html Msg
@@ -769,6 +814,9 @@ viewModal model =
 
         ReportBugModal ->
             viewReportBugModal model.env.appContext
+
+        DownloadModal fqn ->
+            viewDownloadModal fqn
 
 
 viewAppLoading : AppContext -> Html msg

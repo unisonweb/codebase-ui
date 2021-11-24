@@ -1,0 +1,75 @@
+.copy-field {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  height: 2.25rem;
+  font-family: var(--font-monospace);
+
+  --height-without-border: calc(2.25rem - 2px);
+}
+
+.copy-field .copy-field-field {
+  position: relative;
+  display: flex;
+  flex-direction: row;
+  background: var(--color-gray-lighten-60);
+  border: 1px solid var(--color-gray-lighten-40);
+  border-radius: var(--border-radius-base) 0 0 var(--border-radius-base);
+  flex-grow: 1;
+}
+
+.copy-field .copy-field-field:focus-within {
+  box-shadow: 0 0 0 2px var(--color-blue-3);
+  border-color: var(--color-blue-1);
+  border-right: 1px solid var(--color-blue-1);
+  /* z-index is to help cover the left border of the button when focused */
+  z-index: 2;
+}
+
+.copy-field .copy-field-prefix {
+  height: var(--height-without-border);
+  padding: 0 0.5ch 0 0.5rem;
+  font-size: var(--font-size-medium);
+  align-items: center;
+  display: flex;
+  color: var(--color-gray-lighten-20);
+}
+
+.copy-field .copy-field-input {
+  flex-grow: 1;
+}
+
+.copy-field input {
+  width: 100%;
+  font-family: var(--font-monospace);
+  height: var(--height-without-border);
+  font-size: var(--font-size-medium);
+  font-weight: 600;
+  background: transparent;
+}
+
+.copy-field input:focus {
+  outline: none;
+}
+
+/* TODO: Should this button be more aligned with other buttons in the app? */
+.copy-field button {
+  width: 2.25rem;
+  height: 2.25rem;
+  border: 1px solid var(--color-gray-lighten-40);
+  border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
+  /* move 1 px left such that borders of field and button overlap
+   * (visible when clicking the button) */
+  margin-left: -1px;
+  position: relative;
+}
+
+.copy-field button:hover {
+  border-color: var(--color-gray-lighten-30);
+  /* z-index is to show the buttons left border on hover */
+  z-index: 1;
+}
+
+.copy-field button .icon {
+  font-size: 2.25rem;
+}
