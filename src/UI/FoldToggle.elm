@@ -63,9 +63,19 @@ isOpen isOpen_ toggle =
     { toggle | position = position }
 
 
+isClosed : Bool -> FoldToggle msg -> FoldToggle msg
+isClosed isClosed_ toggle =
+    isOpen (not isClosed_) toggle
+
+
 open : FoldToggle msg -> FoldToggle msg
 open toggle =
     withPosition Opened toggle
+
+
+close : FoldToggle msg -> FoldToggle msg
+close toggle =
+    withPosition Closed toggle
 
 
 isDisabled : Bool -> FoldToggle msg -> FoldToggle msg

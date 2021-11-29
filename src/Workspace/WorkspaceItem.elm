@@ -465,6 +465,9 @@ viewSource zoom onSourceToggleClick sourceConfig item =
         viewToggableSource foldToggle renderedSource =
             div [ class "definition-source" ]
                 [ FoldToggle.view foldToggle, renderedSource ]
+
+        isBuiltin_ =
+            isBuiltinItem item
     in
     case item of
         TermItem (Term _ _ detail) ->
@@ -480,24 +483,31 @@ viewSource zoom onSourceToggleClick sourceConfig item =
                             ( Source.numTermSignatureLines detail.source
                             , Source.viewNamedTermSignature sourceConfig detail.info.name (Term.termSignature detail.source)
                             )
+
+                foldToggle =
+                    if isBuiltin_ then
+                        FoldToggle.disabled |> FoldToggle.close
+
+                    else
+                        FoldToggle.foldToggle onSourceToggleClick |> FoldToggle.isOpen (zoom == Near)
             in
             ( numLines, source )
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.foldToggle onSourceToggleClick |> FoldToggle.isOpen (zoom == Near)))
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource foldToggle)
 
         TypeItem (Type _ _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource sourceConfig)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.open))
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.isClosed isBuiltin_))
 
         DataConstructorItem (DataConstructor _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource sourceConfig)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.open))
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.isClosed isBuiltin_))
 
         AbilityConstructorItem (AbilityConstructor _ detail) ->
             ( detail.source, detail.source )
                 |> Tuple.mapBoth Source.numTypeLines (Source.viewTypeSource sourceConfig)
-                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.open))
+                |> Tuple.mapBoth viewLineGutter (viewToggableSource (FoldToggle.disabled |> FoldToggle.isClosed isBuiltin_))
 
 
 viewItem : Reference -> ItemData -> Bool -> Html Msg
