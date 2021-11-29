@@ -5,6 +5,7 @@ import App
 import Browser
 import Browser.Navigation as Nav
 import Env exposing (Flags)
+import Env.AppContext as AppContext
 import Html
 import Http
 import Perspective exposing (Perspective, PerspectiveParams)
@@ -121,7 +122,7 @@ view : Model -> Browser.Document Msg
 view model =
     let
         appContext flags =
-            Env.appContextFromString flags.appContext
+            AppContext.fromString flags.appContext
     in
     case model of
         Initializing preEnv ->

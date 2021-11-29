@@ -1,7 +1,7 @@
 import "./init";
 import detectOs from "./detectOs";
 import preventDefaultGlobalKeyboardEvents from "./preventDefaultGlobalKeyboardEvents";
-import { Elm } from "./Ucm.elm";
+import { Elm } from "./UnisonLocal.elm";
 
 const basePath = new URL(document.baseURI).pathname;
 
@@ -20,10 +20,10 @@ const flags = {
   operatingSystem: detectOs(window.navigator),
   basePath,
   apiBasePath,
-  appContext: "Ucm",
+  appContext: "UnisonLocal",
 };
 
 preventDefaultGlobalKeyboardEvents();
 
-// The main entry point for the `ucm` target of the Codebase UI.
-Elm.Ucm.init({ flags });
+// The main entry point for the `UnisonLocal` target of the Codebase UI.
+Elm.UnisonLocal.init({ flags });

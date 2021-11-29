@@ -4,7 +4,7 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const API_URL = process.env.API_URL || "127.0.0.1:8080";
 
 module.exports = {
-  entry: "./src/ucm.js",
+  entry: "./src/unisonLocal.js",
 
   module: {
     rules: [
@@ -42,7 +42,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "./static/favicon.ico",
-      template: "./src/ucm.ejs",
+      template: "./src/unisonLocal.ejs",
       inject: "body",
       publicPath: "/",
       base: "/",

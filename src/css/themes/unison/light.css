@@ -22,7 +22,7 @@
   --color-app-header-subtle-fg: var(--color-gray-lighten-20);
   --color-app-header-subtle-fg-em: var(--color-gray-lighten-50);
   --color-app-header-context-unison-share-fg: var(--color-purple-4);
-  --color-app-header-context-ucm-fg: var(--color-pink-3);
+  --color-app-header-context-unison-local-fg: var(--color-pink-3);
   --color-app-header-border: var(--color-gray-base);
 
   --color-keyboard-shortcut-key-fg: var(--color-gray-base);

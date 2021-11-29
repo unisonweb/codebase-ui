@@ -5,7 +5,8 @@ import Browser
 import Browser.Navigation as Nav
 import CodebaseTree
 import Definition.Reference exposing (Reference)
-import Env exposing (AppContext(..), Env, OperatingSystem(..))
+import Env exposing (Env, OperatingSystem(..))
+import Env.AppContext as AppContext exposing (AppContext(..))
 import Finder
 import Finder.SearchOptions as SearchOptions
 import FullyQualifiedName as FQN exposing (FQN)
@@ -451,10 +452,10 @@ appTitle clickMsg appContext =
 
         content =
             case appContext of
-                Env.Ucm ->
-                    h1 [] [ text "Unison", span [ class "context ucm" ] [ text "Local" ] ]
+                UnisonLocal ->
+                    h1 [] [ text "Unison", span [ class "context unison-local" ] [ text "Local" ] ]
 
-                Env.UnisonShare ->
+                UnisonShare ->
                     h1 [] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ]
     in
     appTitle_ content
@@ -479,7 +480,7 @@ viewAppHeader model =
 
         banner =
             case appContext of
-                Ucm ->
+                UnisonLocal ->
                     Nothing
 
                 UnisonShare ->
@@ -544,7 +545,7 @@ subMenu appContext =
     , ( "Community", ExternalHref "https://unisonweb.org/community" )
     , ( "Report a bug", OnClick (ShowModal ReportBugModal) )
     ]
-        ++ (if Env.isUnisonLocal appContext then
+        ++ (if AppContext.isUnisonLocal appContext then
                 [ ( "Unison Share", ExternalHref "https://share.unison-lang.org" ) ]
 
             else
@@ -578,7 +579,7 @@ viewMainSidebar model =
             Perspective.toNamespacePerspective perspective >> ChangePerspective
 
         sidebarContent =
-            if Perspective.isCodebasePerspective perspective && Env.isUnisonShare appContext then
+            if Perspective.isCodebasePerspective perspective && AppContext.isUnisonShare appContext then
                 UnisonShare.SidebarContent.view changePerspectiveMsg
 
             else
@@ -732,7 +733,7 @@ viewReportBugModal appContext =
                         , div [ class "action" ]
                             [ githubLinkButton "unisonweb/codebase-ui"
                             , text "for reports on"
-                            , strong [] [ text (Env.appContextToString appContext) ]
+                            , strong [] [ text (AppContext.toString appContext) ]
                             , span [ class "subtle" ] [ text "(this UI)" ]
                             ]
                         , div [ class "action" ]
@@ -784,7 +785,7 @@ viewAppError : AppContext -> Http.Error -> Html msg
 viewAppError appContext error =
     let
         context =
-            Env.appContextToString appContext
+            AppContext.toString appContext
     in
     div [ id "app" ]
         [ AppHeader.view (AppHeader.appHeader (appTitle Nothing appContext))
@@ -801,12 +802,7 @@ view : Model -> Browser.Document Msg
 view model =
     let
         title_ =
-            case model.env.appContext of
-                UnisonShare ->
-                    "Unison Share"
-
-                Ucm ->
-                    "Unison Local"
+            AppContext.toString model.env.appContext
 
         page =
             case model.route of
