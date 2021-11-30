@@ -137,10 +137,20 @@ update msg ({ env } as model) =
             ( model, Cmd.none )
 
         UrlChanged url ->
-            -- URL changes happen when setting focus on a definitions.
-            -- Currently, the URL change is a result of that as oppose to focus
-            -- being a result of a URL change
-            ( { model | route = Route.fromUrl env.basePath url }, Cmd.none )
+            let
+                route =
+                    Route.fromUrl env.basePath url
+            in
+            case route of
+                Route.Definition _ ref ->
+                    let
+                        ( workspace, cmd ) =
+                            Workspace.open env model.workspace ref
+                    in
+                    ( { model | route = route, workspace = workspace }, Cmd.map WorkspaceMsg cmd )
+
+                _ ->
+                    ( { model | route = route }, Cmd.none )
 
         ChangePerspective perspective ->
             replacePerspective model perspective
@@ -168,7 +178,7 @@ update msg ({ env } as model) =
             keydown model event
 
         OpenDefinition ref ->
-            openDefinition model ref
+            navigateToDefinition model ref
 
         ShowModal modal ->
             ( { model | modal = modal }, Cmd.none )
@@ -203,7 +213,7 @@ update msg ({ env } as model) =
             in
             case outMsg of
                 PerspectiveLanding.OpenDefinition ref ->
-                    openDefinition model2 ref
+                    navigateToDefinition model2 ref
 
                 PerspectiveLanding.ShowFinderRequest ->
                     showFinder model2 Nothing
@@ -230,7 +240,7 @@ update msg ({ env } as model) =
                                 model4 =
                                     { model2 | sidebarToggled = False }
                             in
-                            openDefinition model4 ref
+                            navigateToDefinition model4 ref
 
                         CodebaseTree.ChangePerspectiveToNamespace fqn ->
                             fqn
@@ -254,7 +264,7 @@ update msg ({ env } as model) =
                             ( { model | modal = NoModal }, Cmd.none )
 
                         Finder.OpenDefinition ref ->
-                            openDefinition { model | modal = NoModal } ref
+                            navigateToDefinition { model | modal = NoModal } ref
 
                 _ ->
                     ( model, Cmd.none )
@@ -271,19 +281,9 @@ update msg ({ env } as model) =
 -- UPDATE HELPERS
 
 
-openDefinition : Model -> Reference -> ( Model, Cmd Msg )
-openDefinition model ref =
-    let
-        ( workspace, wCmd, outMsg ) =
-            Workspace.open model.env model.workspace ref
-
-        model2 =
-            { model | workspace = workspace }
-
-        ( model3, cmd ) =
-            handleWorkspaceOutMsg model2 outMsg
-    in
-    ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
+navigateToDefinition : Model -> Reference -> ( Model, Cmd Msg )
+navigateToDefinition model ref =
+    ( model, Route.navigateToDefinition model.navKey model.route ref )
 
 
 replacePerspective : Model -> Perspective -> ( Model, Cmd Msg )
@@ -336,7 +336,7 @@ handleWorkspaceOutMsg model out =
             showFinder model withinNamespace
 
         Workspace.Focused ref ->
-            ( model, Route.navigateToByReference model.navKey model.route ref )
+            ( model, Route.navigateToDefinition model.navKey model.route ref )
 
         Workspace.Emptied ->
             ( model, Route.navigateToCurrentPerspective model.navKey model.route )
