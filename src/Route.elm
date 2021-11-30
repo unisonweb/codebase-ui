@@ -2,8 +2,8 @@ module Route exposing
     ( Route(..)
     , fromUrl
     , navigate
-    , navigateToByReference
     , navigateToCurrentPerspective
+    , navigateToDefinition
     , navigateToLatestCodebase
     , navigateToPerspective
     , perspectiveParams
@@ -263,8 +263,8 @@ navigateToLatestCodebase navKey =
     navigateToPerspective navKey (ByCodebase Relative)
 
 
-navigateToByReference : Nav.Key -> Route -> Reference -> Cmd msg
-navigateToByReference navKey currentRoute reference =
+navigateToDefinition : Nav.Key -> Route -> Reference -> Cmd msg
+navigateToDefinition navKey currentRoute reference =
     navigate navKey (toDefinition currentRoute reference)
 
 

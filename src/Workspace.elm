@@ -27,7 +27,7 @@ import Perspective exposing (Perspective)
 import Task
 import UI.Button as Button
 import UI.Icon as Icon
-import Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem(..))
+import Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem)
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 
 
@@ -55,7 +55,7 @@ init env mRef =
 
         Just ref ->
             let
-                ( m, c, _ ) =
+                ( m, c ) =
                     open env model ref
             in
             ( m, c )
@@ -116,7 +116,7 @@ update env msg ({ workspaceItems } as model) =
             in
             ( { model | workspaceItems = nextWorkspaceItems }
             , cmd
-            , openDefinitionsFocusToOutMsg nextWorkspaceItems
+            , None
             )
 
         IsDocCropped ref res ->
@@ -157,7 +157,7 @@ update env msg ({ workspaceItems } as model) =
         WorkspaceItemMsg wiMsg ->
             case wiMsg of
                 WorkspaceItem.OpenReference relativeToRef ref ->
-                    openItem env model (Just relativeToRef) ref
+                    openReference env model relativeToRef ref
 
                 WorkspaceItem.Close ref ->
                     let
@@ -218,11 +218,6 @@ type alias WithWorkspaceItems m =
     { m | workspaceItems : WorkspaceItems }
 
 
-open : Env -> WithWorkspaceItems m -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
-open env model ref =
-    openItem env model Nothing ref
-
-
 replaceWorkspaceItemReferencesWithHashOnly : Model -> Model
 replaceWorkspaceItemReferencesWithHashOnly model =
     let
@@ -232,7 +227,29 @@ replaceWorkspaceItemReferencesWithHashOnly model =
     { model | workspaceItems = workspaceItems }
 
 
-openItem : Env -> WithWorkspaceItems m -> Maybe Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
+open : Env -> WithWorkspaceItems m -> Reference -> ( WithWorkspaceItems m, Cmd Msg )
+open env model ref =
+    openItem env model Nothing ref
+
+
+{-| openReference opens a definition relative to another definition. This is
+done within Workspace, as opposed to from the outside via a URL change. This
+function returns a Focused command for the newly opened reference and as such
+changes the URL.
+-}
+openReference : Env -> WithWorkspaceItems m -> Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
+openReference env model relativeToRef ref =
+    let
+        ( newModel, cmd ) =
+            openItem env model (Just relativeToRef) ref
+
+        out =
+            openDefinitionsFocusToOutMsg newModel.workspaceItems
+    in
+    ( newModel, cmd, out )
+
+
+openItem : Env -> WithWorkspaceItems m -> Maybe Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg )
 openItem env ({ workspaceItems } as model) relativeToRef ref =
     -- We don't want to refetch or replace any already open definitions, but we
     -- do want to focus and scroll to it
@@ -243,7 +260,6 @@ openItem env ({ workspaceItems } as model) relativeToRef ref =
         in
         ( { model | workspaceItems = nextWorkspaceItems }
         , scrollToDefinition ref
-        , openDefinitionsFocusToOutMsg nextWorkspaceItems
         )
 
     else
@@ -261,24 +277,14 @@ openItem env ({ workspaceItems } as model) relativeToRef ref =
         in
         ( { model | workspaceItems = nextWorkspaceItems }
         , Cmd.batch [ Api.perform env.apiBasePath (fetchDefinition env.perspective ref), scrollToDefinition ref ]
-        , openDefinitionsFocusToOutMsg nextWorkspaceItems
         )
 
 
 openDefinitionsFocusToOutMsg : WorkspaceItems -> OutMsg
 openDefinitionsFocusToOutMsg openDefs =
-    let
-        toFocusedOut workspaceItem =
-            case workspaceItem of
-                Success ref _ ->
-                    Focused ref
-
-                _ ->
-                    None
-    in
     openDefs
-        |> WorkspaceItems.focus
-        |> Maybe.map toFocusedOut
+        |> WorkspaceItems.focusedReference
+        |> Maybe.map Focused
         |> Maybe.withDefault Emptied
 
 
