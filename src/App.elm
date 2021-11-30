@@ -525,7 +525,7 @@ viewSidebarHeader env =
                                 |> List.singleton
                                 |> Sidebar.headerItem []
 
-                        Ucm ->
+                        UnisonLocal ->
                             UI.nothing
             in
             Sidebar.header
