@@ -1,0 +1,12 @@
+#download-modal {
+  width: 32rem;
+}
+
+#download-modal p {
+  margin-bottom: 1.5rem;
+}
+
+#download-modal .hint {
+  margin-top: 0.5rem;
+  padding-left: calc(var(--border-radius-base) / 2);
+}

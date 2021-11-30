@@ -1,19 +1,29 @@
 module UI.Sidebar exposing (..)
 
-import Html exposing (Html, a, aside, h3, label, text)
+import Html exposing (Attribute, Html, a, aside, div, h3, label, text)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
+
+
+header : List (Html msg) -> Html msg
+header content =
+    Html.header [ class "sidebar-header" ] content
+
+
+headerItem : List (Attribute msg) -> List (Html msg) -> Html msg
+headerItem attrs content =
+    div (attrs ++ [ class "sidebar-header-item" ]) content
 
 
 section : String -> List (Html msg) -> Html msg
 section label content =
     Html.section [ class "sidebar-section" ]
-        (header label :: content)
+        (sectionTitle label :: content)
 
 
-header : String -> Html msg
-header label =
-    h3 [ class "sidebar-header" ] [ text label ]
+sectionTitle : String -> Html msg
+sectionTitle label =
+    h3 [ class "sidebar-section-title" ] [ text label ]
 
 
 item : msg -> String -> Html msg

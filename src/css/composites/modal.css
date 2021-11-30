@@ -69,3 +69,8 @@
 .modal:focus {
   outline: none;
 }
+
+.hint {
+  font-size: var(--font-size-small);
+  color: var(--color-modal-subtle-fg-em);
+}

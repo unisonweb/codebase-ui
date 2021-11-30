@@ -41,7 +41,7 @@ p {
   margin-bottom: 1em;
 }
 
-hr {
+.divider {
   background: var(--color-main-divider);
   border: 0;
   margin: 1.5rem 0;
