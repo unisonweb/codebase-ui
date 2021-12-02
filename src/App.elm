@@ -140,20 +140,32 @@ update msg ({ env } as model) =
             let
                 route =
                     Route.fromUrl env.basePath url
+
+                model2 =
+                    { model | route = route }
+
+                newEnv params =
+                    { env | perspective = Perspective.nextFromParams env.perspective params }
             in
             case route of
-                Route.Definition _ ref ->
+                Route.Definition params ref ->
                     let
                         ( workspace, cmd ) =
-                            Workspace.open env model.workspace ref
-                    in
-                    ( { model | route = route, workspace = workspace }, Cmd.map WorkspaceMsg cmd )
+                            Workspace.open (newEnv params) model.workspace ref
 
-                _ ->
-                    ( { model | route = route }, Cmd.none )
+                        model3 =
+                            { model2 | workspace = workspace, env = newEnv params }
+
+                        ( model4, fetchPerspectiveCmd ) =
+                            fetchPerspective model3
+                    in
+                    ( model4, Cmd.batch [ Cmd.map WorkspaceMsg cmd, fetchPerspectiveCmd ] )
+
+                Route.Perspective params ->
+                    fetchPerspective { model2 | env = newEnv params }
 
         ChangePerspective perspective ->
-            replacePerspective model perspective
+            navigateToPerspective model perspective
 
         FetchPerspectiveNamespaceDetailsFinished fqn details ->
             let
@@ -245,7 +257,7 @@ update msg ({ env } as model) =
                         CodebaseTree.ChangePerspectiveToNamespace fqn ->
                             fqn
                                 |> Perspective.toNamespacePerspective model.env.perspective
-                                |> replacePerspective model
+                                |> navigateToPerspective model
             in
             ( model3, Cmd.batch [ cmd, Cmd.map CodebaseTreeMsg cCmd ] )
 
@@ -286,15 +298,9 @@ navigateToDefinition model ref =
     ( model, Route.navigateToDefinition model.navKey model.route ref )
 
 
-replacePerspective : Model -> Perspective -> ( Model, Cmd Msg )
-replacePerspective ({ env } as model) perspective =
+navigateToPerspective : Model -> Perspective -> ( Model, Cmd Msg )
+navigateToPerspective model perspective =
     let
-        newEnv =
-            { env | perspective = perspective }
-
-        ( codebaseTree, codebaseTreeCmd ) =
-            CodebaseTree.init newEnv
-
         -- Update all open references to be hash based to ensure that we can
         -- refresh the page and fetch them appropriately even if they are
         -- outside of the current perspective
@@ -310,20 +316,32 @@ replacePerspective ({ env } as model) perspective =
 
         changeRouteCmd =
             Route.replacePerspective model.navKey (Perspective.toParams perspective) focusedReferenceRoute
+    in
+    ( { model | workspace = workspace }, changeRouteCmd )
+
+
+fetchPerspective : Model -> ( Model, Cmd Msg )
+fetchPerspective ({ env } as model) =
+    let
+        ( codebaseTree, codebaseTreeCmd ) =
+            CodebaseTree.init env
 
         fetchNamespaceDetailsCmd =
-            perspective
+            env.perspective
                 |> fetchNamespaceDetails
                 |> Maybe.map (Api.perform env.apiBasePath)
                 |> Maybe.withDefault Cmd.none
     in
-    ( { model | env = newEnv, codebaseTree = codebaseTree, workspace = workspace }
-    , Cmd.batch
-        [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
-        , changeRouteCmd
-        , fetchNamespaceDetailsCmd
-        ]
-    )
+    if Perspective.needsFetching env.perspective then
+        ( { model | codebaseTree = codebaseTree }
+        , Cmd.batch
+            [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
+            , fetchNamespaceDetailsCmd
+            ]
+        )
+
+    else
+        ( model, Cmd.none )
 
 
 handleWorkspaceOutMsg : Model -> Workspace.OutMsg -> ( Model, Cmd Msg )
@@ -344,7 +362,7 @@ handleWorkspaceOutMsg model out =
         Workspace.ChangePerspectiveToNamespace fqn ->
             fqn
                 |> Perspective.toNamespacePerspective model.env.perspective
-                |> replacePerspective model
+                |> navigateToPerspective model
 
 
 keydown : Model -> KeyboardEvent -> ( Model, Cmd Msg )

@@ -132,10 +132,10 @@ reference item =
 toHashReference : WorkspaceItem -> WorkspaceItem
 toHashReference workspaceItem =
     let
-        toHashOnly hash hq =
+        toHashOnly hash_ hq =
             case hq of
                 HQ.NameOnly _ ->
-                    HQ.HashOnly hash
+                    HQ.HashOnly hash_
 
                 HQ.HashOnly h ->
                     HQ.HashOnly h
@@ -252,6 +252,26 @@ hasDoc item =
 
         _ ->
             False
+
+
+{-| Attempt to get the Hash of a WorkspaceItem. First by checking if the
+Reference includes the Hash, secondly by checking the item data itself.
+-}
+hash : WorkspaceItem -> Maybe Hash
+hash wItem =
+    let
+        itemHash_ =
+            case wItem of
+                Success _ d ->
+                    Just (itemHash d.item)
+
+                _ ->
+                    Nothing
+    in
+    wItem
+        |> reference
+        |> Reference.hash
+        |> MaybeE.orElse itemHash_
 
 
 itemHash : Item -> Hash
@@ -387,21 +407,21 @@ viewInfoItems hash_ info =
         formattedHash =
             hash_ |> Hash.toShortString |> Hash.stripHashPrefix
 
-        hash =
+        hashTooltip =
             Tooltip.tooltip (viewInfoItem Icon.hash formattedHash) (Tooltip.Text (Hash.toString hash_))
                 |> Tooltip.withArrow Tooltip.Start
                 |> Tooltip.view
     in
-    div [ class "info-items" ] [ hash, namespace, otherNames ]
+    div [ class "info-items" ] [ hashTooltip, namespace, otherNames ]
 
 
 viewInfo : Zoom -> Msg -> Hash -> Info -> Category -> Html Msg
-viewInfo zoom onClick_ hash info category =
+viewInfo zoom onClick_ hash_ info category =
     div [ class "info" ]
         [ FoldToggle.foldToggle onClick_ |> FoldToggle.isOpen (zoom /= Far) |> FoldToggle.view
         , div [ class "category-icon" ] [ Icon.view (Category.icon category) ]
         , h3 [ class "name" ] [ FQN.view info.name ]
-        , viewInfoItems hash info
+        , viewInfoItems hash_ info
         ]
 
 

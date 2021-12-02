@@ -1,9 +1,11 @@
 module HashQualified exposing
     ( HashQualified(..)
+    , equals
     , fromString
     , fromUrlString
     , hash
     , name
+    , same
     , toString
     , toUrlString
     , urlParser
@@ -75,6 +77,54 @@ urlParser =
 
 
 -- HELPERS
+
+
+equals : HashQualified -> HashQualified -> Bool
+equals a b =
+    case ( a, b ) of
+        ( NameOnly aFqn, NameOnly bFqn ) ->
+            FQN.equals aFqn bFqn
+
+        ( HashOnly aH, HashOnly bH ) ->
+            Hash.equals aH bH
+
+        ( HashQualified aFqn aH, HashQualified bFqn bH ) ->
+            FQN.equals aFqn bFqn && Hash.equals aH bH
+
+        _ ->
+            False
+
+
+{-| Like `equals`, but compares deeper such that a HashQualified with the same
+Hash as a HashOnly are considered the same, and HashQualified with the same FQN
+as a NameOnly are considered the same.
+-}
+same : HashQualified -> HashQualified -> Bool
+same a b =
+    case ( a, b ) of
+        ( NameOnly aFqn, NameOnly bFqn ) ->
+            FQN.equals aFqn bFqn
+
+        ( HashOnly aH, HashOnly bH ) ->
+            Hash.equals aH bH
+
+        ( HashQualified aFqn aH, HashQualified bFqn bH ) ->
+            FQN.equals aFqn bFqn && Hash.equals aH bH
+
+        ( HashQualified _ aH, HashOnly bH ) ->
+            Hash.equals aH bH
+
+        ( HashOnly aH, HashQualified _ bH ) ->
+            Hash.equals aH bH
+
+        ( HashQualified aFqn _, NameOnly bFqn ) ->
+            FQN.equals aFqn bFqn
+
+        ( NameOnly aFqn, HashQualified bFqn _ ) ->
+            FQN.equals aFqn bFqn
+
+        _ ->
+            False
 
 
 name : HashQualified -> Maybe FQN

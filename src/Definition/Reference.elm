@@ -1,6 +1,7 @@
 module Definition.Reference exposing (..)
 
 import FullyQualifiedName exposing (FQN)
+import Hash exposing (Hash)
 import HashQualified as HQ exposing (HashQualified)
 import UI.Icon as Icon exposing (Icon)
 import Url.Parser
@@ -36,6 +37,47 @@ urlParser toRef =
 -- HELPERS
 
 
+equals : Reference -> Reference -> Bool
+equals a b =
+    case ( a, b ) of
+        ( TermReference aHq, TermReference bHq ) ->
+            HQ.equals aHq bHq
+
+        ( TypeReference aHq, TypeReference bHq ) ->
+            HQ.equals aHq bHq
+
+        ( AbilityConstructorReference aHq, AbilityConstructorReference bHq ) ->
+            HQ.equals aHq bHq
+
+        ( DataConstructorReference aHq, DataConstructorReference bHq ) ->
+            HQ.equals aHq bHq
+
+        _ ->
+            False
+
+
+{-| Like `equals`, but compares deeper such that a HashQualified with the same
+Hash as a HashOnly are considered the same
+-}
+same : Reference -> Reference -> Bool
+same a b =
+    case ( a, b ) of
+        ( TermReference aHq, TermReference bHq ) ->
+            HQ.same aHq bHq
+
+        ( TypeReference aHq, TypeReference bHq ) ->
+            HQ.same aHq bHq
+
+        ( AbilityConstructorReference aHq, AbilityConstructorReference bHq ) ->
+            HQ.same aHq bHq
+
+        ( DataConstructorReference aHq, DataConstructorReference bHq ) ->
+            HQ.same aHq bHq
+
+        _ ->
+            False
+
+
 hashQualified : Reference -> HashQualified
 hashQualified ref =
     case ref of
@@ -55,6 +97,11 @@ hashQualified ref =
 fqn : Reference -> Maybe FQN
 fqn =
     hashQualified >> HQ.name
+
+
+hash : Reference -> Maybe Hash
+hash =
+    hashQualified >> HQ.hash
 
 
 

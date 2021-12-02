@@ -46,6 +46,19 @@ fqn perspective =
             d.fqn
 
 
+equals : Perspective -> Perspective -> Bool
+equals a b =
+    case ( a, b ) of
+        ( Codebase ah, Codebase bh ) ->
+            Hash.equals ah bh
+
+        ( Namespace ans, Namespace bns ) ->
+            Hash.equals ans.codebaseHash bns.codebaseHash && FQN.equals ans.fqn bns.fqn
+
+        _ ->
+            False
+
+
 {-| Even when we have a Codebase hash, we always constructor Relative params.
 Absolute is currently not supported (until Unison Share includes historic
 codebase), though the model allows it.
@@ -74,6 +87,53 @@ fromParams params =
 
         ByNamespace (Absolute h) fqn_ ->
             Just (Namespace { codebaseHash = h, fqn = fqn_, details = NotAsked })
+
+
+{-| Similar to `fromParams`, but requires a previous `Perspective` (with a
+codebase hash) to migrate from
+-}
+nextFromParams : Perspective -> PerspectiveParams -> Perspective
+nextFromParams perspective params =
+    let
+        codebaseHash_ =
+            codebaseHash perspective
+    in
+    case ( params, perspective ) of
+        ( ByNamespace Relative fqn_, Namespace d ) ->
+            if Hash.equals codebaseHash_ d.codebaseHash && FQN.equals fqn_ d.fqn then
+                Namespace d
+
+            else
+                Namespace { codebaseHash = codebaseHash_, fqn = fqn_, details = NotAsked }
+
+        ( ByNamespace (Absolute h) fqn_, Namespace d ) ->
+            if Hash.equals h d.codebaseHash && FQN.equals fqn_ d.fqn then
+                Namespace d
+
+            else
+                Namespace { codebaseHash = h, fqn = fqn_, details = NotAsked }
+
+        ( ByNamespace Relative fqn_, _ ) ->
+            Namespace { codebaseHash = codebaseHash_, fqn = fqn_, details = NotAsked }
+
+        ( ByNamespace (Absolute h) fqn_, _ ) ->
+            Namespace { codebaseHash = h, fqn = fqn_, details = NotAsked }
+
+        ( ByCodebase Relative, _ ) ->
+            Codebase codebaseHash_
+
+        ( ByCodebase (Absolute h), _ ) ->
+            Codebase h
+
+
+needsFetching : Perspective -> Bool
+needsFetching perspective =
+    case perspective of
+        Namespace d ->
+            d.details == NotAsked
+
+        _ ->
+            False
 
 
 isCodebasePerspective : Perspective -> Bool
