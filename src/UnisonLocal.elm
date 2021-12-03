@@ -1,9 +1,9 @@
 module UnisonLocal exposing (..)
 
-import App
 import Browser
 import Env exposing (Flags)
-import PreApp
+import UnisonLocal.App as App
+import UnisonLocal.PreApp as PreApp
 
 
 main : Program Flags PreApp.Model PreApp.Msg

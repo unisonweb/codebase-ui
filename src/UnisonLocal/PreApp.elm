@@ -1,15 +1,14 @@
-module PreApp exposing (..)
+module UnisonLocal.PreApp exposing (..)
 
 import Api exposing (ApiBasePath(..), ApiRequest)
-import App
 import Browser
 import Browser.Navigation as Nav
 import Env exposing (Flags)
-import Env.AppContext as AppContext
 import Html
 import Http
 import Perspective exposing (Perspective, PerspectiveParams)
 import Route exposing (Route)
+import UnisonLocal.App as App
 import Url exposing (Url)
 
 
@@ -120,19 +119,15 @@ subscriptions model =
 
 view : Model -> Browser.Document Msg
 view model =
-    let
-        appContext flags =
-            AppContext.fromString flags.appContext
-    in
     case model of
-        Initializing preEnv ->
+        Initializing _ ->
             { title = "Loading.."
-            , body = [ App.viewAppLoading (appContext preEnv.flags) ]
+            , body = [ App.viewAppLoading ]
             }
 
-        InitializationError preEnv error ->
+        InitializationError _ error ->
             { title = "Application Error"
-            , body = [ App.viewAppError (appContext preEnv.flags) error ]
+            , body = [ App.viewAppError error ]
             }
 
         Initialized appModel ->
