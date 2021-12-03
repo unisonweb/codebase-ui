@@ -156,12 +156,12 @@ update msg ({ env } as model) =
                             { model2 | workspace = workspace, env = newEnv params }
 
                         ( model4, fetchPerspectiveCmd ) =
-                            fetchPerspective model3
+                            fetchPerspectiveAndCodebaseTree env.perspective model3
                     in
                     ( model4, Cmd.batch [ Cmd.map WorkspaceMsg cmd, fetchPerspectiveCmd ] )
 
                 Route.Perspective params ->
-                    fetchPerspective { model2 | env = newEnv params }
+                    fetchPerspectiveAndCodebaseTree env.perspective { model2 | env = newEnv params }
 
         ChangePerspective perspective ->
             navigateToPerspective model perspective
@@ -319,8 +319,8 @@ navigateToPerspective model perspective =
     ( { model | workspace = workspace }, changeRouteCmd )
 
 
-fetchPerspective : Model -> ( Model, Cmd Msg )
-fetchPerspective ({ env } as model) =
+fetchPerspectiveAndCodebaseTree : Perspective -> Model -> ( Model, Cmd Msg )
+fetchPerspectiveAndCodebaseTree oldPerspective ({ env } as model) =
     let
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init env
@@ -338,6 +338,9 @@ fetchPerspective ({ env } as model) =
             , fetchNamespaceDetailsCmd
             ]
         )
+
+    else if not (Perspective.equals oldPerspective env.perspective) then
+        ( model, Cmd.map CodebaseTreeMsg codebaseTreeCmd )
 
     else
         ( model, Cmd.none )
