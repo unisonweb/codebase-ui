@@ -1,4 +1,4 @@
-module App exposing (..)
+module UnisonShare.App exposing (..)
 
 import Api
 import Browser

@@ -1,9 +1,9 @@
 module UnisonShare exposing (..)
 
-import App
 import Browser
 import Env exposing (Flags)
-import PreApp
+import UnisonShare.App as App
+import UnisonShare.PreApp as PreApp
 
 
 main : Program Flags PreApp.Model PreApp.Msg

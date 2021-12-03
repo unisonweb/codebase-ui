@@ -1,7 +1,6 @@
-module PreApp exposing (..)
+module UnisonLocal.PreApp exposing (..)
 
 import Api exposing (ApiBasePath(..), ApiRequest)
-import App
 import Browser
 import Browser.Navigation as Nav
 import Env exposing (Flags)
@@ -10,6 +9,7 @@ import Html
 import Http
 import Perspective exposing (Perspective, PerspectiveParams)
 import Route exposing (Route)
+import UnisonLocal.App as App
 import Url exposing (Url)
 
 
