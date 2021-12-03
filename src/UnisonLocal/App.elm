@@ -6,7 +6,6 @@ import Browser.Navigation as Nav
 import CodebaseTree
 import Definition.Reference exposing (Reference)
 import Env exposing (Env, OperatingSystem(..))
-import Env.AppContext as AppContext exposing (AppContext(..))
 import Finder
 import Finder.SearchOptions as SearchOptions
 import FullyQualifiedName as FQN exposing (FQN)
@@ -24,15 +23,12 @@ import RemoteData
 import Route exposing (Route)
 import UI
 import UI.AppHeader as AppHeader
-import UI.Banner as Banner
 import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
-import UI.CopyField as CopyField
 import UI.Icon as Icon
 import UI.Modal as Modal
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
-import UnisonShare.SidebarContent
 import Url exposing (Url)
 import Workspace
 import Workspace.WorkspaceItems as WorkspaceItems
@@ -48,7 +44,6 @@ type Modal
     | HelpModal
     | ReportBugModal
     | PublishModal
-    | DownloadModal FQN
 
 
 type alias Model =
@@ -459,8 +454,8 @@ subscriptions model =
 -- VIEW
 
 
-appTitle : Maybe msg -> AppContext -> AppHeader.AppTitle msg
-appTitle clickMsg appContext =
+appTitle : Maybe msg -> AppHeader.AppTitle msg
+appTitle clickMsg =
     let
         appTitle_ =
             case clickMsg of
@@ -469,26 +464,15 @@ appTitle clickMsg appContext =
 
                 Just msg ->
                     AppHeader.Clickable msg
-
-        content =
-            case appContext of
-                UnisonLocal ->
-                    h1 [] [ text "Unison", span [ class "context unison-local" ] [ text "Local" ] ]
-
-                UnisonShare ->
-                    h1 [] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ]
     in
-    appTitle_ content
+    appTitle_ (h1 [] [ text "Unison", span [ class "context unison-local" ] [ text "Local" ] ])
 
 
 viewAppHeader : Model -> Html Msg
 viewAppHeader model =
     let
-        { appContext, perspective } =
-            model.env
-
         changePerspectiveMsg =
-            case perspective of
+            case model.env.perspective of
                 Codebase codebaseHash ->
                     ChangePerspective (Codebase codebaseHash)
 
@@ -496,25 +480,12 @@ viewAppHeader model =
                     ChangePerspective (Codebase codebaseHash)
 
         appTitle_ =
-            appTitle (Just changePerspectiveMsg) appContext
-
-        banner =
-            case appContext of
-                UnisonLocal ->
-                    Nothing
-
-                UnisonShare ->
-                    Just
-                        (Banner.promotion "article"
-                            "New Article: Spark-like distributed datasets in under 100 lines of Unison"
-                            (ExternalHref "https://www.unison-lang.org/articles/distributed-datasets/")
-                            "Check it out!"
-                        )
+            appTitle (Just changePerspectiveMsg)
     in
     AppHeader.view
         { menuToggle = Just ToggleSidebar
         , appTitle = appTitle_
-        , banner = banner
+        , banner = Nothing
         , rightButton = Just (Button.button (ShowModal PublishModal) "Publish on Unison Share" |> Button.share)
         }
 
@@ -533,18 +504,6 @@ viewSidebarHeader env =
                 -- thats quite involved...
                 isOverflowing =
                     fqn |> FQN.toString |> String.length |> (\l -> l > 20)
-
-                download =
-                    case env.appContext of
-                        UnisonShare ->
-                            Button.iconThenLabel (ShowModal (DownloadModal fqn)) Icon.download "Download latest version"
-                                |> Button.small
-                                |> Button.view
-                                |> List.singleton
-                                |> Sidebar.headerItem []
-
-                        UnisonLocal ->
-                            UI.nothing
             in
             Sidebar.header
                 [ Sidebar.headerItem
@@ -552,7 +511,6 @@ viewSidebarHeader env =
                     [ UI.namespaceSlug
                     , h2 [ class "namespace" ] [ FQN.view fqn ]
                     ]
-                , download
                 , UI.divider
                 ]
 
@@ -573,30 +531,25 @@ viewMainSidebarCollapseButton model =
         ]
 
 
-subMenu : AppContext -> List ( String, Click Msg )
-subMenu appContext =
+subMenu : List ( String, Click Msg )
+subMenu =
     [ ( "Unison website", ExternalHref "https://unisonweb.org" )
     , ( "Docs", ExternalHref "https://unisonweb.org/docs" )
     , ( "Language Reference", ExternalHref "https://unisonweb.org/docs/language-reference" )
     , ( "Community", ExternalHref "https://unisonweb.org/community" )
     , ( "Report a bug", OnClick (ShowModal ReportBugModal) )
+    , ( "Unison Share", ExternalHref "https://share.unison-lang.org" )
     ]
-        ++ (if AppContext.isUnisonLocal appContext then
-                [ ( "Unison Share", ExternalHref "https://share.unison-lang.org" ) ]
-
-            else
-                []
-           )
 
 
-unisonSubmenu : AppContext -> Html Msg
-unisonSubmenu appContext =
+unisonSubmenu : Html Msg
+unisonSubmenu =
     Tooltip.tooltip
         (Icon.unisonMark
             |> Icon.withClass "sidebar-unison-submenu"
             |> Icon.view
         )
-        (subMenu appContext |> Tooltip.textMenu)
+        (Tooltip.textMenu subMenu)
         |> Tooltip.withPosition Tooltip.RightOf
         |> Tooltip.withArrow Tooltip.End
         |> Tooltip.view
@@ -604,36 +557,18 @@ unisonSubmenu appContext =
 
 viewMainSidebar : Model -> Html Msg
 viewMainSidebar model =
-    let
-        perspective =
-            model.env.perspective
-
-        appContext =
-            model.env.appContext
-
-        changePerspectiveMsg =
-            Perspective.toNamespacePerspective perspective >> ChangePerspective
-
-        sidebarContent =
-            if Perspective.isCodebasePerspective perspective && AppContext.isUnisonShare appContext then
-                UnisonShare.SidebarContent.view changePerspectiveMsg
-
-            else
-                UI.nothing
-    in
     Sidebar.view
         [ viewMainSidebarCollapseButton model
         , div [ class "expanded-content" ]
             [ viewSidebarHeader model.env
             , div [ class "sidebar-scroll-area" ]
-                [ sidebarContent
-                , Sidebar.section
+                [ Sidebar.section
                     "Namespaces and Definitions"
                     [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
                 , nav []
                     (List.map
                         (\( l, c ) -> Click.view [] [ text l ] c)
-                        (subMenu appContext)
+                        subMenu
                         ++ [ a [ class "show-help", onClick (ShowModal HelpModal) ]
                                 [ text "Keyboard Shortcuts"
                                 , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
@@ -643,7 +578,7 @@ viewMainSidebar model =
                 ]
             ]
         , div [ class "collapsed-content" ]
-            [ unisonSubmenu appContext
+            [ unisonSubmenu
             , Tooltip.tooltip
                 (a
                     [ class "show-help-collapsed", onClick (ShowModal HelpModal) ]
@@ -656,33 +591,6 @@ viewMainSidebar model =
                 |> Tooltip.view
             ]
         ]
-
-
-viewDownloadModal : FQN -> Html Msg
-viewDownloadModal fqn =
-    let
-        prettyName =
-            FQN.toString fqn
-
-        unqualified =
-            FQN.unqualifiedName fqn
-
-        pullCommand =
-            "pull git@github.com:unisonweb/share.git:." ++ prettyName ++ " ." ++ unqualified
-
-        content =
-            Modal.Content
-                (section
-                    []
-                    [ p [] [ text "Download ", UI.bold prettyName, text " by pulling the namespace from Unison Share into a namespace in your local codebase:" ]
-                    , CopyField.copyField (\_ -> CloseModal) pullCommand |> CopyField.withPrefix ".>" |> CopyField.view
-                    , div [ class "hint" ] [ text "Copy and paste this command into UCM." ]
-                    ]
-                )
-    in
-    Modal.modal "download-modal" CloseModal content
-        |> Modal.withHeader ("Download " ++ prettyName)
-        |> Modal.view
 
 
 viewHelpModal : OperatingSystem -> KeyboardShortcut.Model -> Html Msg
@@ -780,8 +688,8 @@ viewPublishModal =
         |> Modal.view
 
 
-viewReportBugModal : AppContext -> Html Msg
-viewReportBugModal appContext =
+viewReportBugModal : Html Msg
+viewReportBugModal =
     let
         content =
             Modal.Content
@@ -796,7 +704,7 @@ viewReportBugModal appContext =
                         , div [ class "action" ]
                             [ githubLinkButton "unisonweb/codebase-ui"
                             , text "for reports on"
-                            , strong [] [ text (AppContext.toString appContext) ]
+                            , strong [] [ text "Unison Local" ]
                             , span [ class "subtle" ] [ text "(this UI)" ]
                             ]
                         , div [ class "action" ]
@@ -832,34 +740,27 @@ viewModal model =
             viewPublishModal
 
         ReportBugModal ->
-            viewReportBugModal model.env.appContext
-
-        DownloadModal fqn ->
-            viewDownloadModal fqn
+            viewReportBugModal
 
 
-viewAppLoading : AppContext -> Html msg
-viewAppLoading appContext =
+viewAppLoading : Html msg
+viewAppLoading =
     div [ id "app" ]
-        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing appContext))
+        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
         , Sidebar.view []
         , div [ id "main-content" ] []
         ]
 
 
-viewAppError : AppContext -> Http.Error -> Html msg
-viewAppError appContext error =
-    let
-        context =
-            AppContext.toString appContext
-    in
+viewAppError : Http.Error -> Html msg
+viewAppError error =
     div [ id "app" ]
-        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing appContext))
+        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
         , Sidebar.view []
         , div [ id "main-content", class "app-error" ]
             [ Icon.view Icon.warn
             , p [ title (Api.errorToString error) ]
-                [ text (context ++ " could not be started.") ]
+                [ text "Unison Local could not be started." ]
             ]
         ]
 
@@ -867,9 +768,6 @@ viewAppError appContext error =
 view : Model -> Browser.Document Msg
 view model =
     let
-        title_ =
-            AppContext.toString model.env.appContext
-
         page =
             case model.route of
                 Route.Perspective _ ->
@@ -882,7 +780,7 @@ view model =
                 Route.Definition _ _ ->
                     Html.map WorkspaceMsg (Workspace.view model.workspace)
     in
-    { title = title_
+    { title = "Unison Local"
     , body =
         [ div [ id "app", classList [ ( "sidebar-toggled", model.sidebarToggled ) ] ]
             [ viewAppHeader model
