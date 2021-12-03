@@ -16,6 +16,7 @@ import Definition.Doc as Doc
 import Definition.Reference as Reference exposing (Reference)
 import Env exposing (Env)
 import FullyQualifiedName exposing (FQN)
+import Hash
 import HashQualified as HQ
 import Html exposing (Html, article, div, header, section)
 import Html.Attributes exposing (class, id)
@@ -93,31 +94,55 @@ update env msg ({ workspaceItems } as model) =
             ( model, Cmd.none, ShowFinderRequest Nothing )
 
         FetchItemFinished ref itemResult ->
-            let
-                ( workspaceItem, cmd ) =
-                    case itemResult of
-                        Err e ->
-                            ( WorkspaceItem.Failure ref e, Cmd.none )
+            case itemResult of
+                Err e ->
+                    ( { model | workspaceItems = WorkspaceItems.replace workspaceItems ref (WorkspaceItem.Failure ref e) }
+                    , Cmd.none
+                    , None
+                    )
 
-                        Ok i ->
+                Ok i ->
+                    let
+                        cmd =
+                            -- Docs items are always shown in full and never cropped
+                            if WorkspaceItem.isDocItem i then
+                                Cmd.none
+
+                            else
+                                isDocCropped ref
+
+                        isDupe wi =
                             let
-                                c =
-                                    -- Docs items are always shown in full and never cropped
-                                    if WorkspaceItem.isDocItem i then
-                                        Cmd.none
+                                ref_ =
+                                    WorkspaceItem.reference wi
 
-                                    else
-                                        isDocCropped ref
+                                refEqs =
+                                    Reference.equals ref ref_
+
+                                hashEqs =
+                                    wi
+                                        |> WorkspaceItem.hash
+                                        |> Maybe.map (Hash.equals (WorkspaceItem.itemHash i))
+                                        |> Maybe.withDefault False
                             in
-                            ( WorkspaceItem.fromItem ref i, c )
+                            (Reference.same ref ref_ && not refEqs) || (hashEqs && not refEqs)
 
-                nextWorkspaceItems =
-                    WorkspaceItems.replace workspaceItems ref workspaceItem
-            in
-            ( { model | workspaceItems = nextWorkspaceItems }
-            , cmd
-            , None
-            )
+                        -- In some cases (like using the back button between
+                        -- perspectives) we try and fetch the same item twice, not
+                        -- knowing we've fetched it before since one was by hash
+                        -- and the other by name. If found to already be fetched,
+                        -- we favor the newly fetched item and discard the old
+                        deduped =
+                            workspaceItems
+                                |> WorkspaceItems.find isDupe
+                                |> Maybe.map WorkspaceItem.reference
+                                |> Maybe.map (WorkspaceItems.remove workspaceItems)
+                                |> Maybe.withDefault workspaceItems
+
+                        nextWorkspaceItems =
+                            WorkspaceItems.replace deduped ref (WorkspaceItem.fromItem ref i)
+                    in
+                    ( { model | workspaceItems = nextWorkspaceItems }, cmd, None )
 
         IsDocCropped ref res ->
             let

@@ -18,8 +18,10 @@
 module Workspace.WorkspaceItems exposing (..)
 
 import Definition.Reference exposing (Reference)
+import Hash exposing (Hash)
 import List
 import List.Extra as ListE
+import Maybe.Extra as MaybeE
 import Workspace.WorkspaceItem as WorkspaceItem exposing (WorkspaceItem)
 
 
@@ -253,6 +255,14 @@ member items ref =
     items |> references |> List.member ref
 
 
+hashes : WorkspaceItems -> List Hash
+hashes items =
+    items
+        |> toList
+        |> List.map WorkspaceItem.hash
+        |> MaybeE.values
+
+
 references : WorkspaceItems -> List Reference
 references items =
     items
@@ -443,6 +453,27 @@ map f wItems =
                 , focus = f data.focus
                 , after = List.map f data.after
                 }
+
+
+find : (WorkspaceItem -> Bool) -> WorkspaceItems -> Maybe WorkspaceItem
+find pred wItems =
+    wItems
+        |> toList
+        |> ListE.find pred
+
+
+all : (WorkspaceItem -> Bool) -> WorkspaceItems -> Bool
+all pred wItems =
+    wItems
+        |> toList
+        |> List.all pred
+
+
+any : (WorkspaceItem -> Bool) -> WorkspaceItems -> Bool
+any pred wItems =
+    wItems
+        |> toList
+        |> List.any pred
 
 
 mapToList : (WorkspaceItem -> Bool -> a) -> WorkspaceItems -> List a
