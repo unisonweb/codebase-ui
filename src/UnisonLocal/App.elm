@@ -27,6 +27,7 @@ import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
 import UI.Icon as Icon
 import UI.Modal as Modal
+import UI.Page as Page
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import Url exposing (Url)
@@ -471,7 +472,7 @@ appTitle clickMsg =
     appTitle_ (h1 [] [ text "Unison", span [ class "context unison-local" ] [ text "Local" ] ])
 
 
-viewAppHeader : Model -> Html Msg
+viewAppHeader : Model -> AppHeader.AppHeader Msg
 viewAppHeader model =
     let
         changePerspectiveMsg =
@@ -485,12 +486,11 @@ viewAppHeader model =
         appTitle_ =
             appTitle (Just changePerspectiveMsg)
     in
-    AppHeader.view
-        { menuToggle = Just ToggleSidebar
-        , appTitle = appTitle_
-        , banner = Nothing
-        , rightButton = Just (Button.button (ShowModal PublishModal) "Publish on Unison Share" |> Button.share)
-        }
+    { menuToggle = Just ToggleSidebar
+    , appTitle = appTitle_
+    , banner = Nothing
+    , rightButton = Just (Button.button (ShowModal PublishModal) "Publish on Unison Share" |> Button.share)
+    }
 
 
 viewSidebarHeader : Env -> Html Msg
@@ -558,42 +558,41 @@ unisonSubmenu =
         |> Tooltip.view
 
 
-viewMainSidebar : Model -> Html Msg
+viewMainSidebar : Model -> List (Html Msg)
 viewMainSidebar model =
-    Sidebar.view
-        [ viewMainSidebarCollapseButton model
-        , div [ class "expanded-content" ]
-            [ viewSidebarHeader model.env
-            , div [ class "sidebar-scroll-area" ]
-                [ Sidebar.section
-                    "Namespaces and Definitions"
-                    [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
-                , nav []
-                    (List.map
-                        (\( l, c ) -> Click.view [] [ text l ] c)
-                        subMenu
-                        ++ [ a [ class "show-keyboard-shortcuts", onClick (ShowModal HelpModal) ]
-                                [ text "Keyboard Shortcuts"
-                                , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
-                                ]
-                           ]
-                    )
-                ]
-            ]
-        , div [ class "collapsed-content" ]
-            [ unisonSubmenu
-            , Tooltip.tooltip
-                (a
-                    [ class "show-keyboard-shortcuts-collapsed", onClick (ShowModal HelpModal) ]
-                    [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
-                    ]
+    [ viewMainSidebarCollapseButton model
+    , div [ class "expanded-content" ]
+        [ viewSidebarHeader model.env
+        , div [ class "sidebar-scroll-area" ]
+            [ Sidebar.section
+                "Namespaces and Definitions"
+                [ Html.map CodebaseTreeMsg (CodebaseTree.view model.codebaseTree) ]
+            , nav []
+                (List.map
+                    (\( l, c ) -> Click.view [] [ text l ] c)
+                    subMenu
+                    ++ [ a [ class "show-keyboard-shortcuts", onClick (ShowModal HelpModal) ]
+                            [ text "Keyboard Shortcuts"
+                            , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                            ]
+                       ]
                 )
-                (Tooltip.Text "Keyboard Shortcuts")
-                |> Tooltip.withPosition Tooltip.RightOf
-                |> Tooltip.withArrow Tooltip.Middle
-                |> Tooltip.view
             ]
         ]
+    , div [ class "collapsed-content" ]
+        [ unisonSubmenu
+        , Tooltip.tooltip
+            (a
+                [ class "show-help-collapsed", onClick (ShowModal HelpModal) ]
+                [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
+                ]
+            )
+            (Tooltip.Text "Keyboard Shortcuts")
+            |> Tooltip.withPosition Tooltip.RightOf
+            |> Tooltip.withArrow Tooltip.Middle
+            |> Tooltip.view
+        ]
+    ]
 
 
 viewHelpModal : OperatingSystem -> KeyboardShortcut.Model -> Html Msg
@@ -748,30 +747,39 @@ viewModal model =
 
 viewAppLoading : Html msg
 viewAppLoading =
-    div [ id "app" ]
-        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
-        , Sidebar.view []
-        , div [ id "main-content" ] []
-        ]
+    Page.view
+        (Page.SidebarLayout
+            { header = AppHeader.appHeader (appTitle Nothing)
+            , sidebar = []
+            , sidebarToggled = False
+            , content = Page.PageContent []
+            }
+        )
 
 
 viewAppError : Http.Error -> Html msg
 viewAppError error =
-    div [ id "app" ]
-        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
-        , Sidebar.view []
-        , div [ id "main-content", class "app-error" ]
-            [ Icon.view Icon.warn
-            , p [ title (Api.errorToString error) ]
-                [ text "Unison Local could not be started." ]
-            ]
-        ]
+    Page.view
+        (Page.SidebarLayout
+            { header = AppHeader.appHeader (appTitle Nothing)
+            , sidebar = []
+            , sidebarToggled = False
+            , content =
+                Page.PageContent
+                    [ div [ class "app-error" ]
+                        [ Icon.view Icon.warn
+                        , p [ title (Api.errorToString error) ]
+                            [ text "Unison Local could not be started." ]
+                        ]
+                    ]
+            }
+        )
 
 
 view : Model -> Browser.Document Msg
 view model =
     let
-        page =
+        pageContent =
             case model.route of
                 Route.Perspective _ ->
                     Html.map PerspectiveLandingMsg
@@ -782,14 +790,15 @@ view model =
 
                 Route.Definition _ _ ->
                     Html.map WorkspaceMsg (Workspace.view model.workspace)
+
+        page =
+            Page.SidebarLayout
+                { header = viewAppHeader model
+                , sidebar = viewMainSidebar model
+                , sidebarToggled = model.sidebarToggled
+                , content = Page.PageContent [ pageContent ]
+                }
     in
     { title = "Unison Local"
-    , body =
-        [ div [ id "app", classList [ ( "sidebar-toggled", model.sidebarToggled ) ] ]
-            [ viewAppHeader model
-            , viewMainSidebar model
-            , div [ id "main-content" ] [ page ]
-            , viewModal model
-            ]
-        ]
+    , body = [ div [ id "app" ] [ Page.view page, viewModal model ] ]
     }
