@@ -572,7 +572,7 @@ viewMainSidebar model =
                     (List.map
                         (\( l, c ) -> Click.view [] [ text l ] c)
                         subMenu
-                        ++ [ a [ class "show-help", onClick (ShowModal HelpModal) ]
+                        ++ [ a [ class "show-keyboard-shortcuts", onClick (ShowModal HelpModal) ]
                                 [ text "Keyboard Shortcuts"
                                 , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
                                 ]
@@ -584,7 +584,7 @@ viewMainSidebar model =
             [ unisonSubmenu
             , Tooltip.tooltip
                 (a
-                    [ class "show-help-collapsed", onClick (ShowModal HelpModal) ]
+                    [ class "show-keyboard-shortcuts-collapsed", onClick (ShowModal HelpModal) ]
                     [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
                     ]
                 )
