@@ -11,7 +11,7 @@
     "clean": "rm -rf dist",
     "start": "webpack serve --mode development --port 1234 --config webpack.dev.js",
     "test": "elm-test",
-    "review": "elm-review"
+    "review": "elm-review  --ignore-files src/UnisonShare/Page/Catalog.elm"
   },
   "bugs": {
     "url": "https://github.com/unisonweb/codebase-ui/issues"
