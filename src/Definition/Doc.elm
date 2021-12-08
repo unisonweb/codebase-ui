@@ -415,7 +415,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     br [] []
 
                 SectionBreak ->
-                    hr [] []
+                    hr [ class "divider" ] []
 
                 Tooltip triggerContent tooltipContent ->
                     Tooltip.tooltip
