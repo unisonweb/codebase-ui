@@ -15,7 +15,7 @@ Running Development Server
 
 2. Make sure the latest dependencies are installed with by running `npm install`
 
-3. Start the development server, run: `API_URL="<API URL FROM UCM>" npm start`
+3. Start the Unison Share dev server with: `API_URL="<API URL FROM UCM>" npm run start:unisonShare` or the Unison Local dev server with: `API_URL="<API URL FROM UCM>" npm run start:unisonLocal`
 
 4. Visit `http://localhost:1234` in a browser.
 

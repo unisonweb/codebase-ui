@@ -312,7 +312,7 @@
   text-decoration: none;
 }
 
-#main-sidebar .show-help {
+#main-sidebar .show-keyboard-shortcuts {
   position: relative;
   line-height: 1;
   display: flex;
@@ -324,11 +324,11 @@
   margin-top: 1.5rem;
 }
 
-#main-sidebar .show-help:hover {
+#main-sidebar .show-keyboard-shortcuts:hover {
   text-decoration: none;
 }
 
-#main-sidebar .show-help .keyboard-shortcut {
+#main-sidebar .show-keyboard-shortcuts .keyboard-shortcut {
   justify-self: flex-end;
   margin-left: auto;
   margin-right: 0.1875rem;
@@ -340,10 +340,10 @@
   font-weight: normal;
 }
 
-#main-sidebar .show-help:hover {
+#main-sidebar .show-keyboard-shortcuts:hover {
   background: var(--color-sidebar-focus-bg);
 }
-#main-sidebar .show-help:hover .key {
+#main-sidebar .show-keyboard-shortcuts:hover .key {
   color: var(--color-sidebar-keyboard-shortcut-hover-key-fg);
 }
 

@@ -6,6 +6,7 @@ module UI.Button exposing
     , contained
     , danger
     , default
+    , github
     , icon
     , iconThenLabel
     , large
@@ -307,6 +308,17 @@ large =
 withSize : Size -> Button clickMsg -> Button clickMsg
 withSize size button_ =
     { button_ | size = size }
+
+
+
+-- COMMON INSTANCES
+
+
+github : String -> Button msg
+github repo =
+    linkIconThenLabel ("https://github.com/" ++ repo) I.github repo
+        |> small
+        |> contained
 
 
 

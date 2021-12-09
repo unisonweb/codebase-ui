@@ -5,16 +5,14 @@ import Browser
 import Browser.Navigation as Nav
 import CodebaseTree
 import Definition.Reference exposing (Reference)
-import Env exposing (Env, OperatingSystem(..))
-import Finder
-import Finder.SearchOptions as SearchOptions
+import Env exposing (Env)
 import FullyQualifiedName as FQN exposing (FQN)
-import Html exposing (Html, a, div, h1, h2, h3, nav, p, section, span, strong, text)
-import Html.Attributes exposing (class, classList, href, id, rel, target, title)
+import Html exposing (Html, a, div, h1, h2, nav, p, span, text)
+import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
 import KeyboardShortcut
-import KeyboardShortcut.Key as Key exposing (Key(..))
+import KeyboardShortcut.Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Namespace exposing (NamespaceDetails)
 import Perspective exposing (Perspective(..))
@@ -26,11 +24,10 @@ import UI.AppHeader as AppHeader
 import UI.Banner as Banner
 import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
-import UI.CopyField as CopyField
 import UI.Icon as Icon
-import UI.Modal as Modal
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
+import UnisonShare.AppModal as AppModal
 import UnisonShare.SidebarContent
 import Url exposing (Url)
 import Workspace
@@ -41,22 +38,13 @@ import Workspace.WorkspaceItems as WorkspaceItems
 -- MODEL
 
 
-type Modal
-    = NoModal
-    | FinderModal Finder.Model
-    | HelpModal
-    | ReportBugModal
-    | PublishModal
-    | DownloadModal FQN
-
-
 type alias Model =
     { navKey : Nav.Key
     , route : Route
     , codebaseTree : CodebaseTree.Model
     , workspace : Workspace.Model
     , perspectiveLanding : PerspectiveLanding.Model
-    , modal : Modal
+    , appModal : AppModal.Model
     , keyboardShortcut : KeyboardShortcut.Model
     , env : Env
 
@@ -92,7 +80,7 @@ init env route navKey =
             , workspace = workspace
             , perspectiveLanding = PerspectiveLanding.init
             , codebaseTree = codebaseTree
-            , modal = NoModal
+            , appModal = AppModal.init
             , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
             , env = env
             , sidebarToggled = False
@@ -118,11 +106,10 @@ type Msg
     | FetchPerspectiveNamespaceDetailsFinished FQN (Result Http.Error NamespaceDetails)
     | Keydown KeyboardEvent
     | OpenDefinition Reference
-    | ShowModal Modal
-    | CloseModal
+    | ShowModal AppModal.AppModal
     | ToggleSidebar
       -- sub msgs
-    | FinderMsg Finder.Msg
+    | AppModalMsg AppModal.Msg
     | WorkspaceMsg Workspace.Msg
     | PerspectiveLandingMsg PerspectiveLanding.Msg
     | CodebaseTreeMsg CodebaseTree.Msg
@@ -192,15 +179,31 @@ update msg ({ env } as model) =
             navigateToDefinition model ref
 
         ShowModal modal ->
-            ( { model | modal = modal }, Cmd.none )
-
-        CloseModal ->
-            ( { model | modal = NoModal }, Cmd.none )
+            let
+                ( appModal, cmd ) =
+                    AppModal.show modal
+            in
+            ( { model | appModal = appModal }, Cmd.map AppModalMsg cmd )
 
         ToggleSidebar ->
             ( { model | sidebarToggled = not model.sidebarToggled }, Cmd.none )
 
         -- Sub msgs
+        AppModalMsg amMsg ->
+            let
+                ( am, amCmd, out ) =
+                    AppModal.update env amMsg model.appModal
+
+                ( newModel, cmd ) =
+                    case out of
+                        AppModal.OpenDefinition ref ->
+                            navigateToDefinition { model | appModal = am } ref
+
+                        _ ->
+                            ( { model | appModal = am }, Cmd.none )
+            in
+            ( newModel, Cmd.batch [ Cmd.map AppModalMsg amCmd, cmd ] )
+
         WorkspaceMsg wMsg ->
             let
                 ( workspace, wCmd, outMsg ) =
@@ -259,26 +262,6 @@ update msg ({ env } as model) =
                                 |> navigateToPerspective model
             in
             ( model3, Cmd.batch [ cmd, Cmd.map CodebaseTreeMsg cCmd ] )
-
-        FinderMsg fMsg ->
-            case model.modal of
-                FinderModal fModel ->
-                    let
-                        ( fm, fc, out ) =
-                            Finder.update env fMsg fModel
-                    in
-                    case out of
-                        Finder.Remain ->
-                            ( { model | modal = FinderModal fm }, Cmd.map FinderMsg fc )
-
-                        Finder.Exit ->
-                            ( { model | modal = NoModal }, Cmd.none )
-
-                        Finder.OpenDefinition ref ->
-                            navigateToDefinition { model | modal = NoModal } ref
-
-                _ ->
-                    ( model, Cmd.none )
 
         KeyboardShortcutMsg kMsg ->
             let
@@ -400,11 +383,16 @@ keydown model keyboardEvent =
             showFinder model Nothing
 
         KeyboardShortcut.Chord Shift QuestionMark ->
-            ( { model | modal = HelpModal }, Cmd.none )
+            let
+                ( am, amCmd ) =
+                    AppModal.show AppModal.KeyboardShortcutsModal
+            in
+            ( { model | appModal = am }, Cmd.map AppModalMsg amCmd )
 
+        -- TODO: Move exit by Escape into AppModal module
         KeyboardShortcut.Sequence _ Escape ->
-            if model.modal == HelpModal then
-                ( { model | modal = NoModal }, Cmd.none )
+            if AppModal.modalIs model.appModal AppModal.KeyboardShortcutsModal then
+                ( { model | appModal = AppModal.close }, Cmd.none )
 
             else
                 noOp
@@ -413,19 +401,13 @@ keydown model keyboardEvent =
             noOp
 
 
-showFinder :
-    { m | env : Env, modal : Modal }
-    -> Maybe FQN
-    -> ( { m | env : Env, modal : Modal }, Cmd Msg )
+showFinder : Model -> Maybe FQN -> ( Model, Cmd Msg )
 showFinder model withinNamespace =
     let
-        options =
-            SearchOptions.init model.env.perspective withinNamespace
-
-        ( fm, fcmd ) =
-            Finder.init model.env options
+        ( am, amCmd ) =
+            AppModal.showFinder model.env withinNamespace
     in
-    ( { model | modal = FinderModal fm }, Cmd.map FinderMsg fcmd )
+    ( { model | appModal = am }, Cmd.map AppModalMsg amCmd )
 
 
 
@@ -501,7 +483,7 @@ viewAppHeader model =
         { menuToggle = Just ToggleSidebar
         , appTitle = appTitle_
         , banner = banner
-        , rightButton = Just (Button.button (ShowModal PublishModal) "Publish on Unison Share" |> Button.share)
+        , rightButton = Just (Button.button (ShowModal AppModal.PublishModal) "Publish on Unison Share" |> Button.share)
         }
 
 
@@ -521,7 +503,7 @@ viewSidebarHeader env =
                     fqn |> FQN.toString |> String.length |> (\l -> l > 20)
 
                 download =
-                    Button.iconThenLabel (ShowModal (DownloadModal fqn)) Icon.download "Download latest version"
+                    Button.iconThenLabel (ShowModal (AppModal.DownloadModal fqn)) Icon.download "Download latest version"
                         |> Button.small
                         |> Button.view
                         |> List.singleton
@@ -560,7 +542,7 @@ subMenu =
     , ( "Docs", ExternalHref "https://unisonweb.org/docs" )
     , ( "Language Reference", ExternalHref "https://unisonweb.org/docs/language-reference" )
     , ( "Community", ExternalHref "https://unisonweb.org/community" )
-    , ( "Report a bug", OnClick (ShowModal ReportBugModal) )
+    , ( "Report a bug", OnClick (ShowModal AppModal.ReportBugModal) )
     ]
 
 
@@ -606,7 +588,7 @@ viewMainSidebar model =
                     (List.map
                         (\( l, c ) -> Click.view [] [ text l ] c)
                         subMenu
-                        ++ [ a [ class "show-help", onClick (ShowModal HelpModal) ]
+                        ++ [ a [ class "show-keyboard-shortcuts", onClick (ShowModal AppModal.KeyboardShortcutsModal) ]
                                 [ text "Keyboard Shortcuts"
                                 , KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
                                 ]
@@ -618,7 +600,7 @@ viewMainSidebar model =
             [ unisonSubmenu
             , Tooltip.tooltip
                 (a
-                    [ class "show-help-collapsed", onClick (ShowModal HelpModal) ]
+                    [ class "show-keyboard-shortcuts-collapsed", onClick (ShowModal AppModal.KeyboardShortcutsModal) ]
                     [ KeyboardShortcut.view model.keyboardShortcut (KeyboardShortcut.single QuestionMark)
                     ]
                 )
@@ -628,186 +610,6 @@ viewMainSidebar model =
                 |> Tooltip.view
             ]
         ]
-
-
-viewDownloadModal : FQN -> Html Msg
-viewDownloadModal fqn =
-    let
-        prettyName =
-            FQN.toString fqn
-
-        unqualified =
-            FQN.unqualifiedName fqn
-
-        pullCommand =
-            "pull git@github.com:unisonweb/share.git:." ++ prettyName ++ " ." ++ unqualified
-
-        content =
-            Modal.Content
-                (section
-                    []
-                    [ p [] [ text "Download ", UI.bold prettyName, text " by pulling the namespace from Unison Share into a namespace in your local codebase:" ]
-                    , CopyField.copyField (\_ -> CloseModal) pullCommand |> CopyField.withPrefix ".>" |> CopyField.view
-                    , div [ class "hint" ] [ text "Copy and paste this command into UCM." ]
-                    ]
-                )
-    in
-    Modal.modal "download-modal" CloseModal content
-        |> Modal.withHeader ("Download " ++ prettyName)
-        |> Modal.view
-
-
-viewHelpModal : OperatingSystem -> KeyboardShortcut.Model -> Html Msg
-viewHelpModal os keyboardShortcut =
-    let
-        viewRow label instructions =
-            div
-                [ class "row" ]
-                [ label
-                , div [ class "instructions" ] instructions
-                ]
-
-        viewInstructions label shortcuts =
-            viewRow label [ KeyboardShortcut.viewShortcuts keyboardShortcut shortcuts ]
-
-        openFinderInstructions =
-            case os of
-                MacOS ->
-                    [ KeyboardShortcut.Chord Meta (K Key.Lower), KeyboardShortcut.Chord Ctrl (K Key.Lower), KeyboardShortcut.single ForwardSlash ]
-
-                _ ->
-                    [ KeyboardShortcut.Chord Ctrl (K Key.Lower), KeyboardShortcut.single ForwardSlash ]
-
-        toggleSidebarInstructions =
-            case os of
-                MacOS ->
-                    [ KeyboardShortcut.Chord Meta (B Key.Lower), KeyboardShortcut.Chord Ctrl (B Key.Lower) ]
-
-                _ ->
-                    [ KeyboardShortcut.Chord Ctrl (B Key.Lower), KeyboardShortcut.single (S Key.Lower) ]
-
-        content =
-            Modal.Content
-                (section
-                    [ class "shortcuts" ]
-                    [ div [ class "shortcut-group" ]
-                        [ h3 [] [ text "General" ]
-                        , viewInstructions (span [] [ text "Keyboard shortcuts", UI.subtle " (this dialog)" ]) [ KeyboardShortcut.single QuestionMark ]
-                        , viewInstructions (text "Open Finder") openFinderInstructions
-                        , viewInstructions (text "Toggle sidebar") toggleSidebarInstructions
-                        , viewInstructions (text "Move focus up") [ KeyboardShortcut.single ArrowUp, KeyboardShortcut.single (K Key.Lower) ]
-                        , viewInstructions (text "Move focus down") [ KeyboardShortcut.single ArrowDown, KeyboardShortcut.single (J Key.Lower) ]
-                        , viewInstructions (text "Close focused definition") [ KeyboardShortcut.single (X Key.Lower) ]
-                        , viewInstructions (text "Expand/Collapse focused definition") [ KeyboardShortcut.single Space ]
-                        ]
-                    , div [ class "shortcut-group" ]
-                        [ h3 [] [ text "Finder" ]
-                        , viewInstructions (text "Clear search query") [ KeyboardShortcut.single Escape ]
-                        , viewInstructions (span [] [ text "Close", UI.subtle " (when search query is empty)" ]) [ KeyboardShortcut.single Escape ]
-                        , viewInstructions (text "Move focus up") [ KeyboardShortcut.single ArrowUp ]
-                        , viewInstructions (text "Move focus down") [ KeyboardShortcut.single ArrowDown ]
-                        , viewInstructions (text "Open focused definition") [ KeyboardShortcut.single Enter ]
-                        , viewRow (text "Open definition")
-                            [ KeyboardShortcut.viewBase
-                                [ KeyboardShortcut.viewKey os Semicolon False
-                                , KeyboardShortcut.viewThen
-                                , KeyboardShortcut.viewKeyBase "1-9" False
-                                ]
-                            ]
-                        ]
-                    ]
-                )
-    in
-    Modal.modal "help-modal" CloseModal content
-        |> Modal.withHeader "Keyboard shortcuts"
-        |> Modal.view
-
-
-githubLinkButton : String -> Html msg
-githubLinkButton repo =
-    Button.linkIconThenLabel ("https://github.com/" ++ repo) Icon.github repo
-        |> Button.small
-        |> Button.contained
-        |> Button.view
-
-
-viewPublishModal : Html Msg
-viewPublishModal =
-    let
-        content =
-            Modal.Content
-                (section
-                    []
-                    [ p [ class "main" ]
-                        [ text "With your Unison codebase on GitHub, open a Pull Request against "
-                        , githubLinkButton "unisonweb/share"
-                        , text " to list (or unlist) your project on Unison Share."
-                        ]
-                    , a [ class "help", href "https://www.unisonweb.org/docs/codebase-organization/#day-to-day-development-creating-and-merging-pull-requests", rel "noopener", target "_blank" ] [ text "How do I get my code on GitHub?" ]
-                    ]
-                )
-    in
-    Modal.modal "publish-modal" CloseModal content
-        |> Modal.withHeader "Publish your project on Unison Share"
-        |> Modal.view
-
-
-viewReportBugModal : Html Msg
-viewReportBugModal =
-    let
-        content =
-            Modal.Content
-                (div []
-                    [ section []
-                        [ p [] [ text "We try our best, but bugs unfortunately creep through :(" ]
-                        , p [] [ text "We greatly appreciate feedback and bug reports—its very helpful for providing the best developer experience when working with Unison." ]
-                        ]
-                    , UI.divider
-                    , section [ class "actions" ]
-                        [ p [] [ text "Visit our GitHub repositories to report bugs and provide feedback" ]
-                        , div [ class "action" ]
-                            [ githubLinkButton "unisonweb/codebase-ui"
-                            , text "for reports on"
-                            , strong [] [ text "Unison Share" ]
-                            , span [ class "subtle" ] [ text "(this UI)" ]
-                            ]
-                        , div [ class "action" ]
-                            [ githubLinkButton "unisonweb/unison"
-                            , text "for reports on the"
-                            , strong [] [ text "Unison Language" ]
-                            , span [ class "subtle" ] [ text "(UCM)" ]
-                            ]
-                        ]
-                    ]
-                )
-    in
-    Modal.modal "report-bug-modal" CloseModal content
-        |> Modal.withHeader "Report a Bug"
-        |> Modal.view
-
-
-viewModal :
-    { m | env : Env, modal : Modal, keyboardShortcut : KeyboardShortcut.Model }
-    -> Html Msg
-viewModal model =
-    case model.modal of
-        NoModal ->
-            UI.nothing
-
-        FinderModal m ->
-            Html.map FinderMsg (Finder.view m)
-
-        HelpModal ->
-            viewHelpModal model.env.operatingSystem model.keyboardShortcut
-
-        PublishModal ->
-            viewPublishModal
-
-        ReportBugModal ->
-            viewReportBugModal
-
-        DownloadModal fqn ->
-            viewDownloadModal fqn
 
 
 viewAppLoading : Html msg
@@ -853,7 +655,7 @@ view model =
             [ viewAppHeader model
             , viewMainSidebar model
             , div [ id "main-content" ] [ page ]
-            , viewModal model
+            , Html.map AppModalMsg (AppModal.view model.env model.appModal)
             ]
         ]
     }
