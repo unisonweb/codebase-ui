@@ -7,8 +7,8 @@ import Env exposing (Flags)
 import Html
 import Http
 import Perspective exposing (Perspective, PerspectiveParams)
-import Route exposing (Route)
 import UnisonLocal.App as App
+import UnisonLocal.Route as Route exposing (Route)
 import Url exposing (Url)
 
 

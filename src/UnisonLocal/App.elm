@@ -20,7 +20,6 @@ import Namespace exposing (NamespaceDetails)
 import Perspective exposing (Perspective(..))
 import PerspectiveLanding
 import RemoteData
-import Route exposing (Route)
 import UI
 import UI.AppHeader as AppHeader
 import UI.Button as Button
@@ -30,6 +29,7 @@ import UI.Modal as Modal
 import UI.Page as Page
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
+import UnisonLocal.Route as Route exposing (Route)
 import Url exposing (Url)
 import Workspace
 import Workspace.WorkspaceItems as WorkspaceItems

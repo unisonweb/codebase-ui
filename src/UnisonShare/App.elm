@@ -18,7 +18,6 @@ import Namespace exposing (NamespaceDetails)
 import Perspective exposing (Perspective(..))
 import PerspectiveLanding
 import RemoteData
-import Route exposing (Route)
 import UI
 import UI.AppHeader as AppHeader
 import UI.Banner as Banner
@@ -29,7 +28,7 @@ import UI.Page as Page
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonShare.AppModal as AppModal
-import UnisonShare.SidebarContent
+import UnisonShare.Route as Route exposing (Route)
 import Url exposing (Url)
 import Workspace
 import Workspace.WorkspaceItems as WorkspaceItems
@@ -570,7 +569,13 @@ viewMainSidebar model =
 
         sidebarContent =
             if Perspective.isCodebasePerspective perspective then
-                UnisonShare.SidebarContent.view changePerspectiveMsg
+                let
+                    base =
+                        FQN.fromString "unison.base"
+                in
+                Sidebar.section "Popular libraries"
+                    [ Sidebar.item (changePerspectiveMsg base) (FQN.toString base)
+                    ]
 
             else
                 UI.nothing
