@@ -13,7 +13,7 @@
     "start:unisonLocal": "webpack serve --mode development --port 1234 --config webpack.unisonLocal.dev.js",
     "start:unisonShare": "webpack serve --mode development --port 1234 --config webpack.unisonShare.dev.js",
     "test": "elm-test",
-    "review": "elm-review"
+    "review": "elm-review  --ignore-files src/UnisonShare/Page/Catalog.elm"
   },
   "bugs": {
     "url": "https://github.com/unisonweb/codebase-ui/issues"

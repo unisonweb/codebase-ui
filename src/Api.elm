@@ -8,6 +8,7 @@ module Api exposing
     , list
     , namespace
     , perform
+    , projects
     , toRequest
     , toUrl
     )
@@ -51,6 +52,11 @@ namespace perspective fqn =
             [ rootBranch (Perspective.codebaseHash perspective) ]
     in
     Endpoint [ "namespaces", FQN.toString fqn ] queryParams
+
+
+projects : Endpoint
+projects =
+    Endpoint [ "projects" ] []
 
 
 getDefinition : Perspective -> List String -> Endpoint
