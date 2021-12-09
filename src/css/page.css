@@ -1,12 +1,32 @@
 .page {
   display: grid;
+  transition: grid-template-columns var(--transition-sidebar-collapse-time);
+  --transition-sidebar-collapse-time: 0.3s;
+}
+
+.page.sidebar-layout {
   grid-template-rows: var(--app-header-height) auto;
   grid-template-columns: var(--main-sidebar-width) auto;
   grid-template-areas:
     "app-header app-header"
     "main-sidebar page-content";
-  transition: grid-template-columns var(--transition-sidebar-collapse-time);
-  --transition-sidebar-collapse-time: 0.3s;
+}
+
+.page.full-layout {
+  grid-template-rows: var(--app-header-height) auto;
+  grid-template-columns: auto;
+  grid-template-areas:
+    "app-header"
+    "page-content";
+}
+
+.page.hero-layout {
+  grid-template-rows: var(--app-header-height) var(page-hero-height) auto;
+  grid-template-columns: auto;
+  grid-template-areas:
+    "app-header"
+    "page-hero"
+    "page-content";
 }
 
 /* -- Main Content --------------------------------------------------------- */
