@@ -1,16 +1,5 @@
 /* -- Application ---------------------------------------------------------- */
 
-#app {
-  display: grid;
-  grid-template-rows: var(--app-header-height) auto;
-  grid-template-columns: var(--main-sidebar-width) auto;
-  grid-template-areas:
-    "app-header app-header"
-    "main-sidebar main-content";
-  transition: grid-template-columns var(--transition-sidebar-collapse-time);
-  --transition-sidebar-collapse-time: 0.3s;
-}
-
 #app .app-error {
   display: flex;
   flex: 1;
@@ -347,54 +336,30 @@
   color: var(--color-sidebar-keyboard-shortcut-hover-key-fg);
 }
 
-/* -- Main Content --------------------------------------------------------- */
-
-#main-content {
-  grid-area: main-content;
-  height: calc(100vh - var(--app-header-height));
-  overflow: auto;
-  scroll-behavior: smooth;
-  scrollbar-width: auto;
-  scrollbar-color: var(--color-main-subtle-fg) var(--color-main-bg);
-}
-#main-content::-webkit-scrollbar {
-  width: 0.5rem;
-  height: 0.5rem;
-}
-
-#main-content::-webkit-scrollbar-track {
-  background: var(--color-main-bg);
-}
-
-#main-content::-webkit-scrollbar-thumb {
-  background-color: var(--color-main-subtle-fg);
-  border-radius: var(--border-radius-base);
-}
-
 /* -- Responsive ----------------------------------------------------------- */
 
 @media only screen and (min-width: 1025px) {
-  #app.sidebar-toggled {
+  .page.sidebar-toggled {
     --main-sidebar-width: var(--main-sidebar-collapsed-width);
   }
 
-  #app.sidebar-toggled .collapse-sidebar-button {
+  .page.sidebar-toggled .collapse-sidebar-button {
     animation: collapse-sidebar-button var(--transition-sidebar-collapse-time)
       ease-in-out;
     transition: none;
     animation-fill-mode: forwards;
   }
 
-  #app.sidebar-toggled #main-sidebar {
+  .page.sidebar-toggled #main-sidebar {
     overflow: visible;
   }
 
-  #app.sidebar-toggled #main-sidebar .collapsed-content {
+  .page.sidebar-toggled #main-sidebar .collapsed-content {
     opacity: 1;
     transform: translateX(0);
   }
 
-  #app.sidebar-toggled #main-sidebar .expanded-content {
+  .page.sidebar-toggled #main-sidebar .expanded-content {
     transition: opacity;
     transition-duration: var(--transition-sidebar-collapse-time) * 1.1;
     transition-delay: 0;
@@ -402,7 +367,7 @@
     overflow: hidden;
   }
 
-  #app.sidebar-toggled .sidebar-scroll-area {
+  .page.sidebar-toggled .sidebar-scroll-area {
     overflow: hidden;
   }
 }
@@ -413,18 +378,18 @@
     grid-template-columns: auto auto;
     grid-template-areas:
       "app-header app-header"
-      "main-content main-content";
+      "page-content page-content";
   }
 
   #main-sidebar {
     display: none;
   }
 
-  #main-content {
+  .page-content {
     width: 100vw;
   }
 
-  #app.sidebar-toggled {
+  .page.sidebar-toggled {
     grid-template-rows: 3.5rem auto;
     grid-template-columns: auto auto;
     grid-template-areas:
@@ -432,13 +397,13 @@
       "main-sidebar main-sidebar";
   }
 
-  #app.sidebar-toggled #main-sidebar {
+  .page.sidebar-toggled #main-sidebar {
     display: flex;
     width: 100vw;
   }
 
-  #app.sidebar-toggled .collapse-sidebar-button,
-  #app.sidebar-toggled #main-content {
+  .page.sidebar-toggled .collapse-sidebar-button,
+  .page.sidebar-toggled .page-content {
     display: none;
   }
 }
@@ -457,6 +422,8 @@
     transform: translateX(-3.15rem);
   }
 }
+
+@import "./page.css";
 
 @import "./help-modal.css";
 @import "./publish-modal.css";
