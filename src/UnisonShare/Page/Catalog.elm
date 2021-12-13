@@ -4,13 +4,11 @@ import Api
 import Dict exposing (Dict)
 import Env exposing (Env)
 import Html exposing (Html, div, text)
-import Html.Attributes exposing (class)
 import Http
 import Project exposing (ProjectListing)
 import RemoteData exposing (RemoteData(..), WebData)
-import UI
 import UI.AppHeader exposing (AppHeader)
-import UI.Page as Page exposing (Page)
+import UI.Page as Page
 
 
 
