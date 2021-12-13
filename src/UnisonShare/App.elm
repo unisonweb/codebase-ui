@@ -18,7 +18,6 @@ import Namespace exposing (NamespaceDetails)
 import Perspective exposing (Perspective(..))
 import PerspectiveLanding
 import RemoteData
-import Route exposing (Route)
 import UI
 import UI.AppHeader as AppHeader
 import UI.Banner as Banner
@@ -29,7 +28,8 @@ import UI.Page as Page
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonShare.AppModal as AppModal
-import UnisonShare.SidebarContent
+import UnisonShare.Page.Catalog as Catalog
+import UnisonShare.Route as Route exposing (Route)
 import Url exposing (Url)
 import Workspace
 import Workspace.WorkspaceItems as WorkspaceItems
@@ -45,6 +45,7 @@ type alias Model =
     , codebaseTree : CodebaseTree.Model
     , workspace : Workspace.Model
     , perspectiveLanding : PerspectiveLanding.Model
+    , catalog : Catalog.Model
     , appModal : AppModal.Model
     , keyboardShortcut : KeyboardShortcut.Model
     , env : Env
@@ -75,6 +76,9 @@ init env route navKey =
                 |> Maybe.map (Api.perform env.apiBasePath)
                 |> Maybe.withDefault Cmd.none
 
+        ( catalog, _ ) =
+            Catalog.init env
+
         model =
             { navKey = navKey
             , route = route
@@ -85,6 +89,7 @@ init env route navKey =
             , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
             , env = env
             , sidebarToggled = False
+            , catalog = catalog
             }
     in
     ( model
@@ -111,6 +116,7 @@ type Msg
     | ToggleSidebar
       -- sub msgs
     | AppModalMsg AppModal.Msg
+    | CatalogMsg Catalog.Msg
     | WorkspaceMsg Workspace.Msg
     | PerspectiveLandingMsg PerspectiveLanding.Msg
     | CodebaseTreeMsg CodebaseTree.Msg
@@ -135,6 +141,13 @@ update msg ({ env } as model) =
                     { env | perspective = Perspective.nextFromParams env.perspective params }
             in
             case route of
+                Route.Catalog ->
+                    let
+                        ( catalog, cmd ) =
+                            Catalog.init model.env
+                    in
+                    ( { model | catalog = catalog }, Cmd.map CatalogMsg cmd )
+
                 Route.Definition params ref ->
                     let
                         ( workspace, cmd ) =
@@ -204,6 +217,13 @@ update msg ({ env } as model) =
                             ( { model | appModal = am }, Cmd.none )
             in
             ( newModel, Cmd.batch [ Cmd.map AppModalMsg amCmd, cmd ] )
+
+        CatalogMsg cMsg ->
+            let
+                ( catalog, cmd ) =
+                    Catalog.update cMsg model.catalog
+            in
+            ( { model | catalog = catalog }, Cmd.map CatalogMsg cmd )
 
         WorkspaceMsg wMsg ->
             let
@@ -570,7 +590,13 @@ viewMainSidebar model =
 
         sidebarContent =
             if Perspective.isCodebasePerspective perspective then
-                UnisonShare.SidebarContent.view changePerspectiveMsg
+                let
+                    base =
+                        FQN.fromString "unison.base"
+                in
+                Sidebar.section "Popular libraries"
+                    [ Sidebar.item (changePerspectiveMsg base) (FQN.toString base)
+                    ]
 
             else
                 UI.nothing
@@ -641,30 +667,45 @@ viewAppError error =
 view : Model -> Browser.Document Msg
 view model =
     let
-        pageContent =
-            case model.route of
-                Route.Perspective _ ->
-                    Html.map PerspectiveLandingMsg
-                        (PerspectiveLanding.view
-                            model.env
-                            model.perspectiveLanding
-                        )
+        appHeader =
+            viewAppHeader model
 
-                Route.Definition _ _ ->
-                    Html.map WorkspaceMsg (Workspace.view model.workspace)
-
-        page =
+        withSidebar pageContent =
             Page.SidebarLayout
                 { header = viewAppHeader model
                 , sidebar = viewMainSidebar model
                 , sidebarToggled = model.sidebarToggled
                 , content = Page.PageContent [ pageContent ]
                 }
+
+        page =
+            case model.route of
+                Route.Catalog ->
+                    let
+                        ( m, _ ) =
+                            Catalog.init model.env
+                    in
+                    -- Html.map CatalogMsg (Catalog.view appHeader m)
+                    Catalog.view appHeader m
+
+                Route.Perspective _ ->
+                    Html.map PerspectiveLandingMsg
+                        (PerspectiveLanding.view
+                            model.env
+                            model.perspectiveLanding
+                        )
+                        |> withSidebar
+                        |> Page.view
+
+                Route.Definition _ _ ->
+                    Html.map WorkspaceMsg (Workspace.view model.workspace)
+                        |> withSidebar
+                        |> Page.view
     in
     { title = "Unison Share"
     , body =
         [ div [ id "app" ]
-            [ Page.view page
+            [ page
             , Html.map AppModalMsg (AppModal.view model.env model.appModal)
             ]
         ]

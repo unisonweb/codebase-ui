@@ -7,8 +7,8 @@ import Env exposing (Flags)
 import Html
 import Http
 import Perspective exposing (Perspective, PerspectiveParams)
-import Route exposing (Route)
 import UnisonShare.App as App
+import UnisonShare.Route as Route exposing (Route)
 import Url exposing (Url)
 
 
@@ -32,11 +32,16 @@ init flags url navKey =
         route =
             Route.fromUrl flags.basePath url
 
+        perspectiveParams =
+            route
+                |> Route.perspectiveParams
+                |> Maybe.withDefault (Perspective.ByCodebase Perspective.Relative)
+
         preEnv =
             { flags = flags
             , route = route
             , navKey = navKey
-            , perspectiveParams = Route.perspectiveParams route
+            , perspectiveParams = perspectiveParams
             }
 
         perspectiveToAppInit perspective =

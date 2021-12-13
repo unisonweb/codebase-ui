@@ -1,4 +1,4 @@
-module RouteTests exposing (..)
+module UnisonLocal.RouteTests exposing (..)
 
 import Definition.Reference as Reference exposing (Reference(..))
 import Expect
@@ -6,8 +6,8 @@ import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
 import HashQualified as HQ
 import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
-import Route
 import Test exposing (..)
+import UnisonLocal.Route as Route
 import Url exposing (Url)
 
 

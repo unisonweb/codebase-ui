@@ -9,6 +9,8 @@ import Http
 import Project exposing (ProjectListing)
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
+import UI.AppHeader exposing (AppHeader)
+import UI.Page as Page exposing (Page)
 
 
 
@@ -88,22 +90,13 @@ projectsToCatalog _ =
 -- VIEW
 
 
-viewLoaded : LoadedModel -> Html Msg
-viewLoaded _ =
-    div [] [ text "Catalog" ]
-
-
-view : Model -> Html Msg
-view model =
-    case model of
-        NotAsked ->
-            UI.nothing
-
-        Loading ->
-            UI.nothing
-
-        Failure _ ->
-            div [ class "" ] [ text "Error..." ]
-
-        Success m ->
-            viewLoaded m
+view : AppHeader msg -> Model -> Html msg
+view appHeader _ =
+    let
+        page =
+            Page.FullLayout
+                { header = appHeader
+                , content = Page.PageContent [ div [] [ text "Catalog" ] ]
+                }
+    in
+    Page.view page

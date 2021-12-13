@@ -1,4 +1,4 @@
-module Route exposing
+module UnisonLocal.Route exposing
     ( Route(..)
     , fromUrl
     , navigate

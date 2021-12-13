@@ -14,7 +14,7 @@ type alias Project a =
 
 
 type alias ProjectListing =
-    Project ()
+    Project {}
 
 
 decodeList : Decode.Decoder (List ProjectListing)
