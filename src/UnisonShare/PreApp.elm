@@ -32,11 +32,16 @@ init flags url navKey =
         route =
             Route.fromUrl flags.basePath url
 
+        perspectiveParams =
+            route
+                |> Route.perspectiveParams
+                |> Maybe.withDefault (Perspective.ByCodebase Perspective.Relative)
+
         preEnv =
             { flags = flags
             , route = route
             , navKey = navKey
-            , perspectiveParams = Route.perspectiveParams route
+            , perspectiveParams = perspectiveParams
             }
 
         perspectiveToAppInit perspective =

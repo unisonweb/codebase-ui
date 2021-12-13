@@ -22,7 +22,7 @@ import HashQualified exposing (HashQualified(..))
 import List.Nonempty as NEL
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
-import Route.Parsers as RP exposing (b, reference, slash)
+import Route.Parsers as RP exposing (b, reference, s, slash)
 import Url exposing (Url)
 import Url.Builder exposing (relative)
 
@@ -72,13 +72,17 @@ import Url.Builder exposing (relative)
 
 
 type Route
-    = Perspective PerspectiveParams
+    = Catalog
+    | Perspective PerspectiveParams
     | Definition PerspectiveParams Reference
 
 
 updatePerspectiveParams : Route -> PerspectiveParams -> Route
 updatePerspectiveParams route params =
     case route of
+        Catalog ->
+            Catalog
+
         Perspective _ ->
             Perspective params
 
@@ -88,6 +92,11 @@ updatePerspectiveParams route params =
 
 
 -- PARSER ---------------------------------------------------------------------
+
+
+catalog : Parser Route
+catalog =
+    succeed Catalog |. slash |. s "catalog"
 
 
 perspective : Parser Route
@@ -102,7 +111,7 @@ definition =
 
 toRoute : Parser Route
 toRoute =
-    oneOf [ b perspective, b definition ]
+    oneOf [ b catalog, b perspective, b definition ]
 
 
 {-| In environments like Unison Local, the UI is served with a base path
@@ -151,14 +160,17 @@ fromUrl basePath url =
 -- HELPERS --------------------------------------------------------------------
 
 
-perspectiveParams : Route -> PerspectiveParams
+perspectiveParams : Route -> Maybe PerspectiveParams
 perspectiveParams route =
     case route of
+        Catalog ->
+            Nothing
+
         Perspective nsRef ->
-            nsRef
+            Just nsRef
 
         Definition nsRef _ ->
-            nsRef
+            Just nsRef
 
 
 
@@ -167,7 +179,13 @@ perspectiveParams route =
 
 toDefinition : Route -> Reference -> Route
 toDefinition oldRoute ref =
-    Definition (perspectiveParams oldRoute) ref
+    let
+        params =
+            oldRoute
+                |> perspectiveParams
+                |> Maybe.withDefault (ByCodebase Relative)
+    in
+    Definition params ref
 
 
 toUrlString : Route -> String
@@ -217,6 +235,9 @@ toUrlString route =
 
         path =
             case route of
+                Catalog ->
+                    [ "catalog" ]
+
                 Perspective pp ->
                     perspectiveParamsToPath pp False
 
@@ -255,7 +276,13 @@ navigateToPerspective navKey perspectiveParams_ =
 
 navigateToCurrentPerspective : Nav.Key -> Route -> Cmd msg
 navigateToCurrentPerspective navKey oldRoute =
-    navigateToPerspective navKey (perspectiveParams oldRoute)
+    let
+        params =
+            oldRoute
+                |> perspectiveParams
+                |> Maybe.withDefault (ByCodebase Relative)
+    in
+    navigateToPerspective navKey params
 
 
 navigateToLatestCodebase : Nav.Key -> Cmd msg
@@ -273,6 +300,9 @@ replacePerspective navKey perspectiveParams_ oldRoute =
     let
         newRoute =
             case oldRoute of
+                Catalog ->
+                    Catalog
+
                 Perspective _ ->
                     Perspective perspectiveParams_
 
