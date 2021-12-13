@@ -1,14 +1,8 @@
-## Overview
-What does this change accomplish and why?
-Include a screenshot or GIF of the change if appropriate.
+## Problem
+Describe the problem this PR intend to solve
 
-## Implementation notes
-How does it accomplish it, in broad strokes?
+## Solution
+Describe the solution this PR takes to solve the problem and any alternative approach considered
 
-## Interesting/controversial decisions
-Include anything that you thought twice about, debated, chose arbitrarily, etc.
-What could have been done differently, but wasn't? And why?
-
-## Loose ends
-Link to related issues that address things you didn't get to. Stuff you
-encountered on the way and decided not to include in this PR.
+## Caveats/Notes
+Issues that address things you didn't get to or general notes
