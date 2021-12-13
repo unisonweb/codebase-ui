@@ -208,7 +208,12 @@
   --color-button-danger-hover-fg: var(--color-gray-lighten-100);
   --color-button-danger-hover-bg: var(--color-pink-2);
 
-  /* Badges */
+  /* Card */
+  --color-card-bg: var(--color-gray-lighten-100);
+  --color-card-fg: var(--color-gray-darken-30);
+  --color-card-title: var(--color-gray-lighten-30);
+
+  /* Badge */
   --color-badge-fg: var(--color-gray-base);
   --color-badge-bg: var(--color-gray-lighten-60);
   --color-badge-border: var(--color-gray-lighten-50);
@@ -220,7 +225,7 @@
   --color-option-badge-bg: var(--color-gray-darken-30);
   --color-option-badge-border: var(--color-transparent);
 
-  /* Tooltips */
+  /* Tooltip */
   --color-tooltip-fg: var(--color-gray-lighten-60);
   --color-tooltip-subtle-fg: var(--color-gray-lighten-20);
   --color-tooltip-bg: var(--color-gray-darken-30);
