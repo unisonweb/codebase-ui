@@ -31,4 +31,5 @@
 @import "./animations.css";
 @import "./elements.css";
 @import "./composites.css";
+@import "./ui/page-layout.css";
 @import "./app.css";

@@ -423,8 +423,6 @@
   }
 }
 
-@import "./page.css";
-
 @import "./help-modal.css";
 @import "./publish-modal.css";
 @import "./report-bug-modal.css";

@@ -1,7 +1,6 @@
 module Project exposing (..)
 
 import FullyQualifiedName exposing (FQN)
-import Hash exposing (Hash)
 import Json.Decode as Decode
 
 
@@ -10,11 +9,16 @@ type Owner
 
 
 type alias Project a =
-    { a | owner : Owner, name : FQN, hash : Hash }
+    { a | owner : Owner, name : FQN }
 
 
 type alias ProjectListing =
     Project {}
+
+
+ownerToString : Owner -> String
+ownerToString (Owner o) =
+    o
 
 
 decodeList : Decode.Decoder (List ProjectListing)

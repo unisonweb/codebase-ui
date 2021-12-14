@@ -6,6 +6,32 @@ import List.Nonempty as NEL
 import Test exposing (..)
 
 
+cons : Test
+cons =
+    describe "FullyQualifiedName.cons"
+        [ test "cons a String to the front of the FQN segments" <|
+            \_ ->
+                let
+                    list =
+                        FQN.fromString "List"
+                in
+                Expect.equal [ "base", "List" ] (segments (FQN.cons "base" list))
+        ]
+
+
+snoc : Test
+snoc =
+    describe "FullyQualifiedName.snoc"
+        [ test "snoc a String to the end of the FQN segments" <|
+            \_ ->
+                let
+                    list =
+                        FQN.fromString "List"
+                in
+                Expect.equal [ "List", "map" ] (segments (FQN.snoc list "map"))
+        ]
+
+
 append : Test
 append =
     describe "FullyQualifiedName.append"
@@ -222,9 +248,9 @@ namespaceOf =
         ]
 
 
-namepsace : Test
-namepsace =
-    describe "FullyQualifiedName.namepsace"
+namespace : Test
+namespace =
+    describe "FullyQualifiedName.namespace"
         [ test "removes qualified name" <|
             \_ ->
                 let

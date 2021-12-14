@@ -24,7 +24,7 @@ import UI.Banner as Banner
 import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
 import UI.Icon as Icon
-import UI.Page as Page
+import UI.PageLayout as PageLayout
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonShare.AppModal as AppModal
@@ -126,8 +126,15 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ env } as model) =
     case msg of
-        LinkClicked _ ->
-            ( model, Cmd.none )
+        LinkClicked urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.navKey (Url.toString url) )
+
+                -- External links are handled via target blank and never end up
+                -- here
+                Browser.External _ ->
+                    ( model, Cmd.none )
 
         UrlChanged url ->
             let
@@ -639,21 +646,21 @@ viewMainSidebar model =
 
 viewAppLoading : Html msg
 viewAppLoading =
-    Page.view
-        (Page.FullLayout
+    PageLayout.view
+        (PageLayout.FullLayout
             { header = AppHeader.appHeader (appTitle Nothing)
-            , content = Page.PageContent []
+            , content = PageLayout.PageContent []
             }
         )
 
 
 viewAppError : Http.Error -> Html msg
 viewAppError error =
-    Page.view
-        (Page.FullLayout
+    PageLayout.view
+        (PageLayout.FullLayout
             { header = AppHeader.appHeader (appTitle Nothing)
             , content =
-                Page.PageContent
+                PageLayout.PageContent
                     [ div [ class "app-error" ]
                         [ Icon.view Icon.warn
                         , p [ title (Api.errorToString error) ]
@@ -671,11 +678,11 @@ view model =
             viewAppHeader model
 
         withSidebar pageContent =
-            Page.SidebarLayout
+            PageLayout.SidebarLayout
                 { header = viewAppHeader model
                 , sidebar = viewMainSidebar model
                 , sidebarToggled = model.sidebarToggled
-                , content = Page.PageContent [ pageContent ]
+                , content = PageLayout.PageContent [ pageContent ]
                 }
 
         page =
@@ -695,12 +702,12 @@ view model =
                             model.perspectiveLanding
                         )
                         |> withSidebar
-                        |> Page.view
+                        |> PageLayout.view
 
                 Route.Definition _ _ ->
                     Html.map WorkspaceMsg (Workspace.view model.workspace)
                         |> withSidebar
-                        |> Page.view
+                        |> PageLayout.view
     in
     { title = "Unison Share"
     , body =

@@ -1,4 +1,5 @@
 import "./init";
+import "./css/unison-share.css";
 import detectOs from "./detectOs";
 import preventDefaultGlobalKeyboardEvents from "./preventDefaultGlobalKeyboardEvents";
 import { Elm } from "./UnisonShare.elm";

@@ -1,0 +1,61 @@
+.catalog-hero h1 {
+  font-size: 2.375rem;
+  font-weight: normal;
+  text-align: center;
+}
+
+.catalog-hero h1 .explore {
+  color: var(--color-green-4);
+}
+
+.catalog-hero h1 .discover {
+  color: var(--color-blue-4);
+}
+
+.catalog-hero h1 .share {
+  color: var(--color-purple-4);
+}
+
+.catalog-hero .catalog-search {
+  width: 50rem;
+  height: 3.5rem;
+  background: var(--color-main-bg);
+  color: var(--color-main-fg);
+  border-radius: var(--border-radius-base);
+  position: absolute;
+  bottom: -1.75rem;
+  border: 2px solid var(--color-gray-darken-10);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  padding: 1rem;
+  left: 50%;
+  transform: translateX(-50%);
+}
+.catalog-hero .catalog-search input {
+  width: 100%;
+  height: 1.5rem;
+  margin-left: 0.75rem;
+  font-size: 1.125rem;
+}
+.catalog-hero .catalog-search input:focus {
+  outline: none;
+}
+
+.catalog-hero .catalog-search .icon {
+  font-size: 1.5rem;
+  color: var(--color-gray-lighten-30);
+}
+
+.categories {
+  margin-top: 6.25rem;
+  display: flex;
+  flex-direction: row;
+  flex-flow: row wrap;
+  gap: 3.125rem;
+}
+
+.categories .card {
+  width: 18.75rem;
+}

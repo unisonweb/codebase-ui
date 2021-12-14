@@ -1,6 +1,7 @@
 module FullyQualifiedName exposing
     ( FQN
     , append
+    , cons
     , decode
     , decodeFromParent
     , equals
@@ -16,6 +17,7 @@ module FullyQualifiedName exposing
     , namespaceOf
     , numSegments
     , segments
+    , snoc
     , toString
     , toUrlSegments
     , toUrlString
@@ -177,6 +179,16 @@ equals a b =
 append : FQN -> FQN -> FQN
 append (FQN a) (FQN b) =
     FQN (NEL.append a b)
+
+
+cons : String -> FQN -> FQN
+cons s (FQN segments_) =
+    FQN (NEL.cons s segments_)
+
+
+snoc : FQN -> String -> FQN
+snoc (FQN segments_) s =
+    FQN (NEL.append segments_ (NEL.fromElement s))
 
 
 {-| This is passed through a string as a suffix name can include
