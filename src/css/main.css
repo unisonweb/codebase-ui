@@ -8,6 +8,7 @@
   --border-radius-base: 0.25rem;
 
   /* -- Layers ------------------------------------------------------------- */
+  --layer-beneath: 0;
   --layer-base: 1;
   --layer-popover: 50;
   --layer-tooltip: 75;

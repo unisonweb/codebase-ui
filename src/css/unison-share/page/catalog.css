@@ -1,19 +1,57 @@
+.catalog-hero {
+  --color-catalog-hero-bg: var(--color-gray-darken-10);
+  --color-catalog-hero-bg-transparent: var(--color-gray-darken-10-transparent);
+  --color-catalog-hero-explore: var(--color-green-4);
+  --color-catalog-hero-discover: var(--color-blue-4);
+  --color-catalog-hero-share: var(--color-purple-4);
+
+  display: flex;
+  flex: 1;
+  height: 100%;
+  background-image: linear-gradient(
+      to bottom,
+      var(--color-catalog-hero-bg),
+      var(--color-catalog-hero-bg-transparent)
+    ),
+    url("../../../img/circle-grid-color.svg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: cover;
+  justify-content: center;
+  align-items: center;
+}
+
+.catalog-hero:after {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  content: " ";
+  background: var(--color-catalog-hero-bg);
+  opacity: 0.9;
+  z-index: var(--layer-beneath);
+}
+
 .catalog-hero h1 {
+  position: relative;
+  z-index: var(--layer-base);
   font-size: 2.375rem;
   font-weight: normal;
   text-align: center;
+  margin-bottom: 1.375rem;
 }
 
 .catalog-hero h1 .explore {
-  color: var(--color-green-4);
+  color: var(--color-catalog-hero-explore);
 }
 
 .catalog-hero h1 .discover {
-  color: var(--color-blue-4);
+  color: var(--color-catalog-hero-discover);
 }
 
 .catalog-hero h1 .share {
-  color: var(--color-purple-4);
+  color: var(--color-catalog-hero-share);
 }
 
 .catalog-hero .catalog-search {
@@ -24,28 +62,35 @@
   border-radius: var(--border-radius-base);
   position: absolute;
   bottom: -1.75rem;
-  border: 2px solid var(--color-gray-darken-10);
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.25);
+  border: 2px solid var(--color-catalog-hero-bg);
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: row;
   align-items: center;
-  padding: 1rem;
+  padding: 1rem 0 1rem 1rem;
   left: 50%;
   transform: translateX(-50%);
+  z-index: var(--layer-base);
+  transition: all 0.2s;
 }
 .catalog-hero .catalog-search input {
   width: 100%;
-  height: 1.5rem;
+  height: calc(3.5rem - 4px);
   margin-left: 0.75rem;
   font-size: 1.125rem;
+  border-radius: var(--border-radius-base);
 }
 .catalog-hero .catalog-search input:focus {
   outline: none;
 }
+.catalog-hero .catalog-search:focus-within {
+  border-color: var(--color-main-focus-fg);
+  box-shadow: 0 0 0 2px var(--color-main-focus-outline);
+}
 
 .catalog-hero .catalog-search .icon {
   font-size: 1.5rem;
-  color: var(--color-gray-lighten-30);
+  color: var(--color-main-subtle-fg);
 }
 
 .categories {
