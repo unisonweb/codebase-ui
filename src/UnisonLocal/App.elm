@@ -754,33 +754,37 @@ viewModal model =
 
 viewAppLoading : Html msg
 viewAppLoading =
-    PageLayout.view
-        (PageLayout.SidebarLayout
-            { header = AppHeader.appHeader (appTitle Nothing)
-            , sidebar = []
-            , sidebarToggled = False
-            , content = PageLayout.PageContent []
-            }
-        )
+    div [ id "app" ]
+        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
+        , PageLayout.view
+            (PageLayout.SidebarLayout
+                { sidebar = []
+                , sidebarToggled = False
+                , content = PageLayout.PageContent []
+                }
+            )
+        ]
 
 
 viewAppError : Http.Error -> Html msg
 viewAppError error =
-    PageLayout.view
-        (PageLayout.SidebarLayout
-            { header = AppHeader.appHeader (appTitle Nothing)
-            , sidebar = []
-            , sidebarToggled = False
-            , content =
-                PageLayout.PageContent
-                    [ div [ class "app-error" ]
-                        [ Icon.view Icon.warn
-                        , p [ title (Api.errorToString error) ]
-                            [ text "Unison Local could not be started." ]
+    div [ id "app" ]
+        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
+        , PageLayout.view
+            (PageLayout.SidebarLayout
+                { sidebar = []
+                , sidebarToggled = False
+                , content =
+                    PageLayout.PageContent
+                        [ div [ class "app-error" ]
+                            [ Icon.view Icon.warn
+                            , p [ title (Api.errorToString error) ]
+                                [ text "Unison Local could not be started." ]
+                            ]
                         ]
-                    ]
-            }
-        )
+                }
+            )
+        ]
 
 
 view : Model -> Browser.Document Msg
@@ -800,12 +804,11 @@ view model =
 
         page =
             PageLayout.SidebarLayout
-                { header = viewAppHeader model
-                , sidebar = viewMainSidebar model
+                { sidebar = viewMainSidebar model
                 , sidebarToggled = model.sidebarToggled
                 , content = PageLayout.PageContent [ pageContent ]
                 }
     in
     { title = "Unison Local"
-    , body = [ div [ id "app" ] [ PageLayout.view page, viewModal model ] ]
+    , body = [ div [ id "app" ] [ AppHeader.view (viewAppHeader model), PageLayout.view page, viewModal model ] ]
     }

@@ -6,12 +6,12 @@ import Env exposing (Env)
 import FullyQualifiedName as FQN
 import Html exposing (Html, a, div, h1, input, strong, text)
 import Html.Attributes exposing (class, href, placeholder)
+import Html.Events exposing (onInput)
 import Http
 import Project exposing (ProjectListing)
 import RemoteData exposing (RemoteData(..), WebData)
 import Set exposing (Set)
 import UI
-import UI.AppHeader exposing (AppHeader)
 import UI.Card as Card
 import UI.Icon as Icon
 import UI.PageLayout as PageLayout exposing (PageLayout)
@@ -133,8 +133,8 @@ viewCategory (Category category projects) =
         |> Card.view
 
 
-viewLoaded : AppHeader msg -> LoadedModel -> PageLayout msg
-viewLoaded appHeader _ =
+viewLoaded : LoadedModel -> PageLayout Msg
+viewLoaded model =
     let
         content =
             [ div [ class "categories" ]
@@ -165,8 +165,7 @@ viewLoaded appHeader _ =
             ]
     in
     PageLayout.HeroLayout
-        { header = appHeader
-        , hero =
+        { hero =
             PageLayout.PageHero
                 (div [ class "catalog-hero" ]
                     [ h1 []
@@ -180,37 +179,43 @@ viewLoaded appHeader _ =
                             ]
                         , div [] [ text "Projects, libraries, documention, terms, and types" ]
                         ]
-                    , div [ class "catalog-search" ] [ Icon.view Icon.search, input [ placeholder "Search for projects" ] [] ]
+                    , div [ class "catalog-search" ]
+                        [ Icon.view Icon.search
+                        , input
+                            [ placeholder "Search for projects"
+                            , onInput UpdateQuery
+                            ]
+                            []
+                        ]
                     ]
                 )
         , content = PageLayout.PageContent content
         }
 
 
-disabledPage : AppHeader msg -> Html msg -> PageLayout msg
-disabledPage appHeader content =
+disabledPage : Html Msg -> PageLayout Msg
+disabledPage content =
     PageLayout.HeroLayout
-        { header = appHeader
-        , hero = PageLayout.PageHero UI.nothing
+        { hero = PageLayout.PageHero UI.nothing
         , content = PageLayout.PageContent [ content ]
         }
 
 
-view : AppHeader msg -> Model -> Html msg
-view appHeader model =
+view : Model -> Html Msg
+view model =
     let
         page =
             case model of
                 NotAsked ->
-                    disabledPage appHeader (div [] [])
+                    disabledPage (div [] [])
 
                 Loading ->
-                    disabledPage appHeader (div [] [])
+                    disabledPage (div [] [])
 
                 Failure _ ->
-                    disabledPage appHeader (div [] [])
+                    disabledPage (div [] [])
 
                 Success m ->
-                    viewLoaded appHeader m
+                    viewLoaded m
     in
     PageLayout.view page
