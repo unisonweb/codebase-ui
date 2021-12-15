@@ -26,7 +26,7 @@ import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
 import UI.Icon as Icon
 import UI.Modal as Modal
-import UI.Page as Page
+import UI.PageLayout as PageLayout
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonLocal.Route as Route exposing (Route)
@@ -129,8 +129,15 @@ type Msg
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ env } as model) =
     case msg of
-        LinkClicked _ ->
-            ( model, Cmd.none )
+        LinkClicked urlRequest ->
+            case urlRequest of
+                Browser.Internal url ->
+                    ( model, Nav.pushUrl model.navKey (Url.toString url) )
+
+                -- External links are handled via target blank and never end up
+                -- here
+                Browser.External _ ->
+                    ( model, Cmd.none )
 
         UrlChanged url ->
             let
@@ -747,25 +754,25 @@ viewModal model =
 
 viewAppLoading : Html msg
 viewAppLoading =
-    Page.view
-        (Page.SidebarLayout
+    PageLayout.view
+        (PageLayout.SidebarLayout
             { header = AppHeader.appHeader (appTitle Nothing)
             , sidebar = []
             , sidebarToggled = False
-            , content = Page.PageContent []
+            , content = PageLayout.PageContent []
             }
         )
 
 
 viewAppError : Http.Error -> Html msg
 viewAppError error =
-    Page.view
-        (Page.SidebarLayout
+    PageLayout.view
+        (PageLayout.SidebarLayout
             { header = AppHeader.appHeader (appTitle Nothing)
             , sidebar = []
             , sidebarToggled = False
             , content =
-                Page.PageContent
+                PageLayout.PageContent
                     [ div [ class "app-error" ]
                         [ Icon.view Icon.warn
                         , p [ title (Api.errorToString error) ]
@@ -792,13 +799,13 @@ view model =
                     Html.map WorkspaceMsg (Workspace.view model.workspace)
 
         page =
-            Page.SidebarLayout
+            PageLayout.SidebarLayout
                 { header = viewAppHeader model
                 , sidebar = viewMainSidebar model
                 , sidebarToggled = model.sidebarToggled
-                , content = Page.PageContent [ pageContent ]
+                , content = PageLayout.PageContent [ pageContent ]
                 }
     in
     { title = "Unison Local"
-    , body = [ div [ id "app" ] [ Page.view page, viewModal model ] ]
+    , body = [ div [ id "app" ] [ PageLayout.view page, viewModal model ] ]
     }

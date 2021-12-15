@@ -1,4 +1,4 @@
-module UI.Page exposing (..)
+module UI.PageLayout exposing (..)
 
 import Html exposing (Html, div, header, section)
 import Html.Attributes exposing (class, classList)
@@ -6,18 +6,18 @@ import UI.AppHeader as AppHeader exposing (AppHeader)
 import UI.Sidebar as Sidebar
 
 
-type Hero msg
-    = Hero (Html msg)
+type PageHero msg
+    = PageHero (Html msg)
 
 
 type PageContent msg
     = PageContent (List (Html msg))
 
 
-type Page msg
+type PageLayout msg
     = HeroLayout
         { header : AppHeader msg
-        , hero : Hero msg
+        , hero : PageHero msg
         , content :
             PageContent msg
         }
@@ -34,8 +34,8 @@ type Page msg
 -- VIEW
 
 
-viewHero : Hero msg -> Html msg
-viewHero (Hero content) =
+viewHero : PageHero msg -> Html msg
+viewHero (PageHero content) =
     header [ class "page-hero" ] [ content ]
 
 
@@ -44,7 +44,7 @@ viewContent (PageContent content) =
     section [ class "page-content" ] content
 
 
-view : Page msg -> Html msg
+view : PageLayout msg -> Html msg
 view page =
     case page of
         HeroLayout { header, hero, content } ->

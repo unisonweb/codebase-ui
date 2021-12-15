@@ -1,5 +1,6 @@
 module UnisonShare.Route exposing
     ( Route(..)
+    , forProject
     , fromUrl
     , navigate
     , navigateToCurrentPerspective
@@ -22,6 +23,7 @@ import HashQualified exposing (HashQualified(..))
 import List.Nonempty as NEL
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
+import Project exposing (Project)
 import Route.Parsers as RP exposing (b, reference, s, slash)
 import Url exposing (Url)
 import Url.Builder exposing (relative)
@@ -171,6 +173,19 @@ perspectiveParams route =
 
         Definition nsRef _ ->
             Just nsRef
+
+
+
+-- Create
+
+
+forProject : Project a -> Route
+forProject project_ =
+    let
+        fqn =
+            FQN.cons (Project.ownerToString project_.owner) project_.name
+    in
+    Perspective (Perspective.ByNamespace Relative fqn)
 
 
 

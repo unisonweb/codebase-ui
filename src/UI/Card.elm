@@ -1,6 +1,6 @@
 module UI.Card exposing (..)
 
-import Html exposing (Html, div, text)
+import Html exposing (Html, div, h3, text)
 import Html.Attributes exposing (class)
 
 
@@ -40,5 +40,8 @@ view card_ =
             case card_.title of
                 Just t ->
                     h3 [ class "card-title" ] [ text t ] :: card_.items
+
+                Nothing ->
+                    card_.items
     in
     div [ class "card" ] items
