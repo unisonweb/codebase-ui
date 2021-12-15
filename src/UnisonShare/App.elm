@@ -646,41 +646,43 @@ viewMainSidebar model =
 
 viewAppLoading : Html msg
 viewAppLoading =
-    PageLayout.view
-        (PageLayout.FullLayout
-            { header = AppHeader.appHeader (appTitle Nothing)
-            , content = PageLayout.PageContent []
-            }
-        )
+    div [ id "app" ]
+        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
+        , PageLayout.view
+            (PageLayout.FullLayout
+                { content = PageLayout.PageContent [] }
+            )
+        ]
 
 
 viewAppError : Http.Error -> Html msg
 viewAppError error =
-    PageLayout.view
-        (PageLayout.FullLayout
-            { header = AppHeader.appHeader (appTitle Nothing)
-            , content =
-                PageLayout.PageContent
-                    [ div [ class "app-error" ]
-                        [ Icon.view Icon.warn
-                        , p [ title (Api.errorToString error) ]
-                            [ text "Unison Share could not be started." ]
+    div [ id "app" ]
+        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
+        , PageLayout.view
+            (PageLayout.FullLayout
+                { content =
+                    PageLayout.PageContent
+                        [ div [ class "app-error" ]
+                            [ Icon.view Icon.warn
+                            , p [ title (Api.errorToString error) ]
+                                [ text "Unison Share could not be started." ]
+                            ]
                         ]
-                    ]
-            }
-        )
+                }
+            )
+        ]
 
 
 view : Model -> Browser.Document Msg
 view model =
     let
         appHeader =
-            viewAppHeader model
+            AppHeader.view (viewAppHeader model)
 
         withSidebar pageContent =
             PageLayout.SidebarLayout
-                { header = viewAppHeader model
-                , sidebar = viewMainSidebar model
+                { sidebar = viewMainSidebar model
                 , sidebarToggled = model.sidebarToggled
                 , content = PageLayout.PageContent [ pageContent ]
                 }
@@ -688,12 +690,7 @@ view model =
         page =
             case model.route of
                 Route.Catalog ->
-                    let
-                        ( m, _ ) =
-                            Catalog.init model.env
-                    in
-                    -- Html.map CatalogMsg (Catalog.view appHeader m)
-                    Catalog.view appHeader m
+                    Html.map CatalogMsg (Catalog.view model.catalog)
 
                 Route.Perspective _ ->
                     Html.map PerspectiveLandingMsg
@@ -712,7 +709,8 @@ view model =
     { title = "Unison Share"
     , body =
         [ div [ id "app" ]
-            [ page
+            [ appHeader
+            , page
             , Html.map AppModalMsg (AppModal.view model.env model.appModal)
             ]
         ]
