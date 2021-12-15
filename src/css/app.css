@@ -30,6 +30,8 @@
   font-size: var(--font-size-medium);
   z-index: var(--layer-popover);
 
+  box-shadow: 0 -1px 0 var(--color-sidebar-border);
+
   --color-main-fg: var(--color-sidebar-fg);
   --color-main-subtle-fg: var(--color-sidebar-subtle-fg);
 
