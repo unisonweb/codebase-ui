@@ -10,6 +10,7 @@ module Api exposing
     , perform
     , projects
     , toRequest
+    , toTask
     , toUrl
     )
 
@@ -20,6 +21,7 @@ import Json.Decode as Decode
 import Perspective exposing (Perspective(..))
 import Regex
 import Syntax
+import Task exposing (Task)
 import Url.Builder exposing (QueryParameter, absolute, int, string)
 
 
@@ -29,6 +31,11 @@ import Url.Builder exposing (QueryParameter, absolute, int, string)
 
 type Endpoint
     = Endpoint (List String) (List QueryParameter)
+
+
+toUrl : ApiBasePath -> Endpoint -> String
+toUrl (ApiBasePath basePath) (Endpoint paths queryParams) =
+    absolute (basePath ++ paths) queryParams
 
 
 codebaseHash : Endpoint
@@ -107,11 +114,6 @@ type ApiRequest a msg
     = ApiRequest Endpoint (Decode.Decoder a) (Result Http.Error a -> msg)
 
 
-toUrl : ApiBasePath -> Endpoint -> String
-toUrl (ApiBasePath basePath) (Endpoint paths queryParams) =
-    absolute (basePath ++ paths) queryParams
-
-
 toRequest : Decode.Decoder a -> (Result Http.Error a -> msg) -> Endpoint -> ApiRequest a msg
 toRequest decoder toMsg endpoint =
     ApiRequest endpoint decoder toMsg
@@ -123,6 +125,46 @@ perform basePath (ApiRequest endpoint decoder toMsg) =
         { url = toUrl basePath endpoint
         , expect = Http.expectJson toMsg decoder
         }
+
+
+
+--- TASK ----------------------------------------------------------------------
+
+
+{-| TODO Perhaps this API should be merged into ApiRequest fully?? |
+-}
+toTask : ApiBasePath -> Decode.Decoder a -> Endpoint -> Task Http.Error a
+toTask basePath decoder endpoint =
+    Http.task
+        { method = "GET"
+        , headers = []
+        , url = toUrl basePath endpoint
+        , body = Http.emptyBody
+        , resolver = Http.stringResolver (httpJsonBodyResolver decoder)
+        , timeout = Nothing
+        }
+
+
+httpJsonBodyResolver : Decode.Decoder a -> Http.Response String -> Result Http.Error a
+httpJsonBodyResolver decoder resp =
+    case resp of
+        Http.GoodStatus_ _ s ->
+            Decode.decodeString decoder s
+                |> Result.mapError (Decode.errorToString >> Http.BadBody)
+
+        Http.BadUrl_ s ->
+            Err (Http.BadUrl s)
+
+        Http.Timeout_ ->
+            Err Http.Timeout
+
+        Http.NetworkError_ ->
+            Err Http.NetworkError
+
+        Http.BadStatus_ m s ->
+            Decode.decodeString decoder s
+                -- just trying; if our decoder understands the response body, great
+                |> Result.mapError (\_ -> Http.BadStatus m.statusCode)
 
 
 

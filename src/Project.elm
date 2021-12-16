@@ -1,7 +1,8 @@
 module Project exposing (..)
 
-import FullyQualifiedName exposing (FQN)
-import Json.Decode as Decode
+import FullyQualifiedName as FQN exposing (FQN)
+import Hash exposing (Hash)
+import Json.Decode as Decode exposing (field, string)
 
 
 type Owner
@@ -9,11 +10,16 @@ type Owner
 
 
 type alias Project a =
-    { a | owner : Owner, name : FQN }
+    { a | owner : Owner, name : FQN, hash : Hash }
 
 
 type alias ProjectListing =
     Project {}
+
+
+slug : Project a -> FQN
+slug project =
+    FQN.cons (ownerToString project.owner) project.name
 
 
 ownerToString : Owner -> String
@@ -21,6 +27,23 @@ ownerToString (Owner o) =
     o
 
 
-decodeList : Decode.Decoder (List ProjectListing)
-decodeList =
-    Decode.succeed []
+
+-- Decode
+
+
+decodeListing : Decode.Decoder ProjectListing
+decodeListing =
+    let
+        mk owner name hash =
+            { owner = owner, name = name, hash = hash }
+    in
+    Decode.map3
+        mk
+        (field "owner" (Decode.map Owner string))
+        (field "name" FQN.decode)
+        (field "hash" Hash.decode)
+
+
+decodeListings : Decode.Decoder (List ProjectListing)
+decodeListings =
+    Decode.list decodeListing

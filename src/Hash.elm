@@ -13,6 +13,7 @@ module Hash exposing
     , toShortString
     , toString
     , toUrlString
+    , unsafeFromString
     , urlParser
     , urlPrefix
     )
@@ -92,6 +93,14 @@ fromString raw =
 
     else
         Nothing
+
+
+{-| !! Don't use this function outside of testing. It provides no guarantees
+for the correctness of the Hash.
+-}
+unsafeFromString : String -> Hash
+unsafeFromString raw =
+    Hash raw
 
 
 isRawHash : String -> Bool
