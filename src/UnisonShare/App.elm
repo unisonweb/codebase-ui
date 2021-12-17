@@ -76,7 +76,7 @@ init env route navKey =
                 |> Maybe.map (Api.perform env.apiBasePath)
                 |> Maybe.withDefault Cmd.none
 
-        ( catalog, _ ) =
+        ( catalog, catalogCmd ) =
             Catalog.init env
 
         model =
@@ -96,6 +96,7 @@ init env route navKey =
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
         , Cmd.map WorkspaceMsg workspaceCmd
+        , Cmd.map CatalogMsg catalogCmd
         , fetchNamespaceDetailsCmd
         ]
     )
@@ -153,7 +154,7 @@ update msg ({ env } as model) =
                         ( catalog, cmd ) =
                             Catalog.init model.env
                     in
-                    ( { model | catalog = catalog }, Cmd.map CatalogMsg cmd )
+                    ( { model2 | catalog = catalog }, Cmd.map CatalogMsg cmd )
 
                 Route.Definition params ref ->
                     let

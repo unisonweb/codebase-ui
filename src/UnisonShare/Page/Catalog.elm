@@ -1,33 +1,26 @@
 module UnisonShare.Page.Catalog exposing (..)
 
--- import Api
-
+import Api
 import Env exposing (Env)
 import FullyQualifiedName as FQN
 import Html exposing (Html, a, div, h1, input, strong, text)
-import Html.Attributes exposing (class, href, placeholder)
+import Html.Attributes exposing (autofocus, class, href, placeholder)
 import Html.Events exposing (onInput)
 import Http
+import Perspective
 import Project exposing (ProjectListing)
 import RemoteData exposing (RemoteData(..), WebData)
-import Set exposing (Set)
+import Task
 import UI
 import UI.Card as Card
 import UI.Icon as Icon
 import UI.PageLayout as PageLayout exposing (PageLayout)
+import UnisonShare.Catalog as Catalog exposing (Catalog)
 import UnisonShare.Route as Route
 
 
 
 -- MODEL
-
-
-type Category
-    = Category String (List ProjectListing)
-
-
-type Catalog
-    = Catalog (Set Category)
 
 
 type alias LoadedModel =
@@ -41,27 +34,29 @@ type alias Model =
 
 
 init : Env -> ( Model, Cmd Msg )
-init _ =
-    {-
-       let
-           fetchCmd =
-               Api.projects
-                   |> Api.toRequest Project.decodeList FetchProjectsFinished
-                   |> Api.perform env.apiBasePath
-       in
-       ( Loading, fetchCmd )
-    -}
-    let
-        categories =
-            Set.empty
+init env =
+    ( Loading, fetchCatalog env )
 
-        model =
-            Success
-                { catalog = Catalog categories
-                , query = ""
-                }
+
+{-| Fetch the Catalog in sequence by first fetching the doc, then the
+projectListings and finally merging them into a Catalog
+-}
+fetchCatalog : Env -> Cmd Msg
+fetchCatalog env =
+    let
+        perspective =
+            Perspective.toCodebasePerspective env.perspective
     in
-    ( model, Cmd.none )
+    Api.getDefinition perspective [ "_catalog" ]
+        |> Api.toTask env.apiBasePath Catalog.decodeCatalogMask
+        |> Task.andThen
+            (\catalog ->
+                Api.projects
+                    |> Api.toTask env.apiBasePath Project.decodeListings
+                    |> Task.map (\projects -> ( catalog, projects ))
+            )
+        |> Task.map (\( cm, ps ) -> Catalog.catalog cm ps)
+        |> Task.attempt FetchCatalogFinished
 
 
 
@@ -71,22 +66,19 @@ init _ =
 type Msg
     = UpdateQuery String
     | ClearQuery
-    | FetchProjectsFinished (Result Http.Error (List ProjectListing))
+    | NoOp
+    | FetchCatalogFinished (Result Http.Error Catalog)
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model ) of
-        ( FetchProjectsFinished projectsResult, _ ) ->
-            case projectsResult of
+        ( FetchCatalogFinished catalogResult, _ ) ->
+            case catalogResult of
                 Err e ->
                     ( Failure e, Cmd.none )
 
-                Ok projects ->
-                    let
-                        catalog =
-                            projectsToCatalog projects
-                    in
+                Ok catalog ->
                     ( Success { query = "", catalog = catalog }, Cmd.none )
 
         ( UpdateQuery query, Success m ) ->
@@ -97,11 +89,6 @@ update msg model =
 
         _ ->
             ( model, Cmd.none )
-
-
-projectsToCatalog : List ProjectListing -> Catalog
-projectsToCatalog _ =
-    Catalog Set.empty
 
 
 
@@ -122,8 +109,8 @@ viewProjectListing project =
     a [ class "project-listing", href url ] [ FQN.view slug ]
 
 
-viewCategory : Category -> Html msg
-viewCategory (Category category projects) =
+viewCategory : ( String, List ProjectListing ) -> Html msg
+viewCategory ( category, projects ) =
     let
         projectLinks =
             projects
@@ -136,33 +123,10 @@ viewCategory (Category category projects) =
 viewLoaded : LoadedModel -> PageLayout Msg
 viewLoaded model =
     let
-        content =
-            [ div [ class "categories" ]
-                [ viewCategory
-                    (Category "Featured"
-                        [ { owner = Project.Owner "unison", name = FQN.fromString "base" }
-                        , { owner = Project.Owner "unison", name = FQN.fromString "distributed" }
-                        ]
-                    )
-                , viewCategory
-                    (Category "Parsers & Text Manipulation"
-                        [ { owner = Project.Owner "rlmark", name = FQN.fromString "parsing" }
-                        , { owner = Project.Owner "stew", name = FQN.fromString "json" }
-                        ]
-                    )
-                , viewCategory (Category "Databases" [])
-                , viewCategory (Category "Datatypes" [])
-                , viewCategory (Category "Math" [])
-                , viewCategory (Category "Instrumentation" [])
-                , viewCategory (Category "Multimedia" [])
-                , viewCategory
-                    (Category "Networking"
-                        [ { owner = Project.Owner "unison", name = FQN.fromString "http" }
-                        ]
-                    )
-                , viewCategory (Category "Utilities" [])
-                ]
-            ]
+        categories =
+            model.catalog
+                |> Catalog.toList
+                |> List.map viewCategory
     in
     PageLayout.HeroLayout
         { hero =
@@ -184,12 +148,13 @@ viewLoaded model =
                         , input
                             [ placeholder "Search for projects"
                             , onInput UpdateQuery
+                            , autofocus True
                             ]
                             []
                         ]
                     ]
                 )
-        , content = PageLayout.PageContent content
+        , content = PageLayout.PageContent [ div [ class "categories" ] categories ]
         }
 
 
