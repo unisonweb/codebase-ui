@@ -3,9 +3,9 @@ module UnisonShare.Page.Catalog exposing (..)
 import Api
 import Env exposing (Env)
 import FullyQualifiedName as FQN
-import Html exposing (Html, a, div, h1, input, strong, text)
+import Html exposing (Html, a, div, h1, input, span, strong, text)
 import Html.Attributes exposing (autofocus, class, href, placeholder)
-import Html.Events exposing (onInput)
+import Html.Events exposing (onBlur, onFocus, onInput)
 import Http
 import Perspective
 import Project exposing (ProjectListing)
@@ -25,6 +25,7 @@ import UnisonShare.Route as Route
 
 type alias LoadedModel =
     { query : String
+    , hasFocus : Bool
     , catalog : Catalog
     }
 
@@ -65,6 +66,7 @@ fetchCatalog env =
 
 type Msg
     = UpdateQuery String
+    | UpdateFocus Bool
     | ClearQuery
     | NoOp
     | FetchCatalogFinished (Result Http.Error Catalog)
@@ -79,7 +81,10 @@ update msg model =
                     ( Failure e, Cmd.none )
 
                 Ok catalog ->
-                    ( Success { query = "", catalog = catalog }, Cmd.none )
+                    ( Success { query = "", hasFocus = True, catalog = catalog }, Cmd.none )
+
+        ( UpdateFocus hasFocus, Success m ) ->
+            ( Success { m | hasFocus = hasFocus }, Cmd.none )
 
         ( UpdateQuery query, Success m ) ->
             ( Success { m | query = query }, Cmd.none )
@@ -95,18 +100,18 @@ update msg model =
 -- VIEW
 
 
+projectUrl : ProjectListing -> String
+projectUrl =
+    Route.forProject >> Route.toUrlString
+
+
 viewProjectListing : ProjectListing -> Html msg
 viewProjectListing project =
     let
         slug =
-            FQN.cons (Project.ownerToString project.owner) project.name
-
-        url =
-            project
-                |> Route.forProject
-                |> Route.toUrlString
+            Project.slug project
     in
-    a [ class "project-listing", href url ] [ FQN.view slug ]
+    a [ class "project-listing", href (projectUrl project) ] [ FQN.view slug ]
 
 
 viewCategory : ( String, List ProjectListing ) -> Html msg
@@ -120,6 +125,37 @@ viewCategory ( category, projects ) =
         |> Card.view
 
 
+viewSearchResult : ( ProjectListing, String ) -> Html msg
+viewSearchResult ( project, category ) =
+    a
+        [ class "search-result", href (projectUrl project) ]
+        [ project |> Project.slug |> FQN.view
+        , span [ class "category" ] [ text category ]
+        ]
+
+
+viewSearchResults : LoadedModel -> Html msg
+viewSearchResults model =
+    if String.length model.query > 3 then
+        let
+            results =
+                model.query
+                    |> Catalog.search model.catalog
+                    |> List.map viewSearchResult
+
+            resultsPane =
+                if List.isEmpty results then
+                    [ div [ class "empty-state" ] [ text ("No matching projects found for \"" ++ model.query ++ "\"") ] ]
+
+                else
+                    results
+        in
+        div [ class "search-results" ] resultsPane
+
+    else
+        UI.nothing
+
+
 viewLoaded : LoadedModel -> PageLayout Msg
 viewLoaded model =
     let
@@ -127,6 +163,13 @@ viewLoaded model =
             model.catalog
                 |> Catalog.toList
                 |> List.map viewCategory
+
+        searchResults =
+            if model.hasFocus then
+                viewSearchResults model
+
+            else
+                UI.nothing
     in
     PageLayout.HeroLayout
         { hero =
@@ -144,13 +187,18 @@ viewLoaded model =
                         , div [] [ text "Projects, libraries, documention, terms, and types" ]
                         ]
                     , div [ class "catalog-search" ]
-                        [ Icon.view Icon.search
-                        , input
-                            [ placeholder "Search for projects"
-                            , onInput UpdateQuery
-                            , autofocus True
+                        [ div [ class "search-field" ]
+                            [ Icon.view Icon.search
+                            , input
+                                [ placeholder "Search for projects"
+                                , onInput UpdateQuery
+                                , autofocus True
+                                , onBlur (UpdateFocus False)
+                                , onFocus (UpdateFocus True)
+                                ]
+                                []
                             ]
-                            []
+                        , searchResults
                         ]
                     ]
                 )

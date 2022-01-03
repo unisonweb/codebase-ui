@@ -22,6 +22,11 @@ slug project =
     FQN.cons (ownerToString project.owner) project.name
 
 
+slugString : Project a -> String
+slugString project =
+    project |> slug |> FQN.toString
+
+
 ownerToString : Owner -> String
 ownerToString (Owner o) =
     o
