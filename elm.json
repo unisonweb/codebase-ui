@@ -20,6 +20,7 @@
             "elm-community/list-extra": "8.2.4",
             "elm-community/maybe-extra": "5.2.0",
             "elm-community/string-extra": "4.0.1",
+            "j-maas/elm-ordered-containers": "1.0.0",
             "krisajenkins/remotedata": "6.0.1",
             "mgold/elm-nonempty-list": "4.1.0",
             "stoeffel/set-extra": "1.2.3",

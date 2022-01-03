@@ -12,9 +12,9 @@ module UnisonShare.Catalog.CatalogMask exposing
     )
 
 import Definition.Doc as Doc exposing (Doc)
-import Dict exposing (Dict)
 import Json.Decode as Decode exposing (field, index)
 import List.Extra as ListE
+import OrderedDict exposing (OrderedDict)
 
 
 {-| CatalogMask is used to create the Catalog and map ProjectListings to their
@@ -24,7 +24,7 @@ Indexed by project to category "unison.http" -> "Web & Networking"
 
 -}
 type CatalogMask
-    = CatalogMask (Dict String String)
+    = CatalogMask (OrderedDict String String)
 
 
 
@@ -33,12 +33,12 @@ type CatalogMask
 
 empty : CatalogMask
 empty =
-    CatalogMask Dict.empty
+    CatalogMask OrderedDict.empty
 
 
 fromList : List ( String, String ) -> CatalogMask
 fromList categories_ =
-    CatalogMask (Dict.fromList categories_)
+    CatalogMask (OrderedDict.fromList categories_)
 
 
 {-| For right now, a CatalogMask is fetched as a Doc from the server and as
@@ -78,27 +78,27 @@ fromDoc doc =
 
 isEmpty : CatalogMask -> Bool
 isEmpty (CatalogMask mask) =
-    Dict.isEmpty mask
+    OrderedDict.isEmpty mask
 
 
 categoryOf : String -> CatalogMask -> Maybe String
 categoryOf projectName (CatalogMask mask) =
-    Dict.get projectName mask
+    OrderedDict.get projectName mask
 
 
 categories : CatalogMask -> List String
 categories (CatalogMask mask) =
-    Dict.values mask |> ListE.unique
+    OrderedDict.values mask |> ListE.unique
 
 
 projectNames : CatalogMask -> List String
 projectNames (CatalogMask mask) =
-    Dict.keys mask
+    OrderedDict.keys mask
 
 
 toList : CatalogMask -> List ( String, String )
 toList (CatalogMask mask) =
-    Dict.toList mask
+    OrderedDict.toList mask
 
 
 

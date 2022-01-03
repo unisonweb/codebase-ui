@@ -11,8 +11,8 @@ fromDoc =
     describe "CatalogMask.fromDoc"
         [ test "Creates a CatalogMask from a Doc" <|
             \_ ->
-                Expect.equal (List.sort rawMask)
-                    (CatalogMask.fromDoc doc |> CatalogMask.toList |> List.sort)
+                Expect.equal rawMask
+                    (CatalogMask.fromDoc doc |> CatalogMask.toList)
         ]
 
 
@@ -25,8 +25,8 @@ fromList =
                     catalogMask =
                         CatalogMask.fromList rawMask
                 in
-                Expect.equal (List.sort rawMask)
-                    (CatalogMask.toList catalogMask |> List.sort)
+                Expect.equal rawMask
+                    (CatalogMask.toList catalogMask)
         ]
 
 
@@ -53,14 +53,12 @@ categories =
                         CatalogMask.fromList rawMask
                 in
                 Expect.equal
-                    (List.sort
-                        [ "Featured"
-                        , "Web & Networking"
-                        , "Parsers & Text Manipulation"
-                        , "Datatypes"
-                        ]
-                    )
-                    (CatalogMask.categories catalogMask |> List.sort)
+                    [ "Featured"
+                    , "Web & Networking"
+                    , "Parsers & Text Manipulation"
+                    , "Datatypes"
+                    ]
+                    (CatalogMask.categories catalogMask)
         ]
 
 
@@ -74,15 +72,13 @@ projectNames =
                         CatalogMask.fromList rawMask
                 in
                 Expect.equal
-                    (List.sort
-                        [ "unison.base"
-                        , "unison.distributed"
-                        , "unison.http"
-                        , "hojberg.textExtra"
-                        , "hojberg.nanoid"
-                        ]
-                    )
-                    (CatalogMask.projectNames catalogMask |> List.sort)
+                    [ "unison.base"
+                    , "unison.distributed"
+                    , "unison.http"
+                    , "hojberg.textExtra"
+                    , "hojberg.nanoid"
+                    ]
+                    (CatalogMask.projectNames catalogMask)
         ]
 
 
