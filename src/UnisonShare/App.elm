@@ -126,8 +126,8 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ env } as model) =
-    case msg of
-        LinkClicked urlRequest ->
+    case ( model.route, msg ) of
+        ( _, LinkClicked urlRequest ) ->
             case urlRequest of
                 Browser.Internal url ->
                     ( model, Nav.pushUrl model.navKey (Url.toString url) )
@@ -137,7 +137,7 @@ update msg ({ env } as model) =
                 Browser.External _ ->
                     ( model, Cmd.none )
 
-        UrlChanged url ->
+        ( _, UrlChanged url ) ->
             let
                 route =
                     Route.fromUrl env.basePath url
@@ -172,10 +172,10 @@ update msg ({ env } as model) =
                 Route.Perspective params ->
                     fetchPerspectiveAndCodebaseTree env.perspective { model2 | env = newEnv params }
 
-        ChangePerspective perspective ->
+        ( _, ChangePerspective perspective ) ->
             navigateToPerspective model perspective
 
-        FetchPerspectiveNamespaceDetailsFinished fqn details ->
+        ( _, FetchPerspectiveNamespaceDetailsFinished fqn details ) ->
             let
                 perspective =
                     case env.perspective of
@@ -194,24 +194,24 @@ update msg ({ env } as model) =
             in
             ( { model | env = nextEnv }, Cmd.none )
 
-        Keydown event ->
+        ( _, Keydown event ) ->
             keydown model event
 
-        OpenDefinition ref ->
+        ( _, OpenDefinition ref ) ->
             navigateToDefinition model ref
 
-        ShowModal modal ->
+        ( _, ShowModal modal ) ->
             let
                 ( appModal, cmd ) =
                     AppModal.show modal
             in
             ( { model | appModal = appModal }, Cmd.map AppModalMsg cmd )
 
-        ToggleSidebar ->
+        ( _, ToggleSidebar ) ->
             ( { model | sidebarToggled = not model.sidebarToggled }, Cmd.none )
 
         -- Sub msgs
-        AppModalMsg amMsg ->
+        ( _, AppModalMsg amMsg ) ->
             let
                 ( am, amCmd, out ) =
                     AppModal.update env amMsg model.appModal
@@ -226,27 +226,34 @@ update msg ({ env } as model) =
             in
             ( newModel, Cmd.batch [ Cmd.map AppModalMsg amCmd, cmd ] )
 
-        CatalogMsg cMsg ->
+        ( Route.Catalog, CatalogMsg cMsg ) ->
             let
                 ( catalog, cmd ) =
                     Catalog.update cMsg model.catalog
             in
             ( { model | catalog = catalog }, Cmd.map CatalogMsg cmd )
 
-        WorkspaceMsg wMsg ->
-            let
-                ( workspace, wCmd, outMsg ) =
-                    Workspace.update env wMsg model.workspace
+        ( _, WorkspaceMsg wMsg ) ->
+            -- TODO: Clean this up, there should be a top level Project route
+            -- instead of 2 separate workspace routes (perspective and
+            -- definition)
+            if model.route /= Route.Catalog then
+                let
+                    ( workspace, wCmd, outMsg ) =
+                        Workspace.update env wMsg model.workspace
 
-                model2 =
-                    { model | workspace = workspace }
+                    model2 =
+                        { model | workspace = workspace }
 
-                ( model3, cmd ) =
-                    handleWorkspaceOutMsg model2 outMsg
-            in
-            ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
+                    ( model3, cmd ) =
+                        handleWorkspaceOutMsg model2 outMsg
+                in
+                ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
 
-        PerspectiveLandingMsg rMsg ->
+            else
+                ( model, Cmd.none )
+
+        ( _, PerspectiveLandingMsg rMsg ) ->
             let
                 ( perspectiveLanding, outMsg ) =
                     PerspectiveLanding.update rMsg model.perspectiveLanding
@@ -264,7 +271,7 @@ update msg ({ env } as model) =
                 PerspectiveLanding.None ->
                     ( model2, Cmd.none )
 
-        CodebaseTreeMsg cMsg ->
+        ( _, CodebaseTreeMsg cMsg ) ->
             let
                 ( codebaseTree, cCmd, outMsg ) =
                     CodebaseTree.update env cMsg model.codebaseTree
@@ -292,12 +299,15 @@ update msg ({ env } as model) =
             in
             ( model3, Cmd.batch [ cmd, Cmd.map CodebaseTreeMsg cCmd ] )
 
-        KeyboardShortcutMsg kMsg ->
+        ( _, KeyboardShortcutMsg kMsg ) ->
             let
                 ( keyboardShortcut, cmd ) =
                     KeyboardShortcut.update kMsg model.keyboardShortcut
             in
             ( { model | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd )
+
+        _ ->
+            ( model, Cmd.none )
 
 
 
@@ -392,24 +402,11 @@ keydown model keyboardEvent =
             ( { model | sidebarToggled = not model.sidebarToggled }, Cmd.none )
     in
     case shortcut of
-        KeyboardShortcut.Chord Ctrl (K _) ->
-            showFinder model Nothing
-
-        KeyboardShortcut.Chord Meta (K _) ->
-            if model.env.operatingSystem == Env.MacOS then
-                showFinder model Nothing
-
-            else
-                noOp
-
         KeyboardShortcut.Chord Ctrl (B _) ->
             toggleSidebar
 
         KeyboardShortcut.Chord Meta (B _) ->
             toggleSidebar
-
-        KeyboardShortcut.Sequence _ ForwardSlash ->
-            showFinder model Nothing
 
         KeyboardShortcut.Chord Shift QuestionMark ->
             let

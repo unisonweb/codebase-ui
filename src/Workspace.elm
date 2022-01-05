@@ -175,7 +175,7 @@ update env msg ({ workspaceItems } as model) =
                     KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
 
                 ( nextModel, cmd, out ) =
-                    handleKeyboardShortcut { model | keyboardShortcut = keyboardShortcut } shortcut
+                    handleKeyboardShortcut env { model | keyboardShortcut = keyboardShortcut } shortcut
             in
             ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ], out )
 
@@ -313,8 +313,8 @@ openDefinitionsFocusToOutMsg openDefs =
         |> Maybe.withDefault Emptied
 
 
-handleKeyboardShortcut : Model -> KeyboardShortcut -> ( Model, Cmd Msg, OutMsg )
-handleKeyboardShortcut ({ workspaceItems } as model) shortcut =
+handleKeyboardShortcut : Env -> Model -> KeyboardShortcut -> ( Model, Cmd Msg, OutMsg )
+handleKeyboardShortcut env ({ workspaceItems } as model) shortcut =
     let
         scrollToCmd =
             WorkspaceItems.focus
@@ -351,6 +351,19 @@ handleKeyboardShortcut ({ workspaceItems } as model) shortcut =
             ( { model | workspaceItems = next }, scrollToCmd next, openDefinitionsFocusToOutMsg next )
     in
     case shortcut of
+        KeyboardShortcut.Chord Ctrl (K _) ->
+            ( model, Cmd.none, ShowFinderRequest Nothing )
+
+        KeyboardShortcut.Chord Meta (K _) ->
+            if env.operatingSystem == Env.MacOS then
+                ( model, Cmd.none, ShowFinderRequest Nothing )
+
+            else
+                ( model, Cmd.none, None )
+
+        Sequence _ ForwardSlash ->
+            ( model, Cmd.none, ShowFinderRequest Nothing )
+
         Chord Alt ArrowDown ->
             moveDown
 

@@ -384,24 +384,11 @@ keydown model keyboardEvent =
             ( { model | sidebarToggled = not model.sidebarToggled }, Cmd.none )
     in
     case shortcut of
-        KeyboardShortcut.Chord Ctrl (K _) ->
-            showFinder model Nothing
-
-        KeyboardShortcut.Chord Meta (K _) ->
-            if model.env.operatingSystem == Env.MacOS then
-                showFinder model Nothing
-
-            else
-                noOp
-
         KeyboardShortcut.Chord Ctrl (B _) ->
             toggleSidebar
 
         KeyboardShortcut.Chord Meta (B _) ->
             toggleSidebar
-
-        KeyboardShortcut.Sequence _ ForwardSlash ->
-            showFinder model Nothing
 
         KeyboardShortcut.Chord Shift QuestionMark ->
             ( { model | modal = HelpModal }, Cmd.none )
