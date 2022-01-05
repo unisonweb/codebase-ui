@@ -194,11 +194,17 @@ viewListingRow clickMsg label_ category icon =
                 |> Maybe.map (\msg -> a [ containerClass, onClick msg ])
                 |> Maybe.withDefault (span [ containerClass ])
     in
-    container
-        [ Icon.view icon
-        , viewListingLabel label_
-        , span [ class "definition-category" ] [ text category ]
-        ]
+    -- TODO: Temporary work around to avoid the hidden catalog definition to
+    -- show up on Share while the catalog page is being worked on
+    if label_ == "_catalog" then
+        UI.nothing
+
+    else
+        container
+            [ Icon.view icon
+            , viewListingLabel label_
+            , span [ class "definition-category" ] [ text category ]
+            ]
 
 
 viewListingLabel : String -> Html msg
