@@ -7,7 +7,9 @@ import Html.Events exposing (onClick)
 
 type Click msg
     = ExternalHref String
+    | Href String -- Internal route
     | OnClick msg
+    | Disabled
 
 
 attrs : Click msg -> List (Attribute msg)
@@ -16,8 +18,14 @@ attrs click =
         ExternalHref href_ ->
             [ href href_, rel "noopener", target "_blank" ]
 
+        Href href_ ->
+            [ href href_ ]
+
         OnClick msg ->
             [ onClick msg ]
+
+        Disabled ->
+            []
 
 
 view : List (Attribute msg) -> List (Html msg) -> Click msg -> Html msg
