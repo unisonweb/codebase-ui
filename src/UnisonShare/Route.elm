@@ -1,5 +1,6 @@
 module UnisonShare.Route exposing
-    ( Route(..)
+    ( ProjectRoute(..)
+    , Route(..)
     , forProject
     , fromUrl
     , navigate
@@ -73,10 +74,14 @@ import Url.Builder exposing (relative)
 -}
 
 
+type ProjectRoute
+    = ProjectRoot
+    | ProjectDefinition Reference
+
+
 type Route
     = Catalog
-    | Perspective PerspectiveParams
-    | Definition PerspectiveParams Reference
+    | Project PerspectiveParams ProjectRoute
 
 
 updatePerspectiveParams : Route -> PerspectiveParams -> Route
@@ -85,11 +90,11 @@ updatePerspectiveParams route params =
         Catalog ->
             Catalog
 
-        Perspective _ ->
-            Perspective params
+        Project _ ProjectRoot ->
+            Project params ProjectRoot
 
-        Definition _ ref ->
-            Definition params ref
+        Project _ (ProjectDefinition ref) ->
+            Project params (ProjectDefinition ref)
 
 
 
@@ -103,12 +108,12 @@ catalog =
 
 perspective : Parser Route
 perspective =
-    succeed Perspective |. slash |= RP.perspectiveParams |. end
+    succeed (\pp -> Project pp ProjectRoot) |. slash |= RP.perspectiveParams |. end
 
 
 definition : Parser Route
 definition =
-    succeed Definition |. slash |= RP.perspectiveParams |. slash |= reference |. end
+    succeed (\pp r -> Project pp (ProjectDefinition r)) |. slash |= RP.perspectiveParams |. slash |= reference |. end
 
 
 toRoute : Parser Route
@@ -149,7 +154,7 @@ fromUrl basePath url =
                 "/" ++ path
 
         parse url_ =
-            Result.withDefault (Perspective (ByCodebase Relative)) (Parser.run toRoute url_)
+            Result.withDefault (Project (ByCodebase Relative) ProjectRoot) (Parser.run toRoute url_)
     in
     url
         |> .path
@@ -168,11 +173,8 @@ perspectiveParams route =
         Catalog ->
             Nothing
 
-        Perspective nsRef ->
-            Just nsRef
-
-        Definition nsRef _ ->
-            Just nsRef
+        Project pp _ ->
+            Just pp
 
 
 
@@ -185,7 +187,7 @@ forProject project_ =
         fqn =
             FQN.cons (Project.ownerToString project_.owner) project_.name
     in
-    Perspective (Perspective.ByNamespace Relative fqn)
+    Project (Perspective.ByNamespace Relative fqn) ProjectRoot
 
 
 
@@ -200,7 +202,7 @@ toDefinition oldRoute ref =
                 |> perspectiveParams
                 |> Maybe.withDefault (ByCodebase Relative)
     in
-    Definition params ref
+    Project params (ProjectDefinition ref)
 
 
 toUrlString : Route -> String
@@ -253,10 +255,10 @@ toUrlString route =
                 Catalog ->
                     [ "catalog" ]
 
-                Perspective pp ->
+                Project pp ProjectRoot ->
                     perspectiveParamsToPath pp False
 
-                Definition pp ref ->
+                Project pp (ProjectDefinition ref) ->
                     case ref of
                         TypeReference hq ->
                             perspectiveParamsToPath pp True ++ ("types" :: hqToPath hq)
@@ -284,9 +286,13 @@ navigate navKey route =
         |> Nav.pushUrl navKey
 
 
+
+-- TODO: this should go away in UnisonShare
+
+
 navigateToPerspective : Nav.Key -> PerspectiveParams -> Cmd msg
 navigateToPerspective navKey perspectiveParams_ =
-    navigate navKey (Perspective perspectiveParams_)
+    navigate navKey (Project perspectiveParams_ ProjectRoot)
 
 
 navigateToCurrentPerspective : Nav.Key -> Route -> Cmd msg
@@ -310,6 +316,10 @@ navigateToDefinition navKey currentRoute reference =
     navigate navKey (toDefinition currentRoute reference)
 
 
+
+-- TODO: This should go away in UnisonShare
+
+
 replacePerspective : Nav.Key -> PerspectiveParams -> Route -> Cmd msg
 replacePerspective navKey perspectiveParams_ oldRoute =
     let
@@ -318,10 +328,10 @@ replacePerspective navKey perspectiveParams_ oldRoute =
                 Catalog ->
                     Catalog
 
-                Perspective _ ->
-                    Perspective perspectiveParams_
+                Project _ ProjectRoot ->
+                    Project perspectiveParams_ ProjectRoot
 
-                Definition _ ref ->
-                    Definition perspectiveParams_ ref
+                Project _ (ProjectDefinition ref) ->
+                    Project perspectiveParams_ (ProjectDefinition ref)
     in
     navigate navKey newRoute

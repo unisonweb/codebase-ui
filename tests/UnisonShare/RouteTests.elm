@@ -7,31 +7,44 @@ import Hash exposing (Hash)
 import HashQualified as HQ
 import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
 import Test exposing (..)
-import UnisonShare.Route as Route
+import UnisonShare.Route as Route exposing (ProjectRoute(..), Route(..))
 import Url exposing (Url)
 
 
-perspectiveRoute : Test
-perspectiveRoute =
-    describe "Route.fromUrl : perspective route"
-        [ test "Matches root to relative codease perspective" <|
+catalogRoute : Test
+catalogRoute =
+    describe "Route.fromUrl : catalog route"
+        [ test "Matches /catalog to Catalog" <|
             \_ ->
                 let
                     url =
-                        mkUrl "/"
-
-                    expected =
-                        Route.Perspective (ByCodebase Relative)
+                        mkUrl "/catalog"
                 in
-                Expect.equal expected (Route.fromUrl "" url)
-        , test "Matches a codebase relative perspective" <|
+                Expect.equal Catalog (Route.fromUrl "" url)
+
+        {- TODO enable when cutting over to catalog
+           , test "Matches root to Catalog" <|
+               \_ ->
+                   let
+                       url =
+                           mkUrl "/"
+                   in
+                   Expect.equal Catalog (Route.fromUrl "" url)
+        -}
+        ]
+
+
+projectRootRoute : Test
+projectRootRoute =
+    describe "Route.fromUrl : project root route"
+        [ test "Matches a codebase relative perspective" <|
             \_ ->
                 let
                     url =
                         mkUrl "/latest"
 
                     expected =
-                        Route.Perspective (ByCodebase Relative)
+                        Project (ByCodebase Relative) ProjectRoot
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase relative perspective with namespace" <|
@@ -41,7 +54,7 @@ perspectiveRoute =
                         mkUrl "/latest/namespaces/base/List"
 
                     expected =
-                        Route.Perspective (ByNamespace Relative (fqn "base.List"))
+                        Project (ByNamespace Relative (fqn "base.List")) ProjectRoot
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase absolute perspective" <|
@@ -52,7 +65,7 @@ perspectiveRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Route.Perspective (ByCodebase (Absolute h)))
+                            |> Maybe.map (\h -> Project (ByCodebase (Absolute h)) ProjectRoot)
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a codebase absolute perspective with namespace" <|
@@ -63,7 +76,7 @@ perspectiveRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Route.Perspective (ByNamespace (Absolute h) (fqn "base.List")))
+                            |> Maybe.map (\h -> Project (ByNamespace (Absolute h) (fqn "base.List")) ProjectRoot)
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a namespace with special characters" <|
@@ -73,7 +86,7 @@ perspectiveRoute =
                         mkUrl "/latest/namespaces/base/List/;./%2F/docs"
 
                     expected =
-                        Route.Perspective (ByNamespace Relative (segments [ "base", "List", ".", "/", "docs" ]))
+                        Route.Project (ByNamespace Relative (segments [ "base", "List", ".", "/", "docs" ])) ProjectRoot
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         ]
@@ -89,7 +102,7 @@ definitionRoute =
                         mkUrl "/latest/terms/base/List/map"
 
                     expected =
-                        Route.Definition (ByCodebase Relative) (Reference.fromString TermReference "base.List.map")
+                        Project (ByCodebase Relative) (ProjectDefinition (Reference.fromString TermReference "base.List.map"))
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase relative and relative definition within a namespace" <|
@@ -99,7 +112,7 @@ definitionRoute =
                         mkUrl "/latest/namespaces/base/List/;/terms/map"
 
                     expected =
-                        Route.Definition (ByNamespace Relative (fqn "base.List")) (Reference.fromString TermReference "map")
+                        Project (ByNamespace Relative (fqn "base.List")) (ProjectDefinition (Reference.fromString TermReference "map"))
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase relative and absolute definition" <|
@@ -109,7 +122,7 @@ definitionRoute =
                         mkUrl "/latest/terms/@definitionhash"
 
                     expected =
-                        Route.Definition (ByCodebase Relative) (Reference.fromString TermReference "#definitionhash")
+                        Project (ByCodebase Relative) (ProjectDefinition (Reference.fromString TermReference "#definitionhash"))
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase relative and absolute definition within a namespace" <|
@@ -119,7 +132,7 @@ definitionRoute =
                         mkUrl "/latest/namespaces/base/List/;/terms/@definitionhash"
 
                     expected =
-                        Route.Definition (ByNamespace Relative (fqn "base.List")) (Reference.fromString TermReference "#definitionhash")
+                        Project (ByNamespace Relative (fqn "base.List")) (ProjectDefinition (Reference.fromString TermReference "#definitionhash"))
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase absolute and relative definition " <|
@@ -130,7 +143,7 @@ definitionRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Route.Definition (ByCodebase (Absolute h)) (Reference.fromString TermReference "base.List.map"))
+                            |> Maybe.map (\h -> Project (ByCodebase (Absolute h)) (ProjectDefinition (Reference.fromString TermReference "base.List.map")))
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a codebase absolute and relative definition within a namespace" <|
@@ -141,7 +154,7 @@ definitionRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Route.Definition (ByNamespace (Absolute h) (fqn "base.List")) (Reference.fromString TermReference "map"))
+                            |> Maybe.map (\h -> Project (ByNamespace (Absolute h) (fqn "base.List")) (ProjectDefinition (Reference.fromString TermReference "map")))
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a codebase absolute and absolute definition " <|
@@ -152,7 +165,7 @@ definitionRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Route.Definition (ByCodebase (Absolute h)) (Reference.fromString TermReference "#definitionhash"))
+                            |> Maybe.map (\h -> Project (ByCodebase (Absolute h)) (ProjectDefinition (Reference.fromString TermReference "#definitionhash")))
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a codebase absolute and absolute definition within a namespace" <|
@@ -163,7 +176,7 @@ definitionRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Route.Definition (ByNamespace (Absolute h) (fqn "base.List")) (Reference.fromString TermReference "map"))
+                            |> Maybe.map (\h -> Project (ByNamespace (Absolute h) (fqn "base.List")) (ProjectDefinition (Reference.fromString TermReference "map")))
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a namespace and definition with special characters" <|
@@ -173,9 +186,11 @@ definitionRoute =
                         mkUrl "/latest/namespaces/base/List/;./%2F/docs/;/terms/docs/about/;./and/%2F/doc"
 
                     expected =
-                        Route.Definition
+                        Project
                             (ByNamespace Relative (segments [ "base", "List", ".", "/", "docs" ]))
-                            (TermReference (HQ.NameOnly (segments [ "docs", "about", ".", "and", "/", "doc" ])))
+                            (ProjectDefinition
+                                (TermReference (HQ.NameOnly (segments [ "docs", "about", ".", "and", "/", "doc" ])))
+                            )
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         ]
@@ -194,7 +209,7 @@ fromUrlBasePath =
                         "/some-token/ui/"
 
                     expected =
-                        Route.Definition (ByCodebase Relative) (Reference.fromString TermReference "#abc123")
+                        Project (ByCodebase Relative) (ProjectDefinition (Reference.fromString TermReference "#abc123"))
                 in
                 Expect.equal expected (Route.fromUrl basePath url)
         , test "Matches with a root basePath prefix" <|
@@ -207,7 +222,7 @@ fromUrlBasePath =
                         "/"
 
                     expected =
-                        Route.Definition (ByCodebase Relative) (Reference.fromString TermReference "#abc123")
+                        Project (ByCodebase Relative) (ProjectDefinition (Reference.fromString TermReference "#abc123"))
                 in
                 Expect.equal expected (Route.fromUrl basePath url)
         ]
