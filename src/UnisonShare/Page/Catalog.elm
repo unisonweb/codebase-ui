@@ -2,7 +2,6 @@ module UnisonShare.Page.Catalog exposing (..)
 
 import Api
 import Env exposing (Env)
-import FullyQualifiedName as FQN
 import Html exposing (Html, a, div, h1, input, span, strong, text)
 import Html.Attributes exposing (autofocus, class, href, placeholder)
 import Html.Events exposing (onBlur, onFocus, onInput)
@@ -13,6 +12,7 @@ import RemoteData exposing (RemoteData(..), WebData)
 import Task
 import UI
 import UI.Card as Card
+import UI.Click as Click
 import UI.Icon as Icon
 import UI.PageLayout as PageLayout exposing (PageLayout)
 import UnisonShare.Catalog as Catalog exposing (Catalog)
@@ -107,11 +107,7 @@ projectUrl =
 
 viewProjectListing : ProjectListing -> Html msg
 viewProjectListing project =
-    let
-        slug =
-            Project.slug project
-    in
-    a [ class "project-listing", href (projectUrl project) ] [ FQN.view slug ]
+    Project.viewProjectListing (Click.Href (projectUrl project)) project
 
 
 viewCategory : ( String, List ProjectListing ) -> Html msg
@@ -129,7 +125,7 @@ viewSearchResult : ( ProjectListing, String ) -> Html msg
 viewSearchResult ( project, category ) =
     a
         [ class "search-result", href (projectUrl project) ]
-        [ project |> Project.slug |> FQN.view
+        [ Project.viewProjectListing Click.Disabled project
         , span [ class "category" ] [ text category ]
         ]
 

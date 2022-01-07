@@ -12,18 +12,11 @@
   --color-gray-darken-20-transparent: rgba(45, 46, 53, 0);
   --color-gray-darken-10-transparent: rgba(65, 66, 75, 0);
 
-  /* Brand colors */
-  --color-brand-bright-red: #ff4756;
-  --color-brand-orange: #ff8800;
-  --color-brand-yellow: #ffc41f;
-  --color-brand-purple: #8f228f;
-  --color-brand-dark-purple: #520066;
-
   /* Grays */
-  --color-gray-darken-10: #41424b;
-  --color-gray-darken-20: #2d2e35;
-  --color-gray-darken-25: #22232a;
   --color-gray-darken-30: #18181c;
+  --color-gray-darken-25: #22232a;
+  --color-gray-darken-20: #2d2e35;
+  --color-gray-darken-10: #41424b;
 
   --color-gray-base: #515258;
 

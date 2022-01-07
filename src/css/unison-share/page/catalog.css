@@ -61,7 +61,7 @@
   border-radius: var(--border-radius-base);
   position: absolute;
   top: calc(var(--page-hero-height) - 1.75rem);
-  border: 2px solid transparent;
+  border: 2px solid var(--color-catalog-hero-bg);
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.1);
   display: flex;
   flex-direction: column;
@@ -69,7 +69,6 @@
   transform: translateX(-50%);
   z-index: var(--layer-base);
   transition: all 0.2s;
-  background: var(--color-gray-lighten-55);
 }
 
 .catalog-hero .catalog-search:focus-within {
@@ -143,6 +142,7 @@
   font-size: var(--font-size-medium);
   margin-left: auto;
   justify-self: flex-end;
+  text-transform: uppercase;
 }
 
 .catalog-hero .catalog-search .search-results .empty-state {

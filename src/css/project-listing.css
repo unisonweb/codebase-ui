@@ -1,0 +1,13 @@
+.project-listing {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.project-listing .hashvatar {
+  margin-right: 0.5rem;
+}
+
+.project-listing:hover {
+  text-decoration: none;
+}

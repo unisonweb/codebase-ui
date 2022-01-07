@@ -2,7 +2,11 @@ module Project exposing (..)
 
 import FullyQualifiedName as FQN exposing (FQN)
 import Hash exposing (Hash)
+import Hashvatar
+import Html exposing (Html)
+import Html.Attributes exposing (class)
 import Json.Decode as Decode exposing (field, string)
+import UI.Click as Click
 
 
 type Owner
@@ -30,6 +34,24 @@ slugString project =
 ownerToString : Owner -> String
 ownerToString (Owner o) =
     o
+
+
+
+-- View
+
+
+viewSlug : Project a -> Html msg
+viewSlug project =
+    project |> slug |> FQN.view
+
+
+viewProjectListing : Click.Click msg -> Project a -> Html msg
+viewProjectListing click project =
+    Click.view [ class "project-listing" ]
+        [ Hashvatar.view project.hash
+        , viewSlug project
+        ]
+        click
 
 
 
