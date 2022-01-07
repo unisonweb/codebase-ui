@@ -9,6 +9,11 @@ import String.Extra exposing (break)
 import UI.Color as Color exposing (Color)
 
 
+empty : Html msg
+empty =
+    view_ HexGrid.empty
+
+
 view : Hash -> Html msg
 view hash =
     let
@@ -35,9 +40,12 @@ view hash =
                 |> toGrid
                 |> Maybe.withDefault HexGrid.empty
     in
-    div [ class "hashvatar" ]
-        [ HexGrid.view grid
-        ]
+    view_ grid
+
+
+view_ : HexGrid.HexGrid -> Html msg
+view_ grid =
+    div [ class "hashvatar" ] [ HexGrid.view grid ]
 
 
 

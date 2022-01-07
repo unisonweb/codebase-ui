@@ -240,11 +240,11 @@
   );
 }
 
-#main-sidebar .sidebar-header .namespace-slug {
+#main-sidebar .sidebar-header .hasvatar {
   position: relative;
 }
 
-#main-sidebar .sidebar-header .is-overflowing .namespace-slug:after {
+#main-sidebar .sidebar-header .is-overflowing .hashvatar:after {
   position: absolute;
   top: 0;
   right: -1.5rem;
