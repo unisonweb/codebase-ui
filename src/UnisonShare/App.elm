@@ -59,9 +59,10 @@ type alias Model =
 init : Env -> Route -> Nav.Key -> ( Model, Cmd Msg )
 init env route navKey =
     let
+        -- TODO: This whole thing should be route driven
         ( workspace, workspaceCmd ) =
             case route of
-                Route.Definition _ ref ->
+                Route.Project _ (Route.ProjectDefinition ref) ->
                     Workspace.init env (Just ref)
 
                 _ ->
@@ -156,7 +157,7 @@ update msg ({ env } as model) =
                     in
                     ( { model2 | catalog = catalog }, Cmd.map CatalogMsg cmd )
 
-                Route.Definition params ref ->
+                Route.Project params (Route.ProjectDefinition ref) ->
                     let
                         ( workspace, cmd ) =
                             Workspace.open (newEnv params) model.workspace ref
@@ -169,7 +170,7 @@ update msg ({ env } as model) =
                     in
                     ( model4, Cmd.batch [ Cmd.map WorkspaceMsg cmd, fetchPerspectiveCmd ] )
 
-                Route.Perspective params ->
+                Route.Project params Route.ProjectRoot ->
                     fetchPerspectiveAndCodebaseTree env.perspective { model2 | env = newEnv params }
 
         ( _, ChangePerspective perspective ) ->
@@ -233,27 +234,20 @@ update msg ({ env } as model) =
             in
             ( { model | catalog = catalog }, Cmd.map CatalogMsg cmd )
 
-        ( _, WorkspaceMsg wMsg ) ->
-            -- TODO: Clean this up, there should be a top level Project route
-            -- instead of 2 separate workspace routes (perspective and
-            -- definition)
-            if model.route /= Route.Catalog then
-                let
-                    ( workspace, wCmd, outMsg ) =
-                        Workspace.update env wMsg model.workspace
+        ( Route.Project _ _, WorkspaceMsg wMsg ) ->
+            let
+                ( workspace, wCmd, outMsg ) =
+                    Workspace.update env wMsg model.workspace
 
-                    model2 =
-                        { model | workspace = workspace }
+                model2 =
+                    { model | workspace = workspace }
 
-                    ( model3, cmd ) =
-                        handleWorkspaceOutMsg model2 outMsg
-                in
-                ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
+                ( model3, cmd ) =
+                    handleWorkspaceOutMsg model2 outMsg
+            in
+            ( model3, Cmd.batch [ cmd, Cmd.map WorkspaceMsg wCmd ] )
 
-            else
-                ( model, Cmd.none )
-
-        ( _, PerspectiveLandingMsg rMsg ) ->
+        ( Route.Project _ Route.ProjectRoot, PerspectiveLandingMsg rMsg ) ->
             let
                 ( perspectiveLanding, outMsg ) =
                     PerspectiveLanding.update rMsg model.perspectiveLanding
@@ -271,7 +265,7 @@ update msg ({ env } as model) =
                 PerspectiveLanding.None ->
                     ( model2, Cmd.none )
 
-        ( _, CodebaseTreeMsg cMsg ) ->
+        ( Route.Project _ _, CodebaseTreeMsg cMsg ) ->
             let
                 ( codebaseTree, cCmd, outMsg ) =
                     CodebaseTree.update env cMsg model.codebaseTree
@@ -690,7 +684,7 @@ view model =
                 Route.Catalog ->
                     Html.map CatalogMsg (Catalog.view model.catalog)
 
-                Route.Perspective _ ->
+                Route.Project _ Route.ProjectRoot ->
                     Html.map PerspectiveLandingMsg
                         (PerspectiveLanding.view
                             model.env
@@ -699,7 +693,7 @@ view model =
                         |> withSidebar
                         |> PageLayout.view
 
-                Route.Definition _ _ ->
+                Route.Project _ (Route.ProjectDefinition _) ->
                     Html.map WorkspaceMsg (Workspace.view model.workspace)
                         |> withSidebar
                         |> PageLayout.view
