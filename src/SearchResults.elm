@@ -1,6 +1,7 @@
 module SearchResults exposing
     ( Matches
     , SearchResults(..)
+    , empty
     , focus
     , focusOn
     , from
@@ -30,6 +31,11 @@ import Maybe.Extra exposing (unwrap)
 type SearchResults a
     = Empty
     | SearchResults (Matches a)
+
+
+empty : SearchResults a
+empty =
+    Empty
 
 
 isEmpty : SearchResults a -> Bool

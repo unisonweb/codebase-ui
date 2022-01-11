@@ -2,13 +2,17 @@ module UnisonShare.Page.Catalog exposing (..)
 
 import Api
 import Env exposing (Env)
-import Html exposing (Html, a, div, h1, input, span, strong, text)
-import Html.Attributes exposing (autofocus, class, href, placeholder)
-import Html.Events exposing (onBlur, onFocus, onInput)
+import Html exposing (Html, div, h1, input, strong, table, tbody, td, text, tr)
+import Html.Attributes exposing (autofocus, class, classList, placeholder)
+import Html.Events exposing (onBlur, onClick, onFocus, onInput)
 import Http
+import KeyboardShortcut exposing (KeyboardShortcut(..))
+import KeyboardShortcut.Key as Key exposing (Key(..))
+import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Perspective
 import Project exposing (ProjectListing)
 import RemoteData exposing (RemoteData(..), WebData)
+import SearchResults exposing (SearchResults(..))
 import Task
 import UI
 import UI.Card as Card
@@ -23,10 +27,23 @@ import UnisonShare.Route as Route
 -- MODEL
 
 
+type alias SearchResult =
+    ( ProjectListing, String )
+
+
+type alias CatalogSearchResults =
+    SearchResults SearchResult
+
+
+type alias CatalogSearch =
+    { query : String, results : CatalogSearchResults }
+
+
 type alias LoadedModel =
-    { query : String
+    { search : CatalogSearch
     , hasFocus : Bool
     , catalog : Catalog
+    , keyboardShortcut : KeyboardShortcut.Model
     }
 
 
@@ -68,12 +85,14 @@ type Msg
     = UpdateQuery String
     | UpdateFocus Bool
     | ClearQuery
-    | NoOp
+    | SelectProject ProjectListing
     | FetchCatalogFinished (Result Http.Error Catalog)
+    | Keydown KeyboardEvent
+    | KeyboardShortcutMsg KeyboardShortcut.Msg
 
 
-update : Msg -> Model -> ( Model, Cmd Msg )
-update msg model =
+update : Env -> Msg -> Model -> ( Model, Cmd Msg )
+update env msg model =
     case ( msg, model ) of
         ( FetchCatalogFinished catalogResult, _ ) ->
             case catalogResult of
@@ -81,19 +100,117 @@ update msg model =
                     ( Failure e, Cmd.none )
 
                 Ok catalog ->
-                    ( Success { query = "", hasFocus = True, catalog = catalog }, Cmd.none )
+                    let
+                        initModel =
+                            { search = { query = "", results = SearchResults.empty }
+                            , hasFocus = True
+                            , catalog = catalog
+                            , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
+                            }
+                    in
+                    ( Success initModel, Cmd.none )
 
         ( UpdateFocus hasFocus, Success m ) ->
             ( Success { m | hasFocus = hasFocus }, Cmd.none )
 
         ( UpdateQuery query, Success m ) ->
-            ( Success { m | query = query }, Cmd.none )
+            let
+                searchResults =
+                    if String.length query < 3 then
+                        SearchResults.empty
+
+                    else
+                        query
+                            |> Catalog.search m.catalog
+                            |> SearchResults.fromList
+            in
+            ( Success { m | search = { query = query, results = searchResults } }, Cmd.none )
 
         ( ClearQuery, Success m ) ->
-            ( Success { m | query = "" }, Cmd.none )
+            ( Success { m | search = { query = "", results = SearchResults.empty } }, Cmd.none )
+
+        ( SelectProject project, Success m ) ->
+            ( Success m, Route.navigateToProject env.navKey project )
+
+        ( Keydown event, Success m ) ->
+            let
+                ( keyboardShortcut, kCmd ) =
+                    KeyboardShortcut.collect m.keyboardShortcut event.key
+
+                cmd =
+                    Cmd.map KeyboardShortcutMsg kCmd
+
+                newModel =
+                    { m | keyboardShortcut = keyboardShortcut }
+
+                shortcut =
+                    KeyboardShortcut.fromKeyboardEvent m.keyboardShortcut event
+            in
+            case shortcut of
+                Sequence _ Escape ->
+                    ( Success { newModel | search = { query = "", results = SearchResults.empty } }, cmd )
+
+                Sequence _ ArrowUp ->
+                    let
+                        newSearch =
+                            mapSearch SearchResults.prev m.search
+                    in
+                    ( Success { newModel | search = newSearch }, cmd )
+
+                Sequence _ ArrowDown ->
+                    let
+                        newSearch =
+                            mapSearch SearchResults.next m.search
+                    in
+                    ( Success { newModel | search = newSearch }, cmd )
+
+                Sequence _ Enter ->
+                    case m.search.results of
+                        Empty ->
+                            ( Success newModel, cmd )
+
+                        SearchResults matches ->
+                            let
+                                navigate =
+                                    matches
+                                        |> SearchResults.focus
+                                        |> Tuple.first
+                                        |> Route.navigateToProject env.navKey
+                            in
+                            ( Success newModel, Cmd.batch [ cmd, navigate ] )
+
+                Sequence (Just Semicolon) k ->
+                    case Key.toNumber k of
+                        Just n ->
+                            let
+                                navigate =
+                                    SearchResults.getAt (n - 1) m.search.results
+                                        |> Maybe.map Tuple.first
+                                        |> Maybe.map (Route.navigateToProject env.navKey)
+                                        |> Maybe.withDefault Cmd.none
+                            in
+                            ( Success newModel, Cmd.batch [ cmd, navigate ] )
+
+                        Nothing ->
+                            ( Success newModel, cmd )
+
+                _ ->
+                    ( Success newModel, cmd )
+
+        ( KeyboardShortcutMsg kMsg, Success m ) ->
+            let
+                ( keyboardShortcut, cmd ) =
+                    KeyboardShortcut.update kMsg m.keyboardShortcut
+            in
+            ( Success { m | keyboardShortcut = keyboardShortcut }, Cmd.map KeyboardShortcutMsg cmd )
 
         _ ->
             ( model, Cmd.none )
+
+
+mapSearch : (CatalogSearchResults -> CatalogSearchResults) -> CatalogSearch -> CatalogSearch
+mapSearch f search =
+    { search | results = f search.results }
 
 
 
@@ -121,32 +238,69 @@ viewCategory ( category, projects ) =
         |> Card.view
 
 
-viewSearchResult : ( ProjectListing, String ) -> Html msg
-viewSearchResult ( project, category ) =
-    a
-        [ class "search-result", href (projectUrl project) ]
-        [ Project.viewProjectListing Click.Disabled project
-        , span [ class "category" ] [ text category ]
+viewMatch : KeyboardShortcut.Model -> SearchResult -> Bool -> Maybe Key -> Html Msg
+viewMatch keyboardShortcut ( project, category ) isFocused shortcut =
+    let
+        shortcutIndicator =
+            if isFocused then
+                KeyboardShortcut.view keyboardShortcut (Sequence Nothing Key.Enter)
+
+            else
+                case shortcut of
+                    Nothing ->
+                        UI.nothing
+
+                    Just key ->
+                        KeyboardShortcut.view keyboardShortcut (Sequence (Just Key.Semicolon) key)
+    in
+    tr
+        [ classList [ ( "search-result", True ), ( "focused", isFocused ) ]
+        , onClick (SelectProject project)
+        ]
+        [ td [ class "project-name" ] [ Project.viewProjectListing Click.Disabled project ]
+        , td [ class "category" ] [ text category ]
+        , td [] [ div [ class "shortcut" ] [ shortcutIndicator ] ]
         ]
 
 
-viewSearchResults : LoadedModel -> Html msg
-viewSearchResults model =
-    if String.length model.query > 3 then
+indexToShortcut : Int -> Maybe Key
+indexToShortcut index =
+    let
+        n =
+            index + 1
+    in
+    if n > 9 then
+        Nothing
+
+    else
+        n |> String.fromInt |> Key.fromString |> Just
+
+
+viewMatches : KeyboardShortcut.Model -> SearchResults.Matches SearchResult -> Html Msg
+viewMatches keyboardShortcut matches =
+    let
+        matchItems =
+            matches
+                |> SearchResults.mapMatchesToList (\d f -> ( d, f ))
+                |> List.indexedMap (\i ( d, f ) -> ( d, f, indexToShortcut i ))
+                |> List.map (\( d, f, s ) -> viewMatch keyboardShortcut d f s)
+    in
+    table [] [ tbody [] matchItems ]
+
+
+viewSearchResults : KeyboardShortcut.Model -> CatalogSearch -> Html Msg
+viewSearchResults keyboardShortcut { query, results } =
+    if String.length query > 2 then
         let
-            results =
-                model.query
-                    |> Catalog.search model.catalog
-                    |> List.map viewSearchResult
-
             resultsPane =
-                if List.isEmpty results then
-                    [ div [ class "empty-state" ] [ text ("No matching projects found for \"" ++ model.query ++ "\"") ] ]
+                case results of
+                    Empty ->
+                        div [ class "empty-state" ] [ text ("No matching projects found for \"" ++ query ++ "\"") ]
 
-                else
-                    results
+                    SearchResults matches ->
+                        viewMatches keyboardShortcut matches
         in
-        div [ class "search-results" ] resultsPane
+        div [ class "search-results" ] [ resultsPane ]
 
     else
         UI.nothing
@@ -162,10 +316,17 @@ viewLoaded model =
 
         searchResults =
             if model.hasFocus then
-                viewSearchResults model
+                viewSearchResults model.keyboardShortcut model.search
 
             else
                 UI.nothing
+
+        keyboardEvent =
+            KeyboardEvent.on KeyboardEvent.Keydown Keydown
+                |> KeyboardEvent.stopPropagation
+                |> KeyboardEvent.preventDefaultWhen
+                    (\evt -> List.member evt.key [ ArrowUp, ArrowDown, Semicolon ])
+                |> KeyboardEvent.attach
     in
     PageLayout.HeroLayout
         { hero =
@@ -182,7 +343,7 @@ viewLoaded model =
                             ]
                         , div [] [ text "Projects, libraries, documention, terms, and types" ]
                         ]
-                    , div [ class "catalog-search" ]
+                    , div [ class "catalog-search", keyboardEvent ]
                         [ div [ class "search-field" ]
                             [ Icon.view Icon.search
                             , input

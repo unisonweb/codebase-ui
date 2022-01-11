@@ -1,6 +1,7 @@
 module Env exposing (..)
 
 import Api exposing (ApiBasePath(..))
+import Browser.Navigation as Nav
 import Env.AppContext as AppContext exposing (AppContext)
 import Perspective exposing (Perspective)
 
@@ -19,6 +20,7 @@ type alias Env =
     , basePath : String
     , apiBasePath : ApiBasePath
     , appContext : AppContext
+    , navKey : Nav.Key
     , perspective : Perspective
     }
 
@@ -31,12 +33,13 @@ type alias Flags =
     }
 
 
-init : Flags -> Perspective -> Env
-init flags perspective =
+init : Flags -> Nav.Key -> Perspective -> Env
+init flags navKey perspective =
     { operatingSystem = operatingSystemFromString flags.operatingSystem
     , basePath = flags.basePath
     , apiBasePath = ApiBasePath flags.apiBasePath
     , appContext = AppContext.fromString flags.appContext
+    , navKey = navKey
     , perspective = perspective
     }
 
