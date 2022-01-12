@@ -171,15 +171,6 @@ p {
   align-items: center;
 }
 
-/* Namespace Slug */
-.namespace-slug {
-  display: inline-flex;
-  flex: 0 0 1.5rem;
-  width: 1.5rem;
-  height: 1.5rem;
-  background: url(../img/namespace-slug-untitled.svg);
-}
-
 @import "./elements/icon.css";
 @import "./elements/banner.css";
 @import "./elements/button.css";

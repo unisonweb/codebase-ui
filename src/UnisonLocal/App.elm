@@ -9,6 +9,7 @@ import Env exposing (Env, OperatingSystem(..))
 import Finder
 import Finder.SearchOptions as SearchOptions
 import FullyQualifiedName as FQN exposing (FQN)
+import Hashvatar
 import Html exposing (Html, a, div, h1, h2, h3, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
@@ -493,7 +494,7 @@ viewSidebarHeader env =
         Codebase _ ->
             UI.nothing
 
-        Namespace { fqn } ->
+        Namespace { fqn, details } ->
             let
                 -- Imprecise, but close enough, approximation of overflowing,
                 -- which results in a slight faded left edge A better way would
@@ -501,11 +502,16 @@ viewSidebarHeader env =
                 -- thats quite involved...
                 isOverflowing =
                     fqn |> FQN.toString |> String.length |> (\l -> l > 20)
+
+                hashvatar =
+                    details
+                        |> RemoteData.map (Namespace.hash >> Hashvatar.view)
+                        |> RemoteData.withDefault Hashvatar.empty
             in
             Sidebar.header
                 [ Sidebar.headerItem
                     [ classList [ ( "is-overflowing", isOverflowing ) ] ]
-                    [ UI.namespaceSlug
+                    [ hashvatar
                     , h2 [ class "namespace" ] [ FQN.view fqn ]
                     ]
                 , UI.divider
