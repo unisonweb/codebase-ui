@@ -102,6 +102,98 @@ filterLuminance pred colors_ =
 
 
 
+-- Hue
+
+
+type Hue
+    = Gray
+    | Orange
+    | Pink
+    | Purple
+    | Blue
+    | Green
+
+
+hueOf : Color -> Hue
+hueOf color =
+    if isGray color then
+        Gray
+
+    else if isOrange color then
+        Orange
+
+    else if isPink color then
+        Pink
+
+    else if isPurple color then
+        Purple
+
+    else if isBlue color then
+        Blue
+
+    else
+        Green
+
+
+{-| Get all the other colors in the same hue as the given color
+-}
+inSameHue : Color -> List Color
+inSameHue color =
+    let
+        sameHue =
+            case hueOf color of
+                Gray ->
+                    grays
+
+                Orange ->
+                    oranges
+
+                Pink ->
+                    pinks
+
+                Purple ->
+                    purples
+
+                Blue ->
+                    blues
+
+                Green ->
+                    greens
+    in
+    List.filter (\c -> c /= color) sameHue
+
+
+isGray : Color -> Bool
+isGray color =
+    List.member color grays
+
+
+isOrange : Color -> Bool
+isOrange color =
+    List.member color oranges
+
+
+isPink : Color -> Bool
+isPink color =
+    List.member color pinks
+
+
+isPurple : Color -> Bool
+isPurple color =
+    List.member color purples
+
+
+isBlue : Color -> Bool
+isBlue color =
+    List.member color blues
+
+
+isGreen : Color -> Bool
+isGreen color =
+    List.member color greens
+
+
+
 -- Grays
 
 

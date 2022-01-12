@@ -71,7 +71,7 @@ toGrid slots =
         selectTendrils grid_ =
             let
                 tendrils =
-                    getIn grid_.tendrils (Color.harmonizesWith grid_.background)
+                    getIn grid_.tendrils (Color.inSameHue grid_.background)
             in
             Maybe.map
                 (\tr ->
