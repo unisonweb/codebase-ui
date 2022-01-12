@@ -11,6 +11,6 @@
 .card .card-title {
   color: var(--color-card-title);
   text-transform: uppercase;
-  font-size: var(--font-size-medium);
+  font-size: var(--font-size-small);
   font-weight: normal;
 }

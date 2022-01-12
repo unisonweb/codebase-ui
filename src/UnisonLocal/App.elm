@@ -49,8 +49,7 @@ type Modal
 
 
 type alias Model =
-    { navKey : Nav.Key
-    , route : Route
+    { route : Route
     , codebaseTree : CodebaseTree.Model
     , workspace : Workspace.Model
     , perspectiveLanding : PerspectiveLanding.Model
@@ -64,8 +63,8 @@ type alias Model =
     }
 
 
-init : Env -> Route -> Nav.Key -> ( Model, Cmd Msg )
-init env route navKey =
+init : Env -> Route -> ( Model, Cmd Msg )
+init env route =
     let
         ( workspace, workspaceCmd ) =
             case route of
@@ -85,8 +84,7 @@ init env route navKey =
                 |> Maybe.withDefault Cmd.none
 
         model =
-            { navKey = navKey
-            , route = route
+            { route = route
             , workspace = workspace
             , perspectiveLanding = PerspectiveLanding.init
             , codebaseTree = codebaseTree
@@ -133,7 +131,7 @@ update msg ({ env } as model) =
         LinkClicked urlRequest ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, Nav.pushUrl model.navKey (Url.toString url) )
+                    ( model, Nav.pushUrl env.navKey (Url.toString url) )
 
                 -- External links are handled via target blank and never end up
                 -- here
@@ -299,7 +297,7 @@ update msg ({ env } as model) =
 
 navigateToDefinition : Model -> Reference -> ( Model, Cmd Msg )
 navigateToDefinition model ref =
-    ( model, Route.navigateToDefinition model.navKey model.route ref )
+    ( model, Route.navigateToDefinition model.env.navKey model.route ref )
 
 
 navigateToPerspective : Model -> Perspective -> ( Model, Cmd Msg )
@@ -319,7 +317,7 @@ navigateToPerspective model perspective =
                 |> Maybe.withDefault model.route
 
         changeRouteCmd =
-            Route.replacePerspective model.navKey (Perspective.toParams perspective) focusedReferenceRoute
+            Route.replacePerspective model.env.navKey (Perspective.toParams perspective) focusedReferenceRoute
     in
     ( { model | workspace = workspace }, changeRouteCmd )
 
@@ -352,7 +350,7 @@ fetchPerspectiveAndCodebaseTree oldPerspective ({ env } as model) =
 
 
 handleWorkspaceOutMsg : Model -> Workspace.OutMsg -> ( Model, Cmd Msg )
-handleWorkspaceOutMsg model out =
+handleWorkspaceOutMsg ({ env } as model) out =
     case out of
         Workspace.None ->
             ( model, Cmd.none )
@@ -361,10 +359,10 @@ handleWorkspaceOutMsg model out =
             showFinder model withinNamespace
 
         Workspace.Focused ref ->
-            ( model, Route.navigateToDefinition model.navKey model.route ref )
+            ( model, Route.navigateToDefinition env.navKey model.route ref )
 
         Workspace.Emptied ->
-            ( model, Route.navigateToCurrentPerspective model.navKey model.route )
+            ( model, Route.navigateToCurrentPerspective env.navKey model.route )
 
         Workspace.ChangePerspectiveToNamespace fqn ->
             fqn

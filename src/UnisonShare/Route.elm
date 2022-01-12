@@ -8,6 +8,7 @@ module UnisonShare.Route exposing
     , navigateToDefinition
     , navigateToLatestCodebase
     , navigateToPerspective
+    , navigateToProject
     , perspectiveParams
     , replacePerspective
     , toDefinition
@@ -284,6 +285,11 @@ navigate navKey route =
     route
         |> toUrlString
         |> Nav.pushUrl navKey
+
+
+navigateToProject : Nav.Key -> Project a -> Cmd msg
+navigateToProject navKey project =
+    navigate navKey (forProject project)
 
 
 

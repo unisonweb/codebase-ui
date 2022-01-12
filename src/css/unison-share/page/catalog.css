@@ -116,33 +116,67 @@
   background: var(--color-main-bg);
   border-top: 1px solid var(--color-gray-lighten-50);
   border-radius: 0 0 var(--border-radius-base) var(--border-radius-base);
-  display: flex;
-  flex-direction: column;
-  gap: 0.75rem;
   padding: 0.75rem;
 }
 
-.catalog-hero .catalog-search .search-results .search-result {
-  display: flex;
-  flex-direction: row;
-  padding: 0.5rem 1rem;
-  align-items: center;
+.catalog-hero .catalog-search .search-results table {
+  width: 100%;
+}
+
+.catalog-hero .catalog-search .search-results .search-result td {
+  padding: 0.5rem 0.75rem;
   height: 3rem;
-  border-radius: var(--border-radius-base);
   font-size: 1rem;
 }
 
-.catalog-hero .catalog-search .search-results .search-result:hover {
-  background: var(--color-gray-lighten-55);
-  text-decoration: none;
+.catalog-hero .catalog-search .search-results td:first-child {
+  border-radius: var(--border-radius-base) 0 0 var(--border-radius-base);
 }
 
-.catalog-hero .catalog-search .search-results .search-result .category {
+.catalog-hero .catalog-search .search-results td:last {
+  border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
+}
+
+.catalog-hero .catalog-search .search-results .search-result td.project-name {
+  width: 20em;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.catalog-hero .catalog-search .search-results .search-result td.category {
   color: var(--color-main-subtle-fg);
-  font-size: var(--font-size-medium);
-  margin-left: auto;
-  justify-self: flex-end;
+  font-size: var(--font-size-small);
   text-transform: uppercase;
+}
+
+.catalog-hero .catalog-search .search-results .search-result .shortcut {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.catalog-hero .catalog-search .search-results .search-result .key {
+  color: var(--color-modal-subtle-fg-em);
+  background: var(--color-modal-subtle-bg);
+}
+
+.catalog-hero .catalog-search .search-results .search-result .key.active {
+  color: var(--color-modal-focus-subtle-fg);
+  background: var(--color-modal-focus-subtle-bg);
+}
+
+.catalog-hero .catalog-search .search-results .search-result.focused {
+  background: var(--color-gray-lighten-55);
+}
+
+.catalog-hero .catalog-search .search-results .search-result.focused .key {
+  color: var(--color-modal-focus-subtle-fg);
+  background: var(--color-modal-focus-subtle-bg);
+}
+
+.catalog-hero .catalog-search .search-results .search-result:hover {
+  background: var(--color-gray-lighten-60);
+  text-decoration: none;
 }
 
 .catalog-hero .catalog-search .search-results .empty-state {

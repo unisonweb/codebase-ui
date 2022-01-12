@@ -42,10 +42,10 @@ init flags url navKey =
         perspectiveToAppInit perspective =
             let
                 env =
-                    Env.init preEnv.flags perspective
+                    Env.init preEnv.flags preEnv.navKey perspective
 
                 ( app, cmd ) =
-                    App.init env preEnv.route preEnv.navKey
+                    App.init env preEnv.route
             in
             ( Initialized app, Cmd.map AppMsg cmd )
 
@@ -79,7 +79,7 @@ update msg model =
                 Ok perspective ->
                     let
                         env =
-                            Env.init preEnv.flags perspective
+                            Env.init preEnv.flags preEnv.navKey perspective
 
                         newRoute =
                             perspective
@@ -87,7 +87,7 @@ update msg model =
                                 |> Route.updatePerspectiveParams preEnv.route
 
                         ( app, cmd ) =
-                            App.init env newRoute preEnv.navKey
+                            App.init env newRoute
                     in
                     ( Initialized app, Cmd.map AppMsg cmd )
 
