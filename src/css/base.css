@@ -30,6 +30,9 @@ html {
   /* TODO: Make configurable by users */
   /* https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures */
   font-variant-ligatures: none; /* normal */
+  -moz-text-size-adjust: none;
+  -webkit-text-size-adjust: none;
+  text-size-adjust: none;
 }
 
 body {
@@ -37,5 +40,4 @@ body {
   line-height: 1.4;
   background: var(--color-main-bg);
   color: var(--color-main-fg);
-  -webkit-text-size-adjust: 100%;
 }
