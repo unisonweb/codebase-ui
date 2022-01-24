@@ -1,17 +1,17 @@
 module UI.AppHeader exposing (..)
 
-import Html exposing (Html, a, header, section, span)
+import Html exposing (Html, a, header, section)
 import Html.Attributes exposing (class, id)
 import Html.Events exposing (onClick)
 import UI
 import UI.Banner as Banner exposing (Banner)
 import UI.Button as Button exposing (Button)
+import UI.Click as Click exposing (Click)
 import UI.Icon as Icon
 
 
 type AppTitle msg
-    = Clickable msg (Html msg)
-    | Disabled (Html msg)
+    = AppTitle (Click msg) (Html msg)
 
 
 type alias MenuToggle msg =
@@ -70,13 +70,8 @@ view appHeader_ =
 
 
 viewAppTitle : AppTitle msg -> Html msg
-viewAppTitle title =
-    case title of
-        Clickable clickMsg content ->
-            a [ class "app-title", onClick clickMsg ] [ content ]
-
-        Disabled content ->
-            span [ class "app-title" ] [ content ]
+viewAppTitle (AppTitle click content) =
+    Click.view [ class "app-title" ] [ content ] click
 
 
 view_ : List (Html msg) -> Html msg

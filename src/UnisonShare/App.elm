@@ -494,34 +494,19 @@ subscriptions model =
 -- VIEW
 
 
-appTitle : Maybe msg -> AppHeader.AppTitle msg
-appTitle clickMsg =
+appTitle : Click msg -> AppHeader.AppTitle msg
+appTitle click =
+    AppHeader.AppTitle click
+        (h1 []
+            [ text "Unison"
+            , span [ class "context unison-share" ] [ text "Share" ]
+            ]
+        )
+
+
+appHeader : AppHeader.AppHeader Msg
+appHeader =
     let
-        appTitle_ =
-            case clickMsg of
-                Nothing ->
-                    AppHeader.Disabled
-
-                Just msg ->
-                    AppHeader.Clickable msg
-    in
-    appTitle_ (h1 [] [ text "Unison", span [ class "context unison-share" ] [ text "Share" ] ])
-
-
-viewAppHeader : Model -> AppHeader.AppHeader Msg
-viewAppHeader model =
-    let
-        changePerspectiveMsg =
-            case model.env.perspective of
-                Codebase codebaseHash ->
-                    ChangePerspective (Codebase codebaseHash)
-
-                Namespace { codebaseHash } ->
-                    ChangePerspective (Codebase codebaseHash)
-
-        appTitle_ =
-            appTitle (Just changePerspectiveMsg)
-
         banner =
             Just
                 (Banner.promotion "article"
@@ -531,7 +516,7 @@ viewAppHeader model =
                 )
     in
     { menuToggle = Just ToggleSidebar
-    , appTitle = appTitle_
+    , appTitle = appTitle (Click.Href "/")
     , banner = banner
     , rightButton = Just (Button.button (ShowModal AppModal.PublishModal) "Publish on Unison Share" |> Button.share)
     }
@@ -675,7 +660,7 @@ viewMainSidebar model =
 viewAppLoading : Html msg
 viewAppLoading =
     div [ id "app" ]
-        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
+        [ AppHeader.view (AppHeader.appHeader (appTitle Click.Disabled))
         , PageLayout.view
             (PageLayout.FullLayout
                 { content = PageLayout.PageContent [] }
@@ -686,7 +671,7 @@ viewAppLoading =
 viewAppError : Http.Error -> Html msg
 viewAppError error =
     div [ id "app" ]
-        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
+        [ AppHeader.view (AppHeader.appHeader (appTitle Click.Disabled))
         , PageLayout.view
             (PageLayout.FullLayout
                 { content =
@@ -705,9 +690,6 @@ viewAppError error =
 view : Model -> Browser.Document Msg
 view model =
     let
-        appHeader =
-            AppHeader.view (viewAppHeader model)
-
         withSidebar pageContent =
             PageLayout.SidebarLayout
                 { sidebar = viewMainSidebar model
@@ -748,7 +730,7 @@ view model =
     { title = "Unison Share"
     , body =
         [ div [ id "app", class pageId ]
-            [ appHeader
+            [ AppHeader.view appHeader
             , page
             , Html.map AppModalMsg (AppModal.view model.env model.appModal)
             ]
