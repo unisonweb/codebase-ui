@@ -61,9 +61,18 @@ namespace perspective fqn =
     Endpoint [ "namespaces", FQN.toString fqn ] queryParams
 
 
-projects : Endpoint
-projects =
-    Endpoint [ "projects" ] []
+projects : Maybe String -> Endpoint
+projects owner =
+    let
+        queryParams =
+            case owner of
+                Just owner_ ->
+                    [ string "owner" owner_ ]
+
+                Nothing ->
+                    []
+    in
+    Endpoint [ "projects" ] queryParams
 
 
 getDefinition : Perspective -> List String -> Endpoint

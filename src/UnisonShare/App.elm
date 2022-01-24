@@ -18,7 +18,7 @@ import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import Namespace exposing (NamespaceDetails)
 import Perspective exposing (Perspective(..))
 import PerspectiveLanding
-import RemoteData
+import RemoteData exposing (RemoteData(..))
 import UI
 import UI.AppHeader as AppHeader
 import UI.Banner as Banner
@@ -30,6 +30,7 @@ import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonShare.AppModal as AppModal
 import UnisonShare.Page.Catalog as Catalog
+import UnisonShare.Page.UserPage as UserPage
 import UnisonShare.Route as Route exposing (Route)
 import Url exposing (Url)
 import Workspace
@@ -46,6 +47,7 @@ type alias Model =
     , workspace : Workspace.Model
     , perspectiveLanding : PerspectiveLanding.Model
     , catalog : Catalog.Model
+    , userPage : UserPage.Model
     , appModal : AppModal.Model
     , keyboardShortcut : KeyboardShortcut.Model
     , env : Env
@@ -78,7 +80,20 @@ init env route =
                 |> Maybe.withDefault Cmd.none
 
         ( catalog, catalogCmd ) =
-            Catalog.init env
+            case route of
+                Route.Catalog ->
+                    Catalog.init env
+
+                _ ->
+                    ( NotAsked, Cmd.none )
+
+        ( userPage, userPageCmd ) =
+            case route of
+                Route.User username ->
+                    UserPage.init env username
+
+                _ ->
+                    ( NotAsked, Cmd.none )
 
         model =
             { route = route
@@ -90,6 +105,7 @@ init env route =
             , env = env
             , sidebarToggled = False
             , catalog = catalog
+            , userPage = userPage
             }
     in
     ( model
@@ -97,6 +113,7 @@ init env route =
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
         , Cmd.map WorkspaceMsg workspaceCmd
         , Cmd.map CatalogMsg catalogCmd
+        , Cmd.map UserPageMsg userPageCmd
         , fetchNamespaceDetailsCmd
         ]
     )
@@ -118,6 +135,7 @@ type Msg
       -- sub msgs
     | AppModalMsg AppModal.Msg
     | CatalogMsg Catalog.Msg
+    | UserPageMsg UserPage.Msg
     | WorkspaceMsg Workspace.Msg
     | PerspectiveLandingMsg PerspectiveLanding.Msg
     | CodebaseTreeMsg CodebaseTree.Msg
@@ -155,6 +173,13 @@ update msg ({ env } as model) =
                             Catalog.init model.env
                     in
                     ( { model2 | catalog = catalog }, Cmd.map CatalogMsg cmd )
+
+                Route.User username ->
+                    let
+                        ( userPage, cmd ) =
+                            UserPage.init model.env username
+                    in
+                    ( { model2 | userPage = userPage }, Cmd.map UserPageMsg cmd )
 
                 Route.Project params (Route.ProjectDefinition ref) ->
                     let
@@ -232,6 +257,13 @@ update msg ({ env } as model) =
                     Catalog.update env cMsg model.catalog
             in
             ( { model | catalog = catalog }, Cmd.map CatalogMsg cmd )
+
+        ( Route.User _, UserPageMsg uMsg ) ->
+            let
+                ( userPage, cmd ) =
+                    UserPage.update env uMsg model.userPage
+            in
+            ( { model | userPage = userPage }, Cmd.map UserPageMsg cmd )
 
         ( Route.Project _ _, WorkspaceMsg wMsg ) ->
             let
@@ -683,28 +715,39 @@ view model =
                 , content = PageLayout.PageContent [ pageContent ]
                 }
 
-        page =
+        ( pageId, page ) =
             case model.route of
                 Route.Catalog ->
-                    Html.map CatalogMsg (Catalog.view model.catalog)
+                    ( "catalog-page", Html.map CatalogMsg (Catalog.view model.catalog) )
+
+                Route.User _ ->
+                    ( "user-page", Html.map UserPageMsg (UserPage.view model.userPage) )
 
                 Route.Project _ Route.ProjectRoot ->
-                    Html.map PerspectiveLandingMsg
-                        (PerspectiveLanding.view
-                            model.env
-                            model.perspectiveLanding
-                        )
-                        |> withSidebar
-                        |> PageLayout.view
+                    let
+                        page_ =
+                            Html.map PerspectiveLandingMsg
+                                (PerspectiveLanding.view
+                                    model.env
+                                    model.perspectiveLanding
+                                )
+                                |> withSidebar
+                                |> PageLayout.view
+                    in
+                    ( "project-page", page_ )
 
                 Route.Project _ (Route.ProjectDefinition _) ->
-                    Html.map WorkspaceMsg (Workspace.view model.workspace)
-                        |> withSidebar
-                        |> PageLayout.view
+                    let
+                        page_ =
+                            Html.map WorkspaceMsg (Workspace.view model.workspace)
+                                |> withSidebar
+                                |> PageLayout.view
+                    in
+                    ( "project-page", page_ )
     in
     { title = "Unison Share"
     , body =
-        [ div [ id "app" ]
+        [ div [ id "app", class pageId ]
             [ appHeader
             , page
             , Html.map AppModalMsg (AppModal.view model.env model.appModal)

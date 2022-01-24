@@ -8,6 +8,7 @@
   --color-main-subtle-fg: var(--color-gray-lighten-30);
   --color-main-subtle-fg-em: var(--color-gray-lighten-20);
   --color-main-subtle-bg: var(--color-gray-lighten-60);
+  --color-main-hover-bg: var(--color-gray-lighten-55);
   --color-main-border: var(--color-gray-lighten-40);
   --color-main-subtle-border: var(--color-gray-lighten-50);
   --color-main-divider: var(--color-gray-lighten-55);
@@ -213,6 +214,7 @@
   --color-card-bg: var(--color-gray-lighten-100);
   --color-card-fg: var(--color-gray-darken-30);
   --color-card-title: var(--color-gray-lighten-30);
+  --color-card-border: var(--color-gray-lighten-50);
 
   /* Badge */
   --color-badge-fg: var(--color-gray-base);

@@ -200,16 +200,5 @@
 }
 
 .categories .card .project-listing {
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  height: 2rem;
-  padding: 0 0.25rem;
   margin-left: -0.25rem;
-  border-radius: var(--border-radius-base);
-}
-
-.categories .card .project-listing:hover {
-  text-decoration: none;
-  background: var(--color-gray-lighten-55);
 }

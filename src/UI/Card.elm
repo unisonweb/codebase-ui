@@ -4,18 +4,36 @@ import Html exposing (Html, div, h3, text)
 import Html.Attributes exposing (class)
 
 
+type CardType
+    = Contained
+    | Uncontained
+
+
 type alias Card msg =
-    { title : Maybe String, items : List (Html msg) }
+    { type_ : CardType
+    , title : Maybe String
+    , items : List (Html msg)
+    }
 
 
 card : List (Html msg) -> Card msg
 card items =
-    { title = Nothing, items = items }
+    { type_ = Uncontained, title = Nothing, items = items }
 
 
 titled : String -> List (Html msg) -> Card msg
 titled title items =
-    { title = Just title, items = items }
+    { type_ = Uncontained, title = Just title, items = items }
+
+
+withType : CardType -> Card msg -> Card msg
+withType type_ card_ =
+    { card_ | type_ = type_ }
+
+
+asContained : Card msg -> Card msg
+asContained card_ =
+    { card_ | type_ = Contained }
 
 
 withTitle : String -> Card msg -> Card msg
@@ -43,5 +61,13 @@ view card_ =
 
                 Nothing ->
                     card_.items
+
+        typeClass =
+            case card_.type_ of
+                Contained ->
+                    "contained"
+
+                Uncontained ->
+                    "uncontained"
     in
-    div [ class "card" ] items
+    div [ class "card", class typeClass ] items

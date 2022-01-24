@@ -170,7 +170,12 @@ view env model =
                 Success (Namespace _ _ { readme }) ->
                     case readme of
                         Just r ->
-                            container [ Readme.view OpenReference ToggleDocFold model r ]
+                            container
+                                [ div [ class "perspective-landing-readme" ]
+                                    [ header [] [ Icon.view Icon.doc, text "README" ]
+                                    , Readme.view OpenReference ToggleDocFold model r
+                                    ]
+                                ]
 
                         Nothing ->
                             viewEmptyStateNamespace fqn

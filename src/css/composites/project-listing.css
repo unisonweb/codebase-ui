@@ -1,0 +1,15 @@
+/* A combination of a hashvatar and a project name */
+
+.project-listing {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  height: 2rem;
+  padding: 0 0.25rem;
+  border-radius: var(--border-radius-base);
+}
+
+.project-listing:hover {
+  text-decoration: none;
+  background: var(--color-main-hover-bg);
+}

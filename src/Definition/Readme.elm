@@ -2,10 +2,9 @@ module Definition.Readme exposing (..)
 
 import Definition.Doc as Doc exposing (Doc, DocFoldToggles, FoldId)
 import Definition.Reference exposing (Reference)
-import Html exposing (Html, div, header, text)
+import Html exposing (Html, div)
 import Html.Attributes exposing (class)
 import Json.Decode as Decode
-import UI.Icon as Icon
 
 
 {-| Represent the Readme Doc definition of a namespace. This is typically
@@ -28,9 +27,7 @@ view :
     -> Html msg
 view refToMsg toggleFoldMsg docFoldToggles (Readme doc) =
     div [ class "readme" ]
-        [ header [] [ Icon.view Icon.doc, text "README" ]
-        , Doc.view refToMsg toggleFoldMsg docFoldToggles doc
-        ]
+        [ Doc.view refToMsg toggleFoldMsg docFoldToggles doc ]
 
 
 

@@ -1,0 +1,27 @@
+.user-page {
+  --page-hero-height: 8rem;
+}
+
+.user-page .page-content {
+  display: flex;
+  align-items: flex-start;
+  flex-direction: column;
+  padding: 4rem 0;
+  gap: 2rem;
+}
+
+.user-page .page-content .card {
+  width: 100%;
+}
+
+.user-page .page-content .projects {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.user-page .page-content .projects .project-listing {
+  width: calc(33%);
+  margin-left: -0.25rem;
+}
