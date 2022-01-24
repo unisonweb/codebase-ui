@@ -69,7 +69,7 @@ fetchCatalog env =
         |> Api.toTask env.apiBasePath Catalog.decodeCatalogMask
         |> Task.andThen
             (\catalog ->
-                Api.projects
+                Api.projects Nothing
                     |> Api.toTask env.apiBasePath Project.decodeListings
                     |> Task.map (\projects -> ( catalog, projects ))
             )

@@ -2,6 +2,7 @@ module UnisonShare.Route exposing
     ( ProjectRoute(..)
     , Route(..)
     , forProject
+    , forUser
     , fromUrl
     , navigate
     , navigateToCurrentPerspective
@@ -27,6 +28,7 @@ import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
 import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
 import Project exposing (Project)
 import Route.Parsers as RP exposing (b, reference, s, slash)
+import UnisonShare.User as User exposing (User)
 import Url exposing (Url)
 import Url.Builder exposing (relative)
 
@@ -82,6 +84,7 @@ type ProjectRoute
 
 type Route
     = Catalog
+    | User User.Username
     | Project PerspectiveParams ProjectRoute
 
 
@@ -90,6 +93,9 @@ updatePerspectiveParams route params =
     case route of
         Catalog ->
             Catalog
+
+        User username_ ->
+            User username_
 
         Project _ ProjectRoot ->
             Project params ProjectRoot
@@ -107,6 +113,28 @@ catalog =
     succeed Catalog |. slash |. s "catalog"
 
 
+user : Parser Route
+user =
+    succeed User |. slash |. s "users" |. slash |= username |. end
+
+
+username : Parser User.Username
+username =
+    let
+        handleMaybe mUsername =
+            case mUsername of
+                Just u ->
+                    Parser.succeed u
+
+                Nothing ->
+                    Parser.problem "Invalid username"
+    in
+    Parser.chompUntilEndOr "/"
+        |> Parser.getChompedString
+        |> Parser.map User.usernameFromString
+        |> Parser.andThen handleMaybe
+
+
 perspective : Parser Route
 perspective =
     succeed (\pp -> Project pp ProjectRoot) |. slash |= RP.perspectiveParams |. end
@@ -119,7 +147,7 @@ definition =
 
 toRoute : Parser Route
 toRoute =
-    oneOf [ b catalog, b perspective, b definition ]
+    oneOf [ b catalog, b user, b perspective, b definition ]
 
 
 {-| In environments like Unison Local, the UI is served with a base path
@@ -171,11 +199,11 @@ fromUrl basePath url =
 perspectiveParams : Route -> Maybe PerspectiveParams
 perspectiveParams route =
     case route of
-        Catalog ->
-            Nothing
-
         Project pp _ ->
             Just pp
+
+        _ ->
+            Nothing
 
 
 
@@ -189,6 +217,11 @@ forProject project_ =
             FQN.cons (Project.ownerToString project_.owner) project_.name
     in
     Project (Perspective.ByNamespace Relative fqn) ProjectRoot
+
+
+forUser : User a -> Route
+forUser user_ =
+    User user_.username
 
 
 
@@ -255,6 +288,9 @@ toUrlString route =
             case route of
                 Catalog ->
                     [ "catalog" ]
+
+                User username_ ->
+                    [ "users", User.usernameToString username_ ]
 
                 Project pp ProjectRoot ->
                     perspectiveParamsToPath pp False
@@ -331,13 +367,13 @@ replacePerspective navKey perspectiveParams_ oldRoute =
     let
         newRoute =
             case oldRoute of
-                Catalog ->
-                    Catalog
-
                 Project _ ProjectRoot ->
                     Project perspectiveParams_ ProjectRoot
 
                 Project _ (ProjectDefinition ref) ->
                     Project perspectiveParams_ (ProjectDefinition ref)
+
+                _ ->
+                    oldRoute
     in
     navigate navKey newRoute
