@@ -451,36 +451,20 @@ subscriptions model =
 -- VIEW
 
 
-appTitle : Maybe msg -> AppHeader.AppTitle msg
-appTitle clickMsg =
-    let
-        appTitle_ =
-            case clickMsg of
-                Nothing ->
-                    AppHeader.Disabled
-
-                Just msg ->
-                    AppHeader.Clickable msg
-    in
-    appTitle_ (h1 [] [ text "Unison", span [ class "context unison-local" ] [ text "Local" ] ])
+appTitle : Click msg -> AppHeader.AppTitle msg
+appTitle click =
+    AppHeader.AppTitle click
+        (h1 []
+            [ text "Unison"
+            , span [ class "context unison-local" ] [ text "Local" ]
+            ]
+        )
 
 
-viewAppHeader : Model -> AppHeader.AppHeader Msg
-viewAppHeader model =
-    let
-        changePerspectiveMsg =
-            case model.env.perspective of
-                Codebase codebaseHash ->
-                    ChangePerspective (Codebase codebaseHash)
-
-                Namespace { codebaseHash } ->
-                    ChangePerspective (Codebase codebaseHash)
-
-        appTitle_ =
-            appTitle (Just changePerspectiveMsg)
-    in
+appHeader : AppHeader.AppHeader Msg
+appHeader =
     { menuToggle = Just ToggleSidebar
-    , appTitle = appTitle_
+    , appTitle = appTitle (Click.Href "/")
     , banner = Nothing
     , rightButton = Just (Button.button (ShowModal PublishModal) "Publish on Unison Share" |> Button.share)
     }
@@ -746,7 +730,7 @@ viewModal model =
 viewAppLoading : Html msg
 viewAppLoading =
     div [ id "app" ]
-        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
+        [ AppHeader.view (AppHeader.appHeader (appTitle Click.Disabled))
         , PageLayout.view
             (PageLayout.SidebarLayout
                 { sidebar = []
@@ -760,7 +744,7 @@ viewAppLoading =
 viewAppError : Http.Error -> Html msg
 viewAppError error =
     div [ id "app" ]
-        [ AppHeader.view (AppHeader.appHeader (appTitle Nothing))
+        [ AppHeader.view (AppHeader.appHeader (appTitle Click.Disabled))
         , PageLayout.view
             (PageLayout.SidebarLayout
                 { sidebar = []
@@ -801,5 +785,5 @@ view model =
                 }
     in
     { title = "Unison Local"
-    , body = [ div [ id "app" ] [ AppHeader.view (viewAppHeader model), PageLayout.view page, viewModal model ] ]
+    , body = [ div [ id "app" ] [ AppHeader.view appHeader, PageLayout.view page, viewModal model ] ]
     }
