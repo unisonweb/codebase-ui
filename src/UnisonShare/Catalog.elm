@@ -5,7 +5,6 @@ import FullyQualifiedName as FQN
 import Json.Decode as Decode
 import OrderedDict exposing (OrderedDict)
 import Project exposing (ProjectListing)
-import Simple.Fuzzy as Fuzzy
 import UnisonShare.Catalog.CatalogMask as CatalogMask exposing (CatalogMask)
 
 
@@ -85,25 +84,6 @@ fromList items =
 
 
 -- HELPERS
-
-
-{-| Fuzzy search through a flattened catalog by project name and category
--}
-search : Catalog -> String -> List ( ProjectListing, String )
-search catalog_ query =
-    let
-        flat ( category, projects ) acc =
-            acc ++ List.map (\p -> ( p, category )) projects
-
-        normalize ( p, c ) =
-            p
-                |> Project.slugString
-                |> (++) c
-    in
-    catalog_
-        |> toList
-        |> List.foldl flat []
-        |> Fuzzy.filter normalize query
 
 
 isEmpty : Catalog -> Bool

@@ -83,39 +83,6 @@ toList =
         ]
 
 
-search : Test
-search =
-    describe "Catalog.search"
-        [ test "Fuzzy finds projects in the catalog by project name " <|
-            \_ ->
-                let
-                    projectListings_ =
-                        [ baseListing, distributedListing, textExtraListing, nanoidListing ]
-
-                    catalog_ =
-                        Catalog.catalog catalogMask projectListings_
-                in
-                Expect.equal
-                    [ ( baseListing, "Featured" )
-                    , ( distributedListing, "Featured" )
-                    ]
-                    (Catalog.search catalog_ "unison")
-        , test "Fuzzy finds projects in the catalog by category" <|
-            \_ ->
-                let
-                    projectListings_ =
-                        [ baseListing, distributedListing, textExtraListing, nanoidListing ]
-
-                    catalog_ =
-                        Catalog.catalog catalogMask projectListings_
-                in
-                Expect.equal
-                    [ ( textExtraListing, "Parsers & Text Manipulation" )
-                    ]
-                    (Catalog.search catalog_ "parsers")
-        ]
-
-
 
 -- helpers
 
