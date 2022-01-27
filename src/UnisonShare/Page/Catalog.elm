@@ -4,15 +4,18 @@ import Api
 import Env exposing (Env)
 import Html exposing (Html, div, h1, input, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (autofocus, class, classList, placeholder)
-import Html.Events exposing (onBlur, onClick, onFocus, onInput)
+import Html.Events exposing (onBlur, onFocus, onInput, onMouseDown)
 import Http
 import KeyboardShortcut exposing (KeyboardShortcut(..))
 import KeyboardShortcut.Key as Key exposing (Key(..))
 import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
+import List.Extra as ListE
+import Maybe.Extra as MaybeE
 import Perspective
 import Project exposing (ProjectListing)
 import RemoteData exposing (RemoteData(..), WebData)
 import SearchResults exposing (SearchResults(..))
+import Simple.Fuzzy as Fuzzy
 import Task
 import UI
 import UI.Card as Card
@@ -20,19 +23,26 @@ import UI.Click as Click
 import UI.Icon as Icon
 import UI.PageLayout as PageLayout exposing (PageLayout)
 import UnisonShare.Catalog as Catalog exposing (Catalog)
+import UnisonShare.Catalog.CatalogMask exposing (CatalogMask)
 import UnisonShare.Route as Route
+import UnisonShare.User as User exposing (Username)
 
 
 
 -- MODEL
 
 
-type alias SearchResult =
-    ( ProjectListing, String )
+type Match
+    = UserMatch Username
+    | ProjectMatch ProjectListing String
 
 
 type alias CatalogSearchResults =
-    SearchResults SearchResult
+    SearchResults Match
+
+
+
+-- TODO: Rename
 
 
 type alias CatalogSearch =
@@ -43,6 +53,7 @@ type alias LoadedModel =
     { search : CatalogSearch
     , hasFocus : Bool
     , catalog : Catalog
+    , usernames : List Username
     , keyboardShortcut : KeyboardShortcut.Model
     }
 
@@ -53,14 +64,14 @@ type alias Model =
 
 init : Env -> ( Model, Cmd Msg )
 init env =
-    ( Loading, fetchCatalog env )
+    ( Loading, fetch env )
 
 
 {-| Fetch the Catalog in sequence by first fetching the doc, then the
 projectListings and finally merging them into a Catalog
 -}
-fetchCatalog : Env -> Cmd Msg
-fetchCatalog env =
+fetch : Env -> Cmd Msg
+fetch env =
     let
         perspective =
             Perspective.toCodebasePerspective env.perspective
@@ -73,8 +84,7 @@ fetchCatalog env =
                     |> Api.toTask env.apiBasePath Project.decodeListings
                     |> Task.map (\projects -> ( catalog, projects ))
             )
-        |> Task.map (\( cm, ps ) -> Catalog.catalog cm ps)
-        |> Task.attempt FetchCatalogFinished
+        |> Task.attempt FetchFinished
 
 
 
@@ -86,7 +96,8 @@ type Msg
     | UpdateFocus Bool
     | ClearQuery
     | SelectProject ProjectListing
-    | FetchCatalogFinished (Result Http.Error Catalog)
+    | SelectUser Username
+    | FetchFinished (Result Http.Error ( CatalogMask, List ProjectListing ))
     | Keydown KeyboardEvent
     | KeyboardShortcutMsg KeyboardShortcut.Msg
 
@@ -94,17 +105,25 @@ type Msg
 update : Env -> Msg -> Model -> ( Model, Cmd Msg )
 update env msg model =
     case ( msg, model ) of
-        ( FetchCatalogFinished catalogResult, _ ) ->
-            case catalogResult of
+        ( FetchFinished result, _ ) ->
+            case result of
                 Err e ->
                     ( Failure e, Cmd.none )
 
-                Ok catalog ->
+                Ok ( mask, listings ) ->
                     let
+                        usernames =
+                            listings
+                                |> List.map (.owner >> Project.ownerToString)
+                                |> ListE.unique
+                                |> List.map User.usernameFromString
+                                |> MaybeE.values
+
                         initModel =
                             { search = { query = "", results = SearchResults.empty }
                             , hasFocus = True
-                            , catalog = catalog
+                            , catalog = Catalog.catalog mask listings
+                            , usernames = usernames
                             , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
                             }
                     in
@@ -121,7 +140,7 @@ update env msg model =
 
                     else
                         query
-                            |> Catalog.search m.catalog
+                            |> search m.catalog m.usernames
                             |> SearchResults.fromList
             in
             ( Success { m | search = { query = query, results = searchResults } }, Cmd.none )
@@ -131,6 +150,9 @@ update env msg model =
 
         ( SelectProject project, Success m ) ->
             ( Success m, Route.navigateToProject env.navKey project )
+
+        ( SelectUser username, Success m ) ->
+            ( Success m, Route.navigateToUsername env.navKey username )
 
         ( Keydown event, Success m ) ->
             let
@@ -174,8 +196,7 @@ update env msg model =
                                 navigate =
                                     matches
                                         |> SearchResults.focus
-                                        |> Tuple.first
-                                        |> Route.navigateToProject env.navKey
+                                        |> matchToNavigate env
                             in
                             ( Success newModel, Cmd.batch [ cmd, navigate ] )
 
@@ -185,8 +206,7 @@ update env msg model =
                             let
                                 navigate =
                                     SearchResults.getAt (n - 1) m.search.results
-                                        |> Maybe.map Tuple.first
-                                        |> Maybe.map (Route.navigateToProject env.navKey)
+                                        |> Maybe.map (matchToNavigate env)
                                         |> Maybe.withDefault Cmd.none
                             in
                             ( Success newModel, Cmd.batch [ cmd, navigate ] )
@@ -209,8 +229,49 @@ update env msg model =
 
 
 mapSearch : (CatalogSearchResults -> CatalogSearchResults) -> CatalogSearch -> CatalogSearch
-mapSearch f search =
-    { search | results = f search.results }
+mapSearch f search_ =
+    { search_ | results = f search_.results }
+
+
+matchToNavigate : Env -> Match -> Cmd Msg
+matchToNavigate env match =
+    case match of
+        UserMatch username ->
+            Route.navigateToUsername env.navKey username
+
+        ProjectMatch project _ ->
+            Route.navigateToProject env.navKey project
+
+
+toMatches : Catalog -> List Username -> List Match
+toMatches catalog users =
+    let
+        flat ( category, projects ) acc =
+            acc ++ List.map (\p -> ProjectMatch p category) projects
+
+        projectMatches =
+            catalog
+                |> Catalog.toList
+                |> List.foldl flat []
+
+        userMatches =
+            List.map UserMatch users
+    in
+    userMatches ++ projectMatches
+
+
+search : Catalog -> List Username -> String -> List Match
+search catalog users query =
+    let
+        normalize m =
+            case m of
+                UserMatch u ->
+                    User.usernameToString u
+
+                ProjectMatch p _ ->
+                    Project.slugString p
+    in
+    Fuzzy.filter normalize query (toMatches catalog users)
 
 
 
@@ -238,8 +299,11 @@ viewCategory ( category, projects ) =
         |> Card.view
 
 
-viewMatch : KeyboardShortcut.Model -> SearchResult -> Bool -> Maybe Key -> Html Msg
-viewMatch keyboardShortcut ( project, category ) isFocused shortcut =
+{-| View a match in the dropdown list. Use `onMouseDown` instead of `onClick`
+to avoid competing with `onBlur` on the input
+-}
+viewMatch : KeyboardShortcut.Model -> Match -> Bool -> Maybe Key -> Html Msg
+viewMatch keyboardShortcut match isFocused shortcut =
     let
         shortcutIndicator =
             if isFocused then
@@ -253,14 +317,31 @@ viewMatch keyboardShortcut ( project, category ) isFocused shortcut =
                     Just key ->
                         KeyboardShortcut.view keyboardShortcut (Sequence (Just Key.Semicolon) key)
     in
-    tr
-        [ classList [ ( "search-result", True ), ( "focused", isFocused ) ]
-        , onClick (SelectProject project)
-        ]
-        [ td [ class "project-name" ] [ Project.viewProjectListing Click.Disabled project ]
-        , td [ class "category" ] [ text category ]
-        , td [] [ div [ class "shortcut" ] [ shortcutIndicator ] ]
-        ]
+    case match of
+        UserMatch username ->
+            tr
+                [ classList [ ( "search-result", True ), ( "focused", isFocused ) ]
+                , onMouseDown (SelectUser username)
+                ]
+                [ td [ class "match-name" ]
+                    [ div [ class "user-listing" ]
+                        [ div [ class "avatar" ] [ Icon.view Icon.user ]
+                        , text (User.usernameToString username)
+                        ]
+                    ]
+                , td [ class "category" ] [ text "User" ]
+                , td [] [ div [ class "shortcut" ] [ shortcutIndicator ] ]
+                ]
+
+        ProjectMatch project category ->
+            tr
+                [ classList [ ( "search-result", True ), ( "focused", isFocused ) ]
+                , onMouseDown (SelectProject project)
+                ]
+                [ td [ class "match-name" ] [ Project.viewProjectListing Click.Disabled project ]
+                , td [ class "category" ] [ text category ]
+                , td [] [ div [ class "shortcut" ] [ shortcutIndicator ] ]
+                ]
 
 
 indexToShortcut : Int -> Maybe Key
@@ -276,7 +357,7 @@ indexToShortcut index =
         n |> String.fromInt |> Key.fromString |> Just
 
 
-viewMatches : KeyboardShortcut.Model -> SearchResults.Matches SearchResult -> Html Msg
+viewMatches : KeyboardShortcut.Model -> SearchResults.Matches Match -> Html Msg
 viewMatches keyboardShortcut matches =
     let
         matchItems =
@@ -295,7 +376,7 @@ viewSearchResults keyboardShortcut { query, results } =
             resultsPane =
                 case results of
                     Empty ->
-                        div [ class "empty-state" ] [ text ("No matching projects found for \"" ++ query ++ "\"") ]
+                        div [ class "empty-state" ] [ text ("No matches found for \"" ++ query ++ "\"") ]
 
                     SearchResults matches ->
                         viewMatches keyboardShortcut matches
@@ -347,7 +428,7 @@ viewLoaded model =
                         [ div [ class "search-field" ]
                             [ Icon.view Icon.search
                             , input
-                                [ placeholder "Search for projects"
+                                [ placeholder "Search for projects and users"
                                 , onInput UpdateQuery
                                 , autofocus True
                                 , onBlur (UpdateFocus False)

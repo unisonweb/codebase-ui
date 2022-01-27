@@ -127,6 +127,7 @@
   padding: 0.5rem 0.75rem;
   height: 3rem;
   font-size: 1rem;
+  cursor: pointer;
 }
 
 .catalog-hero .catalog-search .search-results td:first-child {
@@ -137,7 +138,7 @@
   border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
 }
 
-.catalog-hero .catalog-search .search-results .search-result td.project-name {
+.catalog-hero .catalog-search .search-results .search-result td.match-name {
   width: 20em;
   text-overflow: ellipsis;
   overflow: hidden;
@@ -177,6 +178,51 @@
 .catalog-hero .catalog-search .search-results .search-result:hover {
   background: var(--color-gray-lighten-60);
   text-decoration: none;
+}
+
+.catalog-hero
+  .catalog-search
+  .search-results
+  .search-result
+  .project-listing:hover {
+  background: none;
+}
+
+.catalog-hero .catalog-search .search-results .search-result .user-listing {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  font-weight: bold;
+  padding-left: 0.25rem;
+}
+
+.catalog-hero
+  .catalog-search
+  .search-results
+  .search-result
+  .user-listing
+  .avatar {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.5rem;
+  background: var(--color-main-subtle-bg);
+  border: 1px solid var(--color-main-border);
+  border-radius: 0.75rem;
+  display: flex;
+  flex-direction: row;
+  align-items: flex-end;
+  justify-content: center;
+  overflow: hidden;
+}
+.catalog-hero
+  .catalog-search
+  .search-results
+  .search-result
+  .user-listing
+  .avatar
+  .icon {
+  font-size: 1rem;
+  color: var(--color-main-border);
 }
 
 .catalog-hero .catalog-search .search-results .empty-state {

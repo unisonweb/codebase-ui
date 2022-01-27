@@ -10,6 +10,8 @@ module UnisonShare.Route exposing
     , navigateToLatestCodebase
     , navigateToPerspective
     , navigateToProject
+    , navigateToUser
+    , navigateToUsername
     , perspectiveParams
     , replacePerspective
     , toDefinition
@@ -326,6 +328,16 @@ navigate navKey route =
 navigateToProject : Nav.Key -> Project a -> Cmd msg
 navigateToProject navKey project =
     navigate navKey (forProject project)
+
+
+navigateToUser : Nav.Key -> User.User a -> Cmd msg
+navigateToUser navKey user_ =
+    navigate navKey (forUser user_)
+
+
+navigateToUsername : Nav.Key -> User.Username -> Cmd msg
+navigateToUsername navKey username_ =
+    navigate navKey (User username_)
 
 
 
