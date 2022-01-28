@@ -36,6 +36,11 @@ ownerToString (Owner o) =
     o
 
 
+equals : Project a -> Project b -> Bool
+equals a b =
+    Hash.equals a.hash b.hash
+
+
 
 -- View
 
