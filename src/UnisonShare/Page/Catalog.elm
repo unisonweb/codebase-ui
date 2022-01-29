@@ -54,6 +54,7 @@ type alias LoadedModel =
     , hasFocus : Bool
     , catalog : Catalog
     , usernames : List Username
+    , projectListings : List ProjectListing
     , keyboardShortcut : KeyboardShortcut.Model
     }
 
@@ -124,6 +125,7 @@ update env msg model =
                             , hasFocus = True
                             , catalog = Catalog.catalog mask listings
                             , usernames = usernames
+                            , projectListings = listings
                             , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
                             }
                     in
@@ -140,7 +142,8 @@ update env msg model =
 
                     else
                         query
-                            |> search m.catalog m.usernames
+                            |> search m.catalog m.projectListings m.usernames
+                            |> List.take 9
                             |> SearchResults.fromList
             in
             ( Success { m | search = { query = query, results = searchResults } }, Cmd.none )
@@ -243,16 +246,27 @@ matchToNavigate env match =
             Route.navigateToProject env.navKey project
 
 
-toMatches : Catalog -> List Username -> List Match
-toMatches catalog users =
+toMatches : Catalog -> List ProjectListing -> List Username -> List Match
+toMatches catalog projects users =
     let
-        flat ( category, projects ) acc =
-            acc ++ List.map (\p -> ProjectMatch p category) projects
+        catalogProjects =
+            catalog |> Catalog.toList |> List.foldl flat []
+
+        flat ( category, projects_ ) acc =
+            acc ++ List.map (\p -> ( p, category )) projects_
+
+        categoryOf project =
+            catalogProjects
+                |> ListE.find (\( p, _ ) -> Project.equals project p)
+                |> Maybe.map Tuple.second
 
         projectMatches =
-            catalog
-                |> Catalog.toList
-                |> List.foldl flat []
+            projects
+                |> List.map
+                    (\p ->
+                        ProjectMatch p
+                            (Maybe.withDefault "" (categoryOf p))
+                    )
 
         userMatches =
             List.map UserMatch users
@@ -260,8 +274,8 @@ toMatches catalog users =
     userMatches ++ projectMatches
 
 
-search : Catalog -> List Username -> String -> List Match
-search catalog users query =
+search : Catalog -> List ProjectListing -> List Username -> String -> List Match
+search catalog projects users query =
     let
         normalize m =
             case m of
@@ -271,7 +285,7 @@ search catalog users query =
                 ProjectMatch p _ ->
                     Project.slugString p
     in
-    Fuzzy.filter normalize query (toMatches catalog users)
+    Fuzzy.filter normalize query (toMatches catalog projects users)
 
 
 
