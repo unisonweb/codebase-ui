@@ -117,6 +117,7 @@
   border-top: 1px solid var(--color-gray-lighten-50);
   border-radius: 0 0 var(--border-radius-base) var(--border-radius-base);
   padding: 0.75rem;
+  overflow: auto;
 }
 
 .catalog-hero .catalog-search .search-results table {
@@ -247,4 +248,43 @@
 
 .categories .card .project-listing {
   margin-left: -0.25rem;
+}
+
+@media only screen and (max-width: 1025px) {
+  .catalog-page {
+    --page-hero-height: 18rem;
+  }
+
+  .page.hero-layout .page-hero {
+    padding: 0 1rem;
+  }
+
+  .catalog-hero h1 {
+    font-size: 1.9rem;
+  }
+
+  .catalog-hero .catalog-search {
+    width: calc(100vw - 1rem);
+  }
+
+  .categories {
+    flex-direction: column;
+    margin-top: 4rem;
+    gap: 1rem;
+  }
+
+  .categories .card {
+    width: auto;
+  }
+
+  .catalog-hero .catalog-search .search-results .search-result td.category {
+    display: none;
+  }
+  .catalog-hero
+    .catalog-search
+    .search-results
+    .search-result
+    .keyboard-shortcut {
+    display: none;
+  }
 }

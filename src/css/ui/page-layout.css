@@ -453,7 +453,9 @@
     display: none;
   }
 
-  .page-content {
+  .page.sidebar-layout .page-content,
+  .page.hero-layout .page-content,
+  .page.full-layout .page-content {
     width: 100vw;
   }
 
