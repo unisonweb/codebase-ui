@@ -25,3 +25,21 @@
   width: calc(33%);
   margin-left: -0.25rem;
 }
+
+@media only screen and (max-width: 1025px) {
+  .user-page {
+    --page-hero-height: 4rem;
+  }
+
+  .user-page .page-content {
+    padding: 2rem 0;
+  }
+
+  .user-page .page-content .card.contained {
+    border: none;
+  }
+
+  .user-page .page-content .projects {
+    flex-direction: column;
+  }
+}
