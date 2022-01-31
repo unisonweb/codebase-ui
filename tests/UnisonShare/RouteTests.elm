@@ -21,13 +21,16 @@ catalogRoute =
                         mkUrl "/catalog"
                 in
                 Expect.equal Catalog (Route.fromUrl "" url)
-        , test "Matches root to Catalog" <|
-            \_ ->
-                let
-                    url =
-                        mkUrl "/"
-                in
-                Expect.equal Catalog (Route.fromUrl "" url)
+
+        {- TODO enable when cutting over to catalog
+           , test "Matches root to Catalog" <|
+               \_ ->
+                   let
+                       url =
+                           mkUrl "/"
+                   in
+                   Expect.equal Catalog (Route.fromUrl "" url)
+        -}
         ]
 
 
