@@ -38,11 +38,9 @@ import Url.Builder exposing (relative)
 
 {-
 
-   Routing
-   =======
+   URL Scheme for Projects
+   =======================
 
-   URL Scheme
-   ----------
 
    Directly on the codebase
    /[latest|:codebase-hash]/[namespaces|types|terms]/[:namespace-name|:definition-name|:definition-hash]
@@ -51,11 +49,14 @@ import Url.Builder exposing (relative)
    Within a namespace
    /[latest|:codebase-hash]/[namespaces]/[:namespace-name]/-/[types|terms]/[:definition-name|:definition-hash]
 
+   TODO:
+     /projects/[:project-name]/-/[namespaces|types|terms]/[:definition-name|:definition-hash]
+     /projects/[:project-name]/-/[namespaces]/[:namespace-name]/-/[types|terms]/[:definition-name|:definition-hash]
 
    Relative examples
    -----------------
 
-   Top level of a Codebase:                       /
+   Top level of a Codebase:                     /
    Top level of a Codebase:                     /latest
    With namespace context:                      /latest/namespaces/base/List
    Definitions:                                 /latest/[types|terms]/base/List/map
@@ -185,7 +186,7 @@ fromUrl basePath url =
                 "/" ++ path
 
         parse url_ =
-            Result.withDefault (Project (ByCodebase Relative) ProjectRoot) (Parser.run toRoute url_)
+            Result.withDefault Catalog (Parser.run toRoute url_)
     in
     url
         |> .path
