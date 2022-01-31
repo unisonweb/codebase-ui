@@ -785,5 +785,11 @@ view model =
                 }
     in
     { title = "Unison Local"
-    , body = [ div [ id "app" ] [ AppHeader.view appHeader, PageLayout.view page, viewModal model ] ]
+    , body =
+        [ div [ id "app" ]
+            [ AppHeader.view appHeader
+            , PageLayout.view page
+            , viewModal model
+            ]
+        ]
     }
