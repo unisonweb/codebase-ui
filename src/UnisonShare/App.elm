@@ -504,8 +504,8 @@ appTitle click =
         )
 
 
-appHeader : AppHeader.AppHeader Msg
-appHeader =
+appHeader : Maybe Msg -> AppHeader.AppHeader Msg
+appHeader menuToggle =
     let
         banner =
             Just
@@ -515,7 +515,7 @@ appHeader =
                     "Check it out!"
                 )
     in
-    { menuToggle = Just ToggleSidebar
+    { menuToggle = menuToggle
     , appTitle = appTitle (Click.Href "/")
     , banner = banner
     , rightButton = Just (Button.button (ShowModal AppModal.PublishModal) "Publish on Unison Share" |> Button.share)
@@ -697,13 +697,13 @@ view model =
                 , content = PageLayout.PageContent [ pageContent ]
                 }
 
-        ( pageId, page ) =
+        ( pageId, page, menuToggle ) =
             case model.route of
                 Route.Catalog ->
-                    ( "catalog-page", Html.map CatalogMsg (Catalog.view model.catalog) )
+                    ( "catalog-page", Html.map CatalogMsg (Catalog.view model.catalog), Nothing )
 
                 Route.User _ ->
-                    ( "user-page", Html.map UserPageMsg (UserPage.view model.userPage) )
+                    ( "user-page", Html.map UserPageMsg (UserPage.view model.userPage), Nothing )
 
                 Route.Project _ Route.ProjectRoot ->
                     let
@@ -716,7 +716,10 @@ view model =
                                 |> withSidebar
                                 |> PageLayout.view
                     in
-                    ( "project-page", page_ )
+                    ( "project-page"
+                    , page_
+                    , Just ToggleSidebar
+                    )
 
                 Route.Project _ (Route.ProjectDefinition _) ->
                     let
@@ -725,12 +728,15 @@ view model =
                                 |> withSidebar
                                 |> PageLayout.view
                     in
-                    ( "project-page", page_ )
+                    ( "project-page"
+                    , page_
+                    , Just ToggleSidebar
+                    )
     in
     { title = "Unison Share"
     , body =
         [ div [ id "app", class pageId ]
-            [ AppHeader.view appHeader
+            [ AppHeader.view (appHeader menuToggle)
             , page
             , Html.map AppModalMsg (AppModal.view model.env model.appModal)
             ]

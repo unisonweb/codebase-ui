@@ -400,7 +400,7 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                     span [ class "strikethrough" ] [ viewAtCurrentSectionLevel d ]
 
                 Style cssClass d ->
-                    span [ cssClass |> stringToClass |> class ] [ viewAtCurrentSectionLevel d ]
+                    div [ cssClass |> stringToClass |> class ] [ viewAtCurrentSectionLevel d ]
 
                 Anchor id_ d ->
                     a [ id id_, target id_ ] [ viewAtCurrentSectionLevel d ]
