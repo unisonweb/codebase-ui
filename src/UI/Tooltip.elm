@@ -12,7 +12,7 @@ module UI.Tooltip exposing
     , withPosition
     )
 
-import Html exposing (Html, div, span, text)
+import Html exposing (Html, div, text)
 import Html.Attributes exposing (class)
 import UI
 import UI.Click as Click exposing (Click)
