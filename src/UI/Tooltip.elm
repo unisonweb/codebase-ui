@@ -128,7 +128,7 @@ view { arrow, content, trigger, position } =
                     [ content_ ]
                 ]
     in
-    span [ class "tooltip-trigger" ] [ tooltip_, trigger ]
+    div [ class "tooltip-trigger" ] [ tooltip_, trigger ]
 
 
 
