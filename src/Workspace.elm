@@ -18,7 +18,7 @@ import Env exposing (Env)
 import FullyQualifiedName exposing (FQN)
 import Hash
 import HashQualified as HQ
-import Html exposing (Html, article, div, header, section)
+import Html exposing (Html, article, div, section)
 import Html.Attributes exposing (class, id)
 import Http
 import KeyboardShortcut exposing (KeyboardShortcut(..))
@@ -28,6 +28,7 @@ import Perspective exposing (Perspective)
 import Task
 import UI.Button as Button
 import UI.Icon as Icon
+import UI.Toolbar as Toolbar
 import Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem)
 import Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 
@@ -499,10 +500,11 @@ view model =
 
         WorkspaceItems.WorkspaceItems _ ->
             article [ id "workspace" ]
-                [ header
-                    [ id "workspace-toolbar" ]
-                    [ Button.iconThenLabel Find Icon.search "Find Definition" |> Button.small |> Button.view
-                    ]
+                [ Button.iconThenLabel Find Icon.search "Find Definition"
+                    |> Button.small
+                    |> Button.view
+                    |> Toolbar.toolbar
+                    |> Toolbar.view
                 , section
                     [ id "workspace-content" ]
                     [ section [ class "definitions-pane" ] (viewWorkspaceItems model.workspaceItems) ]

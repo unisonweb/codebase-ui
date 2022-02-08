@@ -146,13 +146,14 @@
   justify-content: flex-end;
 }
 
-.perspective-landing-readme header {
+.perspective-landing-readme header.title {
   font-size: var(--font-size-medium);
   font-weight: bold;
   height: 1.5rem;
   line-height: 1;
   display: flex;
   flex-direction: row;
+  align-items: center;
 }
 
 .perspective-landing-readme header .icon {

@@ -1,0 +1,15 @@
+.toolbar {
+  height: var(--toolbar-height);
+  padding-left: 2.625rem;
+  padding-right: 1rem;
+  font-size: var(--font-size-medium);
+  background: var(--color-main-bg);
+  border-bottom: 1px solid var(--color-main-border);
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.toolbar .right {
+  margin-left: auto;
+}

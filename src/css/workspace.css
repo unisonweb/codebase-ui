@@ -6,31 +6,12 @@
   background: var(--color-workspace-bg);
   color: var(--color-workspace-fg);
 
-  --workspace-toolbar-height: 3.5rem;
   --workspace-content-width: var(--main-content-width);
-}
-
-#workspace-toolbar {
-  height: var(--workspace-toolbar-height);
-  padding-left: 2.625rem;
-  padding-right: 1rem;
-  font-size: var(--font-size-medium);
-  background: var(--color-workspace-item-bg);
-  border-bottom: 1px solid var(--color-workspace-border);
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-}
-
-#workspace-toolbar .right {
-  margin-left: auto;
 }
 
 #workspace-content {
   overflow: auto;
-  height: calc(
-    calc(100vh - var(--workspace-toolbar-height)) - var(--app-header-height)
-  );
+  height: calc(calc(100vh - var(--toolbar-height)) - var(--app-header-height));
   padding-top: 2rem;
   scroll-behavior: smooth;
   scrollbar-width: auto;
