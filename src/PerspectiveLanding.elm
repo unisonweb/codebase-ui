@@ -15,6 +15,7 @@ import RemoteData exposing (RemoteData(..))
 import UI
 import UI.Button as Button exposing (Button)
 import UI.Icon as Icon
+import UI.Toolbar as Toolbar
 
 
 type alias Model =
@@ -114,7 +115,7 @@ viewEmptyStateCodebase : AppContext -> Html Msg
 viewEmptyStateCodebase appContext =
     let
         button =
-            Button.iconThenLabel Find Icon.search "Find Definitions"
+            Button.iconThenLabel Find Icon.search "Find Definition"
                 |> Button.primaryMono
                 |> Button.medium
     in
@@ -168,17 +169,28 @@ view env model =
                     viewLoading
 
                 Success (Namespace _ _ { readme }) ->
-                    case readme of
-                        Just r ->
-                            container
-                                [ div [ class "perspective-landing-readme" ]
-                                    [ header [] [ Icon.view Icon.doc, text "README" ]
-                                    , Readme.view OpenReference ToggleDocFold model r
-                                    ]
-                                ]
+                    let
+                        content =
+                            case readme of
+                                Just r ->
+                                    container
+                                        [ div [ class "perspective-landing-readme" ]
+                                            [ header [ class "title" ] [ Icon.view Icon.doc, text "README" ]
+                                            , Readme.view OpenReference ToggleDocFold model r
+                                            ]
+                                        ]
 
-                        Nothing ->
-                            viewEmptyStateNamespace fqn
+                                Nothing ->
+                                    viewEmptyStateNamespace fqn
+                    in
+                    div []
+                        [ Button.iconThenLabel Find Icon.search "Find Definition"
+                            |> Button.small
+                            |> Button.view
+                            |> Toolbar.toolbar
+                            |> Toolbar.view
+                        , content
+                        ]
 
                 Failure error ->
                     viewError fqn (Api.errorToString error)
