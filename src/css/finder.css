@@ -25,8 +25,9 @@
 
 #finder header .icon.search {
   font-size: 1.5rem;
+  margin-top: -3px;
   margin-left: 1rem;
-  margin-right: 1rem;
+  margin-right: 0.75rem;
   color: var(--color-modal-subtle-fg);
   transition: color 0.5s;
   transition-delay: 0.4s;
