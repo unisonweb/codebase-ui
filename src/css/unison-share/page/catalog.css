@@ -91,6 +91,7 @@
 
 .catalog-hero .catalog-search .search-field .icon {
   font-size: 1.5rem;
+  margin-top: -3px;
   color: var(--color-main-subtle-fg);
 }
 
