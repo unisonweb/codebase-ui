@@ -131,7 +131,7 @@ viewDownloadModal fqn =
             FQN.unqualifiedName fqn
 
         pullCommand =
-            "pull git@github.com:unisonweb/share.git:." ++ prettyName ++ " ." ++ unqualified
+            "pull https://github.com/unisonweb/share:." ++ prettyName ++ " ." ++ unqualified
 
         content =
             Modal.Content
