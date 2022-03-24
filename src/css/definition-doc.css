@@ -339,6 +339,14 @@
   margin-top: 0;
 }
 
+.definition-doc section:first-child > p:empty {
+  display: none;
+}
+
+.definition-doc section:first-child > p:empty + section {
+  margin-top: 0;
+}
+
 .definition-doc section:last-child {
   margin-bottom: 0;
 }
@@ -418,6 +426,13 @@
 }
 
 .definition-doc .group {
+}
+
+.definition-doc video {
+  background: var(--color-doc-source-bg);
+  border-radius: var(--border-radius-base);
+  max-width: 100%;
+  margin: 1rem 0;
 }
 
 @media only screen and (max-width: 1024px) {

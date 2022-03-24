@@ -15,6 +15,7 @@ module Definition.Doc exposing
 import Definition.Reference exposing (Reference)
 import Definition.Source as Source
 import Definition.Term exposing (TermSignature(..))
+import Dict exposing (Dict)
 import Html
     exposing
         ( Attribute
@@ -31,6 +32,7 @@ import Html
         , ol
         , p
         , section
+        , source
         , span
         , strong
         , table
@@ -39,8 +41,23 @@ import Html
         , text
         , tr
         , ul
+        , video
         )
-import Html.Attributes exposing (alt, class, classList, href, id, rel, src, start, target, title)
+import Html.Attributes
+    exposing
+        ( alt
+        , class
+        , classList
+        , href
+        , id
+        , poster
+        , rel
+        , src
+        , start
+        , target
+        , title
+        , type_
+        )
 import Html.Events exposing (onClick)
 import Json.Decode as Decode exposing (bool, field, index, int, string)
 import Json.Decode.Extra as DecodeE exposing (when)
@@ -161,6 +178,14 @@ type
       -- renderers will support all extensions, currently wrapping Syntax
     | Embed Syntax
     | EmbedInline Syntax
+    | Video
+        (List
+            { mediaSourceUrl : String
+            , mediaSourceMimeType : Maybe String
+            }
+        )
+        (Dict String String)
+    | FrontMatter (Dict String (List String))
 
 
 
@@ -630,6 +655,37 @@ view refToMsg toggleFoldMsg docFoldToggles document =
                         EmbedInline syntax ->
                             span [ class "source rich embed-inline" ] [ UI.inlineCode [] (viewSyntax syntax) ]
 
+                        Video mediaSources attrs ->
+                            let
+                                viewMediaSource s =
+                                    let
+                                        mimeType =
+                                            case s.mediaSourceMimeType of
+                                                Just m ->
+                                                    [ type_ m ]
+
+                                                Nothing ->
+                                                    []
+                                    in
+                                    source (src s.mediaSourceUrl :: mimeType) []
+
+                                sources =
+                                    List.map viewMediaSource mediaSources
+
+                                videoAttrs =
+                                    case Dict.get "poster" attrs of
+                                        Just poster_ ->
+                                            [ poster poster_ ]
+
+                                        Nothing ->
+                                            []
+                            in
+                            video videoAttrs sources
+
+                        FrontMatter _ ->
+                            -- FrontMatter shouldn't be shown when rendered
+                            UI.nothing
+
                 Join docs ->
                     span [ class "join" ] (List.map viewAtCurrentSectionLevel (mergeWords " " docs))
 
@@ -689,6 +745,16 @@ decodeSpecialForm path =
                 [ when tag ((==) "Term") (field "contents" (index 1 (decodeSource_ isFolded)))
                 , when tag ((==) "Type") (field "contents" (index 1 (decodeSource_ isFolded)))
                 ]
+
+        decodeMediaSource =
+            Decode.map2 (\url mime -> { mediaSourceUrl = url, mediaSourceMimeType = mime })
+                (field "mediaSourceUrl" string)
+                (field "mediaSourceMimeType" (Decode.maybe string))
+
+        decodeVideo =
+            Decode.map2 Video
+                (index 0 (Decode.list decodeMediaSource))
+                (index 1 (Decode.dict string))
     in
     Decode.oneOf
         [ when tag ((==) "Source") (Decode.map Source (field "contents" (Decode.list (decodeSource False))))
@@ -712,6 +778,12 @@ decodeSpecialForm path =
             )
         , when tag ((==) "Embed") (Decode.map Embed (field "contents" Syntax.decode))
         , when tag ((==) "EmbedInline") (Decode.map EmbedInline (field "contents" Syntax.decode))
+        , when tag ((==) "Video") (field "contents" decodeVideo)
+        , when tag
+            ((==) "FrontMatter")
+            (Decode.map FrontMatter
+                (field "contents" (Decode.dict (Decode.list Decode.string)))
+            )
         ]
 
 
