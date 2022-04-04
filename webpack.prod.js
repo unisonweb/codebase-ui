@@ -36,6 +36,11 @@ const shared = {
       },
     ],
   },
+  resolve: {
+    alias: {
+      assets: path.resolve(__dirname, "src/assets/"),
+    },
+  },
 };
 
 const unisonShareCfg = {
@@ -56,7 +61,7 @@ const unisonShareCfg = {
     new CopyPlugin({
       patterns: [
         {
-          from: "src/img/unison-share-social.png",
+          from: "src/assets/unison-share-social.png",
           to: "unison-share-social.png",
         },
       ],

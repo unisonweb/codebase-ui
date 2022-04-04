@@ -6,6 +6,12 @@ const API_URL = process.env.API_URL || "127.0.0.1:8080";
 module.exports = {
   entry: "./src/unisonShare.js",
 
+  resolve: {
+    alias: {
+      assets: path.resolve(__dirname, "src/assets/"),
+    },
+  },
+
   module: {
     rules: [
       {

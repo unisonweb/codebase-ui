@@ -1,2 +1,36 @@
+#app {
+  display: grid;
+  grid-template-rows: var(--app-header-height) auto;
+  grid-template-columns: auto;
+  grid-template-areas:
+    "app-header"
+    "page-layout";
+}
+
+/* -- App Error ---------------------------------------------------------- */
+
+.app-error {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 8rem;
+  font-weight: 600;
+  color: var(--color-main-mg);
+}
+
+.app-error .icon {
+  font-size: 4rem;
+  color: var(--color-main-alert);
+}
+
+@import "./themes/unison/light.css";
+@import "./ui.css";
+@import "./code.css";
+
+@import "./unison-share/help-modal.css";
+@import "./unison-share/publish-modal.css";
+@import "./unison-share/report-bug-modal.css";
+@import "./unison-share/download-modal.css";
 @import "./unison-share/page/catalog.css";
 @import "./unison-share/page/user-page.css";

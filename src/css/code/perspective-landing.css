@@ -81,7 +81,7 @@
 .perspective-landing-empty-state {
   margin-top: 2rem;
   font-size: 1rem;
-  background: url(../img/empty-state-bg.svg);
+  background: url(assets/empty-state-bg.svg);
   background-position: center bottom;
   background-repeat: no-repeat;
   width: 38rem;

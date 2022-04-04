@@ -24,13 +24,10 @@
   color: var(--color-main-alert);
 }
 
-@import "./help-modal.css";
-@import "./publish-modal.css";
-@import "./report-bug-modal.css";
-@import "./download-modal.css";
-@import "./finder.css";
+@import "./themes/unison/light.css";
+@import "./ui.css";
+@import "./code.css";
 
-@import "./perspective-landing.css";
-@import "./workspace.css";
-@import "./definition-doc.css";
-@import "./project-listing.css";
+@import "./unison-local/help-modal.css";
+@import "./unison-local/publish-modal.css";
+@import "./unison-local/report-bug-modal.css";

@@ -13,7 +13,7 @@
       var(--color-catalog-hero-bg),
       var(--color-catalog-hero-bg-transparent)
     ),
-    url("../../../img/circle-grid-color.svg");
+    url("assets/circle-grid-color.svg");
   background-repeat: no-repeat;
   background-position: center center;
   background-size: cover;
