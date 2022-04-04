@@ -1,9 +1,9 @@
 module UnisonShare.CatalogTests exposing (..)
 
+import Code.FullyQualifiedName as FQN
+import Code.Hash as Hash
+import Code.Project as Project
 import Expect
-import FullyQualifiedName as FQN
-import Hash
-import Project
 import Test exposing (..)
 import UnisonShare.Catalog as Catalog
 import UnisonShare.Catalog.CatalogMask as CatalogMask

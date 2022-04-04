@@ -5,7 +5,7 @@ module UI.Color exposing (..)
 
 import Color as C
 import Color.Accessibility exposing (luminance)
-import Color.Harmony as Harmony
+import Lib.Color.Harmony as Harmony
 import List.Extra as ListE
 
 

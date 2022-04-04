@@ -15,14 +15,14 @@ module UnisonLocal.Route exposing
     )
 
 import Browser.Navigation as Nav
-import Definition.Reference exposing (Reference(..))
-import FullyQualifiedName as FQN
-import Hash
-import HashQualified exposing (HashQualified(..))
+import Code.Definition.Reference exposing (Reference(..))
+import Code.FullyQualifiedName as FQN
+import Code.Hash as Hash
+import Code.HashQualified exposing (HashQualified(..))
+import Code.Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
+import Code.UrlParsers as UP exposing (b, reference, slash)
 import List.Nonempty as NEL
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
-import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
-import Route.Parsers as RP exposing (b, reference, slash)
 import Url exposing (Url)
 import Url.Builder exposing (relative)
 
@@ -92,12 +92,12 @@ updatePerspectiveParams route params =
 
 perspective : Parser Route
 perspective =
-    succeed Perspective |. slash |= RP.perspectiveParams |. end
+    succeed Perspective |. slash |= UP.perspectiveParams |. end
 
 
 definition : Parser Route
 definition =
-    succeed Definition |. slash |= RP.perspectiveParams |. slash |= reference |. end
+    succeed Definition |. slash |= UP.perspectiveParams |. slash |= reference |. end
 
 
 toRoute : Parser Route

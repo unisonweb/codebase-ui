@@ -7,9 +7,9 @@ module UnisonShare.User exposing
     , usernameToString
     )
 
-import Definition.Readme as Readme exposing (Readme)
+import Code.Definition.Readme as Readme exposing (Readme)
+import Code.Project exposing (ProjectListing)
 import Json.Decode as Decode exposing (field, maybe, string)
-import Project exposing (ProjectListing)
 import Url exposing (Url)
 
 

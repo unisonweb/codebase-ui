@@ -1,6 +1,6 @@
 module UnisonShare.Catalog.CatalogMaskTests exposing (..)
 
-import Definition.Doc as Doc
+import Code.Definition.Doc as Doc
 import Expect
 import Test exposing (..)
 import UnisonShare.Catalog.CatalogMask as CatalogMask

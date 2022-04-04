@@ -1,16 +1,16 @@
 module UnisonShare.Page.UserPage exposing (..)
 
 import Api
-import Definition.Doc as Doc
-import Definition.Readme as Readme
-import Definition.Reference exposing (Reference)
+import Code.Definition.Doc as Doc
+import Code.Definition.Readme as Readme
+import Code.Definition.Reference exposing (Reference)
+import Code.FullyQualifiedName as FQN
+import Code.Perspective as Perspective
+import Code.Project as Project exposing (ProjectListing)
 import Env exposing (Env)
-import FullyQualifiedName as FQN
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Http
-import Perspective
-import Project exposing (ProjectListing)
 import RemoteData exposing (RemoteData(..), WebData)
 import Task
 import UI

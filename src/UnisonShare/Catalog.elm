@@ -1,10 +1,10 @@
 module UnisonShare.Catalog exposing (..)
 
+import Code.FullyQualifiedName as FQN
+import Code.Project as Project exposing (ProjectListing)
 import Dict
-import FullyQualifiedName as FQN
 import Json.Decode as Decode
 import OrderedDict exposing (OrderedDict)
-import Project exposing (ProjectListing)
 import UnisonShare.Catalog.CatalogMask as CatalogMask exposing (CatalogMask)
 
 

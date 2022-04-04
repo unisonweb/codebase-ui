@@ -1,17 +1,17 @@
 module UnisonShare.AppModal exposing (..)
 
-import Definition.Reference exposing (Reference)
+import Code.Definition.Reference exposing (Reference)
+import Code.Finder as Finder
+import Code.Finder.SearchOptions as SearchOptions
+import Code.FullyQualifiedName as FQN exposing (FQN)
 import Env exposing (Env, OperatingSystem(..))
-import Finder
-import Finder.SearchOptions as SearchOptions
-import FullyQualifiedName as FQN exposing (FQN)
 import Html exposing (Html, a, div, h3, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, rel, target)
-import KeyboardShortcut
-import KeyboardShortcut.Key as Key exposing (Key(..))
 import UI
 import UI.Button as Button
 import UI.CopyField as CopyField
+import UI.KeyboardShortcut as KeyboardShortcut
+import UI.KeyboardShortcut.Key as Key exposing (Key(..))
 import UI.Modal as Modal
 
 
