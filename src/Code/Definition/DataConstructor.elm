@@ -12,8 +12,8 @@ import Code.Definition.Info exposing (Info)
 import Code.Definition.Term as Term exposing (TermSignature)
 import Code.Definition.Type as Type exposing (TypeSource)
 import Code.FullyQualifiedName exposing (FQN)
-import Code.Hash as Hash exposing (Hash)
-import Code.Syntax as Syntax exposing (Syntax)
+import Code.Hash exposing (Hash)
+import Code.Syntax exposing (Syntax)
 import Json.Decode as Decode
 
 
