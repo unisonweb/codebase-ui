@@ -3,21 +3,20 @@ module UnisonShare.App exposing (..)
 import Api
 import Browser
 import Browser.Navigation as Nav
-import CodebaseTree
-import Definition.Reference exposing (Reference)
+import Code.CodebaseTree as CodebaseTree
+import Code.Definition.Reference exposing (Reference)
+import Code.FullyQualifiedName as FQN exposing (FQN)
+import Code.Hashvatar as Hashvatar
+import Code.Namespace as Namespace exposing (NamespaceDetails)
+import Code.Perspective as Perspective exposing (Perspective(..))
+import Code.PerspectiveLanding as PerspectiveLanding
+import Code.Workspace as Workspace
+import Code.Workspace.WorkspaceItems as WorkspaceItems
 import Env exposing (Env)
-import FullyQualifiedName as FQN exposing (FQN)
-import Hashvatar
 import Html exposing (Html, a, div, h1, h2, nav, p, span, text)
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
-import KeyboardShortcut
-import KeyboardShortcut.Key exposing (Key(..))
-import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
-import Namespace exposing (NamespaceDetails)
-import Perspective exposing (Perspective(..))
-import PerspectiveLanding
 import RemoteData exposing (RemoteData(..))
 import UI
 import UI.AppHeader as AppHeader
@@ -25,16 +24,17 @@ import UI.Banner as Banner
 import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
 import UI.Icon as Icon
+import UI.KeyboardShortcut as KeyboardShortcut
+import UI.KeyboardShortcut.Key exposing (Key(..))
+import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import UI.PageLayout as PageLayout
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonShare.AppModal as AppModal
-import UnisonShare.Page.Catalog as Catalog
+import UnisonShare.Page.CatalogPage as CatalogPage
 import UnisonShare.Page.UserPage as UserPage
 import UnisonShare.Route as Route exposing (Route)
 import Url exposing (Url)
-import Workspace
-import Workspace.WorkspaceItems as WorkspaceItems
 
 
 
@@ -46,7 +46,7 @@ type alias Model =
     , codebaseTree : CodebaseTree.Model
     , workspace : Workspace.Model
     , perspectiveLanding : PerspectiveLanding.Model
-    , catalog : Catalog.Model
+    , catalog : CatalogPage.Model
     , userPage : UserPage.Model
     , appModal : AppModal.Model
     , keyboardShortcut : KeyboardShortcut.Model
@@ -82,7 +82,7 @@ init env route =
         ( catalog, catalogCmd ) =
             case route of
                 Route.Catalog ->
-                    Catalog.init env
+                    CatalogPage.init env
 
                 _ ->
                     ( NotAsked, Cmd.none )
@@ -112,7 +112,7 @@ init env route =
     , Cmd.batch
         [ Cmd.map CodebaseTreeMsg codebaseTreeCmd
         , Cmd.map WorkspaceMsg workspaceCmd
-        , Cmd.map CatalogMsg catalogCmd
+        , Cmd.map CatalogPageMsg catalogCmd
         , Cmd.map UserPageMsg userPageCmd
         , fetchNamespaceDetailsCmd
         ]
@@ -134,7 +134,7 @@ type Msg
     | ToggleSidebar
       -- sub msgs
     | AppModalMsg AppModal.Msg
-    | CatalogMsg Catalog.Msg
+    | CatalogPageMsg CatalogPage.Msg
     | UserPageMsg UserPage.Msg
     | WorkspaceMsg Workspace.Msg
     | PerspectiveLandingMsg PerspectiveLanding.Msg
@@ -170,9 +170,9 @@ update msg ({ env } as model) =
                 Route.Catalog ->
                     let
                         ( catalog, cmd ) =
-                            Catalog.init model.env
+                            CatalogPage.init model.env
                     in
-                    ( { model2 | catalog = catalog }, Cmd.map CatalogMsg cmd )
+                    ( { model2 | catalog = catalog }, Cmd.map CatalogPageMsg cmd )
 
                 Route.User username ->
                     let
@@ -251,12 +251,12 @@ update msg ({ env } as model) =
             in
             ( newModel, Cmd.batch [ Cmd.map AppModalMsg amCmd, cmd ] )
 
-        ( Route.Catalog, CatalogMsg cMsg ) ->
+        ( Route.Catalog, CatalogPageMsg cMsg ) ->
             let
                 ( catalog, cmd ) =
-                    Catalog.update env cMsg model.catalog
+                    CatalogPage.update env cMsg model.catalog
             in
-            ( { model | catalog = catalog }, Cmd.map CatalogMsg cmd )
+            ( { model | catalog = catalog }, Cmd.map CatalogPageMsg cmd )
 
         ( Route.User _, UserPageMsg uMsg ) ->
             let
@@ -700,7 +700,7 @@ view model =
         ( pageId, page, menuToggle ) =
             case model.route of
                 Route.Catalog ->
-                    ( "catalog-page", Html.map CatalogMsg (Catalog.view model.catalog), Nothing )
+                    ( "catalog-page", Html.map CatalogPageMsg (CatalogPage.view model.catalog), Nothing )
 
                 Route.User _ ->
                     ( "user-page", Html.map UserPageMsg (UserPage.view model.userPage), Nothing )

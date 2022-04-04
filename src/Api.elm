@@ -14,13 +14,13 @@ module Api exposing
     , toUrl
     )
 
-import FullyQualifiedName as FQN exposing (FQN)
-import Hash exposing (Hash)
+import Code.FullyQualifiedName as FQN exposing (FQN)
+import Code.Hash as Hash exposing (Hash)
+import Code.Perspective as Perspective exposing (Perspective(..))
+import Code.Syntax as Syntax
 import Http
 import Json.Decode as Decode
-import Perspective exposing (Perspective(..))
 import Regex
-import Syntax
 import Task exposing (Task)
 import Url.Builder exposing (QueryParameter, absolute, int, string)
 

@@ -3,37 +3,37 @@ module UnisonLocal.App exposing (..)
 import Api
 import Browser
 import Browser.Navigation as Nav
-import CodebaseTree
-import Definition.Reference exposing (Reference)
+import Code.CodebaseTree as CodebaseTree
+import Code.Definition.Reference exposing (Reference)
+import Code.Finder as Finder
+import Code.Finder.SearchOptions as SearchOptions
+import Code.FullyQualifiedName as FQN exposing (FQN)
+import Code.Hashvatar as Hashvatar
+import Code.Namespace as Namespace exposing (NamespaceDetails)
+import Code.Perspective as Perspective exposing (Perspective(..))
+import Code.PerspectiveLanding as PerspectiveLanding
+import Code.Workspace as Workspace
+import Code.Workspace.WorkspaceItems as WorkspaceItems
 import Env exposing (Env, OperatingSystem(..))
-import Finder
-import Finder.SearchOptions as SearchOptions
-import FullyQualifiedName as FQN exposing (FQN)
-import Hashvatar
 import Html exposing (Html, a, div, h1, h2, h3, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import Http
-import KeyboardShortcut
-import KeyboardShortcut.Key as Key exposing (Key(..))
-import KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
-import Namespace exposing (NamespaceDetails)
-import Perspective exposing (Perspective(..))
-import PerspectiveLanding
 import RemoteData
 import UI
 import UI.AppHeader as AppHeader
 import UI.Button as Button
 import UI.Click as Click exposing (Click(..))
 import UI.Icon as Icon
+import UI.KeyboardShortcut as KeyboardShortcut
+import UI.KeyboardShortcut.Key as Key exposing (Key(..))
+import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import UI.Modal as Modal
 import UI.PageLayout as PageLayout
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonLocal.Route as Route exposing (Route)
 import Url exposing (Url)
-import Workspace
-import Workspace.WorkspaceItems as WorkspaceItems
 
 
 

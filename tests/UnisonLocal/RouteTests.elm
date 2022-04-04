@@ -1,11 +1,11 @@
 module UnisonLocal.RouteTests exposing (..)
 
-import Definition.Reference as Reference exposing (Reference(..))
+import Code.Definition.Reference as Reference exposing (Reference(..))
+import Code.FullyQualifiedName as FQN exposing (FQN)
+import Code.Hash as Hash exposing (Hash)
+import Code.HashQualified as HQ
+import Code.Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
 import Expect
-import FullyQualifiedName as FQN exposing (FQN)
-import Hash exposing (Hash)
-import HashQualified as HQ
-import Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
 import Test exposing (..)
 import UnisonLocal.Route as Route
 import Url exposing (Url)

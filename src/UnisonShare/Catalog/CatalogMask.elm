@@ -11,7 +11,7 @@ module UnisonShare.Catalog.CatalogMask exposing
     , toList
     )
 
-import Definition.Doc as Doc exposing (Doc)
+import Code.Definition.Doc as Doc exposing (Doc)
 import Json.Decode as Decode exposing (field, index)
 import List.Extra as ListE
 import OrderedDict exposing (OrderedDict)
