@@ -8,9 +8,9 @@ module UnisonShare.User exposing
     )
 
 import Definition.Readme as Readme exposing (Readme)
-import Hash exposing (Hash)
 import Json.Decode as Decode exposing (field, maybe, string)
 import Project exposing (ProjectListing)
+import Url exposing (Url)
 
 
 type Username
@@ -18,7 +18,11 @@ type Username
 
 
 type alias User u =
-    { u | hash : Hash, username : Username }
+    { u
+        | username : Username
+        , name : Maybe String
+        , avatarUrl : Maybe Url
+    }
 
 
 type alias UserDetails =
@@ -46,10 +50,16 @@ usernameToString (Username raw) =
 decodeDetails : Decode.Decoder UserDetails
 decodeDetails =
     let
-        makeDetails hash username readme =
-            { hash = hash, username = username, readme = readme, projects = [] }
+        makeDetails username name avatarUrl readme =
+            { username = username
+            , name = name
+            , avatarUrl = avatarUrl
+            , readme = readme
+            , projects = []
+            }
     in
-    Decode.map3 makeDetails
-        (field "hash" Hash.decode)
+    Decode.map4 makeDetails
         (field "fqn" (Decode.map Username string))
+        (Decode.succeed Nothing)
+        (Decode.succeed Nothing)
         (maybe (field "readme" Readme.decode))
