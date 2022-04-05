@@ -2,7 +2,6 @@ module Api exposing
     ( ApiBasePath(..)
     , ApiRequest
     , codebaseHash
-    , errorToString
     , find
     , getDefinition
     , list
@@ -174,29 +173,6 @@ httpJsonBodyResolver decoder resp =
             Decode.decodeString decoder s
                 -- just trying; if our decoder understands the response body, great
                 |> Result.mapError (\_ -> Http.BadStatus m.statusCode)
-
-
-
--- ERROR ----------------------------------------------------------------------
-
-
-errorToString : Http.Error -> String
-errorToString err =
-    case err of
-        Http.Timeout ->
-            "Timeout exceeded"
-
-        Http.NetworkError ->
-            "Network error"
-
-        Http.BadStatus status ->
-            "Bad status: " ++ String.fromInt status
-
-        Http.BadBody text ->
-            "Unexpected response from api: " ++ text
-
-        Http.BadUrl url ->
-            "Malformed url: " ++ url
 
 
 

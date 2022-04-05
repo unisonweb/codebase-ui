@@ -1,6 +1,5 @@
 module Code.PerspectiveLanding exposing (..)
 
-import Api
 import Code.Definition.Doc as Doc
 import Code.Definition.Readme as Readme
 import Code.Definition.Reference exposing (Reference)
@@ -11,6 +10,7 @@ import Env exposing (Env)
 import Env.AppContext exposing (AppContext(..))
 import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, id, rel, target)
+import Lib.Util as Util
 import RemoteData exposing (RemoteData(..))
 import UI
 import UI.Button as Button exposing (Button)
@@ -193,4 +193,4 @@ view env model =
                         ]
 
                 Failure error ->
-                    viewError fqn (Api.errorToString error)
+                    viewError fqn (Util.httpErrorToString error)

@@ -1,6 +1,5 @@
 module Code.Workspace.WorkspaceItem exposing (..)
 
-import Api
 import Code.Definition.AbilityConstructor exposing (AbilityConstructor(..), AbilityConstructorDetail)
 import Code.Definition.Category as Category exposing (Category)
 import Code.Definition.DataConstructor exposing (DataConstructor(..), DataConstructorDetail)
@@ -616,7 +615,7 @@ view workspaceItem isFocused =
                 (div [ class "error-header" ]
                     [ Icon.view Icon.warn
                     , Icon.view (Reference.toIcon ref)
-                    , h3 [ title (Api.errorToString err) ] [ text (HQ.toString (Reference.hashQualified ref)) ]
+                    , h3 [ title (Util.httpErrorToString err) ] [ text (HQ.toString (Reference.hashQualified ref)) ]
                     ]
                 )
                 [ ( UI.nothing

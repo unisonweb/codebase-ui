@@ -1,5 +1,6 @@
 module Lib.Util exposing (..)
 
+import Http
 import Json.Decode as Decode
 import List.Nonempty as NEL
 import Process
@@ -42,3 +43,22 @@ decodeFailInvalid failMessage m =
 decodeTag : Decode.Decoder String
 decodeTag =
     Decode.field "tag" Decode.string
+
+
+httpErrorToString : Http.Error -> String
+httpErrorToString err =
+    case err of
+        Http.Timeout ->
+            "Timeout exceeded"
+
+        Http.NetworkError ->
+            "Network error"
+
+        Http.BadStatus status ->
+            "Bad status: " ++ String.fromInt status
+
+        Http.BadBody text ->
+            "Unexpected response from api: " ++ text
+
+        Http.BadUrl url ->
+            "Malformed url: " ++ url

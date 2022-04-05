@@ -528,7 +528,7 @@ view model =
 
                 Failure query error ->
                     div [ class "error" ]
-                        [ h3 [ title (Api.errorToString error) ] [ Icon.view Icon.warn, text "Unable to search" ]
+                        [ h3 [ title (Util.httpErrorToString error) ] [ Icon.view Icon.warn, text "Unable to search" ]
                         , p [] [ text ("Something went wrong trying to find \"" ++ query ++ "\"") ]
                         , p [] [ text "Please try again" ]
                         ]

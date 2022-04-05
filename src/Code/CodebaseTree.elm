@@ -19,6 +19,7 @@ import Html exposing (Html, a, div, label, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Http
+import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
 import UI.Button as Button
@@ -308,7 +309,7 @@ viewNamespaceListing expandedNamespaceListings (NamespaceListing _ name content)
 
 viewError : Http.Error -> Html msg
 viewError err =
-    div [ class "error", title (Api.errorToString err) ]
+    div [ class "error", title (Util.httpErrorToString err) ]
         [ Icon.view Icon.warn
         , text "Unable to load namespace"
         ]

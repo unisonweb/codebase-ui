@@ -19,6 +19,7 @@ import Html exposing (Html, a, div, h1, h2, h3, nav, p, section, span, strong, t
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import Http
+import Lib.Util as Util
 import RemoteData
 import UI
 import UI.AppHeader as AppHeader
@@ -753,7 +754,7 @@ viewAppError error =
                     PageLayout.PageContent
                         [ div [ class "app-error" ]
                             [ Icon.view Icon.warn
-                            , p [ title (Api.errorToString error) ]
+                            , p [ title (Util.httpErrorToString error) ]
                                 [ text "Unison Local could not be started." ]
                             ]
                         ]
