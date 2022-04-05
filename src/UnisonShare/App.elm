@@ -17,6 +17,7 @@ import Html exposing (Html, a, div, h1, h2, nav, p, span, text)
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
+import Lib.Util as Util
 import RemoteData exposing (RemoteData(..))
 import UI
 import UI.AppHeader as AppHeader
@@ -678,7 +679,7 @@ viewAppError error =
                     PageLayout.PageContent
                         [ div [ class "app-error" ]
                             [ Icon.view Icon.warn
-                            , p [ title (Api.errorToString error) ]
+                            , p [ title (Util.httpErrorToString error) ]
                                 [ text "Unison Share could not be started." ]
                             ]
                         ]
