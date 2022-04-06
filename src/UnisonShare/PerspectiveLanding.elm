@@ -6,8 +6,8 @@ import Code.Definition.Reference exposing (Reference)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Namespace exposing (Namespace(..))
 import Code.Perspective as Perspective exposing (Perspective)
-import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
-import Html.Attributes exposing (class, href, id, rel, target)
+import Html exposing (Html, article, div, h2, header, p, section, span, text)
+import Html.Attributes exposing (class, id)
 import Lib.Util as Util
 import RemoteData exposing (RemoteData(..))
 import UI
