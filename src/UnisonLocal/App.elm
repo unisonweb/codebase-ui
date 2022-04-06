@@ -129,6 +129,10 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ env } as model) =
+    let
+        codebaseConfig =
+            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+    in
     case msg of
         LinkClicked urlRequest ->
             case urlRequest of
@@ -270,7 +274,7 @@ update msg ({ env } as model) =
                 FinderModal fModel ->
                     let
                         ( fm, fc, out ) =
-                            Finder.update env (Api.performCodebaseApiRequest env.apiBasePath) fMsg fModel
+                            Finder.update codebaseConfig fMsg fModel
                     in
                     case out of
                         Finder.Remain ->
@@ -411,11 +415,14 @@ showFinder :
     -> ( { m | env : Env, modal : Modal }, Cmd Msg )
 showFinder model withinNamespace =
     let
+        codebaseConfig =
+            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl model.env
+
         options =
             SearchOptions.init model.env.perspective withinNamespace
 
         ( fm, fcmd ) =
-            Finder.init model.env options
+            Finder.init codebaseConfig options
     in
     ( { model | modal = FinderModal fm }, Cmd.map FinderMsg fcmd )
 

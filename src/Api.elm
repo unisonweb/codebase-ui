@@ -1,6 +1,7 @@
 module Api exposing
     ( ApiBasePath(..)
     , ApiRequest
+    , codebaseApiEndpointToEndpointUrl
     , codebaseHash
     , find
     , getDefinition
@@ -13,12 +14,14 @@ module Api exposing
     , toUrl
     )
 
+import Code.CodebaseApi exposing (CodebaseEndpoint)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash exposing (Hash)
 import Code.Perspective as Perspective exposing (Perspective(..))
 import Code.Syntax as Syntax
 import Http
 import Json.Decode as Decode
+import Lib.Api
 import Regex
 import Task exposing (Task)
 import Url.Builder exposing (QueryParameter, absolute, int, string)
@@ -108,6 +111,11 @@ find perspective withinFqn limit (Syntax.Width sourceWidth) query =
          ]
             ++ params
         )
+
+
+codebaseApiEndpointToEndpointUrl : CodebaseEndpoint -> Lib.Api.EndpointUrl
+codebaseApiEndpointToEndpointUrl _ =
+    Lib.Api.EndpointUrl [] []
 
 
 

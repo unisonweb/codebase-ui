@@ -1,12 +1,14 @@
 module UnisonShare.AppModal exposing (..)
 
+import Api
 import Code.Definition.Reference exposing (Reference)
 import Code.Finder as Finder
 import Code.Finder.SearchOptions as SearchOptions
 import Code.FullyQualifiedName as FQN exposing (FQN)
-import Env exposing (Env, OperatingSystem(..))
+import Env exposing (Env)
 import Html exposing (Html, a, div, h3, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, rel, target)
+import Lib.OperatingSystem exposing (OperatingSystem(..))
 import UI
 import UI.Button as Button
 import UI.CopyField as CopyField
@@ -56,8 +58,11 @@ update env msg model =
     case ( model, msg ) of
         ( Visible (FinderModal fModel), FinderMsg fMsg ) ->
             let
+                codebaseConfig =
+                    Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+
                 ( fm, fc, out ) =
-                    Finder.update env fMsg fModel
+                    Finder.update codebaseConfig fMsg fModel
             in
             case out of
                 Finder.Remain ->
@@ -91,8 +96,11 @@ showFinder env withinNamespace =
         options =
             SearchOptions.init env.perspective withinNamespace
 
+        codebaseConfig =
+            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+
         ( fm, fcmd ) =
-            Finder.init env options
+            Finder.init codebaseConfig options
     in
     ( Visible (FinderModal fm), Cmd.map FinderMsg fcmd )
 

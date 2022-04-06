@@ -1,7 +1,8 @@
 module Code.Finder exposing (Model, Msg, OutMsg(..), init, update, view)
 
-import Api exposing (ApiRequest)
 import Browser.Dom as Dom
+import Code.CodebaseApi as CodebaseApi
+import Code.Config exposing (Config)
 import Code.Definition.AbilityConstructor exposing (AbilityConstructor(..))
 import Code.Definition.Category as Category
 import Code.Definition.DataConstructor exposing (DataConstructor(..))
@@ -15,7 +16,6 @@ import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.HashQualified exposing (HashQualified(..))
 import Code.Perspective as Perspective exposing (Perspective)
 import Code.Syntax as Syntax
-import Env exposing (Env)
 import Html
     exposing
         ( Html
@@ -49,6 +49,7 @@ import Html.Attributes
         )
 import Html.Events exposing (onClick, onInput)
 import Http
+import Lib.Api as Api exposing (ApiRequest)
 import Lib.SearchResults as SearchResults exposing (SearchResults(..))
 import Lib.Util as Util
 import List.Nonempty as NEL
@@ -84,11 +85,11 @@ type alias Model =
     }
 
 
-init : Env -> SearchOptions -> ( Model, Cmd Msg )
-init env options =
+init : Config -> SearchOptions -> ( Model, Cmd Msg )
+init config options =
     ( { input = ""
       , search = NotAsked
-      , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
+      , keyboardShortcut = KeyboardShortcut.init config.operatingSystem
       , options = options
       }
     , focusSearchInput
@@ -118,8 +119,8 @@ type OutMsg
     | OpenDefinition Reference
 
 
-update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update env msg model =
+update : Config -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
+update config msg model =
     let
         debounceDelay =
             300
@@ -168,9 +169,9 @@ update env msg model =
             if query == model.input then
                 let
                     ( search, fetch ) =
-                        performSearch env.perspective model.options model.search query
+                        performSearch config model.options model.search query
                 in
-                ( { model | search = search }, Api.perform env.apiBasePath fetch, Remain )
+                ( { model | search = search }, Api.perform config.apiBasePath fetch, Remain )
 
             else
                 ( model, Cmd.none, Remain )
@@ -197,16 +198,16 @@ update env msg model =
         RemoveWithinOption ->
             let
                 options =
-                    SearchOptions.removeWithin env.perspective model.options
+                    SearchOptions.removeWithin config.perspective model.options
 
                 -- Don't perform search when the query is empty.
                 ( search, cmd ) =
                     if not (String.isEmpty model.input) then
                         let
                             ( search_, fetch ) =
-                                performSearch env.perspective options model.search model.input
+                                performSearch config options model.search model.input
                         in
-                        ( search_, Api.perform env.apiBasePath fetch )
+                        ( search_, Api.perform config.apiBasePath fetch )
 
                     else
                         ( model.search, Cmd.none )
@@ -331,12 +332,12 @@ finderSearchToMaybe fs =
 
 
 performSearch :
-    Perspective
+    Config
     -> SearchOptions
     -> FinderSearch
     -> String
     -> ( FinderSearch, ApiRequest (List FinderMatch) Msg )
-performSearch perspective options search query =
+performSearch { toApiEndpointUrl, perspective } options search query =
     let
         search_ =
             case search of
@@ -353,21 +354,29 @@ performSearch perspective options search query =
             case options of
                 SearchOptions AllNamespaces ->
                     fetchMatches
+                        toApiEndpointUrl
                         (Perspective.toCodebasePerspective perspective)
                         Nothing
                         query
 
                 SearchOptions (WithinNamespacePerspective _) ->
-                    fetchMatches perspective Nothing query
+                    fetchMatches toApiEndpointUrl
+                        perspective
+                        Nothing
+                        query
 
                 SearchOptions (WithinNamespace fqn) ->
-                    fetchMatches perspective (Just fqn) query
+                    fetchMatches
+                        toApiEndpointUrl
+                        perspective
+                        (Just fqn)
+                        query
     in
     ( search_, fetch )
 
 
-fetchMatches : Perspective -> Maybe FQN -> String -> ApiRequest (List FinderMatch) Msg
-fetchMatches perspective withinFqn query =
+fetchMatches : CodebaseApi.ToApiEndpointUrl -> Perspective -> Maybe FQN -> String -> ApiRequest (List FinderMatch) Msg
+fetchMatches toApiEndpointUrl perspective withinFqn query =
     let
         limit =
             9
@@ -375,7 +384,14 @@ fetchMatches perspective withinFqn query =
         sourceWidth =
             Syntax.Width 100
     in
-    Api.find perspective withinFqn limit sourceWidth query
+    CodebaseApi.Find
+        { perspective = perspective
+        , withinFqn = withinFqn
+        , limit = limit
+        , sourceWidth = sourceWidth
+        , query = query
+        }
+        |> toApiEndpointUrl
         |> Api.toRequest FinderMatch.decodeMatches (FetchMatchesFinished query)
 
 
