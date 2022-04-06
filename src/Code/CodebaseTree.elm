@@ -1,6 +1,6 @@
 module Code.CodebaseTree exposing (Model, Msg, OutMsg(..), init, update, view)
 
-import Api exposing (ApiRequest)
+import Code.CodebaseApi as CodebaseApi
 import Code.CodebaseTree.NamespaceListing as NamespaceListing
     exposing
         ( DefinitionListing(..)
@@ -8,17 +8,20 @@ import Code.CodebaseTree.NamespaceListing as NamespaceListing
         , NamespaceListingChild(..)
         , NamespaceListingContent
         )
+import Code.Config exposing (Config)
 import Code.Definition.Category as Category
 import Code.Definition.Reference exposing (Reference(..))
+import Code.EntityId as EntityId
 import Code.FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import Code.FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import Code.HashQualified exposing (HashQualified(..))
-import Code.Perspective as Perspective exposing (Perspective)
+import Code.Perspective as Perspective
 import Env exposing (Env)
 import Html exposing (Html, a, div, label, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Http
+import Lib.Api as Api exposing (ApiRequest)
 import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
@@ -37,13 +40,13 @@ type alias Model =
     }
 
 
-init : Env -> ( Model, Cmd Msg )
-init env =
+init : Config -> ( Model, Cmd Msg )
+init config =
     let
         model =
             { rootNamespaceListing = Loading, expandedNamespaceListings = FQNSet.empty }
     in
-    ( model, Api.perform env.apiBasePath (fetchRootNamespaceListing env.perspective) )
+    ( model, Api.perform config.apiBasePath (fetchRootNamespaceListing config) )
 
 
 
@@ -63,8 +66,8 @@ type OutMsg
     | ChangePerspectiveToNamespace FQN
 
 
-update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update env msg model =
+update : Config -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
+update config msg model =
     case msg of
         ToggleExpandedNamespaceListing fqn ->
             let
@@ -98,7 +101,7 @@ update env msg model =
 
                 cmd =
                     if shouldExpand && not namespaceContentFetched then
-                        Api.perform env.apiBasePath (fetchSubNamespaceListing env.perspective fqn)
+                        Api.perform config.apiBasePath (fetchSubNamespaceListing config fqn)
 
                     else
                         Cmd.none
@@ -147,7 +150,7 @@ update env msg model =
                 ChangePerspectiveToNamespace name ->
                     let
                         newPerspectiveFqn =
-                            case env.perspective of
+                            case config.perspective of
                                 Perspective.Namespace { fqn } ->
                                     FQN.append fqn name
 
@@ -164,19 +167,20 @@ update env msg model =
 -- EFFECTS
 
 
-fetchRootNamespaceListing : Perspective -> ApiRequest NamespaceListing Msg
-fetchRootNamespaceListing perspective =
-    fetchNamespaceListing perspective Nothing FetchRootNamespaceListingFinished
+fetchRootNamespaceListing : Config -> ApiRequest NamespaceListing Msg
+fetchRootNamespaceListing config =
+    fetchNamespaceListing config Nothing FetchRootNamespaceListingFinished
 
 
-fetchSubNamespaceListing : Perspective -> FQN -> ApiRequest NamespaceListing Msg
-fetchSubNamespaceListing perspective fqn =
-    fetchNamespaceListing perspective (Just fqn) (FetchSubNamespaceListingFinished fqn)
+fetchSubNamespaceListing : Config -> FQN -> ApiRequest NamespaceListing Msg
+fetchSubNamespaceListing config fqn =
+    fetchNamespaceListing config (Just fqn) (FetchSubNamespaceListingFinished fqn)
 
 
-fetchNamespaceListing : Perspective -> Maybe FQN -> (Result Http.Error NamespaceListing -> msg) -> ApiRequest NamespaceListing msg
-fetchNamespaceListing perspective fqn toMsg =
-    Api.list perspective (Maybe.map FQN.toString fqn)
+fetchNamespaceListing : Config -> Maybe FQN -> (Result Http.Error NamespaceListing -> msg) -> ApiRequest NamespaceListing msg
+fetchNamespaceListing config fqn toMsg =
+    CodebaseApi.Browse { perspective = config.perspective, namespaceId = Maybe.map EntityId.NameId fqn }
+        |> config.toApiEndpointUrl
         |> Api.toRequest (NamespaceListing.decode fqn) toMsg
 
 

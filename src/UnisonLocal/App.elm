@@ -80,7 +80,7 @@ init env route =
                     Workspace.init codebaseConfig Nothing
 
         ( codebaseTree, codebaseTreeCmd ) =
-            CodebaseTree.init env
+            CodebaseTree.init codebaseConfig
 
         fetchNamespaceDetailsCmd =
             env.perspective
@@ -250,7 +250,7 @@ update msg ({ env } as model) =
         CodebaseTreeMsg cMsg ->
             let
                 ( codebaseTree, cCmd, outMsg ) =
-                    CodebaseTree.update env cMsg model.codebaseTree
+                    CodebaseTree.update codebaseConfig cMsg model.codebaseTree
 
                 model2 =
                     { model | codebaseTree = codebaseTree }
@@ -337,8 +337,11 @@ navigateToPerspective model perspective =
 fetchPerspectiveAndCodebaseTree : Perspective -> Model -> ( Model, Cmd Msg )
 fetchPerspectiveAndCodebaseTree oldPerspective ({ env } as model) =
     let
+        codebaseConfig =
+            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl model.env
+
         ( codebaseTree, codebaseTreeCmd ) =
-            CodebaseTree.init env
+            CodebaseTree.init codebaseConfig
 
         fetchNamespaceDetailsCmd =
             env.perspective
