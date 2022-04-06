@@ -10,21 +10,22 @@ module Code.Workspace exposing
     , view
     )
 
-import Api exposing (ApiRequest)
 import Browser.Dom as Dom
+import Code.CodebaseApi as CodebaseApi
+import Code.Config exposing (Config)
 import Code.Definition.Doc as Doc
 import Code.Definition.Reference as Reference exposing (Reference)
+import Code.EntityId as EntityId
 import Code.FullyQualifiedName exposing (FQN)
 import Code.Hash as Hash
 import Code.HashQualified as HQ
-import Code.Perspective exposing (Perspective)
 import Code.Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem)
 import Code.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
-import Env exposing (Env)
 import Html exposing (Html, article, div, section)
 import Html.Attributes exposing (class, id)
 import Http
-import Lib.OperatingSystem as OperatingSystem
+import Lib.Api as Api exposing (ApiRequest)
+import Lib.OperatingSystem as OperatingSystem exposing (OperatingSystem)
 import Task
 import UI.Button as Button
 import UI.Icon as Icon
@@ -44,12 +45,12 @@ type alias Model =
     }
 
 
-init : Env -> Maybe Reference -> ( Model, Cmd Msg )
-init env mRef =
+init : Config -> Maybe Reference -> ( Model, Cmd Msg )
+init config mRef =
     let
         model =
             { workspaceItems = WorkspaceItems.init Nothing
-            , keyboardShortcut = KeyboardShortcut.init env.operatingSystem
+            , keyboardShortcut = KeyboardShortcut.init config.operatingSystem
             }
     in
     case mRef of
@@ -59,7 +60,7 @@ init env mRef =
         Just ref ->
             let
                 ( m, c ) =
-                    open env model ref
+                    open config model ref
             in
             ( m, c )
 
@@ -86,8 +87,8 @@ type OutMsg
     | ChangePerspectiveToNamespace FQN
 
 
-update : Env -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
-update env msg ({ workspaceItems } as model) =
+update : Config -> Msg -> Model -> ( Model, Cmd Msg, OutMsg )
+update config msg ({ workspaceItems } as model) =
     case msg of
         NoOp ->
             ( model, Cmd.none, None )
@@ -177,14 +178,14 @@ update env msg ({ workspaceItems } as model) =
                     KeyboardShortcut.fromKeyboardEvent model.keyboardShortcut event
 
                 ( nextModel, cmd, out ) =
-                    handleKeyboardShortcut env { model | keyboardShortcut = keyboardShortcut } shortcut
+                    handleKeyboardShortcut config.operatingSystem { model | keyboardShortcut = keyboardShortcut } shortcut
             in
             ( nextModel, Cmd.batch [ cmd, Cmd.map KeyboardShortcutMsg kCmd ], out )
 
         WorkspaceItemMsg wiMsg ->
             case wiMsg of
                 WorkspaceItem.OpenReference relativeToRef ref ->
-                    openReference env model relativeToRef ref
+                    openReference config model relativeToRef ref
 
                 WorkspaceItem.Close ref ->
                     let
@@ -254,9 +255,9 @@ replaceWorkspaceItemReferencesWithHashOnly model =
     { model | workspaceItems = workspaceItems }
 
 
-open : Env -> WithWorkspaceItems m -> Reference -> ( WithWorkspaceItems m, Cmd Msg )
-open env model ref =
-    openItem env model Nothing ref
+open : Config -> WithWorkspaceItems m -> Reference -> ( WithWorkspaceItems m, Cmd Msg )
+open config model ref =
+    openItem config model Nothing ref
 
 
 {-| openReference opens a definition relative to another definition. This is
@@ -264,11 +265,11 @@ done within Workspace, as opposed to from the outside via a URL change. This
 function returns a Focused command for the newly opened reference and as such
 changes the URL.
 -}
-openReference : Env -> WithWorkspaceItems m -> Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
-openReference env model relativeToRef ref =
+openReference : Config -> WithWorkspaceItems m -> Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg, OutMsg )
+openReference config model relativeToRef ref =
     let
         ( newModel, cmd ) =
-            openItem env model (Just relativeToRef) ref
+            openItem config model (Just relativeToRef) ref
 
         out =
             openDefinitionsFocusToOutMsg newModel.workspaceItems
@@ -276,8 +277,8 @@ openReference env model relativeToRef ref =
     ( newModel, cmd, out )
 
 
-openItem : Env -> WithWorkspaceItems m -> Maybe Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg )
-openItem env ({ workspaceItems } as model) relativeToRef ref =
+openItem : Config -> WithWorkspaceItems m -> Maybe Reference -> Reference -> ( WithWorkspaceItems m, Cmd Msg )
+openItem config ({ workspaceItems } as model) relativeToRef ref =
     -- We don't want to refetch or replace any already open definitions, but we
     -- do want to focus and scroll to it
     if WorkspaceItems.member workspaceItems ref then
@@ -303,7 +304,7 @@ openItem env ({ workspaceItems } as model) relativeToRef ref =
                         WorkspaceItems.insertWithFocusBefore workspaceItems r toInsert
         in
         ( { model | workspaceItems = nextWorkspaceItems }
-        , Cmd.batch [ Api.perform env.apiBasePath (fetchDefinition env.perspective ref), scrollToDefinition ref ]
+        , Cmd.batch [ Api.perform config.apiBasePath (fetchDefinition config ref), scrollToDefinition ref ]
         )
 
 
@@ -315,8 +316,8 @@ openDefinitionsFocusToOutMsg openDefs =
         |> Maybe.withDefault Emptied
 
 
-handleKeyboardShortcut : Env -> Model -> KeyboardShortcut -> ( Model, Cmd Msg, OutMsg )
-handleKeyboardShortcut env ({ workspaceItems } as model) shortcut =
+handleKeyboardShortcut : OperatingSystem -> Model -> KeyboardShortcut -> ( Model, Cmd Msg, OutMsg )
+handleKeyboardShortcut os ({ workspaceItems } as model) shortcut =
     let
         scrollToCmd =
             WorkspaceItems.focus
@@ -357,7 +358,7 @@ handleKeyboardShortcut env ({ workspaceItems } as model) shortcut =
             ( model, Cmd.none, ShowFinderRequest Nothing )
 
         KeyboardShortcut.Chord Meta (K _) ->
-            if env.operatingSystem == OperatingSystem.MacOS then
+            if os == OperatingSystem.MacOS then
                 ( model, Cmd.none, ShowFinderRequest Nothing )
 
             else
@@ -432,14 +433,28 @@ handleKeyboardShortcut env ({ workspaceItems } as model) shortcut =
 -- EFFECTS
 
 
-fetchDefinition : Perspective -> Reference -> ApiRequest Item Msg
-fetchDefinition perspective ref =
+fetchDefinition : Config -> Reference -> ApiRequest Item Msg
+fetchDefinition config ref =
     let
-        definitionHash =
-            (Reference.hashQualified >> HQ.toString) ref
+        definitionId =
+            case Reference.hashQualified ref of
+                HQ.NameOnly fqn ->
+                    EntityId.NameId fqn
+
+                HQ.HashOnly h ->
+                    EntityId.HashId h
+
+                HQ.HashQualified _ h ->
+                    EntityId.HashId h
+
+        endpoint =
+            CodebaseApi.Definition
+                { perspective = config.perspective
+                , definitionId = definitionId
+                }
     in
-    [ definitionHash ]
-        |> Api.getDefinition perspective
+    endpoint
+        |> config.toApiEndpointUrl
         |> Api.toRequest (WorkspaceItem.decodeItem ref) (FetchItemFinished ref)
 
 

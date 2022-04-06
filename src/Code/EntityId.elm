@@ -1,4 +1,4 @@
-module Code.EntityId exposing (EntityId, toString)
+module Code.EntityId exposing (EntityId(..), toString)
 
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash exposing (Hash)

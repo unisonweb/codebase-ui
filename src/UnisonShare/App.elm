@@ -62,14 +62,17 @@ type alias Model =
 init : Env -> Route -> ( Model, Cmd Msg )
 init env route =
     let
+        codebaseConfig =
+            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+
         -- TODO: This whole thing should be route driven
         ( workspace, workspaceCmd ) =
             case route of
                 Route.Project _ (Route.ProjectDefinition ref) ->
-                    Workspace.init env (Just ref)
+                    Workspace.init codebaseConfig (Just ref)
 
                 _ ->
-                    Workspace.init env Nothing
+                    Workspace.init codebaseConfig Nothing
 
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init env
@@ -145,6 +148,10 @@ type Msg
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ env } as model) =
+    let
+        codebaseConfig =
+            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+    in
     case ( model.route, msg ) of
         ( _, LinkClicked urlRequest ) ->
             case urlRequest of
@@ -184,8 +191,11 @@ update msg ({ env } as model) =
 
                 Route.Project params (Route.ProjectDefinition ref) ->
                     let
+                        codebaseConfig_ =
+                            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl (newEnv params)
+
                         ( workspace, cmd ) =
-                            Workspace.open (newEnv params) model.workspace ref
+                            Workspace.open codebaseConfig_ model.workspace ref
 
                         model3 =
                             { model2 | workspace = workspace, env = newEnv params }
@@ -269,7 +279,7 @@ update msg ({ env } as model) =
         ( Route.Project _ _, WorkspaceMsg wMsg ) ->
             let
                 ( workspace, wCmd, outMsg ) =
-                    Workspace.update env wMsg model.workspace
+                    Workspace.update codebaseConfig wMsg model.workspace
 
                 model2 =
                     { model | workspace = workspace }
