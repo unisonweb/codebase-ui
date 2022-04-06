@@ -1,6 +1,5 @@
 module UnisonShare.Page.CatalogPage exposing (..)
 
-import Api
 import Code.Perspective as Perspective
 import Code.Project as Project exposing (ProjectListing)
 import Env exposing (Env)
@@ -8,6 +7,7 @@ import Html exposing (Html, div, h1, input, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (autofocus, class, classList, placeholder)
 import Html.Events exposing (onBlur, onFocus, onInput, onMouseDown)
 import Http
+import Lib.Api as Api
 import Lib.SearchResults as SearchResults exposing (SearchResults(..))
 import List.Extra as ListE
 import Maybe.Extra as MaybeE
@@ -22,6 +22,7 @@ import UI.KeyboardShortcut as KeyboardShortcut exposing (KeyboardShortcut(..))
 import UI.KeyboardShortcut.Key as Key exposing (Key(..))
 import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEvent)
 import UI.PageLayout as PageLayout exposing (PageLayout)
+import UnisonShare.Api as ShareApi
 import UnisonShare.Catalog as Catalog exposing (Catalog)
 import UnisonShare.Catalog.CatalogMask exposing (CatalogMask)
 import UnisonShare.Route as Route
@@ -73,15 +74,11 @@ projectListings and finally merging them into a Catalog
 -}
 fetch : Env -> Cmd Msg
 fetch env =
-    let
-        perspective =
-            Perspective.toCodebasePerspective env.perspective
-    in
-    Api.getDefinition perspective [ "_catalog" ]
+    ShareApi.catalog
         |> Api.toTask env.apiBasePath Catalog.decodeCatalogMask
         |> Task.andThen
             (\catalog ->
-                Api.projects Nothing
+                ShareApi.projects Nothing
                     |> Api.toTask env.apiBasePath Project.decodeListings
                     |> Task.map (\projects -> ( catalog, projects ))
             )

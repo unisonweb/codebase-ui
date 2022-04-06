@@ -1,6 +1,5 @@
 module UnisonLocal.App exposing (..)
 
-import Api
 import Browser
 import Browser.Navigation as Nav
 import Code.CodebaseTree as CodebaseTree
@@ -18,6 +17,7 @@ import Html exposing (Html, a, div, h1, h2, h3, nav, p, section, span, strong, t
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import Http
+import Lib.Api as HttpApi
 import Lib.OperatingSystem exposing (OperatingSystem(..))
 import Lib.Util as Util
 import RemoteData
@@ -33,6 +33,7 @@ import UI.Modal as Modal
 import UI.PageLayout as PageLayout
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
+import UnisonLocal.Api as LocalApi
 import UnisonLocal.PerspectiveLanding as PerspectiveLanding
 import UnisonLocal.Route as Route exposing (Route)
 import Url exposing (Url)
@@ -69,7 +70,7 @@ init : Env -> Route -> ( Model, Cmd Msg )
 init env route =
     let
         codebaseConfig =
-            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+            Env.toCodeConfig LocalApi.codebaseApiEndpointToEndpointUrl env
 
         ( workspace, workspaceCmd ) =
             case route of
@@ -85,7 +86,7 @@ init env route =
         fetchNamespaceDetailsCmd =
             env.perspective
                 |> fetchNamespaceDetails
-                |> Maybe.map (Api.perform env.apiBasePath)
+                |> Maybe.map (HttpApi.perform env.apiBasePath)
                 |> Maybe.withDefault Cmd.none
 
         model =
@@ -134,7 +135,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ env } as model) =
     let
         codebaseConfig =
-            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+            Env.toCodeConfig LocalApi.codebaseApiEndpointToEndpointUrl env
     in
     case msg of
         LinkClicked urlRequest ->
@@ -162,7 +163,7 @@ update msg ({ env } as model) =
                 Route.Definition params ref ->
                     let
                         codebaseConfig_ =
-                            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl (newEnv params)
+                            Env.toCodeConfig LocalApi.codebaseApiEndpointToEndpointUrl (newEnv params)
 
                         ( workspace, cmd ) =
                             Workspace.open codebaseConfig_ model.workspace ref
@@ -338,7 +339,7 @@ fetchPerspectiveAndCodebaseTree : Perspective -> Model -> ( Model, Cmd Msg )
 fetchPerspectiveAndCodebaseTree oldPerspective ({ env } as model) =
     let
         codebaseConfig =
-            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl model.env
+            Env.toCodeConfig LocalApi.codebaseApiEndpointToEndpointUrl model.env
 
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init codebaseConfig
@@ -346,7 +347,7 @@ fetchPerspectiveAndCodebaseTree oldPerspective ({ env } as model) =
         fetchNamespaceDetailsCmd =
             env.perspective
                 |> fetchNamespaceDetails
-                |> Maybe.map (Api.perform env.apiBasePath)
+                |> Maybe.map (HttpApi.perform env.apiBasePath)
                 |> Maybe.withDefault Cmd.none
     in
     if Perspective.needsFetching env.perspective then
@@ -425,7 +426,7 @@ showFinder :
 showFinder model withinNamespace =
     let
         codebaseConfig =
-            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl model.env
+            Env.toCodeConfig LocalApi.codebaseApiEndpointToEndpointUrl model.env
 
         options =
             SearchOptions.init model.env.perspective withinNamespace
@@ -440,13 +441,13 @@ showFinder model withinNamespace =
 -- EFFECTS
 
 
-fetchNamespaceDetails : Perspective -> Maybe (Api.ApiRequest NamespaceDetails Msg)
+fetchNamespaceDetails : Perspective -> Maybe (HttpApi.ApiRequest NamespaceDetails Msg)
 fetchNamespaceDetails perspective =
     case perspective of
         Namespace { fqn } ->
             fqn
-                |> Api.namespace perspective
-                |> Api.toRequest Namespace.decodeDetails (FetchPerspectiveNamespaceDetailsFinished fqn)
+                |> LocalApi.namespace perspective
+                |> HttpApi.toRequest Namespace.decodeDetails (FetchPerspectiveNamespaceDetailsFinished fqn)
                 |> Just
 
         _ ->

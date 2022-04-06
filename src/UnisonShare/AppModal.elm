@@ -1,6 +1,5 @@
 module UnisonShare.AppModal exposing (..)
 
-import Api
 import Code.Definition.Reference exposing (Reference)
 import Code.Finder as Finder
 import Code.Finder.SearchOptions as SearchOptions
@@ -15,6 +14,7 @@ import UI.CopyField as CopyField
 import UI.KeyboardShortcut as KeyboardShortcut
 import UI.KeyboardShortcut.Key as Key exposing (Key(..))
 import UI.Modal as Modal
+import UnisonShare.Api as Api
 
 
 

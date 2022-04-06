@@ -1,12 +1,13 @@
 module UnisonLocal.PreApp exposing (..)
 
-import Api exposing (ApiBasePath(..), ApiRequest)
 import Browser
 import Browser.Navigation as Nav
 import Code.Perspective as Perspective exposing (Perspective, PerspectiveParams)
 import Env exposing (Flags)
 import Html
 import Http
+import Lib.Api as HttpApi exposing (ApiBasePath(..), ApiRequest)
+import UnisonLocal.Api as LocalApi
 import UnisonLocal.App as App
 import UnisonLocal.Route as Route exposing (Route)
 import Url exposing (Url)
@@ -50,7 +51,7 @@ init flags url navKey =
             ( Initialized app, Cmd.map AppMsg cmd )
 
         fetchPerspective_ =
-            ( Initializing preEnv, Api.perform (ApiBasePath flags.apiBasePath) (fetchPerspective preEnv) )
+            ( Initializing preEnv, HttpApi.perform (ApiBasePath flags.apiBasePath) (fetchPerspective preEnv) )
     in
     -- If we have a codebase hash we can construct a full perspective,
     -- otherwise we have to fetch the hash before being able to start up the
@@ -63,7 +64,7 @@ init flags url navKey =
 
 fetchPerspective : PreEnv -> ApiRequest Perspective Msg
 fetchPerspective preEnv =
-    Api.codebaseHash |> Api.toRequest (Perspective.decode preEnv.perspectiveParams) (FetchPerspectiveFinished preEnv)
+    LocalApi.codebaseHash |> HttpApi.toRequest (Perspective.decode preEnv.perspectiveParams) (FetchPerspectiveFinished preEnv)
 
 
 type Msg

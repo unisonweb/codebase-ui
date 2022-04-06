@@ -1,11 +1,10 @@
 module Env exposing (..)
 
-import Api exposing (ApiBasePath(..))
 import Browser.Navigation as Nav
 import Code.CodebaseApi as CodebaseApi
 import Code.Config
 import Code.Perspective exposing (Perspective)
-import Lib.Api
+import Lib.Api exposing (ApiBasePath(..))
 import Lib.OperatingSystem as OS exposing (OperatingSystem)
 
 
@@ -37,15 +36,8 @@ init flags navKey perspective =
 
 toCodeConfig : CodebaseApi.ToApiEndpointUrl -> Env -> Code.Config.Config
 toCodeConfig toApiEndpointUrl env =
-    let
-        (ApiBasePath path) =
-            env.apiBasePath
-
-        apiBasePath =
-            Lib.Api.ApiBasePath path
-    in
     { operatingSystem = env.operatingSystem
     , perspective = env.perspective
     , toApiEndpointUrl = toApiEndpointUrl
-    , apiBasePath = apiBasePath
+    , apiBasePath = env.apiBasePath
     }

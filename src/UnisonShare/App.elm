@@ -1,6 +1,5 @@
 module UnisonShare.App exposing (..)
 
-import Api
 import Browser
 import Browser.Navigation as Nav
 import Code.CodebaseTree as CodebaseTree
@@ -16,6 +15,7 @@ import Html exposing (Html, a, div, h1, h2, nav, p, span, text)
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
+import Lib.Api as Api
 import Lib.Util as Util
 import RemoteData exposing (RemoteData(..))
 import UI
@@ -30,6 +30,7 @@ import UI.KeyboardShortcut.KeyboardEvent as KeyboardEvent exposing (KeyboardEven
 import UI.PageLayout as PageLayout
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
+import UnisonShare.Api as ShareApi
 import UnisonShare.AppModal as AppModal
 import UnisonShare.Page.CatalogPage as CatalogPage
 import UnisonShare.Page.UserPage as UserPage
@@ -63,7 +64,7 @@ init : Env -> Route -> ( Model, Cmd Msg )
 init env route =
     let
         codebaseConfig =
-            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+            Env.toCodeConfig ShareApi.codebaseApiEndpointToEndpointUrl env
 
         -- TODO: This whole thing should be route driven
         ( workspace, workspaceCmd ) =
@@ -150,7 +151,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg ({ env } as model) =
     let
         codebaseConfig =
-            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl env
+            Env.toCodeConfig ShareApi.codebaseApiEndpointToEndpointUrl env
     in
     case ( model.route, msg ) of
         ( _, LinkClicked urlRequest ) ->
@@ -192,7 +193,7 @@ update msg ({ env } as model) =
                 Route.Project params (Route.ProjectDefinition ref) ->
                     let
                         codebaseConfig_ =
-                            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl (newEnv params)
+                            Env.toCodeConfig ShareApi.codebaseApiEndpointToEndpointUrl (newEnv params)
 
                         ( workspace, cmd ) =
                             Workspace.open codebaseConfig_ model.workspace ref
@@ -381,7 +382,7 @@ fetchPerspectiveAndCodebaseTree : Perspective -> Model -> ( Model, Cmd Msg )
 fetchPerspectiveAndCodebaseTree oldPerspective ({ env } as model) =
     let
         codebaseConfig =
-            Env.toCodeConfig Api.codebaseApiEndpointToEndpointUrl model.env
+            Env.toCodeConfig ShareApi.codebaseApiEndpointToEndpointUrl model.env
 
         ( codebaseTree, codebaseTreeCmd ) =
             CodebaseTree.init codebaseConfig
@@ -484,7 +485,7 @@ fetchNamespaceDetails perspective =
     case perspective of
         Namespace { fqn } ->
             fqn
-                |> Api.namespace perspective
+                |> ShareApi.namespace perspective
                 |> Api.toRequest Namespace.decodeDetails (FetchPerspectiveNamespaceDetailsFinished fqn)
                 |> Just
 

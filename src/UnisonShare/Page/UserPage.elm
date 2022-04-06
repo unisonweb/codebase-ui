@@ -1,6 +1,5 @@
 module UnisonShare.Page.UserPage exposing (..)
 
-import Api
 import Code.Definition.Doc as Doc
 import Code.Definition.Readme as Readme
 import Code.Definition.Reference exposing (Reference)
@@ -11,12 +10,14 @@ import Env exposing (Env)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Http
+import Lib.Api as Api
 import RemoteData exposing (RemoteData(..), WebData)
 import Task
 import UI
 import UI.Card as Card
 import UI.Click as Click
 import UI.PageLayout as PageLayout exposing (PageLayout)
+import UnisonShare.Api as ShareApi
 import UnisonShare.Route as Route
 import UnisonShare.User as User exposing (UserDetails, Username)
 
@@ -53,11 +54,11 @@ fetchUser env username =
         usernameFqn =
             username |> User.usernameToString |> FQN.fromString
     in
-    Api.namespace perspective usernameFqn
+    ShareApi.namespace perspective usernameFqn
         |> Api.toTask env.apiBasePath User.decodeDetails
         |> Task.andThen
             (\userDetails ->
-                Api.projects (username |> User.usernameToString |> Just)
+                ShareApi.projects (username |> User.usernameToString |> Just)
                     |> Api.toTask env.apiBasePath Project.decodeListings
                     |> Task.map (\projects -> ( userDetails, projects ))
             )
