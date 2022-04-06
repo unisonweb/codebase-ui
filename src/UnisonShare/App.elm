@@ -9,7 +9,6 @@ import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hashvatar as Hashvatar
 import Code.Namespace as Namespace exposing (NamespaceDetails)
 import Code.Perspective as Perspective exposing (Perspective(..))
-import Code.PerspectiveLanding as PerspectiveLanding
 import Code.Workspace as Workspace
 import Code.Workspace.WorkspaceItems as WorkspaceItems
 import Env exposing (Env)
@@ -34,6 +33,7 @@ import UI.Tooltip as Tooltip
 import UnisonShare.AppModal as AppModal
 import UnisonShare.Page.CatalogPage as CatalogPage
 import UnisonShare.Page.UserPage as UserPage
+import UnisonShare.PerspectiveLanding as PerspectiveLanding
 import UnisonShare.Route as Route exposing (Route)
 import Url exposing (Url)
 
@@ -711,7 +711,7 @@ view model =
                         page_ =
                             Html.map PerspectiveLandingMsg
                                 (PerspectiveLanding.view
-                                    model.env
+                                    model.env.perspective
                                     model.perspectiveLanding
                                 )
                                 |> withSidebar

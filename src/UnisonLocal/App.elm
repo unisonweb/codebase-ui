@@ -11,7 +11,6 @@ import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hashvatar as Hashvatar
 import Code.Namespace as Namespace exposing (NamespaceDetails)
 import Code.Perspective as Perspective exposing (Perspective(..))
-import Code.PerspectiveLanding as PerspectiveLanding
 import Code.Workspace as Workspace
 import Code.Workspace.WorkspaceItems as WorkspaceItems
 import Env exposing (Env, OperatingSystem(..))
@@ -33,6 +32,7 @@ import UI.Modal as Modal
 import UI.PageLayout as PageLayout
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
+import UnisonLocal.PerspectiveLanding as PerspectiveLanding
 import UnisonLocal.Route as Route exposing (Route)
 import Url exposing (Url)
 
@@ -269,7 +269,7 @@ update msg ({ env } as model) =
                 FinderModal fModel ->
                     let
                         ( fm, fc, out ) =
-                            Finder.update env fMsg fModel
+                            Finder.update env (Api.performCodebaseApiRequest env.apiBasePath) fMsg fModel
                     in
                     case out of
                         Finder.Remain ->
@@ -771,7 +771,7 @@ view model =
                 Route.Perspective _ ->
                     Html.map PerspectiveLandingMsg
                         (PerspectiveLanding.view
-                            model.env
+                            model.env.perspective
                             model.perspectiveLanding
                         )
 
