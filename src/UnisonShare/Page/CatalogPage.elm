@@ -1,6 +1,5 @@
 module UnisonShare.Page.CatalogPage exposing (..)
 
-import Code.Perspective as Perspective
 import Code.Project as Project exposing (ProjectListing)
 import Env exposing (Env)
 import Html exposing (Html, div, h1, input, strong, table, tbody, td, text, tr)
