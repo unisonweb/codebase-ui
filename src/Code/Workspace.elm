@@ -24,7 +24,7 @@ import Code.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 import Html exposing (Html, article, div, section)
 import Html.Attributes exposing (class, id)
 import Http
-import Lib.Api as Api exposing (ApiRequest)
+import Lib.HttpApi as HttpApi exposing (ApiRequest)
 import Lib.OperatingSystem as OperatingSystem exposing (OperatingSystem)
 import Task
 import UI.Button as Button
@@ -304,7 +304,7 @@ openItem config ({ workspaceItems } as model) relativeToRef ref =
                         WorkspaceItems.insertWithFocusBefore workspaceItems r toInsert
         in
         ( { model | workspaceItems = nextWorkspaceItems }
-        , Cmd.batch [ Api.perform config.apiBasePath (fetchDefinition config ref), scrollToDefinition ref ]
+        , Cmd.batch [ HttpApi.perform config.apiBasePath (fetchDefinition config ref), scrollToDefinition ref ]
         )
 
 
@@ -455,7 +455,7 @@ fetchDefinition config ref =
     in
     endpoint
         |> config.toApiEndpointUrl
-        |> Api.toRequest (WorkspaceItem.decodeItem ref) (FetchItemFinished ref)
+        |> HttpApi.toRequest (WorkspaceItem.decodeItem ref) (FetchItemFinished ref)
 
 
 isDocCropped : Reference -> Cmd Msg

@@ -1,4 +1,4 @@
-module Lib.Api exposing
+module Lib.HttpApi exposing
     ( ApiBasePath(..)
     , ApiRequest
     , EndpointUrl(..)

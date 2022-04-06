@@ -17,7 +17,7 @@ import Html exposing (Html, a, div, h1, h2, h3, nav, p, section, span, strong, t
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
 import Http
-import Lib.Api as HttpApi
+import Lib.HttpApi as HttpApi
 import Lib.OperatingSystem exposing (OperatingSystem(..))
 import Lib.Util as Util
 import RemoteData

@@ -6,7 +6,7 @@ import Code.Perspective as Perspective exposing (Perspective, PerspectiveParams)
 import Env exposing (Flags)
 import Html
 import Http
-import Lib.Api as HttpApi exposing (ApiBasePath(..), ApiRequest)
+import Lib.HttpApi as HttpApi exposing (ApiBasePath(..), ApiRequest)
 import UnisonLocal.Api as LocalApi
 import UnisonLocal.App as App
 import UnisonLocal.Route as Route exposing (Route)

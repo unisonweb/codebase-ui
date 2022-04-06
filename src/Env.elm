@@ -4,7 +4,7 @@ import Browser.Navigation as Nav
 import Code.CodebaseApi as CodebaseApi
 import Code.Config
 import Code.Perspective exposing (Perspective)
-import Lib.Api exposing (ApiBasePath(..))
+import Lib.HttpApi exposing (ApiBasePath(..))
 import Lib.OperatingSystem as OS exposing (OperatingSystem)
 
 

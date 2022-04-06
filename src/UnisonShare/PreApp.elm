@@ -6,7 +6,7 @@ import Code.Perspective as Perspective exposing (Perspective, PerspectiveParams)
 import Env exposing (Flags)
 import Html
 import Http
-import Lib.Api as Api exposing (ApiBasePath(..), ApiRequest)
+import Lib.HttpApi as HttpApi exposing (ApiBasePath(..), ApiRequest)
 import UnisonShare.Api as ShareApi
 import UnisonShare.App as App
 import UnisonShare.Route as Route exposing (Route)
@@ -56,7 +56,7 @@ init flags url navKey =
             ( Initialized app, Cmd.map AppMsg cmd )
 
         fetchPerspective_ =
-            ( Initializing preEnv, Api.perform (ApiBasePath flags.apiBasePath) (fetchPerspective preEnv) )
+            ( Initializing preEnv, HttpApi.perform (ApiBasePath flags.apiBasePath) (fetchPerspective preEnv) )
     in
     -- If we have a codebase hash we can construct a full perspective,
     -- otherwise we have to fetch the hash before being able to start up the
@@ -69,7 +69,7 @@ init flags url navKey =
 
 fetchPerspective : PreEnv -> ApiRequest Perspective Msg
 fetchPerspective preEnv =
-    ShareApi.codebaseHash |> Api.toRequest (Perspective.decode preEnv.perspectiveParams) (FetchPerspectiveFinished preEnv)
+    ShareApi.codebaseHash |> HttpApi.toRequest (Perspective.decode preEnv.perspectiveParams) (FetchPerspectiveFinished preEnv)
 
 
 type Msg

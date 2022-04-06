@@ -15,7 +15,7 @@ import Html exposing (Html, a, div, h1, h2, nav, p, span, text)
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
 import Http
-import Lib.Api as Api
+import Lib.HttpApi as HttpApi
 import Lib.Util as Util
 import RemoteData exposing (RemoteData(..))
 import UI
@@ -81,7 +81,7 @@ init env route =
         fetchNamespaceDetailsCmd =
             env.perspective
                 |> fetchNamespaceDetails
-                |> Maybe.map (Api.perform env.apiBasePath)
+                |> Maybe.map (HttpApi.perform env.apiBasePath)
                 |> Maybe.withDefault Cmd.none
 
         ( catalog, catalogCmd ) =
@@ -390,7 +390,7 @@ fetchPerspectiveAndCodebaseTree oldPerspective ({ env } as model) =
         fetchNamespaceDetailsCmd =
             env.perspective
                 |> fetchNamespaceDetails
-                |> Maybe.map (Api.perform env.apiBasePath)
+                |> Maybe.map (HttpApi.perform env.apiBasePath)
                 |> Maybe.withDefault Cmd.none
     in
     if Perspective.needsFetching env.perspective then
@@ -480,13 +480,13 @@ showFinder model withinNamespace =
 -- EFFECTS
 
 
-fetchNamespaceDetails : Perspective -> Maybe (Api.ApiRequest NamespaceDetails Msg)
+fetchNamespaceDetails : Perspective -> Maybe (HttpApi.ApiRequest NamespaceDetails Msg)
 fetchNamespaceDetails perspective =
     case perspective of
         Namespace { fqn } ->
             fqn
                 |> ShareApi.namespace perspective
-                |> Api.toRequest Namespace.decodeDetails (FetchPerspectiveNamespaceDetailsFinished fqn)
+                |> HttpApi.toRequest Namespace.decodeDetails (FetchPerspectiveNamespaceDetailsFinished fqn)
                 |> Just
 
         _ ->

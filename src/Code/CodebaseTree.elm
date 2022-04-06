@@ -20,7 +20,7 @@ import Html exposing (Html, a, div, label, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
 import Http
-import Lib.Api as Api exposing (ApiRequest)
+import Lib.HttpApi as HttpApi exposing (ApiRequest)
 import Lib.Util as Util
 import RemoteData exposing (RemoteData(..), WebData)
 import UI
@@ -45,7 +45,7 @@ init config =
         model =
             { rootNamespaceListing = Loading, expandedNamespaceListings = FQNSet.empty }
     in
-    ( model, Api.perform config.apiBasePath (fetchRootNamespaceListing config) )
+    ( model, HttpApi.perform config.apiBasePath (fetchRootNamespaceListing config) )
 
 
 
@@ -100,7 +100,7 @@ update config msg model =
 
                 cmd =
                     if shouldExpand && not namespaceContentFetched then
-                        Api.perform config.apiBasePath (fetchSubNamespaceListing config fqn)
+                        HttpApi.perform config.apiBasePath (fetchSubNamespaceListing config fqn)
 
                     else
                         Cmd.none
@@ -180,7 +180,7 @@ fetchNamespaceListing : Config -> Maybe FQN -> (Result Http.Error NamespaceListi
 fetchNamespaceListing config fqn toMsg =
     CodebaseApi.Browse { perspective = config.perspective, namespaceId = Maybe.map EntityId.NameId fqn }
         |> config.toApiEndpointUrl
-        |> Api.toRequest (NamespaceListing.decode fqn) toMsg
+        |> HttpApi.toRequest (NamespaceListing.decode fqn) toMsg
 
 
 

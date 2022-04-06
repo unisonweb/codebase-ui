@@ -4,7 +4,7 @@ import Code.EntityId exposing (EntityId)
 import Code.FullyQualifiedName exposing (FQN)
 import Code.Perspective exposing (Perspective)
 import Code.Syntax as Syntax
-import Lib.Api as Api
+import Lib.HttpApi as HttpApi
 
 
 
@@ -34,4 +34,4 @@ type CodebaseEndpoint
 
 
 type alias ToApiEndpointUrl =
-    CodebaseEndpoint -> Api.EndpointUrl
+    CodebaseEndpoint -> HttpApi.EndpointUrl

@@ -49,7 +49,7 @@ import Html.Attributes
         )
 import Html.Events exposing (onClick, onInput)
 import Http
-import Lib.Api as Api exposing (ApiRequest)
+import Lib.HttpApi as HttpApi exposing (ApiRequest)
 import Lib.SearchResults as SearchResults exposing (SearchResults(..))
 import Lib.Util as Util
 import List.Nonempty as NEL
@@ -171,7 +171,7 @@ update config msg model =
                     ( search, fetch ) =
                         performSearch config model.options model.search query
                 in
-                ( { model | search = search }, Api.perform config.apiBasePath fetch, Remain )
+                ( { model | search = search }, HttpApi.perform config.apiBasePath fetch, Remain )
 
             else
                 ( model, Cmd.none, Remain )
@@ -207,7 +207,7 @@ update config msg model =
                             ( search_, fetch ) =
                                 performSearch config options model.search model.input
                         in
-                        ( search_, Api.perform config.apiBasePath fetch )
+                        ( search_, HttpApi.perform config.apiBasePath fetch )
 
                     else
                         ( model.search, Cmd.none )
@@ -392,7 +392,7 @@ fetchMatches toApiEndpointUrl perspective withinFqn query =
         , query = query
         }
         |> toApiEndpointUrl
-        |> Api.toRequest FinderMatch.decodeMatches (FetchMatchesFinished query)
+        |> HttpApi.toRequest FinderMatch.decodeMatches (FetchMatchesFinished query)
 
 
 focusSearchInput : Cmd Msg

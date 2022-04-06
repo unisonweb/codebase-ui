@@ -12,7 +12,7 @@ import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash exposing (Hash)
 import Code.Perspective as Perspective exposing (Perspective(..))
 import Code.Syntax as Syntax
-import Lib.Api as Api exposing (EndpointUrl(..))
+import Lib.HttpApi exposing (EndpointUrl(..))
 import Regex
 import Url.Builder exposing (QueryParameter, int, string)
 
@@ -45,11 +45,11 @@ projects owner =
     EndpointUrl [ "projects" ] queryParams
 
 
-catalog : Api.EndpointUrl
+catalog : EndpointUrl
 catalog =
     [ "_catalog" ]
         |> List.map (string "names")
-        |> (\names -> Api.EndpointUrl [ "getDefinition" ] names)
+        |> (\names -> EndpointUrl [ "getDefinition" ] names)
 
 
 codebaseApiEndpointToEndpointUrl : CodebaseApi.CodebaseEndpoint -> EndpointUrl

@@ -10,7 +10,7 @@ import Env exposing (Env)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Http
-import Lib.Api as Api
+import Lib.HttpApi as HttpApi
 import RemoteData exposing (RemoteData(..), WebData)
 import Task
 import UI
@@ -55,11 +55,11 @@ fetchUser env username =
             username |> User.usernameToString |> FQN.fromString
     in
     ShareApi.namespace perspective usernameFqn
-        |> Api.toTask env.apiBasePath User.decodeDetails
+        |> HttpApi.toTask env.apiBasePath User.decodeDetails
         |> Task.andThen
             (\userDetails ->
                 ShareApi.projects (username |> User.usernameToString |> Just)
-                    |> Api.toTask env.apiBasePath Project.decodeListings
+                    |> HttpApi.toTask env.apiBasePath Project.decodeListings
                     |> Task.map (\projects -> ( userDetails, projects ))
             )
         |> Task.attempt FetchUserProfileFinished

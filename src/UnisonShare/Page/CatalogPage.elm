@@ -7,7 +7,7 @@ import Html exposing (Html, div, h1, input, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (autofocus, class, classList, placeholder)
 import Html.Events exposing (onBlur, onFocus, onInput, onMouseDown)
 import Http
-import Lib.Api as Api
+import Lib.HttpApi as HttpApi
 import Lib.SearchResults as SearchResults exposing (SearchResults(..))
 import List.Extra as ListE
 import Maybe.Extra as MaybeE
@@ -75,11 +75,11 @@ projectListings and finally merging them into a Catalog
 fetch : Env -> Cmd Msg
 fetch env =
     ShareApi.catalog
-        |> Api.toTask env.apiBasePath Catalog.decodeCatalogMask
+        |> HttpApi.toTask env.apiBasePath Catalog.decodeCatalogMask
         |> Task.andThen
             (\catalog ->
                 ShareApi.projects Nothing
-                    |> Api.toTask env.apiBasePath Project.decodeListings
+                    |> HttpApi.toTask env.apiBasePath Project.decodeListings
                     |> Task.map (\projects -> ( catalog, projects ))
             )
         |> Task.attempt FetchFinished
