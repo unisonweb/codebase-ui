@@ -24,6 +24,7 @@ import Env exposing (Env)
 import Html exposing (Html, article, div, section)
 import Html.Attributes exposing (class, id)
 import Http
+import Lib.OperatingSystem as OperatingSystem
 import Task
 import UI.Button as Button
 import UI.Icon as Icon
@@ -356,7 +357,7 @@ handleKeyboardShortcut env ({ workspaceItems } as model) shortcut =
             ( model, Cmd.none, ShowFinderRequest Nothing )
 
         KeyboardShortcut.Chord Meta (K _) ->
-            if env.operatingSystem == Env.MacOS then
+            if env.operatingSystem == OperatingSystem.MacOS then
                 ( model, Cmd.none, ShowFinderRequest Nothing )
 
             else

@@ -2,16 +2,11 @@ module Env exposing (..)
 
 import Api exposing (ApiBasePath(..))
 import Browser.Navigation as Nav
+import Code.CodebaseApi as CodebaseApi
+import Code.Config
 import Code.Perspective exposing (Perspective)
-
-
-type OperatingSystem
-    = MacOS
-    | Windows
-    | Linux
-    | Android
-    | IOS
-    | Unknown
+import Lib.Api
+import Lib.OperatingSystem as OS exposing (OperatingSystem)
 
 
 type alias Env =
@@ -32,7 +27,7 @@ type alias Flags =
 
 init : Flags -> Nav.Key -> Perspective -> Env
 init flags navKey perspective =
-    { operatingSystem = operatingSystemFromString flags.operatingSystem
+    { operatingSystem = OS.fromString flags.operatingSystem
     , basePath = flags.basePath
     , apiBasePath = ApiBasePath flags.apiBasePath
     , navKey = navKey
@@ -40,23 +35,17 @@ init flags navKey perspective =
     }
 
 
-operatingSystemFromString : String -> OperatingSystem
-operatingSystemFromString rawOs =
-    case rawOs of
-        "macOS" ->
-            MacOS
+toCodeConfig : CodebaseApi.ToApiEndpointUrl -> Env -> Code.Config.Config
+toCodeConfig toApiEndpointUrl env =
+    let
+        (ApiBasePath path) =
+            env.apiBasePath
 
-        "iOS" ->
-            IOS
-
-        "Windows" ->
-            Windows
-
-        "Android" ->
-            Android
-
-        "Linux" ->
-            Linux
-
-        _ ->
-            Unknown
+        apiBasePath =
+            Lib.Api.ApiBasePath path
+    in
+    { operatingSystem = env.operatingSystem
+    , perspective = env.perspective
+    , toApiEndpointUrl = toApiEndpointUrl
+    , apiBasePath = apiBasePath
+    }

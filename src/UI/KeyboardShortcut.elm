@@ -37,9 +37,9 @@
 
 module UI.KeyboardShortcut exposing (..)
 
-import Env exposing (OperatingSystem)
 import Html exposing (Html, span, text)
 import Html.Attributes exposing (class, classList)
+import Lib.OperatingSystem exposing (OperatingSystem)
 import List.Nonempty as NEL
 import Process
 import Task
