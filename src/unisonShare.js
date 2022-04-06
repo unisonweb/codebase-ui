@@ -20,7 +20,6 @@ const flags = {
   operatingSystem: detectOs(window.navigator),
   basePath,
   apiBasePath,
-  appContext: "UnisonShare",
 };
 
 preventDefaultGlobalKeyboardEvents();

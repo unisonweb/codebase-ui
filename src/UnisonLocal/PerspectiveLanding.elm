@@ -1,13 +1,11 @@
-module Code.PerspectiveLanding exposing (..)
+module UnisonLocal.PerspectiveLanding exposing (..)
 
 import Code.Definition.Doc as Doc
 import Code.Definition.Readme as Readme
 import Code.Definition.Reference exposing (Reference)
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Namespace exposing (Namespace(..))
-import Code.Perspective as Perspective
-import Env exposing (Env)
-import Env.AppContext exposing (AppContext(..))
+import Code.Perspective as Perspective exposing (Perspective)
 import Html exposing (Html, a, article, div, h2, header, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, id, rel, target)
 import Lib.Util as Util
@@ -111,32 +109,21 @@ viewEmptyState title description cta =
         ]
 
 
-viewEmptyStateCodebase : AppContext -> Html Msg
-viewEmptyStateCodebase appContext =
-    let
-        button =
-            Button.iconThenLabel Find Icon.search "Find Definition"
-                |> Button.primaryMono
-                |> Button.medium
-    in
-    case appContext of
-        UnisonLocal ->
-            viewEmptyState
-                (span [ class "unison-local" ] [ text "Your ", span [ class "context" ] [ text "Local" ], text " Unison Codebase" ])
-                [ p [] [ text "Browse, search, read docs, open definitions, and explore your local codebase." ]
-                , p []
-                    [ text "Check out "
-                    , a [ class "unison-share", href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ strong [] [ text "Unison Share" ] ]
-                    , text " for community projects."
-                    ]
-                ]
-                button
-
-        UnisonShare ->
-            viewEmptyState
-                (span [ class "unison-share" ] [ text "Unison ", span [ class "context" ] [ text "Share" ] ])
-                [ p [] [ text "Explore to discover and share Unison libraries, documentation, types, and terms." ] ]
-                button
+viewEmptyStateCodebase : Html Msg
+viewEmptyStateCodebase =
+    viewEmptyState
+        (span [ class "unison-local" ] [ text "Your ", span [ class "context" ] [ text "Local" ], text " Unison Codebase" ])
+        [ p [] [ text "Browse, search, read docs, open definitions, and explore your local codebase." ]
+        , p []
+            [ text "Check out "
+            , a [ class "unison-share", href "https://share.unison-lang.org", rel "noopener", target "_blank" ] [ strong [] [ text "Unison Share" ] ]
+            , text " for community projects."
+            ]
+        ]
+        (Button.iconThenLabel Find Icon.search "Find Definition"
+            |> Button.primaryMono
+            |> Button.medium
+        )
 
 
 viewEmptyStateNamespace : FQN -> Html Msg
@@ -154,11 +141,11 @@ viewEmptyStateNamespace fqn =
         )
 
 
-view : Env -> Model -> Html Msg
-view env model =
-    case env.perspective of
+view : Perspective -> Model -> Html Msg
+view perspective model =
+    case perspective of
         Perspective.Codebase _ ->
-            viewEmptyStateCodebase env.appContext
+            viewEmptyStateCodebase
 
         Perspective.Namespace { fqn, details } ->
             case details of
