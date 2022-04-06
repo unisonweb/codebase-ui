@@ -3,9 +3,7 @@ module Api exposing
     , ApiRequest
     , codebaseApiEndpointToEndpointUrl
     , codebaseHash
-    , find
     , getDefinition
-    , list
     , namespace
     , perform
     , projects
@@ -14,14 +12,15 @@ module Api exposing
     , toUrl
     )
 
-import Code.CodebaseApi exposing (CodebaseEndpoint)
+import Code.CodebaseApi as CodebaseApi
+import Code.EntityId as EntityId
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash exposing (Hash)
 import Code.Perspective as Perspective exposing (Perspective(..))
 import Code.Syntax as Syntax
 import Http
 import Json.Decode as Decode
-import Lib.Api
+import Lib.Api exposing (EndpointUrl(..))
 import Regex
 import Task exposing (Task)
 import Url.Builder exposing (QueryParameter, absolute, int, string)
@@ -43,15 +42,6 @@ toUrl (ApiBasePath basePath) (Endpoint paths queryParams) =
 codebaseHash : Endpoint
 codebaseHash =
     Endpoint [ "list" ] [ string "namespace" "." ]
-
-
-list : Perspective -> Maybe String -> Endpoint
-list perspective fqnOrHash =
-    let
-        namespace_ =
-            Maybe.withDefault "." fqnOrHash
-    in
-    Endpoint [ "list" ] (string "namespace" namespace_ :: perspectiveToQueryParams perspective)
 
 
 namespace : Perspective -> FQN -> Endpoint
@@ -92,30 +82,52 @@ getDefinition perspective fqnsOrHashes =
         |> (\names -> Endpoint [ "getDefinition" ] (names ++ perspectiveToQueryParams perspective))
 
 
-find : Perspective -> Maybe FQN -> Int -> Syntax.Width -> String -> Endpoint
-find perspective withinFqn limit (Syntax.Width sourceWidth) query =
-    let
-        params =
-            case withinFqn of
-                Just fqn ->
-                    [ rootBranch (Perspective.codebaseHash perspective), relativeTo fqn ]
+codebaseApiEndpointToEndpointUrl : CodebaseApi.CodebaseEndpoint -> Lib.Api.EndpointUrl
+codebaseApiEndpointToEndpointUrl cbEndpoint =
+    case cbEndpoint of
+        CodebaseApi.Find { perspective, withinFqn, limit, sourceWidth, query } ->
+            let
+                params =
+                    case withinFqn of
+                        Just fqn ->
+                            [ rootBranch (Perspective.codebaseHash perspective), relativeTo fqn ]
 
-                Nothing ->
-                    perspectiveToQueryParams perspective
-    in
-    Endpoint
-        [ "find" ]
-        ([ int "limit" limit
-         , int "renderWidth" sourceWidth
-         , string "query" query
-         ]
-            ++ params
-        )
+                        Nothing ->
+                            perspectiveToQueryParams perspective
 
+                width =
+                    case sourceWidth of
+                        Syntax.Width w ->
+                            w
+            in
+            EndpointUrl
+                [ "find" ]
+                ([ int "limit" limit
+                 , int "renderWidth" width
+                 , string "query" query
+                 ]
+                    ++ params
+                )
 
-codebaseApiEndpointToEndpointUrl : CodebaseEndpoint -> Lib.Api.EndpointUrl
-codebaseApiEndpointToEndpointUrl _ =
-    Lib.Api.EndpointUrl [] []
+        CodebaseApi.Browse { perspective, namespaceId } ->
+            let
+                namespace_ =
+                    namespaceId |> Maybe.map EntityId.toString |> Maybe.withDefault "."
+            in
+            EndpointUrl [ "list" ] (string "namespace" namespace_ :: perspectiveToQueryParams perspective)
+
+        CodebaseApi.Definition { perspective, definitionId } ->
+            let
+                re =
+                    Maybe.withDefault Regex.never (Regex.fromString "#[d|a|](\\d+)$")
+
+                stripConstructorPositionFromHash =
+                    Regex.replace re (always "")
+            in
+            [ EntityId.toString definitionId ]
+                |> List.map stripConstructorPositionFromHash
+                |> List.map (string "names")
+                |> (\names -> EndpointUrl [ "getDefinition" ] (names ++ perspectiveToQueryParams perspective))
 
 
 
