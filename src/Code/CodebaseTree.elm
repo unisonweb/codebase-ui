@@ -16,7 +16,6 @@ import Code.FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import Code.FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import Code.HashQualified exposing (HashQualified(..))
 import Code.Perspective as Perspective
-import Env exposing (Env)
 import Html exposing (Html, a, div, label, span, text)
 import Html.Attributes exposing (class, title)
 import Html.Events exposing (onClick)
