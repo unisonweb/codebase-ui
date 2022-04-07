@@ -53,7 +53,7 @@ p {
   display: inline-block;
   height: calc(var(--font-size-base) * 0.65);
   border-radius: calc(var(--font-size-base) / 2);
-  background: var(--main-subtle-fg);
+  background: var(--color-main-subtle-fg);
   min-width: calc(var(--font-size-base) * 3);
 }
 
@@ -62,7 +62,7 @@ p {
 }
 
 .error-message {
-  color: var(--color-pink-1);
+  color: var(--color-main-error-fg);
 }
 
 .subtle {
@@ -134,9 +134,11 @@ p {
   flex-direction: row;
   /* gap: 0.25rem; */
 }
+
 .keyboard-shortcut .key {
   margin-right: 0.25rem;
 }
+
 .keyboard-shortcut:last-child .key {
   margin-right: 0;
 }
@@ -165,7 +167,7 @@ p {
   display: inline-flex;
   height: 1.5rem;
   font-size: 0.625rem;
-  line-heigth: 1;
+  line-height: 1;
   margin: 0 0.35rem;
   color: var(--color-keyboard-shortcut-then);
   align-items: center;

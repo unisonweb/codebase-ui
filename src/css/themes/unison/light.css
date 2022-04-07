@@ -18,6 +18,8 @@
   --color-main-alert: var(--color-pink-1);
   --color-main-mark-fg: var(--color-blue-2);
   --color-main-mark-bg: var(--color-transparent);
+  --color-main-error-fg: var(--color-pink-1);
+  --color-main-error-subtle-fg: var(--color-pink-3);
 
   --color-app-header-fg: var(--color-gray-lighten-100);
   --color-app-header-bg: var(--color-gray-darken-10);
