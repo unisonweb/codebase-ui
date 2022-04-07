@@ -12,7 +12,7 @@ import Test exposing (..)
 init : Test
 init =
     describe "Finder.SearchOptions.init"
-        [ test "with an FQN and the Codebase Perspective it returns the WithinNamespace WithinOption" <|
+        [ test "with an FQN and the Root Perspective it returns the WithinNamespace WithinOption" <|
             \_ ->
                 let
                     result =
@@ -28,7 +28,7 @@ init =
                             |> Maybe.map (\p -> SearchOptions.init p (Just namespaceFqn))
                 in
                 Expect.equal (Just (SearchOptions (WithinNamespace namespaceFqn))) result
-        , test "without an FQN and the Codebase Perspective it returns the AllNamespaces WithinOption" <|
+        , test "without an FQN and the Root Perspective it returns the AllNamespaces WithinOption" <|
             \_ ->
                 let
                     result =
@@ -72,7 +72,7 @@ removeWithin =
                             |> Maybe.map (\p -> SearchOptions.removeWithin p initial)
                 in
                 Expect.equal (Just (SearchOptions AllNamespaces)) result
-        , test "when removing WithinNamespace and Perspective is Codebase, it returns the AllNamespaces WithinOption" <|
+        , test "when removing WithinNamespace and Perspective is Root, it returns the AllNamespaces WithinOption" <|
             \_ ->
                 let
                     initial =
@@ -114,10 +114,10 @@ perspectiveFqn =
 namespacePerspective : Maybe Perspective
 namespacePerspective =
     Hash.fromString "#testhash"
-        |> Maybe.map (\h -> Perspective.Namespace { codebaseHash = h, fqn = perspectiveFqn, details = NotAsked })
+        |> Maybe.map (\h -> Perspective.Namespace { rootHash = h, fqn = perspectiveFqn, details = NotAsked })
 
 
 codebasePerspective : Maybe Perspective
 codebasePerspective =
     Hash.fromString "#testhash"
-        |> Maybe.map Perspective.Codebase
+        |> Maybe.map Perspective.Root

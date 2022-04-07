@@ -4,7 +4,7 @@ import Code.Definition.Reference as Reference exposing (Reference(..))
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash exposing (Hash)
 import Code.HashQualified as HQ
-import Code.Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
+import Code.Perspective exposing (PerspectiveParams(..), RootPerspectiveParam(..))
 import Expect
 import Test exposing (..)
 import UnisonShare.Route as Route exposing (ProjectRoute(..), Route(..))
@@ -41,7 +41,7 @@ projectRootRoute =
                         mkUrl "/latest"
 
                     expected =
-                        Project (ByCodebase Relative) ProjectRoot
+                        Project (ByRoot Relative) ProjectRoot
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase relative perspective with namespace" <|
@@ -62,7 +62,7 @@ projectRootRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Project (ByCodebase (Absolute h)) ProjectRoot)
+                            |> Maybe.map (\h -> Project (ByRoot (Absolute h)) ProjectRoot)
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a codebase absolute perspective with namespace" <|
@@ -99,7 +99,7 @@ definitionRoute =
                         mkUrl "/latest/terms/base/List/map"
 
                     expected =
-                        Project (ByCodebase Relative) (ProjectDefinition (Reference.fromString TermReference "base.List.map"))
+                        Project (ByRoot Relative) (ProjectDefinition (Reference.fromString TermReference "base.List.map"))
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase relative and relative definition within a namespace" <|
@@ -119,7 +119,7 @@ definitionRoute =
                         mkUrl "/latest/terms/@definitionhash"
 
                     expected =
-                        Project (ByCodebase Relative) (ProjectDefinition (Reference.fromString TermReference "#definitionhash"))
+                        Project (ByRoot Relative) (ProjectDefinition (Reference.fromString TermReference "#definitionhash"))
                 in
                 Expect.equal expected (Route.fromUrl "" url)
         , test "Matches a codebase relative and absolute definition within a namespace" <|
@@ -140,7 +140,7 @@ definitionRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Project (ByCodebase (Absolute h)) (ProjectDefinition (Reference.fromString TermReference "base.List.map")))
+                            |> Maybe.map (\h -> Project (ByRoot (Absolute h)) (ProjectDefinition (Reference.fromString TermReference "base.List.map")))
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a codebase absolute and relative definition within a namespace" <|
@@ -162,7 +162,7 @@ definitionRoute =
 
                     expected =
                         hash "@codebasehash"
-                            |> Maybe.map (\h -> Project (ByCodebase (Absolute h)) (ProjectDefinition (Reference.fromString TermReference "#definitionhash")))
+                            |> Maybe.map (\h -> Project (ByRoot (Absolute h)) (ProjectDefinition (Reference.fromString TermReference "#definitionhash")))
                 in
                 Expect.equal expected (Just (Route.fromUrl "" url))
         , test "Matches a codebase absolute and absolute definition within a namespace" <|
@@ -206,7 +206,7 @@ fromUrlBasePath =
                         "/some-token/ui/"
 
                     expected =
-                        Project (ByCodebase Relative) (ProjectDefinition (Reference.fromString TermReference "#abc123"))
+                        Project (ByRoot Relative) (ProjectDefinition (Reference.fromString TermReference "#abc123"))
                 in
                 Expect.equal expected (Route.fromUrl basePath url)
         , test "Matches with a root basePath prefix" <|
@@ -219,7 +219,7 @@ fromUrlBasePath =
                         "/"
 
                     expected =
-                        Project (ByCodebase Relative) (ProjectDefinition (Reference.fromString TermReference "#abc123"))
+                        Project (ByRoot Relative) (ProjectDefinition (Reference.fromString TermReference "#abc123"))
                 in
                 Expect.equal expected (Route.fromUrl basePath url)
         ]
