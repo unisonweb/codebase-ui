@@ -381,8 +381,8 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--color-gray-darken-10);
-  color: var(--color-gray-lighten-100);
+  background: var(--color-page-hero-bg);
+  color: var(--color-page-hero-fg);
   height: var(--page-hero-height);
 }
 

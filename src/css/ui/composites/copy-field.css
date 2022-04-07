@@ -12,16 +12,16 @@
   position: relative;
   display: flex;
   flex-direction: row;
-  background: var(--color-gray-lighten-60);
-  border: 1px solid var(--color-gray-lighten-40);
+  background: var(--color-copy-field-bg);
+  border: 1px solid var(--color-copy-field-border);
   border-radius: var(--border-radius-base) 0 0 var(--border-radius-base);
   flex-grow: 1;
 }
 
 .copy-field .copy-field-field:focus-within {
-  box-shadow: 0 0 0 2px var(--color-blue-3);
-  border-color: var(--color-blue-1);
-  border-right: 1px solid var(--color-blue-1);
+  box-shadow: 0 0 0 2px var(--color-copy-field-focus-glow);
+  border-color: var(--color-copy-field-focus-border);
+  border-right: 1px solid var(--color-copy-field-focus-border);
   /* z-index is to help cover the left border of the button when focused */
   z-index: 2;
 }
@@ -32,7 +32,7 @@
   font-size: var(--font-size-medium);
   align-items: center;
   display: flex;
-  color: var(--color-gray-lighten-20);
+  color: var(--color-copy-field-prefix);
 }
 
 .copy-field .copy-field-input {
@@ -46,6 +46,7 @@
   font-size: var(--font-size-medium);
   font-weight: 600;
   background: transparent;
+  color: var(--color-copy-field-fg);
 }
 
 .copy-field input:focus {
@@ -56,7 +57,7 @@
 .copy-field button {
   width: 2.25rem;
   height: 2.25rem;
-  border: 1px solid var(--color-gray-lighten-40);
+  border: 1px solid var(--color-copy-field-button-border);
   border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
   /* move 1 px left such that borders of field and button overlap
    * (visible when clicking the button) */
@@ -65,7 +66,7 @@
 }
 
 .copy-field button:hover {
-  border-color: var(--color-gray-lighten-30);
+  border-color: var(--color-copy-field-button-hover-border);
   /* z-index is to show the buttons left border on hover */
   z-index: 1;
 }

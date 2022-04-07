@@ -280,4 +280,20 @@
   --color-syntax-monochrome-em: var(--color-main-fg);
 
   --color-syntax-plain: var(--color-main-fg);
+
+  /* Page Hero Layout */
+  --color-page-hero-fg: var(--color-gray-lighten-100);
+  --color-page-hero-bg: var(--color-gray-darken-10);
+
+  /* CopyField */
+  --color-copy-field-fg: var(--color-gray-darken-25);
+  --color-copy-field-bg: var(--color-gray-lighten-60);
+  --color-copy-field-border: var(--color-gray-lighten-40);
+  --color-copy-field-focus-fg: var(--color-gray-darken-25);
+  --color-copy-field-focus-bg: var(--color-gray-lighten-60);
+  --color-copy-field-focus-border: var(--color-blue-1);
+  --color-copy-field-focus-glow: var(--color-blue-3);
+  --color-copy-field-prefix: var(--color-gray-lighten-20);
+  --color-copy-field-button-border: var(--color-gray-lighten-40);
+  --color-copy-field-button-hover-border: var(--color-gray-lighten-30);
 }

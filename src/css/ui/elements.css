@@ -97,7 +97,7 @@ p {
 
 .option-badge .icon {
   font-size: 0.625rem;
-  color: var(--color-gray-option-badge-icon);
+  color: var(--color-option-badge-icon);
   margin-right: 0.375rem;
   line-height: 1;
 }
@@ -172,7 +172,6 @@ p {
 }
 
 @import "./elements/icon.css";
-@import "./elements/banner.css";
 @import "./elements/button.css";
 @import "./elements/tooltip.css";
 @import "./elements/fold-toggle.css";
