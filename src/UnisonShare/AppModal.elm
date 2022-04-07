@@ -4,7 +4,6 @@ import Code.Definition.Reference exposing (Reference)
 import Code.Finder as Finder
 import Code.Finder.SearchOptions as SearchOptions
 import Code.FullyQualifiedName as FQN exposing (FQN)
-import Env exposing (Env)
 import Html exposing (Html, a, div, h3, p, section, span, strong, text)
 import Html.Attributes exposing (class, href, rel, target)
 import Lib.OperatingSystem exposing (OperatingSystem(..))
@@ -15,6 +14,7 @@ import UI.KeyboardShortcut as KeyboardShortcut
 import UI.KeyboardShortcut.Key as Key exposing (Key(..))
 import UI.Modal as Modal
 import UnisonShare.Api as Api
+import UnisonShare.Env as Env exposing (Env)
 
 
 

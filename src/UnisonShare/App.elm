@@ -10,7 +10,6 @@ import Code.Namespace as Namespace exposing (NamespaceDetails)
 import Code.Perspective as Perspective exposing (Perspective(..))
 import Code.Workspace as Workspace
 import Code.Workspace.WorkspaceItems as WorkspaceItems
-import Env exposing (Env)
 import Html exposing (Html, a, div, h1, h2, nav, p, span, text)
 import Html.Attributes exposing (class, classList, id, title)
 import Html.Events exposing (onClick)
@@ -32,6 +31,7 @@ import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonShare.Api as ShareApi
 import UnisonShare.AppModal as AppModal
+import UnisonShare.Env as Env exposing (Env)
 import UnisonShare.Page.CatalogPage as CatalogPage
 import UnisonShare.Page.UserPage as UserPage
 import UnisonShare.PerspectiveLanding as PerspectiveLanding

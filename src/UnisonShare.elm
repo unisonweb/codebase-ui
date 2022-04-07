@@ -1,8 +1,8 @@
 module UnisonShare exposing (..)
 
 import Browser
-import Env exposing (Flags)
 import UnisonShare.App as App
+import UnisonShare.Env exposing (Flags)
 import UnisonShare.PreApp as PreApp
 
 

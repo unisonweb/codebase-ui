@@ -6,7 +6,6 @@ import Code.Definition.Reference exposing (Reference)
 import Code.FullyQualifiedName as FQN
 import Code.Perspective as Perspective
 import Code.Project as Project exposing (ProjectListing)
-import Env exposing (Env)
 import Html exposing (Html, div, h1, text)
 import Html.Attributes exposing (class)
 import Http
@@ -18,6 +17,7 @@ import UI.Card as Card
 import UI.Click as Click
 import UI.PageLayout as PageLayout exposing (PageLayout)
 import UnisonShare.Api as ShareApi
+import UnisonShare.Env exposing (Env)
 import UnisonShare.Route as Route
 import UnisonShare.User as User exposing (UserDetails, Username)
 

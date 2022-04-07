@@ -3,12 +3,12 @@ module UnisonLocal.PreApp exposing (..)
 import Browser
 import Browser.Navigation as Nav
 import Code.Perspective as Perspective exposing (Perspective, PerspectiveParams)
-import Env exposing (Flags)
 import Html
 import Http
 import Lib.HttpApi as HttpApi exposing (ApiBasePath(..), ApiRequest)
 import UnisonLocal.Api as LocalApi
 import UnisonLocal.App as App
+import UnisonLocal.Env as Env exposing (Flags)
 import UnisonLocal.Route as Route exposing (Route)
 import Url exposing (Url)
 

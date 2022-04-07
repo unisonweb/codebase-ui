@@ -1,7 +1,6 @@
 module UnisonShare.Page.CatalogPage exposing (..)
 
 import Code.Project as Project exposing (ProjectListing)
-import Env exposing (Env)
 import Html exposing (Html, div, h1, input, strong, table, tbody, td, text, tr)
 import Html.Attributes exposing (autofocus, class, classList, placeholder)
 import Html.Events exposing (onBlur, onFocus, onInput, onMouseDown)
@@ -24,6 +23,7 @@ import UI.PageLayout as PageLayout exposing (PageLayout)
 import UnisonShare.Api as ShareApi
 import UnisonShare.Catalog as Catalog exposing (Catalog)
 import UnisonShare.Catalog.CatalogMask exposing (CatalogMask)
+import UnisonShare.Env exposing (Env)
 import UnisonShare.Route as Route
 import UnisonShare.User as User exposing (Username)
 

@@ -1,8 +1,8 @@
 module UnisonLocal exposing (..)
 
 import Browser
-import Env exposing (Flags)
 import UnisonLocal.App as App
+import UnisonLocal.Env exposing (Flags)
 import UnisonLocal.PreApp as PreApp
 
 

@@ -12,7 +12,6 @@ import Code.Namespace as Namespace exposing (NamespaceDetails)
 import Code.Perspective as Perspective exposing (Perspective(..))
 import Code.Workspace as Workspace
 import Code.Workspace.WorkspaceItems as WorkspaceItems
-import Env exposing (Env)
 import Html exposing (Html, a, div, h1, h2, h3, nav, p, section, span, strong, text)
 import Html.Attributes exposing (class, classList, href, id, rel, target, title)
 import Html.Events exposing (onClick)
@@ -34,6 +33,7 @@ import UI.PageLayout as PageLayout
 import UI.Sidebar as Sidebar
 import UI.Tooltip as Tooltip
 import UnisonLocal.Api as LocalApi
+import UnisonLocal.Env as Env exposing (Env)
 import UnisonLocal.PerspectiveLanding as PerspectiveLanding
 import UnisonLocal.Route as Route exposing (Route)
 import Url exposing (Url)
