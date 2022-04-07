@@ -33,6 +33,7 @@
   scrollbar-width: auto;
   scrollbar-color: var(--color-main-subtle-fg) var(--color-main-bg);
 }
+
 .page-content::-webkit-scrollbar {
   width: 0.5rem;
   height: 0.5rem;
@@ -159,7 +160,7 @@
   height: 1.875rem;
 }
 
-#main-sidebar .sidebar-item > label {
+#main-sidebar .sidebar-item>label {
   color: var(--color-sidebar-fg);
   transition: all 0.2s;
   cursor: pointer;
@@ -233,11 +234,9 @@
   bottom: -2rem;
   height: 1.75rem;
   content: "";
-  background: linear-gradient(
-    var(--color-sidebar-bg),
-    var(--color-sidebar-bg),
-    var(--color-sidebar-bg-transparent)
-  );
+  background: linear-gradient(var(--color-sidebar-bg),
+      var(--color-sidebar-bg),
+      var(--color-sidebar-bg-transparent));
 }
 
 #main-sidebar .sidebar-header .hasvatar {
@@ -251,12 +250,10 @@
   bottom: 0;
   content: "";
   width: 1.5rem;
-  background: linear-gradient(
-    90deg,
-    var(--color-sidebar-bg),
-    var(--color-sidebar-bg),
-    var(--color-sidebar-bg-transparent)
-  );
+  background: linear-gradient(90deg,
+      var(--color-sidebar-bg),
+      var(--color-sidebar-bg),
+      var(--color-sidebar-bg-transparent));
 }
 
 #main-sidebar .sidebar-header .namespace {
@@ -370,6 +367,7 @@
 #main-sidebar .show-keyboard-shortcuts:hover {
   background: var(--color-sidebar-focus-bg);
 }
+
 #main-sidebar .show-keyboard-shortcuts:hover .key {
   color: var(--color-sidebar-keyboard-shortcut-hover-key-fg);
 }
@@ -399,8 +397,7 @@
   }
 
   .page.sidebar-toggled .collapse-sidebar-button {
-    animation: collapse-sidebar-button var(--transition-sidebar-collapse-time)
-      ease-in-out;
+    animation: collapse-sidebar-button var(--transition-sidebar-collapse-time) ease-in-out;
     transition: none;
     animation-fill-mode: forwards;
   }
@@ -433,9 +430,11 @@
     opacity: 0;
     transform: translateX(-17rem);
   }
+
   50% {
     opacity: 0.5;
   }
+
   100% {
     opacity: 1;
     transform: translateX(-3.15rem);
