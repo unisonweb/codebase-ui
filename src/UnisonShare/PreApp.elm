@@ -36,7 +36,7 @@ init flags url navKey =
         perspectiveParams =
             route
                 |> Route.perspectiveParams
-                |> Maybe.withDefault (Perspective.ByCodebase Perspective.Relative)
+                |> Maybe.withDefault (Perspective.ByRoot Perspective.Relative)
 
         preEnv =
             { flags = flags

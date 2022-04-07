@@ -7,7 +7,9 @@ module UnisonShare.Route exposing
     , navigate
     , navigateToCurrentPerspective
     , navigateToDefinition
-    , navigateToLatestCodebase
+    ,  navigateToLatestRoot
+       -- Codebase root: @deprecate
+
     , navigateToPerspective
     , navigateToProject
     , navigateToUser
@@ -25,7 +27,7 @@ import Code.Definition.Reference exposing (Reference(..))
 import Code.FullyQualifiedName as FQN
 import Code.Hash as Hash
 import Code.HashQualified exposing (HashQualified(..))
-import Code.Perspective as Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
+import Code.Perspective as Perspective exposing (PerspectiveParams(..), RootPerspectiveParam(..))
 import Code.Project as Project exposing (Project)
 import Code.UrlParsers as UP exposing (b, reference, s, slash)
 import List.Nonempty as NEL
@@ -237,7 +239,7 @@ toDefinition oldRoute ref =
         params =
             oldRoute
                 |> perspectiveParams
-                |> Maybe.withDefault (ByCodebase Relative)
+                |> Maybe.withDefault (ByRoot Relative)
     in
     Project params (ProjectDefinition ref)
 
@@ -262,10 +264,10 @@ toUrlString route =
         -- used to mark the end of a namespace FQN
         perspectiveParamsToPath pp includeNamespacesSuffix =
             case pp of
-                ByCodebase Relative ->
+                ByRoot Relative ->
                     [ "latest" ]
 
-                ByCodebase (Absolute hash) ->
+                ByRoot (Absolute hash) ->
                     [ Hash.toUrlString hash ]
 
                 ByNamespace Relative fqn ->
@@ -356,14 +358,14 @@ navigateToCurrentPerspective navKey oldRoute =
         params =
             oldRoute
                 |> perspectiveParams
-                |> Maybe.withDefault (ByCodebase Relative)
+                |> Maybe.withDefault (ByRoot Relative)
     in
     navigateToPerspective navKey params
 
 
-navigateToLatestCodebase : Nav.Key -> Cmd msg
-navigateToLatestCodebase navKey =
-    navigateToPerspective navKey (ByCodebase Relative)
+navigateToLatestRoot : Nav.Key -> Cmd msg
+navigateToLatestRoot navKey =
+    navigateToPerspective navKey (ByRoot Relative)
 
 
 navigateToDefinition : Nav.Key -> Route -> Reference -> Cmd msg

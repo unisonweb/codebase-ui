@@ -49,7 +49,7 @@ fetchUser : Env -> Username -> Cmd Msg
 fetchUser env username =
     let
         perspective =
-            Perspective.toCodebasePerspective env.perspective
+            Perspective.toRootPerspective env.perspective
 
         usernameFqn =
             username |> User.usernameToString |> FQN.fromString

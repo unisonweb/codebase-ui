@@ -109,8 +109,8 @@ viewEmptyState title description cta =
         ]
 
 
-viewEmptyStateCodebase : Html Msg
-viewEmptyStateCodebase =
+viewEmptyStateRoot : Html Msg
+viewEmptyStateRoot =
     viewEmptyState
         (span [ class "unison-share" ] [ text "Unison ", span [ class "context" ] [ text "Share" ] ])
         [ p [] [ text "Explore to discover and share Unison libraries, documentation, types, and terms." ] ]
@@ -138,8 +138,8 @@ viewEmptyStateNamespace fqn =
 view : Perspective -> Model -> Html Msg
 view perspective model =
     case perspective of
-        Perspective.Codebase _ ->
-            viewEmptyStateCodebase
+        Perspective.Root _ ->
+            viewEmptyStateRoot
 
         Perspective.Namespace { fqn, details } ->
             case details of

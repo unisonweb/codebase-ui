@@ -153,7 +153,7 @@ update config msg model =
                                 Perspective.Namespace { fqn } ->
                                     FQN.append fqn name
 
-                                Perspective.Codebase _ ->
+                                Perspective.Root _ ->
                                     name
                     in
                     ( model, Cmd.none, ChangePerspectiveToNamespace newPerspectiveFqn )

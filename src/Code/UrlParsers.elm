@@ -14,7 +14,7 @@ import Code.Definition.Reference exposing (Reference(..))
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash exposing (Hash)
 import Code.HashQualified exposing (HashQualified(..))
-import Code.Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
+import Code.Perspective exposing (PerspectiveParams(..), RootPerspectiveParam(..))
 import Parser exposing ((|.), (|=), Parser, backtrackable, keyword, succeed)
 
 
@@ -92,7 +92,7 @@ reference =
         ]
 
 
-codebaseRef : Parser CodebasePerspectiveParam
+codebaseRef : Parser RootPerspectiveParam
 codebaseRef =
     Parser.oneOf
         [ b (succeed Relative |. s "latest")
@@ -105,7 +105,7 @@ perspectiveParams =
     Parser.oneOf
         [ b (succeed ByNamespace |= codebaseRef |. slash |. s "namespaces" |. slash |= fqn |. fqnEnd)
         , b (succeed ByNamespace |= codebaseRef |. slash |. s "namespaces" |. slash |= fqn)
-        , b (succeed ByCodebase |= codebaseRef)
+        , b (succeed ByRoot |= codebaseRef)
         ]
 
 

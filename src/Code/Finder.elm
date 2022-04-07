@@ -355,7 +355,7 @@ performSearch { toApiEndpointUrl, perspective } options search query =
                 SearchOptions AllNamespaces ->
                     fetchMatches
                         toApiEndpointUrl
-                        (Perspective.toCodebasePerspective perspective)
+                        (Perspective.toRootPerspective perspective)
                         Nothing
                         query
 

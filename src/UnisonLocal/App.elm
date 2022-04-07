@@ -492,7 +492,7 @@ appHeader =
 viewSidebarHeader : Env -> Html Msg
 viewSidebarHeader env =
     case env.perspective of
-        Codebase _ ->
+        Root _ ->
             UI.nothing
 
         Namespace { fqn, details } ->

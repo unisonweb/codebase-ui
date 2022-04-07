@@ -540,7 +540,7 @@ appHeader menuToggle =
 viewSidebarHeader : Env -> Html Msg
 viewSidebarHeader env =
     case env.perspective of
-        Codebase _ ->
+        Root _ ->
             UI.nothing
 
         Namespace { fqn, details } ->
@@ -624,7 +624,7 @@ viewMainSidebar model =
             Perspective.toNamespacePerspective perspective >> ChangePerspective
 
         sidebarContent =
-            if Perspective.isCodebasePerspective perspective then
+            if Perspective.isRootPerspective perspective then
                 let
                     base =
                         FQN.fromString "unison.base"

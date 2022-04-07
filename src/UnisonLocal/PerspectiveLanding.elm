@@ -109,8 +109,8 @@ viewEmptyState title description cta =
         ]
 
 
-viewEmptyStateCodebase : Html Msg
-viewEmptyStateCodebase =
+viewEmptyStateRoot : Html Msg
+viewEmptyStateRoot =
     viewEmptyState
         (span [ class "unison-local" ] [ text "Your ", span [ class "context" ] [ text "Local" ], text " Unison Codebase" ])
         [ p [] [ text "Browse, search, read docs, open definitions, and explore your local codebase." ]
@@ -144,8 +144,8 @@ viewEmptyStateNamespace fqn =
 view : Perspective -> Model -> Html Msg
 view perspective model =
     case perspective of
-        Perspective.Codebase _ ->
-            viewEmptyStateCodebase
+        Perspective.Root _ ->
+            viewEmptyStateRoot
 
         Perspective.Namespace { fqn, details } ->
             case details of

@@ -27,7 +27,7 @@ namespace : Perspective -> FQN -> EndpointUrl
 namespace perspective fqn =
     let
         queryParams =
-            [ rootBranch (Perspective.codebaseHash perspective) ]
+            [ rootBranch (Perspective.rootHash perspective) ]
     in
     EndpointUrl [ "namespaces", FQN.toString fqn ] queryParams
 
@@ -61,7 +61,7 @@ codebaseApiEndpointToEndpointUrl cbEndpoint =
                 params =
                     case withinFqn of
                         Just fqn ->
-                            [ rootBranch (Perspective.codebaseHash perspective), relativeTo fqn ]
+                            [ rootBranch (Perspective.rootHash perspective), relativeTo fqn ]
 
                         Nothing ->
                             perspectiveToQueryParams perspective
@@ -108,11 +108,11 @@ codebaseApiEndpointToEndpointUrl cbEndpoint =
 perspectiveToQueryParams : Perspective -> List QueryParameter
 perspectiveToQueryParams perspective =
     case perspective of
-        Codebase h ->
+        Root h ->
             [ rootBranch h ]
 
         Namespace d ->
-            [ rootBranch d.codebaseHash, relativeTo d.fqn ]
+            [ rootBranch d.rootHash, relativeTo d.fqn ]
 
 
 rootBranch : Hash -> QueryParameter

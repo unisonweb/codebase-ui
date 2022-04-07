@@ -19,7 +19,7 @@ import Code.Definition.Reference exposing (Reference(..))
 import Code.FullyQualifiedName as FQN
 import Code.Hash as Hash
 import Code.HashQualified exposing (HashQualified(..))
-import Code.Perspective exposing (CodebasePerspectiveParam(..), PerspectiveParams(..))
+import Code.Perspective exposing (PerspectiveParams(..), RootPerspectiveParam(..))
 import Code.UrlParsers as UP exposing (b, reference, slash)
 import List.Nonempty as NEL
 import Parser exposing ((|.), (|=), Parser, end, oneOf, succeed)
@@ -138,7 +138,7 @@ fromUrl basePath url =
                 "/" ++ path
 
         parse url_ =
-            Result.withDefault (Perspective (ByCodebase Relative)) (Parser.run toRoute url_)
+            Result.withDefault (Perspective (ByRoot Relative)) (Parser.run toRoute url_)
     in
     url
         |> .path
@@ -190,10 +190,10 @@ toUrlString route =
         -- used to mark the end of a namespace FQN
         perspectiveParamsToPath pp includeNamespacesSuffix =
             case pp of
-                ByCodebase Relative ->
+                ByRoot Relative ->
                     [ "latest" ]
 
-                ByCodebase (Absolute hash) ->
+                ByRoot (Absolute hash) ->
                     [ Hash.toUrlString hash ]
 
                 ByNamespace Relative fqn ->
@@ -260,7 +260,7 @@ navigateToCurrentPerspective navKey oldRoute =
 
 navigateToLatestCodebase : Nav.Key -> Cmd msg
 navigateToLatestCodebase navKey =
-    navigateToPerspective navKey (ByCodebase Relative)
+    navigateToPerspective navKey (ByRoot Relative)
 
 
 navigateToDefinition : Nav.Key -> Route -> Reference -> Cmd msg

@@ -7,39 +7,56 @@ import Json.Decode as Decode exposing (field)
 import RemoteData exposing (RemoteData(..), WebData)
 
 
-type Perspective
-    = Codebase Hash
+
+{-
+   Perspective
+   ===========
+
+   A Perspective (and PerspectiveParams) is used to orient how Code is viewed
+   (in terms of page, url, and api requests) request. Have the user changed
+   perspective to view a sub namespace within a project? Perhaps they are
+   viewing the root of their codebase, etc. This information is tracked with a
+   `Perspective`.
+
+-}
+
+
+type
+    Perspective
+    -- The Root can refer to several things; the root of the codebase,
+    -- the root of a project, or a users codebase.
+    = Root Hash
     | Namespace
-        { codebaseHash : Hash
+        { rootHash : Hash
         , fqn : FQN
         , details : WebData NamespaceDetails
         }
 
 
-toCodebasePerspective : Perspective -> Perspective
-toCodebasePerspective perspective =
-    Codebase (codebaseHash perspective)
+toRootPerspective : Perspective -> Perspective
+toRootPerspective perspective =
+    Root (rootHash perspective)
 
 
 toNamespacePerspective : Perspective -> FQN -> Perspective
 toNamespacePerspective perspective fqn_ =
-    Namespace { codebaseHash = codebaseHash perspective, fqn = fqn_, details = NotAsked }
+    Namespace { rootHash = rootHash perspective, fqn = fqn_, details = NotAsked }
 
 
-codebaseHash : Perspective -> Hash
-codebaseHash perspective =
+rootHash : Perspective -> Hash
+rootHash perspective =
     case perspective of
-        Codebase hash_ ->
+        Root hash_ ->
             hash_
 
         Namespace d ->
-            d.codebaseHash
+            d.rootHash
 
 
 fqn : Perspective -> FQN
 fqn perspective =
     case perspective of
-        Codebase _ ->
+        Root _ ->
             FQN.fromString "."
 
         Namespace d ->
@@ -49,25 +66,25 @@ fqn perspective =
 equals : Perspective -> Perspective -> Bool
 equals a b =
     case ( a, b ) of
-        ( Codebase ah, Codebase bh ) ->
+        ( Root ah, Root bh ) ->
             Hash.equals ah bh
 
         ( Namespace ans, Namespace bns ) ->
-            Hash.equals ans.codebaseHash bns.codebaseHash && FQN.equals ans.fqn bns.fqn
+            Hash.equals ans.rootHash bns.rootHash && FQN.equals ans.fqn bns.fqn
 
         _ ->
             False
 
 
-{-| Even when we have a Codebase hash, we always constructor Relative params.
+{-| Even when we have a Root hash, we always constructor Relative params.
 Absolute is currently not supported (until Unison Share includes historic
-codebase), though the model allows it.
+root), though the model allows it.
 -}
 toParams : Perspective -> PerspectiveParams
 toParams perspective =
     case perspective of
-        Codebase _ ->
-            ByCodebase Relative
+        Root _ ->
+            ByRoot Relative
 
         Namespace d ->
             ByNamespace Relative d.fqn
@@ -76,54 +93,54 @@ toParams perspective =
 fromParams : PerspectiveParams -> Maybe Perspective
 fromParams params =
     case params of
-        ByCodebase Relative ->
+        ByRoot Relative ->
             Nothing
 
         ByNamespace Relative _ ->
             Nothing
 
-        ByCodebase (Absolute h) ->
-            Just (Codebase h)
+        ByRoot (Absolute h) ->
+            Just (Root h)
 
         ByNamespace (Absolute h) fqn_ ->
-            Just (Namespace { codebaseHash = h, fqn = fqn_, details = NotAsked })
+            Just (Namespace { rootHash = h, fqn = fqn_, details = NotAsked })
 
 
 {-| Similar to `fromParams`, but requires a previous `Perspective` (with a
-codebase hash) to migrate from
+root hash) to migrate from
 -}
 nextFromParams : Perspective -> PerspectiveParams -> Perspective
 nextFromParams perspective params =
     let
-        codebaseHash_ =
-            codebaseHash perspective
+        rootHash_ =
+            rootHash perspective
     in
     case ( params, perspective ) of
         ( ByNamespace Relative fqn_, Namespace d ) ->
-            if Hash.equals codebaseHash_ d.codebaseHash && FQN.equals fqn_ d.fqn then
+            if Hash.equals rootHash_ d.rootHash && FQN.equals fqn_ d.fqn then
                 Namespace d
 
             else
-                Namespace { codebaseHash = codebaseHash_, fqn = fqn_, details = NotAsked }
+                Namespace { rootHash = rootHash_, fqn = fqn_, details = NotAsked }
 
         ( ByNamespace (Absolute h) fqn_, Namespace d ) ->
-            if Hash.equals h d.codebaseHash && FQN.equals fqn_ d.fqn then
+            if Hash.equals h d.rootHash && FQN.equals fqn_ d.fqn then
                 Namespace d
 
             else
-                Namespace { codebaseHash = h, fqn = fqn_, details = NotAsked }
+                Namespace { rootHash = h, fqn = fqn_, details = NotAsked }
 
         ( ByNamespace Relative fqn_, _ ) ->
-            Namespace { codebaseHash = codebaseHash_, fqn = fqn_, details = NotAsked }
+            Namespace { rootHash = rootHash_, fqn = fqn_, details = NotAsked }
 
         ( ByNamespace (Absolute h) fqn_, _ ) ->
-            Namespace { codebaseHash = h, fqn = fqn_, details = NotAsked }
+            Namespace { rootHash = h, fqn = fqn_, details = NotAsked }
 
-        ( ByCodebase Relative, _ ) ->
-            Codebase codebaseHash_
+        ( ByRoot Relative, _ ) ->
+            Root rootHash_
 
-        ( ByCodebase (Absolute h), _ ) ->
-            Codebase h
+        ( ByRoot (Absolute h), _ ) ->
+            Root h
 
 
 needsFetching : Perspective -> Bool
@@ -136,10 +153,10 @@ needsFetching perspective =
             False
 
 
-isCodebasePerspective : Perspective -> Bool
-isCodebasePerspective perspective =
+isRootPerspective : Perspective -> Bool
+isRootPerspective perspective =
     case perspective of
-        Codebase _ ->
+        Root _ ->
             True
 
         Namespace _ ->
@@ -149,7 +166,7 @@ isCodebasePerspective perspective =
 isNamespacePerspective : Perspective -> Bool
 isNamespacePerspective perspective =
     case perspective of
-        Codebase _ ->
+        Root _ ->
             False
 
         Namespace _ ->
@@ -163,13 +180,13 @@ isNamespacePerspective perspective =
 decode : PerspectiveParams -> Decode.Decoder Perspective
 decode perspectiveParams =
     let
-        make codebaseHash_ =
+        make rootHash_ =
             case perspectiveParams of
-                ByCodebase _ ->
-                    Codebase codebaseHash_
+                ByRoot _ ->
+                    Root rootHash_
 
                 ByNamespace _ fqn_ ->
-                    Namespace { codebaseHash = codebaseHash_, fqn = fqn_, details = NotAsked }
+                    Namespace { rootHash = rootHash_, fqn = fqn_, details = NotAsked }
     in
     Decode.map make (field "namespaceListingHash" Hash.decode)
 
@@ -177,14 +194,14 @@ decode perspectiveParams =
 
 -- PerspectiveParams ----------------------------------------------------------
 -- These are how a perspective is represented in the url, supporting relative
--- URLs; "latest" vs the absolute URL with a codebase hash.
+-- URLs; "latest" vs the absolute URL with a root hash.
 
 
-type CodebasePerspectiveParam
+type RootPerspectiveParam
     = Relative
     | Absolute Hash
 
 
 type PerspectiveParams
-    = ByCodebase CodebasePerspectiveParam
-    | ByNamespace CodebasePerspectiveParam FQN
+    = ByRoot RootPerspectiveParam
+    | ByNamespace RootPerspectiveParam FQN
