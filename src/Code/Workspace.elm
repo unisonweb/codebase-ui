@@ -15,10 +15,8 @@ import Code.CodebaseApi as CodebaseApi
 import Code.Config exposing (Config)
 import Code.Definition.Doc as Doc
 import Code.Definition.Reference as Reference exposing (Reference)
-import Code.EntityId as EntityId
 import Code.FullyQualifiedName exposing (FQN)
 import Code.Hash as Hash
-import Code.HashQualified as HQ
 import Code.Workspace.WorkspaceItem as WorkspaceItem exposing (Item, WorkspaceItem)
 import Code.Workspace.WorkspaceItems as WorkspaceItems exposing (WorkspaceItems)
 import Html exposing (Html, article, div, section)
@@ -436,21 +434,10 @@ handleKeyboardShortcut os ({ workspaceItems } as model) shortcut =
 fetchDefinition : Config -> Reference -> ApiRequest Item Msg
 fetchDefinition config ref =
     let
-        definitionId =
-            case Reference.hashQualified ref of
-                HQ.NameOnly fqn ->
-                    EntityId.NameId fqn
-
-                HQ.HashOnly h ->
-                    EntityId.HashId h
-
-                HQ.HashQualified _ h ->
-                    EntityId.HashId h
-
         endpoint =
             CodebaseApi.Definition
                 { perspective = config.perspective
-                , definitionId = definitionId
+                , ref = ref
                 }
     in
     endpoint

@@ -11,10 +11,10 @@ import Code.CodebaseTree.NamespaceListing as NamespaceListing
 import Code.Config exposing (Config)
 import Code.Definition.Category as Category
 import Code.Definition.Reference exposing (Reference(..))
-import Code.EntityId as EntityId
 import Code.FullyQualifiedName as FQN exposing (FQN, unqualifiedName)
 import Code.FullyQualifiedNameSet as FQNSet exposing (FQNSet)
 import Code.HashQualified exposing (HashQualified(..))
+import Code.Namespace.NamespaceRef as NamespaceRef
 import Code.Perspective as Perspective
 import Html exposing (Html, a, div, label, span, text)
 import Html.Attributes exposing (class, title)
@@ -178,7 +178,7 @@ fetchSubNamespaceListing config fqn =
 
 fetchNamespaceListing : Config -> Maybe FQN -> (Result Http.Error NamespaceListing -> msg) -> ApiRequest NamespaceListing msg
 fetchNamespaceListing config fqn toMsg =
-    CodebaseApi.Browse { perspective = config.perspective, namespaceId = Maybe.map EntityId.NameId fqn }
+    CodebaseApi.Browse { perspective = config.perspective, ref = Maybe.map NamespaceRef.NameRef fqn }
         |> config.toApiEndpointUrl
         |> HttpApi.toRequest (NamespaceListing.decode fqn) toMsg
 

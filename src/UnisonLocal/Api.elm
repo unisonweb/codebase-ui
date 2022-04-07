@@ -5,9 +5,10 @@ module UnisonLocal.Api exposing
     )
 
 import Code.CodebaseApi as CodebaseApi
-import Code.EntityId as EntityId
+import Code.Definition.Reference as Reference
 import Code.FullyQualifiedName as FQN exposing (FQN)
 import Code.Hash as Hash exposing (Hash)
+import Code.Namespace.NamespaceRef as NamespaceRef
 import Code.Perspective as Perspective exposing (Perspective(..))
 import Code.Syntax as Syntax
 import Lib.HttpApi exposing (EndpointUrl(..))
@@ -56,14 +57,14 @@ codebaseApiEndpointToEndpointUrl cbEndpoint =
                     ++ params
                 )
 
-        CodebaseApi.Browse { perspective, namespaceId } ->
+        CodebaseApi.Browse { perspective, ref } ->
             let
                 namespace_ =
-                    namespaceId |> Maybe.map EntityId.toString |> Maybe.withDefault "."
+                    ref |> Maybe.map NamespaceRef.toString |> Maybe.withDefault "."
             in
             EndpointUrl [ "list" ] (string "namespace" namespace_ :: perspectiveToQueryParams perspective)
 
-        CodebaseApi.Definition { perspective, definitionId } ->
+        CodebaseApi.Definition { perspective, ref } ->
             let
                 re =
                     Maybe.withDefault Regex.never (Regex.fromString "#[d|a|](\\d+)$")
@@ -71,7 +72,7 @@ codebaseApiEndpointToEndpointUrl cbEndpoint =
                 stripConstructorPositionFromHash =
                     Regex.replace re (always "")
             in
-            [ EntityId.toString definitionId ]
+            [ Reference.toApiUrlString ref ]
                 |> List.map stripConstructorPositionFromHash
                 |> List.map (string "names")
                 |> (\names -> EndpointUrl [ "getDefinition" ] (names ++ perspectiveToQueryParams perspective))

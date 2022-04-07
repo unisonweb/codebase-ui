@@ -124,6 +124,25 @@ toString ref =
             "data_constructor__" ++ HQ.toString hq
 
 
+{-| toApiUrlString is lossy in that the kind of definition is lost in the
+serialization
+-}
+toApiUrlString : Reference -> String
+toApiUrlString ref =
+    case ref of
+        TermReference hq ->
+            HQ.toString hq
+
+        TypeReference hq ->
+            HQ.toString hq
+
+        AbilityConstructorReference hq ->
+            HQ.toString hq
+
+        DataConstructorReference hq ->
+            HQ.toString hq
+
+
 toHumanString : Reference -> String
 toHumanString ref =
     case ref of
