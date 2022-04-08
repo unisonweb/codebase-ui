@@ -274,6 +274,7 @@
   --color-syntax-constructor: var(--color-blue-1);
   --color-syntax-constructor-namespace: var(--color-blue-2);
   --color-syntax-text: var(--color-green-1);
+  --color-syntax-link-hover-bg: var(--color-gray-lighten-50);
 
   --color-syntax-monochrome-subtle: var(--color-main-subtle-fg);
   --color-syntax-monochrome-base: var(--color-gray-base);

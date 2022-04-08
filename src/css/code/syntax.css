@@ -26,7 +26,7 @@ code a {
 }
 
 code a:hover {
-  background: var(--color-gray-lighten-50);
+  background: var(--color-syntax-link-hover-bg);
   text-decoration: none;
 }
 
