@@ -30,6 +30,5 @@
 @import "./ui/fonts.css";
 @import "./ui/base.css";
 @import "./ui/animations.css";
-@import "./ui/elements.css";
-@import "./ui/composites.css";
+@import "./ui/components.css";
 @import "./ui/page-layout.css";

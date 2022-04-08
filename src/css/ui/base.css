@@ -41,3 +41,18 @@ body {
   background: var(--color-main-bg);
   color: var(--color-main-fg);
 }
+
+input {
+  border: 0;
+  border-radius: 0;
+  font-family: var(--font-sans-serif);
+  caret-color: var(--color-main-focus-fg);
+}
+
+::placeholder {
+  color: var(--color-main-subtle-fg);
+}
+
+li::marker {
+  color: var(--color-main-subtle-fg-em);
+}

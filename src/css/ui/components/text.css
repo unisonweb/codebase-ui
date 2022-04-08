@@ -1,0 +1,35 @@
+a,
+a:visited {
+  text-decoration: none;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: var(--color-main-fg);
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+h1 {
+  font-size: var(--font-size-large);
+}
+
+h2 {
+  font-size: var(--font-size-base);
+}
+
+h3 {
+  font-size: var(--font-size-medium);
+}
+
+p {
+  margin-bottom: 1em;
+}
+
+.error-message {
+  color: var(--color-main-error-fg);
+}
+
+.subtle {
+  color: var(--color-main-subtle-fg);
+}

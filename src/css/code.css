@@ -2,4 +2,6 @@
 @import "./code/finder.css";
 @import "./code/workspace.css";
 @import "./code/definition-doc.css";
+@import "./code/fully-qualified-name.css";
 @import "./code/project-listing.css";
+@import "./code/hashvatar.css";

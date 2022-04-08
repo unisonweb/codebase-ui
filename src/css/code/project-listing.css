@@ -1,13 +1,18 @@
+
 .project-listing {
   display: flex;
   flex-direction: row;
   align-items: center;
-}
-
-.project-listing .hashvatar {
-  margin-right: 0.5rem;
+  height: 2rem;
+  padding: 0 0.25rem;
+  border-radius: var(--border-radius-base);
 }
 
 .project-listing:hover {
   text-decoration: none;
+  background: var(--color-main-hover-bg);
+}
+
+.project-listing .hashvatar {
+  margin-right: 0.5rem;
 }
