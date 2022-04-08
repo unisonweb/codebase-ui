@@ -24,10 +24,11 @@
   color: var(--color-main-alert);
 }
 
-@import "./themes/unison/light.css";
 @import "./ui.css";
+@import "./themes/unison-light.css";
 @import "./code.css";
 
+@import "./unison-share/banner.css";
 @import "./unison-share/help-modal.css";
 @import "./unison-share/publish-modal.css";
 @import "./unison-share/report-bug-modal.css";

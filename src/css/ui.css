@@ -27,6 +27,7 @@
   --font-size-small: 0.75rem;
 }
 
+@import "./ui/colors.css";
 @import "./ui/fonts.css";
 @import "./ui/base.css";
 @import "./ui/animations.css";
