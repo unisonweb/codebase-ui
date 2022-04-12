@@ -1,156 +1,40 @@
 :root {
   /* -- Default Theme -------------------------------------------------------*/
+
   --color-main-fg: var(--color-gray-darken-30);
-  --color-main-mg: var(--color-gray-base);
   --color-main-bg: var(--color-gray-lighten-100);
   --color-main-subtle-fg: var(--color-gray-lighten-30);
   --color-main-subtle-fg-em: var(--color-gray-lighten-20);
   --color-main-subtle-bg: var(--color-gray-lighten-60);
+  --color-main-subtle-border: var(--color-gray-lighten-45);
   --color-main-hover-bg: var(--color-gray-lighten-55);
   --color-main-border: var(--color-gray-lighten-40);
-  --color-main-subtle-border: var(--color-gray-lighten-50);
   --color-main-divider: var(--color-gray-lighten-55);
   --color-main-focus-fg: var(--color-blue-2);
   --color-main-focus-outline: var(--color-blue-2-25-pct);
+  --color-main-focus-border: var(--color-blue-1);
   --color-main-focus-bg: var(--color-blue-2);
-  --color-main-alert: var(--color-pink-1);
   --color-main-mark-fg: var(--color-blue-2);
   --color-main-mark-bg: var(--color-transparent);
-  --color-main-error-fg: var(--color-pink-1);
-  --color-main-error-subtle-fg: var(--color-pink-3);
+  --color-main-alert-fg: var(--color-pink-1);
+  --color-main-alert-subtle-fg: var(--color-pink-3);
 
-  --color-app-header-fg: var(--color-gray-lighten-100);
-  --color-app-header-bg: var(--color-gray-darken-10);
-  --color-app-header-subtle-fg: var(--color-gray-lighten-20);
-  --color-app-header-subtle-fg-em: var(--color-gray-lighten-50);
-  --color-app-header-context-unison-share-fg: var(--color-purple-4);
-  --color-app-header-context-unison-local-fg: var(--color-pink-3);
-  --color-app-header-border: transparent;
 
   --color-keyboard-shortcut-key-fg: var(--color-gray-base);
   --color-keyboard-shortcut-key-bg: var(--color-gray-lighten-50);
   --color-keyboard-shortcut-then: var(--color-gray-lighten-20);
   --color-keyboard-shortcut-separator: var(--color-gray-lighten-30);
 
-  --color-sidebar-fg: var(--color-gray-lighten-50);
-  --color-sidebar-fg-em: var(--color-gray-lighten-100);
-  --color-sidebar-bg: var(--color-gray-darken-20);
-  /* see color files for why this is needed */
-  --color-sidebar-bg-transparent: var(--color-gray-darken-20-transparent);
-  --color-sidebar-border: var(--color-gray-base);
-  --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
-  --color-sidebar-subtle-fg-em: var(--color-gray-lighten-30);
-  --color-sidebar-subtle-bg: var(--color-transparent);
-  --color-sidebar-focus-fg: var(--color-gray-lighten-60);
-  --color-sidebar-focus-bg: var(--color-gray-darken-10);
-  --color-sidebar-keyboard-shortcut-key-fg: var(--color-gray-lighten-30);
-  --color-sidebar-keyboard-shortcut-key-bg: var(--color-gray-base);
-  --color-sidebar-keyboard-shortcut-then: var(--color-gray-lighten-20);
-  --color-sidebar-keyboard-shortcut-separator: var(--color-gray-base);
-  --color-sidebar-keyboard-shortcut-hover-key-fg: var(--color-gray-lighten-50);
-  --color-sidebar-keyboard-shortcut-hover-key-bg: var(--color-gray-base);
-  --color-sidebar-keyboard-shortcut-hover-then: var(--color-gray-lighten-20);
-  --color-sidebar-keyboard-shortcut-hover-separator: var(--color-gray-base);
-  --color-sidebar-button-default-fg: var(--color-gray-lighten-30);
-  --color-sidebar-button-default-bg: var(--color-gray-base);
-  --color-sidebar-button-default-hover-fg: var(--color-gray-lighten-50);
-  --color-sidebar-button-default-hover-bg: var(--color-gray-base);
-  --color-sidebar-divider: var(--color-gray-darken-10);
-
-  --color-sidebar-tooltip-fg: var(--color-gray-lighten-60);
-  --color-sidebar-tooltip-bg: var(--color-gray-darken-30);
-  --color-sidebar-tooltip-border: var(--color-gray-darken-10);
-
-  --color-perspective-landing-fg: var(--color-main-fg);
-  --color-perspective-landing-bg: var(--color-main-bg);
-  --color-perspective-landing-bg-em: var(--color-gray-lighten-55);
-  --color-perspective-landing-subtle-fg: var(--color-gray-lighten-30);
-  --color-perspective-landing-subtle-fg-em: var(--color-gray-base);
-  --color-perspective-landing-subtle-bg: var(--color-gray-lighten-60);
-  --color-perspective-landing-subtle-border: var(--color-gray-lighten-45);
-
-  --color-workspace-fg: var(--color-main-fg);
-  --color-workspace-bg: var(--color-main-bg);
-  --color-workspace-subtle-bg: var(--color-gray-lighten-60);
-  --color-workspace-border: var(--color-gray-lighten-50);
-
-  --color-workspace-item-fg: var(--color-gray-darken-30);
-  --color-workspace-item-mg: var(--color-gray-lighten-60);
-  --color-workspace-item-bg: var(--color-gray-lighten-100);
-  --color-workspace-item-bg-faded: rgba(
-    255,
-    255,
-    255,
-    0.5
-  ); /* 50% gray-lighten-100 */
-  --color-workspace-item-source-bg: var(--color-transparent);
-  --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
-  --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
-  --color-workspace-item-bg-em: var(--color-gray-lighten-55);
-  --color-workspace-item-content-border: var(--color-gray-lighten-55);
-  --color-workspace-item-border: var(--color-transparent);
-  --color-workspace-item-info-item-fg: var(--color-gray-lighten-30);
-  --color-workspace-item-info-item-subtle-fg: var(--color-gray-lighten-30);
-  --color-workspace-item-info-item-hover-fg: var(--color-gray-darken-30);
-  --color-workspace-item-info-item-hover-subtle-fg: var(--color-gray-base);
-  --color-workspace-item-info-item-hover-bg: var(--color-gray-lighten-50);
-  --color-workspace-item-focus-fg: var(--color-gray-darken-30);
-  --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-30);
-  --color-workspace-item-focus-subtle-bg: var(--color-gray-lighten-50);
-  --color-workspace-item-focus-mg: var(--color-gray-lighten-55);
-  --color-workspace-item-focus-source-bg: var(--color-transparent);
-  --color-workspace-item-focus-bg: var(--color-gray-lighten-60);
-  --color-workspace-item-focus-bg-faded: rgba(
-    250,
-    250,
-    251,
-    0.5
-  ); /* 50% gray-lighten-60 */
-  --color-workspace-item-focus-bg-em: var(--color-gray-lighten-50);
-  --color-workspace-item-focus-content-border: var(--color-gray-lighten-50);
-  --color-workspace-item-focus-border: var(--color-gray-lighten-50);
-  --color-workspace-item-cropped-control-border: var(--color-gray-lighten-30);
-  --color-workspace-item-cropped-control-shadow: var(--color-gray-lighten-45);
-
-  --color-doc-fg: var(--color-gray-darken-30);
-  --color-doc-bg: var(--color-gray-lighten-100);
-  --color-doc-aside-bg: var(--color-gray-lighten-60);
-  --color-doc-aside-source-bg: var(--color-gray-lighten-55);
-  --color-doc-callout-bg: var(--color-blue-5);
-  --color-doc-callout-source-bg: var(--color-lighten-50);
-  --color-doc-subtle-fg: var(--color-gray-lighten-30);
-  --color-doc-source-bg: var(--color-gray-lighten-60);
-  --color-doc-source-mg: var(--color-gray-lighten-45);
-  --color-doc-fold-hover-fg: var(--color-gray-base);
-  --color-doc-fold-hover-bg: var(--color-gray-lighten-45);
-  --color-doc-link: var(--color-blue-1);
-  --color-doc-link-active: var(--color-pink-1);
-  --color-doc-link-hover: var(--color-pink-2);
-  --color-doc-content-border: var(--color-gray-lighten-50);
-
-  --color-doc-focus-fg: var(--color-gray-darken-30);
-  --color-doc-focus-bg: var(--color-gray-lighten-60);
-  --color-doc-focus-aside-bg: var(--color-gray-lighten-55);
-  --color-doc-focus-aside-source-bg: var(--color-gray-lighten-50);
-  --color-doc-focus-callout-bg: var(--color-blue-5);
-  --color-doc-focus-callout-source-bg: var(--color-gray-lighten-50);
-  --color-doc-focus-subtle-fg: var(--color-gray-lighten-30);
-  --color-doc-focus-source-bg: var(--color-gray-lighten-55);
-  --color-doc-focus-source-mg: var(--color-gray-lighten-45);
-  --color-doc-focus-fold-hover-fg: var(--color-gray-base);
-  --color-doc-focus-fold-hover-bg: var(--color-gray-lighten-45);
-  --color-doc-focus-link: var(--color-blue-1);
-  --color-doc-focus-link-active: var(--color-pink-1);
-  --color-doc-focus-link-hover: var(--color-pink-2);
-  --color-doc-focus-content-border: var(--color-gray-lighten-50);
 
   --color-modal-fg: var(--color-main-fg);
   --color-modal-mg: var(--color-gray-lighten-60);
   --color-modal-bg: var(--color-gray-lighten-100);
   --color-modal-inner-border: var(--color-gray-lighten-50);
   --color-modal-separator: var(--color-gray-lighten-55);
-  --color-modal-shadow: rgba(24, 24, 28, 0.2); /* 20% gray-darken-30 */
-  --color-modal-overlay: rgba(24, 24, 28, 0.5); /* 50% gray-darken-30 */
+  --color-modal-shadow: rgba(24, 24, 28, 0.2);
+  /* 20% gray-darken-30 */
+  --color-modal-overlay: rgba(24, 24, 28, 0.5);
+  /* 50% gray-darken-30 */
   --color-modal-border: var(--color-transparent);
   --color-modal-subtle-fg: var(--color-main-subtle-fg);
   --color-modal-subtle-fg-em: var(--color-gray-lighten-20);
@@ -166,15 +50,6 @@
   --color-modal-mark-bg: var(--color-transparent);
   --color-modal-error-fg: var(--color-pink-1);
 
-  /* Icons */
-  --color-icon-type: var(--color-orange-1);
-  --color-icon-data-constructor: var(--color-orange-1);
-  --color-icon-test: var(--color-green-1);
-  --color-icon-term: var(--color-purple-3);
-  --color-icon-ability: var(--color-pink-1);
-  --color-icon-ability-constructor: var(--color-pink-1);
-  --color-icon-doc: var(--color-orange-2);
-  --color-icon-patch: var(--color-blue-2);
 
   /* FoldToggle */
 
@@ -221,6 +96,167 @@
   --color-badge-bg: var(--color-gray-lighten-60);
   --color-badge-border: var(--color-gray-lighten-50);
 
+
+  /* CopyField */
+  --color-copy-field-fg: var(--color-gray-darken-25);
+  --color-copy-field-bg: var(--color-gray-lighten-60);
+  --color-copy-field-border: var(--color-gray-lighten-40);
+  --color-copy-field-focus-fg: var(--color-main-focus-fg);
+  --color-copy-field-focus-bg: var(--color-gray-lighten-60);
+  --color-copy-field-focus-border: var(--color-main-focus-border);
+  --color-copy-field-focus-outline: var(--color-main-focus-outline);
+  --color-copy-field-prefix: var(--color-main-subtle-em);
+  --color-copy-field-button-border: var(--color-gray-lighten-40);
+  --color-copy-field-button-hover-border: var(--color-gray-lighten-30);
+
+  --color-workspace-fg: var(--color-main-fg);
+  --color-workspace-bg: var(--color-main-bg);
+  --color-workspace-subtle-bg: var(--color-gray-lighten-60);
+  --color-workspace-border: var(--color-gray-lighten-50);
+
+  --color-workspace-item-fg: var(--color-gray-darken-30);
+  --color-workspace-item-mg: var(--color-gray-lighten-60);
+  --color-workspace-item-bg: var(--color-gray-lighten-100);
+  --color-workspace-item-bg-faded: rgba(255,
+      255,
+      255,
+      0.5);
+  /* 50% gray-lighten-100 */
+  --color-workspace-item-source-bg: var(--color-transparent);
+  --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
+  --color-workspace-item-bg-em: var(--color-gray-lighten-55);
+  --color-workspace-item-content-border: var(--color-gray-lighten-55);
+  --color-workspace-item-border: var(--color-transparent);
+  --color-workspace-item-info-item-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-info-item-subtle-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-info-item-hover-fg: var(--color-gray-darken-30);
+  --color-workspace-item-info-item-hover-subtle-fg: var(--color-gray-base);
+  --color-workspace-item-info-item-hover-bg: var(--color-gray-lighten-50);
+  --color-workspace-item-focus-fg: var(--color-gray-darken-30);
+  --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-focus-subtle-bg: var(--color-gray-lighten-50);
+  --color-workspace-item-focus-mg: var(--color-gray-lighten-55);
+  --color-workspace-item-focus-source-bg: var(--color-transparent);
+  --color-workspace-item-focus-bg: var(--color-gray-lighten-60);
+  --color-workspace-item-focus-bg-faded: rgba(250,
+      250,
+      251,
+      0.5);
+  /* 50% gray-lighten-60 */
+  --color-workspace-item-focus-bg-em: var(--color-gray-lighten-50);
+  --color-workspace-item-focus-content-border: var(--color-gray-lighten-50);
+  --color-workspace-item-focus-border: var(--color-gray-lighten-50);
+  --color-workspace-item-cropped-control-border: var(--color-gray-lighten-30);
+  --color-workspace-item-cropped-control-shadow: var(--color-gray-lighten-45);
+
+  --color-doc-fg: var(--color-gray-darken-30);
+  --color-doc-bg: var(--color-gray-lighten-100);
+  --color-doc-aside-bg: var(--color-gray-lighten-60);
+  --color-doc-aside-source-bg: var(--color-gray-lighten-55);
+  --color-doc-callout-bg: var(--color-blue-5);
+  --color-doc-callout-source-bg: var(--color-lighten-50);
+  --color-doc-subtle-fg: var(--color-gray-lighten-30);
+  --color-doc-source-bg: var(--color-gray-lighten-60);
+  --color-doc-source-mg: var(--color-gray-lighten-45);
+  --color-doc-fold-hover-fg: var(--color-gray-base);
+  --color-doc-fold-hover-bg: var(--color-gray-lighten-45);
+  --color-doc-link: var(--color-blue-1);
+  --color-doc-link-active: var(--color-pink-1);
+  --color-doc-link-hover: var(--color-pink-2);
+  --color-doc-content-border: var(--color-gray-lighten-50);
+
+  --color-doc-focus-fg: var(--color-gray-darken-30);
+  --color-doc-focus-bg: var(--color-gray-lighten-60);
+  --color-doc-focus-aside-bg: var(--color-gray-lighten-55);
+  --color-doc-focus-aside-source-bg: var(--color-gray-lighten-50);
+  --color-doc-focus-callout-bg: var(--color-blue-5);
+  --color-doc-focus-callout-source-bg: var(--color-gray-lighten-50);
+  --color-doc-focus-subtle-fg: var(--color-gray-lighten-30);
+  --color-doc-focus-source-bg: var(--color-gray-lighten-55);
+  --color-doc-focus-source-mg: var(--color-gray-lighten-45);
+  --color-doc-focus-fold-hover-fg: var(--color-gray-base);
+  --color-doc-focus-fold-hover-bg: var(--color-gray-lighten-45);
+  --color-doc-focus-link: var(--color-blue-1);
+  --color-doc-focus-link-active: var(--color-pink-1);
+  --color-doc-focus-link-hover: var(--color-pink-2);
+  --color-doc-focus-content-border: var(--color-gray-lighten-50);
+
+  /* Syntax */
+  /* Icons */
+  --color-icon-type: var(--color-orange-1);
+  --color-icon-data-constructor: var(--color-orange-1);
+  --color-icon-test: var(--color-green-1);
+  --color-icon-term: var(--color-purple-3);
+  --color-icon-ability: var(--color-pink-1);
+  --color-icon-ability-constructor: var(--color-pink-1);
+  --color-icon-doc: var(--color-orange-2);
+  --color-icon-patch: var(--color-blue-2);
+
+
+  --color-syntax-base: var(--color-gray-darken-30);
+  --color-syntax-subtle: var(--color-gray-lighten-20);
+  --color-syntax-subtle-em: var(--color-gray-base);
+  --color-syntax-keyword: var(--color-pink-2);
+  --color-syntax-operator: var(--color-gray-lighten-30);
+  --color-syntax-term: var(--color-purple-2);
+  --color-syntax-term-namespace: var(--color-purple-3);
+  --color-syntax-ability: var(--color-pink-1);
+  --color-syntax-type: var(--color-blue-1);
+  --color-syntax-type-namespace: var(--color-blue-2);
+  --color-syntax-constructor: var(--color-blue-1);
+  --color-syntax-constructor-namespace: var(--color-blue-2);
+  --color-syntax-text: var(--color-green-1);
+  --color-syntax-link-hover-bg: var(--color-gray-lighten-50);
+
+  --color-syntax-monochrome-subtle: var(--color-main-subtle-fg);
+  --color-syntax-monochrome-base: var(--color-gray-base);
+  --color-syntax-monochrome-em: var(--color-main-fg);
+
+  --color-syntax-plain: var(--color-main-fg);
+}
+
+/* inverse colors */
+:root {
+  --color-app-header-fg: var(--color-gray-lighten-100);
+  --color-app-header-bg: var(--color-gray-darken-10);
+  --color-app-header-subtle-fg: var(--color-gray-lighten-20);
+  --color-app-header-subtle-fg-em: var(--color-gray-lighten-50);
+  --color-app-header-context-unison-share-fg: var(--color-purple-4);
+  --color-app-header-context-unison-local-fg: var(--color-pink-3);
+  --color-app-header-border: transparent;
+
+
+  --color-sidebar-fg: var(--color-gray-lighten-50);
+  --color-sidebar-fg-em: var(--color-gray-lighten-100);
+  --color-sidebar-bg: var(--color-gray-darken-20);
+  /* see color files for why this is needed */
+  --color-sidebar-bg-transparent: var(--color-gray-darken-20-transparent);
+  --color-sidebar-border: var(--color-gray-base);
+  --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
+  --color-sidebar-subtle-fg-em: var(--color-gray-lighten-30);
+  --color-sidebar-subtle-bg: var(--color-transparent);
+  --color-sidebar-focus-fg: var(--color-gray-lighten-60);
+  --color-sidebar-focus-bg: var(--color-gray-darken-10);
+  --color-sidebar-keyboard-shortcut-key-fg: var(--color-gray-lighten-30);
+  --color-sidebar-keyboard-shortcut-key-bg: var(--color-gray-base);
+  --color-sidebar-keyboard-shortcut-then: var(--color-gray-lighten-20);
+  --color-sidebar-keyboard-shortcut-separator: var(--color-gray-base);
+  --color-sidebar-keyboard-shortcut-hover-key-fg: var(--color-gray-lighten-50);
+  --color-sidebar-keyboard-shortcut-hover-key-bg: var(--color-gray-base);
+  --color-sidebar-keyboard-shortcut-hover-then: var(--color-gray-lighten-20);
+  --color-sidebar-keyboard-shortcut-hover-separator: var(--color-gray-base);
+  --color-sidebar-button-default-fg: var(--color-gray-lighten-30);
+  --color-sidebar-button-default-bg: var(--color-gray-base);
+  --color-sidebar-button-default-hover-fg: var(--color-gray-lighten-50);
+  --color-sidebar-button-default-hover-bg: var(--color-gray-base);
+  --color-sidebar-divider: var(--color-gray-darken-10);
+
+  --color-sidebar-tooltip-fg: var(--color-gray-lighten-60);
+  --color-sidebar-tooltip-bg: var(--color-gray-darken-30);
+  --color-sidebar-tooltip-border: var(--color-gray-darken-10);
+
+
   --color-option-badge-fg: var(--color-gray-lighten-40);
   --color-option-badge-subtle-fg: var(--color-gray-lighten-20);
   --color-option-badge-icon: var(--color-gray-lighten-30);
@@ -260,41 +296,7 @@
   --color-tooltip-item-hover-subtle-fg: var(--color-gray-lighten-30);
   --color-tooltip-item-hover-bg: var(--color-gray-darken-10);
 
-  /* Syntax */
-  --color-syntax-base: var(--color-main-fg);
-  --color-syntax-subtle: var(--color-gray-lighten-20);
-  --color-syntax-subtle-em: var(--color-gray-base);
-  --color-syntax-keyword: var(--color-pink-2);
-  --color-syntax-operator: var(--color-gray-lighten-30);
-  --color-syntax-term: var(--color-purple-2);
-  --color-syntax-term-namespace: var(--color-purple-3);
-  --color-syntax-ability: var(--color-pink-1);
-  --color-syntax-type: var(--color-blue-1);
-  --color-syntax-type-namespace: var(--color-blue-2);
-  --color-syntax-constructor: var(--color-blue-1);
-  --color-syntax-constructor-namespace: var(--color-blue-2);
-  --color-syntax-text: var(--color-green-1);
-  --color-syntax-link-hover-bg: var(--color-gray-lighten-50);
-
-  --color-syntax-monochrome-subtle: var(--color-main-subtle-fg);
-  --color-syntax-monochrome-base: var(--color-gray-base);
-  --color-syntax-monochrome-em: var(--color-main-fg);
-
-  --color-syntax-plain: var(--color-main-fg);
-
   /* Page Hero Layout */
   --color-page-hero-fg: var(--color-gray-lighten-100);
   --color-page-hero-bg: var(--color-gray-darken-10);
-
-  /* CopyField */
-  --color-copy-field-fg: var(--color-gray-darken-25);
-  --color-copy-field-bg: var(--color-gray-lighten-60);
-  --color-copy-field-border: var(--color-gray-lighten-40);
-  --color-copy-field-focus-fg: var(--color-gray-darken-25);
-  --color-copy-field-focus-bg: var(--color-gray-lighten-60);
-  --color-copy-field-focus-border: var(--color-blue-1);
-  --color-copy-field-focus-glow: var(--color-blue-3);
-  --color-copy-field-prefix: var(--color-gray-lighten-20);
-  --color-copy-field-button-border: var(--color-gray-lighten-40);
-  --color-copy-field-button-hover-border: var(--color-gray-lighten-30);
 }
