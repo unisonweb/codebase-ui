@@ -21,13 +21,13 @@
   flex-direction: row;
   align-items: center;
   margin: 0.5rem 0;
-  color: var(--color-main-error-subtle-fg);
+  color: var(--color-main-alert-subtle-fg);
 }
 
 .codebase-tree .error .icon {
   font-size: 1rem;
   margin-right: 0.25rem;
-  color: var(--color-main-error-fg);
+  color: var(--color-main-alert-fg);
 }
 
 .codebase-tree .loading {
@@ -51,7 +51,7 @@
   text-decoration: none;
 }
 
-.codebase-tree .namespace-tree .node>.icon {
+.codebase-tree .namespace-tree .node > .icon {
   font-size: 0.875rem;
   text-align: center;
   margin-right: 0.5rem;
@@ -59,19 +59,19 @@
   flex-shrink: 0;
 }
 
-.codebase-tree .namespace-tree .node>.icon.expanded {
+.codebase-tree .namespace-tree .node > .icon.expanded {
   transform: rotate(90deg);
 }
 
-.codebase-tree .namespace-tree .node>.icon.caret-right {
+.codebase-tree .namespace-tree .node > .icon.caret-right {
   color: var(--color-sidebar-subtle-fg);
 }
 
-.codebase-tree .namespace-tree .node:hover>.icon.caret-right {
+.codebase-tree .namespace-tree .node:hover > .icon.caret-right {
   color: var(--color-sidebar-focus-fg);
 }
 
-.codebase-tree .namespace-tree .node>label {
+.codebase-tree .namespace-tree .node > label {
   color: var(--color-sidebar-fg);
   transition: all 0.2s;
   cursor: pointer;
@@ -80,12 +80,12 @@
   line-height: 1.875;
 }
 
-.codebase-tree .namespace-tree .node>.tooltip-trigger {
+.codebase-tree .namespace-tree .node > .tooltip-trigger {
   margin-left: auto;
   opacity: 0;
 }
 
-.codebase-tree .namespace-tree .node:hover>.tooltip-trigger {
+.codebase-tree .namespace-tree .node:hover > .tooltip-trigger {
   opacity: 1;
 }
 
@@ -113,3 +113,4 @@
 .codebase-tree .namespace-tree .namespace-content {
   margin-left: 1rem;
 }
+

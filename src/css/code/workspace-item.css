@@ -170,7 +170,7 @@
 
 .workspace-item header .error-header .icon.warn {
   font-size: 1rem;
-  color: var(--color-main-error-fg);
+  color: var(--color-main-alert-fg);
 }
 
 .workspace-item .content .gutter {

@@ -27,7 +27,7 @@ p {
 }
 
 .error-message {
-  color: var(--color-main-error-fg);
+  color: var(--color-main-alert-fg);
 }
 
 .subtle {
