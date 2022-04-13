@@ -19,22 +19,18 @@
   --color-main-alert-fg: var(--color-pink-1);
   --color-main-alert-subtle-fg: var(--color-pink-3);
 
-
   --color-keyboard-shortcut-key-fg: var(--color-gray-base);
   --color-keyboard-shortcut-key-bg: var(--color-gray-lighten-50);
   --color-keyboard-shortcut-then: var(--color-gray-lighten-20);
   --color-keyboard-shortcut-separator: var(--color-gray-lighten-30);
-
 
   --color-modal-fg: var(--color-main-fg);
   --color-modal-mg: var(--color-gray-lighten-60);
   --color-modal-bg: var(--color-gray-lighten-100);
   --color-modal-inner-border: var(--color-gray-lighten-50);
   --color-modal-separator: var(--color-gray-lighten-55);
-  --color-modal-shadow: rgba(24, 24, 28, 0.2);
-  /* 20% gray-darken-30 */
-  --color-modal-overlay: rgba(24, 24, 28, 0.5);
-  /* 50% gray-darken-30 */
+  --color-modal-shadow: var(--gray-darken-30-20%);
+  --color-modal-overlay: var(--gray-darken-30-50%);
   --color-modal-border: var(--color-transparent);
   --color-modal-subtle-fg: var(--color-main-subtle-fg);
   --color-modal-subtle-fg-em: var(--color-gray-lighten-20);
@@ -49,7 +45,6 @@
   --color-modal-mark-fg: var(--color-blue-2);
   --color-modal-mark-bg: var(--color-transparent);
   --color-modal-error-fg: var(--color-pink-1);
-
 
   /* FoldToggle */
 
@@ -96,7 +91,6 @@
   --color-badge-bg: var(--color-gray-lighten-60);
   --color-badge-border: var(--color-gray-lighten-50);
 
-
   /* CopyField */
   --color-copy-field-fg: var(--color-gray-darken-25);
   --color-copy-field-bg: var(--color-gray-lighten-60);
@@ -117,11 +111,7 @@
   --color-workspace-item-fg: var(--color-gray-darken-30);
   --color-workspace-item-mg: var(--color-gray-lighten-60);
   --color-workspace-item-bg: var(--color-gray-lighten-100);
-  --color-workspace-item-bg-faded: rgba(255,
-      255,
-      255,
-      0.5);
-  /* 50% gray-lighten-100 */
+  --color-workspace-item-bg-faded: var(--color-gray-lighten-100-50pct);
   --color-workspace-item-source-bg: var(--color-transparent);
   --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
   --color-workspace-item-subtle-bg: var(--color-gray-lighten-60);
@@ -139,11 +129,7 @@
   --color-workspace-item-focus-mg: var(--color-gray-lighten-55);
   --color-workspace-item-focus-source-bg: var(--color-transparent);
   --color-workspace-item-focus-bg: var(--color-gray-lighten-60);
-  --color-workspace-item-focus-bg-faded: rgba(250,
-      250,
-      251,
-      0.5);
-  /* 50% gray-lighten-60 */
+  --color-workspace-item-focus-bg-faded: var(--color-gray-lighten-60-50pct);
   --color-workspace-item-focus-bg-em: var(--color-gray-lighten-50);
   --color-workspace-item-focus-content-border: var(--color-gray-lighten-50);
   --color-workspace-item-focus-border: var(--color-gray-lighten-50);
@@ -193,7 +179,6 @@
   --color-icon-doc: var(--color-orange-2);
   --color-icon-patch: var(--color-blue-2);
 
-
   --color-syntax-base: var(--color-gray-darken-30);
   --color-syntax-subtle: var(--color-gray-lighten-20);
   --color-syntax-subtle-em: var(--color-gray-base);
@@ -226,7 +211,6 @@
   --color-app-header-context-unison-local-fg: var(--color-pink-3);
   --color-app-header-border: transparent;
 
-
   --color-sidebar-fg: var(--color-gray-lighten-50);
   --color-sidebar-fg-em: var(--color-gray-lighten-100);
   --color-sidebar-bg: var(--color-gray-darken-20);
@@ -255,7 +239,6 @@
   --color-sidebar-tooltip-fg: var(--color-gray-lighten-60);
   --color-sidebar-tooltip-bg: var(--color-gray-darken-30);
   --color-sidebar-tooltip-border: var(--color-gray-darken-10);
-
 
   --color-option-badge-fg: var(--color-gray-lighten-40);
   --color-option-badge-subtle-fg: var(--color-gray-lighten-20);
@@ -300,3 +283,4 @@
   --color-page-hero-fg: var(--color-gray-lighten-100);
   --color-page-hero-bg: var(--color-gray-darken-10);
 }
+
