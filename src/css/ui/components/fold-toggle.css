@@ -1,4 +1,9 @@
 .fold-toggle {
+  --color-fold-toggle-icon: var(--u-color_icon-on-action-subdued);
+  --color-fold-toggle-bg: var(--u-color_action_subdued);
+  --color-fold-toggle-hover-icon: var(--u-color_icon-on-action-subdued-hovered);
+  --color-fold-toggle-hover-bg: var(--u-color_action_subdued_hovered);
+
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -20,7 +25,7 @@
 
 /* ▶ */
 .fold-toggle .icon {
-  color: var(--color-fold-toggle-fg);
+  color: var(--color-fold-toggle-icon);
   transition: color 0.2s, transform 0.1s ease-out;
 }
 
@@ -34,5 +39,5 @@
 }
 
 .fold-toggle:not(.disabled):hover .icon {
-  color: var(--color-fold-toggle-hover-fg);
+  color: var(--color-fold-toggle-hover-icon);
 }

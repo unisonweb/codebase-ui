@@ -1,9 +1,14 @@
 .card {
+  --color-card-bg: var(--u-color_container);
+  --color-card-text: var(--u-color_text);
+  --color-card-title: var(--u-color_text_very-subdued);
+  --color-card-border: var(--u-color_border_subdued);
+
   padding: 1rem 1.5rem;
   display: flex;
   flex-direction: column;
   gap: 1rem;
-  color: var(--color-card-fg);
+  color: var(--color-card-text);
   border-radius: var(--border-radius-base);
   background: var(--color-card-bg);
 }

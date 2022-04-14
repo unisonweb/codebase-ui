@@ -29,7 +29,8 @@ html {
   font-family: var(--font-sans-serif);
   /* TODO: Make configurable by users */
   /* https://developer.mozilla.org/en-US/docs/Web/CSS/font-variant-ligatures */
-  font-variant-ligatures: none; /* normal */
+  font-variant-ligatures: none;
+  /* normal */
   -moz-text-size-adjust: none;
   -webkit-text-size-adjust: none;
   text-size-adjust: none;
@@ -38,21 +39,26 @@ html {
 body {
   font-size: 1rem;
   line-height: 1.4;
-  background: var(--color-main-bg);
-  color: var(--color-main-fg);
+  background: var(--u-color_background);
+  color: var(--u-color_text);
 }
 
 input {
   border: 0;
   border-radius: 0;
   font-family: var(--font-sans-serif);
-  caret-color: var(--color-main-focus-fg);
+  caret-color: var(--u-color_caret);
 }
 
 ::placeholder {
-  color: var(--color-main-subtle-fg);
+  color: var(--u-color_text_subdued);
 }
 
 li::marker {
-  color: var(--color-main-subtle-fg-em);
+  color: var(--u-color_icon);
+}
+
+mark {
+  color: var(--u-color_search-highlight_text);
+  background: var(--u-color_search-highlight_background);
 }

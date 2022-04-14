@@ -1,6 +1,14 @@
 /* -- App Header ---------------------------------------------------------- */
 
 #app-header {
+  /* @color-todo @inverse */
+  --color-app-header-fg: var(--color-gray-lighten-100);
+  --color-app-header-bg: var(--color-gray-darken-10);
+  --color-app-header-subtle-fg: var(--color-gray-lighten-20);
+  --color-app-header-subtle-fg-em: var(--color-gray-lighten-50);
+  --color-app-header-context-unison-share-fg: var(--color-purple-4);
+  --color-app-header-context-unison-local-fg: var(--color-pink-3);
+  --color-app-header-border: transparent;
   grid-area: app-header;
   padding: 0 1rem 0 1.5rem;
   background: var(--color-app-header-bg);

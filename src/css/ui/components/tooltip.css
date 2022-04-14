@@ -1,6 +1,38 @@
 /* -- Core ------------------------------------------------------------------*/
 
 .tooltip {
+  /* @color-todo @inverse */
+  --color-tooltip-text: var(--color-gray-lighten-60);
+  --color-tooltip-subtle-text: var(--color-gray-lighten-20);
+  --color-tooltip-bg: var(--color-gray-darken-30);
+  --color-tooltip-source-bg: var(--color-gray-darken-20);
+  --color-tooltip-source-mg: var(--color-gray-darken-10);
+  --color-tooltip-fold-hover-bg: var(--color-gray-darken-10);
+  --color-tooltip-link: var(--color-blue-3);
+  --color-tooltip-link-active: var(--color-pink-2);
+  --color-tooltip-link-hover: var(--color-pink-3);
+  --color-tooltip-syntax-base: var(--color-gray-lighten-60);
+  --color-tooltip-syntax-subtle: var(--color-gray-lighten-20);
+  --color-tooltip-syntax-subtle-em: var(--color-gray-lighten-30);
+  --color-tooltip-syntax-keyword: var(--color-pink-3);
+  --color-tooltip-syntax-operator: var(--color-gray-lighten-20);
+  --color-tooltip-syntax-term: var(--color-purple-3);
+  --color-tooltip-syntax-term-namespace: var(--color-purple-4);
+  --color-tooltip-syntax-ability: var(--color-pink-2);
+  --color-tooltip-syntax-type: var(--color-blue-2);
+  --color-tooltip-syntax-type-namespace: var(--color-blue-3);
+  --color-tooltip-syntax-constructor: var(--color-blue-2);
+  --color-tooltip-syntax-constructor-namespace: var(--color-blue-3);
+  --color-tooltip-syntax-text: var(--color-green-2);
+
+  /* ActionMenu (should probably be moved out of tooltip) */
+  --color-tooltip-item-text: var(--color-gray-lighten-60);
+  --color-tooltip-item-subtle-text: var(--color-gray-lighten-20);
+  --color-tooltip-item-bg: var(--color-transparent);
+  --color-tooltip-item-hover-text: var(--color-gray-lighten-60);
+  --color-tooltip-item-hover-subtle-text: var(--color-gray-lighten-30);
+  --color-tooltip-item-hover-bg: var(--color-gray-darken-10);
+
   position: absolute;
   opacity: 0;
   pointer-events: none;
@@ -24,8 +56,6 @@
   --color-doc-link-active: var(--color-tooltip-link-active);
   --color-doc-link-hover: var(--color-tooltip-link-hover);
   --color-doc-source-bg: var(--color-tooltip-source-bg);
-  --color-doc-source-mg: var(--color-tooltip-source-mg);
-  --color-doc-fold-hover-bg: var(--color-tooltip-fold-hover-bg);
 
   /* Syntax (via Docs) can be rendered inside tooltips */
   --color-syntax-base: var(--color-tooltip-syntax-base);
@@ -50,7 +80,7 @@
 .tooltip-bubble {
   position: relative;
   font-size: var(--font-size-medium);
-  color: var(--color-tooltip-fg);
+  color: var(--color-tooltip-text);
   background: var(--color-tooltip-bg);
   padding: 0.5rem 0.75rem;
   border-radius: var(--border-radius-base);
@@ -237,7 +267,7 @@
   align-items: center;
   flex: 1;
   height: 2rem;
-  color: var(--color-tooltip-item-fg);
+  color: var(--color-tooltip-item-text);
   background: var(--color-tooltip-item-bg);
   white-space: nowrap;
   padding: 0 0.5rem;
@@ -248,16 +278,17 @@
 .tooltip .tooltip-menu-items .tooltip-menu-item .icon {
   font-size: var(--font-size-base);
   margin-right: 0.5rem;
-  color: var(--color-tooltip-item-subtle-fg);
+  color: var(--color-tooltip-item-subtle-text);
   margin-top: -1px;
 }
 
 .tooltip .tooltip-menu-items .tooltip-menu-item:hover {
   text-decoration: none;
-  color: var(--color-tooltip-item-hover-fg);
+  color: var(--color-tooltip-item-hover-text);
   background: var(--color-tooltip-item-hover-bg);
 }
 
 .tooltip .tooltip-menu-items .tooltip-menu-item:hover .icon {
-  color: var(--color-tooltip-item-hover-subtle-fg);
+  color: var(--color-tooltip-item-hover-subtle-text);
 }
+

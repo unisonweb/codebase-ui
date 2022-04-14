@@ -3,11 +3,15 @@ a:visited {
   text-decoration: none;
   cursor: pointer;
   transition: all 0.2s;
-  color: var(--color-main-fg);
+  color: var(--u-color_interactive);
 }
 
 a:hover {
-  text-decoration: underline;
+  color: var(--u-color_interactive_hovered);
+}
+
+a:active {
+  color: var(--u-color_interactive_pressed);
 }
 
 h1 {
@@ -27,9 +31,9 @@ p {
 }
 
 .error-message {
-  color: var(--color-main-alert-fg);
+  color: var(--u-color_critical_text);
 }
 
 .subtle {
-  color: var(--color-main-subtle-fg);
+  color: var(--u-color_text_subdued);
 }

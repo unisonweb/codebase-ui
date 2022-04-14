@@ -1,6 +1,28 @@
 /* -- WorkspaceItem -------------------------------------------------------- */
 
 .workspace-item {
+  /* @color-todo */
+  --color-workspace-item-fg: var(--color-gray-darken-30);
+  --color-workspace-item-gutter: var(--color-gray-lighten-60);
+  --color-workspace-item-bg: var(--color-gray-lighten-100);
+  --color-workspace-item-bg-faded: var(--color-gray-lighten-100-50pct);
+  --color-workspace-item-info-item-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-info-item-icon-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-info-item-bg: var(--color-transparent);
+  --color-workspace-item-info-item-hover-fg: var(--color-gray-darken-30);
+  --color-workspace-item-info-item-hover-icon-fg: var(--color-gray-base);
+  --color-workspace-item-info-item-hover-bg: var(--color-gray-lighten-50);
+  --color-workspace-item-source-bg: var(--color-transparent);
+  --color-workspace-item-subtle-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-border: var(--color-transparent);
+  --color-workspace-item-focus-fg: var(--color-gray-darken-30);
+  --color-workspace-item-focus-subtle-fg: var(--color-gray-lighten-30);
+  --color-workspace-item-focus-source-bg: var(--color-transparent);
+  --color-workspace-item-focus-gutter: var(--color-gray-lighten-55);
+  --color-workspace-item-focus-bg: var(--color-gray-lighten-60);
+  --color-workspace-item-focus-bg-faded: var(--color-gray-lighten-60-50pct);
+  --color-workspace-item-focus-border: var(--color-gray-lighten-50);
+
   position: relative;
   color: var(--color-workspace-item-fg);
   background: var(--color-workspace-item-bg);
@@ -10,7 +32,7 @@
   margin-bottom: 1.5rem;
   font-size: var(--font-size-medium);
   /* gutter */
-  box-shadow: inset 2rem 0 0 var(--color-workspace-item-mg);
+  box-shadow: inset 2rem 0 0 var(--color-workspace-item-gutter);
 }
 
 .workspace-item .inner-row {
@@ -49,7 +71,7 @@
   top: 0.75rem;
   right: 1rem;
   height: 1.25rem;
-  background: var(--color-workspace-item-bg-em);
+  background: var(--u-color_action_subdued);
   border-radius: var(--border-radius-base);
   display: flex;
   flex-direction: row;
@@ -71,13 +93,17 @@
   cursor: pointer;
 }
 
+.workspace-item .actions:hover {
+  background: var(--u-color_action_subdued_hovered);
+}
+
 .workspace-item .actions .close .icon {
-  color: var(--color-workspace-item-subtle-fg);
+  color: var(--u-color_icon-on-action-subdued);
   font-size: 0.75rem;
 }
 
 .workspace-item .actions .close:hover .icon {
-  color: var(--color-workspace-item-fg);
+  color: var(--u-color_icon-on-action-subdued-hovered);
 }
 
 .workspace-item header .info {
@@ -119,7 +145,7 @@
 }
 
 .workspace-item header .info .info-items .info-item > .icon {
-  color: var(--color-workspace-item-info-item-subtle-fg);
+  color: var(--color-workspace-item-info-item-icon-fg);
   font-size: var(--font-size-base);
   margin-right: 0.25rem;
 }
@@ -134,7 +160,9 @@
   line-height: 0.875rem;
   transition: 0.2s background;
   border-radius: var(--border-radius-base);
+  background: var(--color-workspace-item-info-item-bg);
 }
+
 .workspace-item header .info .info-items .info-item > label {
   transition: 0.2s all;
 }
@@ -147,7 +175,7 @@
 
 .workspace-item header .info .info-items .info-item:hover > .icon,
 .workspace-item header .info .info-items .tooltip:hover + .info-item > .icon {
-  color: var(--color-workspace-item-info-item-hover-sublte-fg);
+  color: var(--color-workspace-item-info-item-hover-icon-fg);
 }
 
 .workspace-item header .info .info-items .tooltip {
@@ -157,6 +185,7 @@
 .workspace-item header .error-header {
   flex-direction: row;
   align-items: center;
+  color: var(--u-color_text);
 }
 
 .workspace-item header .error-header .icon {
@@ -170,7 +199,7 @@
 
 .workspace-item header .error-header .icon.warn {
   font-size: 1rem;
-  color: var(--color-main-alert-fg);
+  color: var(--u-color_critical_icon);
 }
 
 .workspace-item .content .gutter {
@@ -255,10 +284,6 @@
   margin-left: 1.25rem;
 }
 
-.workspace-item .content .badge {
-  background: var(--color-workspace-item-mg);
-}
-
 .workspace-item .content .definition-source {
   position: relative;
   padding-left: 1.5rem;
@@ -331,15 +356,14 @@
   --color-workspace-item-bg: var(--color-workspace-item-focus-bg);
   --color-workspace-item-bg-faded: var(--color-workspace-item-focus-bg-faded);
   --color-workspace-item-subtle-fg: var(--color-workspace-item-focus-subtle-fg);
-  --color-workspace-item-subtle-bg: var(--color-workspace-item-focus-subtle-bg);
-  --color-workspace-item-content-border: var(
-    --color-workspace-item-focus-content-border
-  );
   --color-workspace-item-border: var(--color-workspace-item-focus-border);
-  --color-workspace-item-mg: var(--color-workspace-item-focus-mg);
+  --color-workspace-item-gutter: var(--color-workspace-item-gutter);
   --color-workspace-item-bg: var(--color-workspace-item-focus-bg);
-  --color-workspace-item-bg-em: var(--color-workspace-item-focus-bg-em);
   --color-workspace-item-source-bg: var(--color-workspace-item-focus-source-bg);
+}
+
+.workspace-item.focused .badge {
+  background: var(--color-workspace-item-focus-gutter);
 }
 
 .workspace-item.focused .actions {
