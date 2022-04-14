@@ -1,12 +1,9 @@
-/* -- Workspace ------------------------------------------------------------ */
-
 #workspace {
+  --color-workspace-gutter: var(--u-color_container_subdued);
+  --workspace-content-width: var(--main-content-width);
+
   display: flex;
   flex-direction: column;
-  background: var(--color-workspace-bg);
-  color: var(--color-workspace-fg);
-
-  --workspace-content-width: var(--main-content-width);
 }
 
 #workspace-content {
@@ -15,10 +12,9 @@
   padding-top: 2rem;
   scroll-behavior: smooth;
   scrollbar-width: auto;
-  scrollbar-color: var(--color-workspace-item-subtle-fg)
-    var(--color-workspace-item-bg);
+  scrollbar-color: var(--u-color_scrollbar) var(--u-color_scrollbar-track);
   /* gutter */
-  box-shadow: inset 2rem 0 0 var(--color-workspace-subtle-bg);
+  box-shadow: inset 2rem 0 0 var(--color-workspace-gutter);
 }
 
 #workspace-content::-webkit-scrollbar {
@@ -27,11 +23,11 @@
 }
 
 #workspace-content::-webkit-scrollbar-track {
-  background: var(--color-workspace-item-bg);
+  background: var(--u-color_scrollbar-track);
 }
 
 #workspace-content::-webkit-scrollbar-thumb {
-  background-color: var(--color-workspace-item-subtle-fg);
+  background-color: var(--u-color_scrollbar);
   border-radius: var(--border-radius-base);
 }
 

@@ -1,12 +1,17 @@
 #perspective-landing {
+  --color-perspective-landing-text: var(--u-color_text_subdued);
+  --color-perspective-landing-bg: var(--u-color_background);
+  --color-perspective-landing-placeholder-text: var(--u-color_border_subdued);
+  --color-perspective-landing-subtle-text: var(--u-color_text_very-subdued);
+  --color-perspective-landing-subtle-border: var(--u-color_border_subdued);
+
   display: flex;
   flex-direction: column;
   background: var(--color-perspective-landing-bg);
-  color: var(--color-perspective-landing-fg);
+  color: var(--color-perspective-landing-text);
   overflow: auto;
   scrollbar-width: auto;
-  scrollbar-color: var(--color-perspective-landing-subtle-fg)
-    var(--color-perspective-landing-bg);
+  scrollbar-color: var(--u-color_scrollbar) var(--u-color_scrollbar-track);
 }
 
 #perspective-landing-content {
@@ -15,8 +20,7 @@
   height: calc(100vh - var(--main-header-height));
   width: var(--main-content-width);
   scrollbar-width: auto;
-  scrollbar-color: var(--color-perspective-landing-subtle-fg)
-    var(--color-perspective-landing-bg);
+  scrollbar-color: var(--u-color_scrollbar) var(--u-color_scrollbar-track);
 }
 
 #perspective-landing::-webkit-scrollbar,
@@ -27,18 +31,18 @@
 
 #perspective-landing::-webkit-scrollbar-track,
 #perspective-landing-content::-webkit-scrollbar-track {
-  background: var(--color-perspective-landing-bg);
+  background: var(--u-color_scrollbar-track);
 }
 
 #perspective-landing::-webkit-scrollbar-thumb,
 #perspective-landing-content::-webkit-scrollbar-thumb {
-  background-color: var(--color-perspective-landing-subtle-fg);
+  background-color: var(--u-color_scrollbar);
   border-radius: var(--border-radius-base);
 }
 
 #perspective-landing .loading .loading-placeholder {
   width: 50%;
-  background: var(--color-perspective-landing-subtle-fg);
+  background: var(--color-perspective-landing-subtle-text);
 }
 
 #perspective-landing .loading .loading-placeholder-row {
@@ -50,7 +54,7 @@
   .loading-placeholder-row:last-child
   .loading-placeholder {
   width: 80%;
-  background: var(--color-perspective-landing-subtle-fg);
+  background: var(--color-perspective-landing-subtle-text);
 }
 
 #perspective-landing .perspective-landing-error header {
@@ -86,13 +90,13 @@
   padding-bottom: 4rem;
   display: flex;
   justify-content: center;
-  color: var(--color-perspective-landing-subtle-fg-em);
+  color: var(--color-perspective-landing-text);
 }
 
 .perspective-landing-empty-state h2 {
   font-size: 1.5rem;
   margin-bottom: 1.5rem;
-  color: var(--color-perspective-landing-fg);
+  color: var(--color-perspective-landing-text);
 }
 
 .perspective-landing-empty-state .content {
@@ -120,7 +124,7 @@
 }
 
 .perspective-landing-empty-state .faux-empty-state-item .loading-placeholder {
-  background: var(--color-perspective-landing-subtle-fg);
+  background: var(--color-perspective-landing-placeholder-text);
   height: 1rem;
   width: 5rem;
 }
@@ -134,7 +138,6 @@
   .faux-empty-state-item
   .loading-placeholder-row:last-child
   .loading-placeholder {
-  background: var(--color-perspective-landing-bg-em);
   width: 12rem;
 }
 

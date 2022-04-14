@@ -21,13 +21,13 @@
   flex-direction: row;
   align-items: center;
   margin: 0.5rem 0;
-  color: var(--color-main-alert-subtle-fg);
+  color: var(--u-color_critical_text);
 }
 
 .codebase-tree .error .icon {
   font-size: 1rem;
   margin-right: 0.25rem;
-  color: var(--color-main-alert-fg);
+  color: var(--u-color_critical_icon);
 }
 
 .codebase-tree .loading {
@@ -113,4 +113,3 @@
 .codebase-tree .namespace-tree .namespace-content {
   margin-left: 1rem;
 }
-

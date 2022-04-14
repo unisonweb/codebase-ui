@@ -1,4 +1,5 @@
 #finder {
+  --color-search-field: var(--u-color_element_subdued);
   position: relative;
   width: 50rem;
   margin-top: 7rem;
@@ -17,7 +18,7 @@
 
 #finder header {
   border-radius: var(--border-radius-base);
-  background: var(--color-modal-mg);
+  background: var(--color-search-field);
   display: flex;
   align-items: center;
   position: relative;
@@ -121,6 +122,7 @@
   padding: 0.75rem;
   border-top: 1px solid var(--color-modal-inner-border);
 }
+
 #finder .results + header {
   border-radius: 0;
   border-top-left-radius: var(--border-radius-base);
@@ -173,11 +175,6 @@
 
 #finder .definition-match td:last-child {
   border-radius: 0 var(--border-radius-base) var(--border-radius-base) 0;
-}
-
-#finder .definition-match mark {
-  color: var(--color-modal-mark-fg);
-  background: var(--color-modal-mark-bg);
 }
 
 #finder .definition-match .category {

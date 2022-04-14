@@ -18,6 +18,10 @@
 }
 
 .page.hero-layout {
+  /* @color-todo @inverse */
+  --color-page-hero-fg: var(--color-gray-lighten-100);
+  --color-page-hero-bg: var(--color-gray-darken-10);
+
   grid-template-rows: var(--page-hero-height) auto;
   grid-template-columns: auto;
   grid-template-areas:
@@ -31,7 +35,7 @@
   grid-area: page-content;
   scroll-behavior: smooth;
   scrollbar-width: auto;
-  scrollbar-color: var(--color-main-subtle-fg) var(--color-main-bg);
+  scrollbar-color: var(--u-color_scrollbar) var(--u-color_scrollbar-track);
 }
 
 .page-content::-webkit-scrollbar {
@@ -40,11 +44,11 @@
 }
 
 .page-content::-webkit-scrollbar-track {
-  background: var(--color-main-bg);
+  background: var(--u-color_scrollbar-track);
 }
 
 .page-content::-webkit-scrollbar-thumb {
-  background-color: var(--color-main-subtle-fg);
+  background-color: var(--u-color_scrollbar);
   border-radius: var(--border-radius-base);
 }
 
@@ -56,6 +60,36 @@
 }
 
 #main-sidebar {
+  /* @color-todo @inverse */
+  --color-sidebar-fg: var(--color-gray-lighten-50);
+  --color-sidebar-fg-em: var(--color-gray-lighten-100);
+  --color-sidebar-bg: var(--color-gray-darken-20);
+  /* see color files for why this is needed */
+  --color-sidebar-bg-transparent: var(--color-gray-darken-20-transparent);
+  --color-sidebar-border: var(--color-gray-base);
+  --color-sidebar-subtle-fg: var(--color-gray-lighten-20);
+  --color-sidebar-subtle-fg-em: var(--color-gray-lighten-30);
+  --color-sidebar-subtle-bg: var(--color-transparent);
+  --color-sidebar-focus-fg: var(--color-gray-lighten-60);
+  --color-sidebar-focus-bg: var(--color-gray-darken-10);
+  --color-sidebar-keyboard-shortcut-key-fg: var(--color-gray-lighten-30);
+  --color-sidebar-keyboard-shortcut-key-bg: var(--color-gray-base);
+  --color-sidebar-keyboard-shortcut-then: var(--color-gray-lighten-20);
+  --color-sidebar-keyboard-shortcut-separator: var(--color-gray-base);
+  --color-sidebar-keyboard-shortcut-hover-key-fg: var(--color-gray-lighten-50);
+  --color-sidebar-keyboard-shortcut-hover-key-bg: var(--color-gray-base);
+  --color-sidebar-keyboard-shortcut-hover-then: var(--color-gray-lighten-20);
+  --color-sidebar-keyboard-shortcut-hover-separator: var(--color-gray-base);
+  --color-sidebar-button-default-text: var(--color-gray-lighten-30);
+  --color-sidebar-button-default-bg: var(--color-gray-base);
+  --color-sidebar-button-default-hover-text: var(--color-gray-lighten-50);
+  --color-sidebar-button-default-hover-bg: var(--color-gray-base);
+  --color-sidebar-divider: var(--color-gray-darken-10);
+
+  --color-sidebar-tooltip-fg: var(--color-gray-lighten-60);
+  --color-sidebar-tooltip-bg: var(--color-gray-darken-30);
+  --color-sidebar-tooltip-border: var(--color-gray-darken-10);
+
   grid-area: main-sidebar;
   display: flex;
   flex-direction: column;
@@ -69,19 +103,23 @@
   font-size: var(--font-size-medium);
   z-index: var(--layer-popover);
 
-  --color-main-fg: var(--color-sidebar-fg);
-  --color-main-subtle-fg: var(--color-sidebar-subtle-fg);
+  --u-color_text: var(--color-sidebar-fg);
+  --u-color_text_subdued: var(--color-sidebar-subtle-fg);
 
-  --color-button-default-fg: var(--color-sidebar-button-default-fg);
-  --color-button-default-bg: var(--color-sidebar-button-default-bg);
-  --color-button-default-hover-fg: var(--color-sidebar-button-default-hover-fg);
-  --color-button-default-hover-bg: var(--color-sidebar-button-default-hover-bg);
-
-  --color-tooltip-fg: var(--color-sidebar-tooltip-fg);
+  --color-tooltip-text: var(--color-sidebar-tooltip-fg);
   --color-tooltip-bg: var(--color-sidebar-tooltip-bg);
   --color-tooltip-border: var(--color-sidebar-tooltip-border);
 
-  --color-main-divider: var(--color-sidebar-divider);
+  --u-color_divider: var(--color-sidebar-divider);
+}
+
+#main-sidebar .button {
+  --color-button-default-text: var(--color-sidebar-button-default-text);
+  --color-button-default-bg: var(--color-sidebar-button-default-bg);
+  --color-button-default-hover-text: var(
+    --color-sidebar-button-default-hover-text
+  );
+  --color-button-default-hover-bg: var(--color-sidebar-button-default-hover-bg);
 }
 
 #main-sidebar a:hover {
@@ -160,7 +198,7 @@
   height: 1.875rem;
 }
 
-#main-sidebar .sidebar-item>label {
+#main-sidebar .sidebar-item > label {
   color: var(--color-sidebar-fg);
   transition: all 0.2s;
   cursor: pointer;
@@ -234,9 +272,11 @@
   bottom: -2rem;
   height: 1.75rem;
   content: "";
-  background: linear-gradient(var(--color-sidebar-bg),
-      var(--color-sidebar-bg),
-      var(--color-sidebar-bg-transparent));
+  background: linear-gradient(
+    var(--color-sidebar-bg),
+    var(--color-sidebar-bg),
+    var(--color-sidebar-bg-transparent)
+  );
 }
 
 #main-sidebar .sidebar-header .hasvatar {
@@ -250,10 +290,12 @@
   bottom: 0;
   content: "";
   width: 1.5rem;
-  background: linear-gradient(90deg,
-      var(--color-sidebar-bg),
-      var(--color-sidebar-bg),
-      var(--color-sidebar-bg-transparent));
+  background: linear-gradient(
+    90deg,
+    var(--color-sidebar-bg),
+    var(--color-sidebar-bg),
+    var(--color-sidebar-bg-transparent)
+  );
 }
 
 #main-sidebar .sidebar-header .namespace {
@@ -397,7 +439,8 @@
   }
 
   .page.sidebar-toggled .collapse-sidebar-button {
-    animation: collapse-sidebar-button var(--transition-sidebar-collapse-time) ease-in-out;
+    animation: collapse-sidebar-button var(--transition-sidebar-collapse-time)
+      ease-in-out;
     transition: none;
     animation-fill-mode: forwards;
   }
@@ -474,3 +517,4 @@
     display: none;
   }
 }
+

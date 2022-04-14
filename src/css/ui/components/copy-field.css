@@ -1,4 +1,13 @@
 .copy-field {
+  --color-copy-field-text: var(--u-color_text);
+  --color-copy-field-bg: var(--u-color_element_disabled);
+  --color-copy-field-border: var(--u-color_border);
+  --color-copy-field-focus-border: var(--u-color_focus-border);
+  --color-copy-field-focus-outline: var(--u-color_focus-outline);
+  --color-copy-field-prefix: var(--u-color_text_subdued);
+  --color-copy-field-button-border: var(--u-color_border);
+  --color-copy-field-button-hover-border: var(--color-gray-lighten-30);
+
   position: relative;
   display: flex;
   flex-direction: row;
@@ -19,7 +28,7 @@
 }
 
 .copy-field .copy-field-field:focus-within {
-  box-shadow: 0 0 0 2px var(--color-copy-field-focus-glow);
+  box-shadow: 0 0 0 2px var(--color-copy-field-focus-outline);
   border-color: var(--color-copy-field-focus-border);
   border-right: 1px solid var(--color-copy-field-focus-border);
   /* z-index is to help cover the left border of the button when focused */
@@ -46,7 +55,7 @@
   font-size: var(--font-size-medium);
   font-weight: 600;
   background: transparent;
-  color: var(--color-copy-field-fg);
+  color: var(--color-copy-field-text);
 }
 
 .copy-field input:focus {

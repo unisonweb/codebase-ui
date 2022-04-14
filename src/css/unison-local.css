@@ -16,12 +16,12 @@
   align-items: center;
   padding-top: 8rem;
   font-weight: 600;
-  color: var(--color-main-mg);
+  color: var(--u-color_text);
 }
 
 .app-error .icon {
   font-size: 4rem;
-  color: var(--color-main-alert);
+  color: var(--u-color_critical_icon);
 }
 
 @import "./ui.css";

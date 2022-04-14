@@ -1,4 +1,3 @@
-
 .project-listing {
   display: flex;
   flex-direction: row;
@@ -10,9 +9,10 @@
 
 .project-listing:hover {
   text-decoration: none;
-  background: var(--color-main-hover-bg);
+  background: var(--u-color_element_hovered);
 }
 
 .project-listing .hashvatar {
   margin-right: 0.5rem;
 }
+

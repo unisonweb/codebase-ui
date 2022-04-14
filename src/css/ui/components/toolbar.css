@@ -1,10 +1,13 @@
 .toolbar {
+  --color-toolbar: var(--u-color_container);
+  --color-toolbar-border: var(--u-color_border_subdued);
+
   height: var(--toolbar-height);
   padding-left: 2.625rem;
   padding-right: 1rem;
   font-size: var(--font-size-medium);
-  background: var(--color-main-bg);
-  border-bottom: 1px solid var(--color-main-border);
+  background: var(--color-toolbar);
+  border-bottom: 1px solid var(--color-toolbar-border);
   display: flex;
   flex-direction: row;
   align-items: center;

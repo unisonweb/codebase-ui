@@ -1,4 +1,7 @@
 .catalog-hero {
+  /* @color-todo @decorative */
+  --color-catalog-search-field: var(--u-color_container);
+  --color-catalog-search-field-text: var(--u-color_text);
   --color-catalog-hero-bg: var(--color-gray-darken-10);
   --color-catalog-hero-bg-transparent: var(--color-gray-darken-10-transparent);
   --color-catalog-hero-explore: var(--color-green-4);
@@ -56,8 +59,8 @@
 
 .catalog-hero .catalog-search {
   width: 50rem;
-  background: var(--color-main-bg);
-  color: var(--color-main-fg);
+  background: var(--color-catalog-search-field);
+  color: var(--color-catalog-search-field-text);
   border-radius: var(--border-radius-base);
   position: absolute;
   top: calc(var(--page-hero-height) - 1.75rem);
@@ -72,8 +75,8 @@
 }
 
 .catalog-hero .catalog-search:focus-within {
-  border-color: var(--color-main-focus-fg);
-  box-shadow: 0 0 0 2px var(--color-main-focus-outline);
+  border-color: var(--u-color_focus-border);
+  box-shadow: 0 0 0 2px var(--u-color_focus-outline);
 }
 
 .catalog-hero .catalog-search .search-field {
@@ -92,7 +95,7 @@
 .catalog-hero .catalog-search .search-field .icon {
   font-size: 1.5rem;
   margin-top: -3px;
-  color: var(--color-main-subtle-fg);
+  color: var(--u-color_icon_subdued);
 }
 
 .catalog-hero .catalog-search .search-field input {
@@ -114,7 +117,7 @@
 }
 
 .catalog-hero .catalog-search .search-results {
-  background: var(--color-main-bg);
+  background: var(-u-color_container);
   border-top: 1px solid var(--color-gray-lighten-50);
   border-radius: 0 0 var(--border-radius-base) var(--border-radius-base);
   padding: 0.75rem;
@@ -147,7 +150,7 @@
 }
 
 .catalog-hero .catalog-search .search-results .search-result td.category {
-  color: var(--color-main-subtle-fg);
+  color: var(--u-color_text_very-subdued);
   font-size: var(--font-size-small);
   text-transform: uppercase;
 }
@@ -207,8 +210,8 @@
   width: 1.5rem;
   height: 1.5rem;
   margin-right: 0.5rem;
-  background: var(--color-main-subtle-bg);
-  border: 1px solid var(--color-main-border);
+  background: var(--u-color_element_subdued);
+  border: 1px solid var(--u-color_border);
   border-radius: 0.75rem;
   display: flex;
   flex-direction: row;
@@ -216,6 +219,7 @@
   justify-content: center;
   overflow: hidden;
 }
+
 .catalog-hero
   .catalog-search
   .search-results
@@ -224,12 +228,12 @@
   .avatar
   .icon {
   font-size: 1rem;
-  color: var(--color-main-border);
+  color: var(--u-color_icon_subdued);
 }
 
 .catalog-hero .catalog-search .search-results .empty-state {
   font-size: var(--font-size-base);
-  color: var(--color-main-subtle-fg);
+  color: var(--u-color_text_very-subdued);
   text-align: center;
   padding: 1rem 0;
 }
@@ -281,6 +285,7 @@
   .catalog-hero .catalog-search .search-results .search-result td.category {
     display: none;
   }
+
   .catalog-hero
     .catalog-search
     .search-results
@@ -289,3 +294,4 @@
     display: none;
   }
 }
+

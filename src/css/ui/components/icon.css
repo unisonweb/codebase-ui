@@ -3,7 +3,7 @@
   font-size: 0.875rem;
   width: 1em;
   height: 1em;
-  color: var(--color-main-fg);
+  color: var(--u-color_icon);
   transition: all 0.2s;
 }
 

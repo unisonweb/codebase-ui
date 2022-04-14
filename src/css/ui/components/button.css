@@ -1,4 +1,34 @@
 .button {
+  /* @color-todo */
+  --color-button-default-text: var(--u-color_text-on-action);
+  --color-button-default-icon: var(--u-color_icon-on-action);
+  --color-button-default-bg: var(--u-color_action);
+  --color-button-default-hover-text: var(--u-color_text-on-action_hovered);
+  --color-button-default-hover-icon: var(--u-color_text-on-action_hovered);
+  --color-button-default-hover-bg: var(--u-color_action_hovered);
+
+  --color-button-primary-mono-text: var(--color-gray-lighten-60);
+  --color-button-primary-mono-bg: var(--color-gray-darken-20);
+  --color-button-primary-mono-hover-text: var(--color-gray-lighten-60);
+  --color-button-primary-mono-hover-bg: var(--color-gray-darken-10);
+
+  /* @deprecate */
+  --color-button-primary-text: var(--color-gray-lighten-60);
+  --color-button-primary-bg: var(--color-blue-2);
+  --color-button-primary-hover-text: var(--color-gray-lighten-60);
+  --color-button-primary-hover-bg: var(--color-blue-1);
+
+  /* @decorative */
+  --color-button-share-text: var(--color-purple-1);
+  --color-button-share-bg: var(--color-purple-4);
+  --color-button-share-hover-text: var(--color-purple-2);
+  --color-button-share-hover-bg: var(--color-purple-4);
+
+  --color-button-danger-text: var(--color-gray-lighten-100);
+  --color-button-danger-bg: var(--color-pink-1);
+  --color-button-danger-hover-text: var(--color-gray-lighten-100);
+  --color-button-danger-hover-bg: var(--color-pink-2);
+
   display: inline-flex;
   font-family: var(--font-sans-serif);
   border: 0;
@@ -73,87 +103,87 @@ a.button:hover {
 /* -- Contained & Colors --------------------------------------------------- */
 
 .button.contained.default {
-  color: var(--color-button-default-fg);
+  color: var(--color-button-default-text);
   background: var(--color-button-default-bg);
 }
 .button.contained.default .icon {
-  color: var(--color-button-default-fg);
+  color: var(--color-button-default-text);
 }
 
 .button.contained.default:hover {
-  color: var(--color-button-default-hover-fg);
+  color: var(--color-button-default-hover-text);
   background: var(--color-button-default-hover-bg);
 }
 
 .button.contained.default:hover .icon {
-  color: var(--color-button-default-hover-fg);
+  color: var(--color-button-default-hover-text);
 }
 
 .button.contained.primary-mono {
-  color: var(--color-button-primary-mono-fg);
+  color: var(--color-button-primary-mono-text);
   background: var(--color-button-primary-mono-bg);
 }
 
 .button.contained.primary-mono .icon {
-  color: var(--color-button-primary-mono-fg);
+  color: var(--color-button-primary-mono-text);
 }
 
 .button.contained.primary-mono:hover {
-  color: var(--color-button-primary-mono-hover-fg);
+  color: var(--color-button-primary-mono-hover-text);
   background: var(--color-button-primary-mono-hover-bg);
 }
 .button.contained.primary-mono:hover .icon {
-  color: var(--color-button-primary-mono-hover-fg);
+  color: var(--color-button-primary-mono-hover-text);
 }
 
 .button.contained.primary {
-  color: var(--color-button-primary-fg);
+  color: var(--color-button-primary-text);
   background: var(--color-button-primary-bg);
 }
 .button.contained.primary .icon {
-  color: var(--color-button-primary-fg);
+  color: var(--color-button-primary-text);
 }
 
 .button.contained.primary:hover {
-  color: var(--color-button-primary-hover-fg);
+  color: var(--color-button-primary-hover-text);
   background: var(--color-button-primary-hover-bg);
 }
 .button.contained.primary:hover .icon {
-  color: var(--color-button-primary-hover-fg);
+  color: var(--color-button-primary-hover-text);
 }
 
 .button.contained.share {
-  color: var(--color-button-share-fg);
+  color: var(--color-button-share-text);
   background: var(--color-button-share-bg);
 }
 
 .button.contained.share .icon {
-  color: var(--color-button-share-fg);
+  color: var(--color-button-share-text);
 }
 
 .button.contained.share:hover {
-  color: var(--color-button-share-hover-fg);
+  color: var(--color-button-share-hover-text);
   background: var(--color-button-share-hover-bg);
 }
 
 .button.contained.share:hover .icon {
-  color: var(--color-button-share-hover-fg);
+  color: var(--color-button-share-hover-text);
 }
 
 .button.contained.danger {
-  color: var(--color-button-danger-fg);
+  color: var(--color-button-danger-text);
   background: var(--color-button-danger-bg);
 }
 .button.contained.danger .icon {
-  color: var(--color-button-danger-fg);
+  color: var(--color-button-danger-text);
 }
 
 .button.contained.danger:hover {
-  color: var(--color-button-danger-fg);
+  color: var(--color-button-danger-text);
   background: var(--color-button-danger-bg);
 }
 .button.contained.danger:hover .icon {
-  color: var(--color-button-danger-fg);
+  color: var(--color-button-danger-text);
 }
 
 /* -- Uncontained & Colors ------------------------------------------------- */
@@ -163,68 +193,68 @@ a.button:hover {
 
 .button.uncontained.default,
 .button.uncontained.default .icon {
-  color: var(--color-button-default-fg);
+  color: var(--color-button-default-text);
 }
 
 .button.uncontained.default:hover {
-  color: var(--color-button-default-hover-fg);
+  color: var(--color-button-default-hover-text);
   background: var(--color-button-default-hover-bg);
 }
 
 .button.uncontained.default:hover .icon {
-  color: var(--color-button-default-hover-fg);
+  color: var(--color-button-default-hover-text);
 }
 
 .button.uncontained.primary-mono,
 .button.uncontained.primary-mono .icon {
-  color: var(--color-button-primary-mono-fg);
+  color: var(--color-button-primary-mono-text);
 }
 
 .button.uncontained.primary-mono:hover {
-  color: var(--color-button-primary-mono-hover-fg);
+  color: var(--color-button-primary-mono-hover-text);
   background: var(--color-button-primary-mono-hover-bg);
 }
 
 .button.uncontained.primary-mono:hover .icon {
-  color: var(--color-button-primary-mono-hover-fg);
+  color: var(--color-button-primary-mono-hover-text);
 }
 
 .button.uncontained.primary,
 .button.uncontained.primary .icon {
-  color: var(--color-button-primary-fg);
+  color: var(--color-button-primary-text);
 }
 
 .button.uncontained.primary:hover {
-  color: var(--color-button-primary-hover-fg);
+  color: var(--color-button-primary-hover-text);
   background: var(--color-button-primary-hover-bg);
 }
 .button.uncontained.primary:hover .icon {
-  color: var(--color-button-primary-hover-fg);
+  color: var(--color-button-primary-hover-text);
 }
 
 .button.uncontained.share,
 .button.uncontained.share .icon {
-  color: var(--color-button-share-fg);
+  color: var(--color-button-share-text);
 }
 
 .button.uncontained.share:hover {
-  color: var(--color-button-share-hover-fg);
+  color: var(--color-button-share-hover-text);
   background: var(--color-button-share-hover-bg);
 }
 
 .button.uncontained.share:hover .icon {
-  color: var(--color-button-share-hover-fg);
+  color: var(--color-button-share-hover-text);
 }
 
 .button.uncontained.danger,
 .button.uncontained.danger .icon {
-  color: var(--color-button-danger-fg);
+  color: var(--color-button-danger-text);
 }
 
 .button.uncontained.danger:hover {
-  color: var(--color-button-danger-fg);
+  color: var(--color-button-danger-text);
   background: var(--color-button-danger-bg);
 }
 .button.uncontained.danger:hover .icon {
-  color: var(--color-button-danger-fg);
+  color: var(--color-button-danger-text);
 }
