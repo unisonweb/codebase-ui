@@ -16,7 +16,6 @@ module UI.Button exposing
     , medium
     , preventDefault
     , primary
-    , primaryMono
     , share
     , small
     , stopPropagation
@@ -229,7 +228,6 @@ type Type
 
 type Color
     = Default
-    | PrimaryMono
     | Primary
     | Share
     | Danger
@@ -253,11 +251,6 @@ withType type_ button_ =
 default : Button clickMsg -> Button clickMsg
 default =
     withColor Default
-
-
-primaryMono : Button clickMsg -> Button clickMsg
-primaryMono =
-    withColor PrimaryMono
 
 
 primary : Button clickMsg -> Button clickMsg
@@ -353,9 +346,6 @@ colorToClassName color =
     case color of
         Default ->
             "default"
-
-        PrimaryMono ->
-            "primary-mono"
 
         Primary ->
             "primary"
