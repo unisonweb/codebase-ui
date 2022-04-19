@@ -1,5 +1,4 @@
 .button {
-  /* @color-todo */
   --color-button-default-text: var(--u-color_text-on-action);
   --color-button-default-icon: var(--u-color_icon-on-action);
   --color-button-default-bg: var(--u-color_action);
@@ -7,27 +6,39 @@
   --color-button-default-hover-icon: var(--u-color_text-on-action_hovered);
   --color-button-default-hover-bg: var(--u-color_action_hovered);
 
-  --color-button-primary-mono-text: var(--color-gray-lighten-60);
-  --color-button-primary-mono-bg: var(--color-gray-darken-20);
-  --color-button-primary-mono-hover-text: var(--color-gray-lighten-60);
-  --color-button-primary-mono-hover-bg: var(--color-gray-darken-10);
+  --color-button-primary-text: var(--u-color_text-on-action-emphasized);
+  --color-button-primary-icon: var(--u-color_icon-on-action-emphasized);
+  --color-button-primary-bg: var(--u-color_action_emphasized);
+  --color-button-primary-hover-text: var(
+    -u-color_text-on-action-emphasized_hovered
+  );
+  --color-button-primary-hover-icon: var(
+    -u-color_icon-on-action-emphasized_hovered
+  );
+  --color-button-primary-hover-bg: var(--u-color_action_emphasized_hovered);
 
-  /* @deprecate */
-  --color-button-primary-text: var(--color-gray-lighten-60);
-  --color-button-primary-bg: var(--color-blue-2);
-  --color-button-primary-hover-text: var(--color-gray-lighten-60);
-  --color-button-primary-hover-bg: var(--color-blue-1);
+  --color-button-danger-text: var(--u-color_critical_text-on-action);
+  --color-button-danger-icon: var(--u-color_critical_icon-on-action);
+  --color-button-danger-bg: var(--u-color_critical_action);
+  --color-button-danger-hover-text: var(
+    --u-color_critical_text-on-action_hovered
+  );
+  --color-button-danger-hover-icon: var(
+    --u-color_critical_icon-on-action_hovered
+  );
+  --color-button-danger-hover-bg: var(--u-color_critical_action_hovered);
 
+  /* @color-todo */
   /* @decorative */
+  --color-button-decorative-blue-text: var(--color-gray-lighten-60);
+  --color-button-decorative-blue-bg: var(--color-blue-2);
+  --color-button-decorative-blue-hover-text: var(--color-gray-lighten-60);
+  --color-button-decorative-blue-hover-bg: var(--color-blue-1);
+
   --color-button-share-text: var(--color-purple-1);
   --color-button-share-bg: var(--color-purple-4);
   --color-button-share-hover-text: var(--color-purple-2);
   --color-button-share-hover-bg: var(--color-purple-4);
-
-  --color-button-danger-text: var(--color-gray-lighten-100);
-  --color-button-danger-bg: var(--color-pink-1);
-  --color-button-danger-hover-text: var(--color-gray-lighten-100);
-  --color-button-danger-hover-bg: var(--color-pink-2);
 
   display: inline-flex;
   font-family: var(--font-sans-serif);
@@ -107,7 +118,7 @@ a.button:hover {
   background: var(--color-button-default-bg);
 }
 .button.contained.default .icon {
-  color: var(--color-button-default-text);
+  color: var(--color-button-default-icon);
 }
 
 .button.contained.default:hover {
@@ -116,24 +127,7 @@ a.button:hover {
 }
 
 .button.contained.default:hover .icon {
-  color: var(--color-button-default-hover-text);
-}
-
-.button.contained.primary-mono {
-  color: var(--color-button-primary-mono-text);
-  background: var(--color-button-primary-mono-bg);
-}
-
-.button.contained.primary-mono .icon {
-  color: var(--color-button-primary-mono-text);
-}
-
-.button.contained.primary-mono:hover {
-  color: var(--color-button-primary-mono-hover-text);
-  background: var(--color-button-primary-mono-hover-bg);
-}
-.button.contained.primary-mono:hover .icon {
-  color: var(--color-button-primary-mono-hover-text);
+  color: var(--color-button-default-hover-icon);
 }
 
 .button.contained.primary {
@@ -141,7 +135,7 @@ a.button:hover {
   background: var(--color-button-primary-bg);
 }
 .button.contained.primary .icon {
-  color: var(--color-button-primary-text);
+  color: var(--color-button-primary-icon);
 }
 
 .button.contained.primary:hover {
@@ -149,7 +143,24 @@ a.button:hover {
   background: var(--color-button-primary-hover-bg);
 }
 .button.contained.primary:hover .icon {
-  color: var(--color-button-primary-hover-text);
+  color: var(--color-button-primary-hover-icon);
+}
+
+.button.contained.danger {
+  color: var(--color-button-danger-text);
+  background: var(--color-button-danger-bg);
+}
+
+.button.contained.danger .icon {
+  color: var(--color-button-danger-icon);
+}
+
+.button.contained.danger:hover {
+  color: var(--color-button-danger-text);
+  background: var(--color-button-danger-bg);
+}
+.button.contained.danger:hover .icon {
+  color: var(--color-button-danger-icon);
 }
 
 .button.contained.share {
@@ -168,22 +179,6 @@ a.button:hover {
 
 .button.contained.share:hover .icon {
   color: var(--color-button-share-hover-text);
-}
-
-.button.contained.danger {
-  color: var(--color-button-danger-text);
-  background: var(--color-button-danger-bg);
-}
-.button.contained.danger .icon {
-  color: var(--color-button-danger-text);
-}
-
-.button.contained.danger:hover {
-  color: var(--color-button-danger-text);
-  background: var(--color-button-danger-bg);
-}
-.button.contained.danger:hover .icon {
-  color: var(--color-button-danger-text);
 }
 
 /* -- Uncontained & Colors ------------------------------------------------- */

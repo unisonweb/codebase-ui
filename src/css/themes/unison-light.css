@@ -13,6 +13,8 @@
   element, interactive, focus-border, focus-outline, divider, caret, backdrop,
   scrollbar, scrollbar-track
 
+  text-on-action vs action-text
+
   emphasis
   --------
   none, very-subdued, subdued, emphasized
@@ -32,9 +34,6 @@
   --u-color_backdrop: var(--color-gray-darken-30-50pct);
   --u-color_scrollbar: var(--color-gray-lighten-30);
   --u-color_scrollbar-track: var(--color-transparent);
-
-  --u-color_search-highlight_text: var(--color-gray-blue-2);
-  --u-color_search-highlight_background: var(--color-transparent);
 
   --u-color_text: var(--color-gray-darken-20);
   --u-color_text_very-subdued: var(--color-gray-lighten-30);
@@ -63,6 +62,9 @@
   --u-color_action_emphasized: var(--color-gray-darken-20);
   --u-color_text-on-action-emphasized: var(--color-gray-lighten-60);
   --u-color_icon-on-action-emphasized: var(--color-gray-lighten-30);
+  --u-color_action_emphasized_hovered: var(--color-gray-darken-10);
+  --u-color_text-on-action-emphasized_hovered: var(--color-gray-lighten-60);
+  --u-color_icon-on-action-emphasized_hovered: var(--color-gray-lighten-30);
   --u-color_container: var(--color-gray-lighten-100);
   --u-color_container_hovered: var(--color-gray-lighten-60);
   --u-color_container_selected: var(--color-gray-lighten-60);
@@ -81,11 +83,23 @@
   --u-color_element_emphasized_hovered: var(--color-gray-lighten-50);
   --u-color_element_emphasized_selected: var(--color-gray-lighten-50);
 
+  --u-color_search-highlight_text: var(--color-gray-blue-2);
+  --u-color_search-highlight_background: var(--color-transparent);
+
   --u-color_critical_text: var(--color-pink-1);
   --u-color_critical_text_subdued: var(--color-pink-3);
   --u-color_critical_icon: var(--color-pink-3);
+  --u-color_critical_action: var(--color-pink-1);
+  --u-color_critical_text-on-action: var(--color-gray-lighten-100);
+  --u-color_critical_icon-on-action: var(--color-pink-3);
+  --u-color_critical_action_hovered: var(--color-pink-2);
+  --u-color_critical_text-on-action_hovered: var(--color-gray-lighten-100);
+  --u-color_critical_icon-on-action_hovered: var(--color-pink-3);
 
   --u-color_info_container_subdued: var(--color-blue-5);
+  --u-color_info_text: var(--color-blue-2);
+
+  --u-color_positive_text: var(--color-green-2);
 
   /* Syntax */
   --color-syntax-plain: var(--u-color_text);

@@ -115,7 +115,7 @@ viewEmptyStateRoot =
         (span [ class "unison-share" ] [ text "Unison ", span [ class "context" ] [ text "Share" ] ])
         [ p [] [ text "Explore to discover and share Unison libraries, documentation, types, and terms." ] ]
         (Button.iconThenLabel Find Icon.search "Find Definition"
-            |> Button.primaryMono
+            |> Button.primary
             |> Button.medium
         )
 
@@ -130,7 +130,7 @@ viewEmptyStateNamespace fqn =
         (FQN.view fqn)
         [ p [] [ text "Browse, search, read docs, open definitions, and explore" ] ]
         (Button.iconThenLabel Find Icon.search ("Find Definitions in " ++ fqn_)
-            |> Button.primaryMono
+            |> Button.primary
             |> Button.medium
         )
 
