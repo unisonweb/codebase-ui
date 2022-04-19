@@ -24,10 +24,6 @@
   color: var(--u-color_critical_icon);
 }
 
-@import "./ui.css";
-@import "./themes/unison-light.css";
-@import "./code.css";
-
 @import "./unison-share/banner.css";
 @import "./unison-share/help-modal.css";
 @import "./unison-share/publish-modal.css";

@@ -2,23 +2,33 @@
 
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <meta name="description" content="A friendly programming language from the future.">
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, shrink-to-fit=no"
+    />
+    <meta
+      name="description"
+      content="A friendly programming language from the future."
+    />
     <title>Unison Local</title>
     <% if (webpackConfig.mode === "production") {%>
-      <script type="text/javascript">
-        const pathSegments = location.pathname.split("/").filter(p => p !== "");
+    <script type="text/javascript">
+      const pathSegments = location.pathname.split("/").filter((p) => p !== "");
 
-        if (pathSegments.length >= 2) {
-          const basePath = pathSegments.slice(0, 2).join("/")
-          const newBase = document.createElement("base");
-          newBase.setAttribute("href", "/" + basePath + "/")
-          document.getElementsByTagName("head")[0].appendChild(newBase);
-        }
-      </script>
+      if (pathSegments.length >= 2) {
+        const basePath = pathSegments.slice(0, 2).join("/");
+        const newBase = document.createElement("base");
+        newBase.setAttribute("href", "/" + basePath + "/");
+        document.getElementsByTagName("head")[0].appendChild(newBase);
+      }
+    </script>
     <% } %>
-    <link rel="icon" type="image/svg+xml" href="<%= require('./favicon.svg') %>">
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="<%= require('./assets/favicon.svg') %>"
+    />
   </head>
   <body></body>
 </html>

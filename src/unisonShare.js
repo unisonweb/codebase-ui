@@ -1,7 +1,10 @@
+import "./css/ui.css";
+import "./css/themes/unison-light.css";
+import "./css/code.css";
 import "./css/unison-share.css";
 import "./UI/CopyOnClick"; // Include web components
-import detectOs from "./detectOs";
-import preventDefaultGlobalKeyboardEvents from "./preventDefaultGlobalKeyboardEvents";
+import detectOs from "./Lib/detectOs";
+import preventDefaultGlobalKeyboardEvents from "./Lib/preventDefaultGlobalKeyboardEvents";
 import { Elm } from "./UnisonShare.elm";
 
 console.log(`
