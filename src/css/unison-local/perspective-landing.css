@@ -40,6 +40,10 @@
   border-radius: var(--border-radius-base);
 }
 
+#perspective-landing-content h2 {
+  color: var(--u-color_text);
+}
+
 #perspective-landing .loading .loading-placeholder {
   width: 50%;
   background: var(--color-perspective-landing-subtle-text);

@@ -1,9 +1,9 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const FileManagerPlugin = require("filemanager-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 
-const shared = {
+const UI_CORE_SRC = "elm-stuff/gitdeps/github.com/unisonweb/ui-core/src";
+
+const unisonLocalCfg = {
   module: {
     rules: [
       {
@@ -39,54 +39,9 @@ const shared = {
   resolve: {
     alias: {
       assets: path.resolve(__dirname, "src/assets/"),
+      "ui-core": path.resolve(__dirname, UI_CORE_SRC + "/"),
     },
   },
-};
-
-const unisonShareCfg = {
-  ...shared,
-
-  entry: "./src/unisonShare.js",
-
-  plugins: [
-    new HtmlWebpackPlugin({
-      favicon: "./static/favicon.ico",
-      template: "./src/unisonShare.ejs",
-      inject: "body",
-      publicPath: "/static/",
-      base: "/",
-      filename: path.resolve(__dirname, "dist/unisonShare/index.html"),
-    }),
-
-    new CopyPlugin({
-      patterns: [
-        {
-          from: "src/assets/unison-share-social.png",
-          to: "unison-share-social.png",
-        },
-      ],
-    }),
-
-    new FileManagerPlugin({
-      events: {
-        onEnd: {
-          archive: [
-            { source: "dist/unisonShare", destination: "dist/unisonShare.zip" },
-          ],
-        },
-      },
-    }),
-  ],
-
-  output: {
-    filename: "[name].[contenthash].js",
-    path: path.resolve(__dirname, "dist/unisonShare/static"),
-    clean: true,
-  },
-};
-
-const unisonLocalCfg = {
-  ...shared,
 
   entry: "./src/unisonLocal.js",
 

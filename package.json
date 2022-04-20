@@ -9,11 +9,10 @@
   "scripts": {
     "build": "webpack --mode production --config webpack.prod.js",
     "clean": "rm -rf dist",
-    "start": "echo 'Please use either `npm run start:unisonLocal` or `npm run start:unisonShare`'",
-    "start:unisonLocal": "webpack serve --mode development --port 1234 --config webpack.unisonLocal.dev.js",
-    "start:unisonShare": "webpack serve --mode development --port 1234 --config webpack.unisonShare.dev.js",
+    "start": "webpack serve --mode development --port 1234 --config webpack.dev.js",
     "test": "elm-test",
-    "review": "elm-review"
+    "review": "elm-review",
+    "ui-core:install": "scripts/ui-core-install.js"
   },
   "bugs": {
     "url": "https://github.com/unisonweb/codebase-ui/issues"

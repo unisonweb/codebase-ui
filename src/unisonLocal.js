@@ -1,10 +1,11 @@
-import "./css/ui.css";
-import "./css/themes/unison-light.css";
-import "./css/code.css";
+import "ui-core/css/ui.css";
+import "ui-core/css/themes/unison-light.css";
+import "ui-core/css/code.css";
+import "ui-core/UI/CopyOnClick"; // Include web components
+import detectOs from "ui-core/Lib/detectOs";
+import preventDefaultGlobalKeyboardEvents from "ui-core/Lib/preventDefaultGlobalKeyboardEvents";
+
 import "./css/unison-local.css";
-import "./UI/CopyOnClick"; // Include web components
-import detectOs from "./Lib/detectOs";
-import preventDefaultGlobalKeyboardEvents from "./Lib/preventDefaultGlobalKeyboardEvents";
 import { Elm } from "./UnisonLocal.elm";
 
 console.log(`

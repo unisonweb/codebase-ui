@@ -2,13 +2,15 @@ const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 
 const API_URL = process.env.API_URL || "127.0.0.1:8080";
+const UI_CORE_SRC = "elm-stuff/gitdeps/github.com/unisonweb/ui-core/src";
 
 module.exports = {
-  entry: "./src/unisonShare.js",
+  entry: "./src/unisonLocal.js",
 
   resolve: {
     alias: {
       assets: path.resolve(__dirname, "src/assets/"),
+      "ui-core": path.resolve(__dirname, UI_CORE_SRC + "/"),
     },
   },
 
@@ -48,7 +50,7 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       favicon: "./static/favicon.ico",
-      template: "./src/unisonShare.ejs",
+      template: "./src/unisonLocal.ejs",
       inject: "body",
       publicPath: "/",
       base: "/",
