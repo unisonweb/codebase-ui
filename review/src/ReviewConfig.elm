@@ -1,6 +1,7 @@
 module ReviewConfig exposing (config)
 
-import NoUnused.Dependencies
+-- import NoUnused.Dependencies
+
 import NoUnused.Modules
 import NoUnused.Parameters
 import NoUnused.Patterns
@@ -11,8 +12,10 @@ import Simplify
 
 config : List Rule
 config =
-    [ NoUnused.Dependencies.rule
-    , NoUnused.Modules.rule
+    [ -- Removed, because of dependencies from ui-core that needs to be in the
+      -- application's elm.json, which elm-review will complain about
+      -- NoUnused.Dependencies.rule
+      NoUnused.Modules.rule
     , NoUnused.Parameters.rule
     , NoUnused.Patterns.rule
     , NoUnused.Variables.rule

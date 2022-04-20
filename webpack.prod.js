@@ -1,5 +1,6 @@
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
+const FileManagerPlugin = require("filemanager-webpack-plugin");
 
 const UI_CORE_SRC = "elm-stuff/gitdeps/github.com/unisonweb/ui-core/src";
 
@@ -73,4 +74,4 @@ const unisonLocalCfg = {
   },
 };
 
-module.exports = [unisonShareCfg, unisonLocalCfg];
+module.exports = unisonLocalCfg;
