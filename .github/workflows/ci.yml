@@ -23,6 +23,7 @@ jobs:
       with:
         node-version: ${{ matrix.node-version }}
     - run: npm ci
-    - run: npm run build --if-present
+    - run: npm run ui-core:install
+    - run: npm run build
     - run: npm test
     - run: npm run review
